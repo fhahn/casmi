@@ -16,3 +16,6 @@
 *.exe
 *.out
 *.app
+
+# Cmake out of source build
+build
