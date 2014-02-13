@@ -1,0 +1,6 @@
+rule main = {
+  let x = peek( [ 1, 2, 3, 4 ] ) in skip
+
+  program( self ) := undef
+}
+init main

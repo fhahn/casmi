@@ -1,0 +1,9 @@
+function x: Int -> Int
+
+rule main = {
+  x( 1 ) := 1
+  x( 2 ) := 2
+
+  program( self ) := undef
+}
+init main

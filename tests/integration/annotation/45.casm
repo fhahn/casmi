@@ -1,0 +1,8 @@
+function a: -> List /*ta: [Int,Int] */
+
+rule main =  {|
+  a := []
+  a := [ [undef,undef], [1,2], undef ]
+  program( self ) := undef
+|}
+init main

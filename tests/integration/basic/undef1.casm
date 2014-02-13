@@ -1,0 +1,19 @@
+function a: -> Int
+
+rule main = {
+	// 1a
+	assert a = undef
+
+	// 1b
+	assert 1 + undef = undef
+	assert undef + 1 = undef
+
+	// 1c
+	assert (undef = undef) = true
+	assert (undef != undef) = false
+	assert (undef = 1) = false
+	assert (undef != 1 ) = true
+
+	program( self ) := undef
+}
+init main

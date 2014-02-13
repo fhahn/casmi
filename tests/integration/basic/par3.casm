@@ -1,0 +1,11 @@
+// error interpreter @7
+
+function x: Int -> Int
+
+rule main = {
+  x( 1 ) := 1
+  x( 1 ) := 2
+
+  program( self ) := undef
+}
+init main

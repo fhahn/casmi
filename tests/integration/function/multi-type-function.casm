@@ -1,0 +1,20 @@
+CASM multi_type_function
+
+init bar
+
+function foo : Int * Int * Int * Int * Int -> Int
+
+rule bar = 
+{
+    {|
+        foo(1, 2, 3, 4, 5) := 6
+
+        assert 6 != foo(4, 5, 1, 2, 3)
+        assert 6 != foo(3, 4, 5, 1, 2)
+        assert 6 != foo(2, 3, 4, 5, 1)
+        assert 6  = foo(1, 2, 3, 4, 5)
+        assert 6 != foo(5, 1, 2, 3, 4)
+    |}
+
+    program(self) := undef
+}

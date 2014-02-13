@@ -1,0 +1,14 @@
+// symbolic
+
+function (symbolic) a: Int -> Int
+function (symbolic) b: Int -> Int
+
+rule main = {
+  
+  b( 1 ) := a( 1 )
+  b( 2 ) := a( 2 )
+
+  program( self ) := undef
+}
+init main
+

@@ -1,0 +1,8 @@
+// error annotation @3
+
+derived a = undef
+
+rule main = {
+  program( self ) := undef
+}
+init main

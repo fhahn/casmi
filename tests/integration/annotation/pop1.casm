@@ -1,0 +1,14 @@
+function a: -> List(Int) initially { [ 1, 2 ] }
+
+rule main = 
+seqblock
+  pop x from a
+  assert x = 1
+
+  pop y from a
+  assert y = 2
+
+  program( self ) := undef
+endseqblock
+
+init main

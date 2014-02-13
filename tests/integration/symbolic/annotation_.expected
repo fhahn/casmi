@@ -1,0 +1,91 @@
+fof(id0,hypothesis,sta(1,2,2)).%CREATE: a 2
+tff(symbolNext, type, sym2: $int).
+fof(id1,hypothesis,sta(1,0,sym2)).%CREATE: a 0
+step
+fof(id2,hypothesis,sta(2,0,sym2)).%SYMBOLIC: a 0
+fof(id3,hypothesis,sta(2,2,2)).%SYMBOLIC: a 2
+step
+fof(id4,hypothesis,sta(3,0,sym2)).%SYMBOLIC: a 0
+fof(id5,hypothesis,sta(3,2,2)).%SYMBOLIC: a 2
+step
+fof(id6,hypothesis,sta(4,0,sym2)).%SYMBOLIC: a 0
+fof(id7,hypothesis,sta(4,2,2)).%SYMBOLIC: a 2
+step
+fof(id8,hypothesis,sta(5,0,sym2)).%SYMBOLIC: a 0
+fof(id9,hypothesis,sta(5,2,2)).%SYMBOLIC: a 2
+step
+fof(id10,hypothesis,sta(6,0,sym2)).%SYMBOLIC: a 0
+fof(id11,hypothesis,sta(6,2,2)).%SYMBOLIC: a 2
+tff(symbolNext, type, sym3: $int).
+fof(id12,hypothesis,sta(6,5,sym3)).%CREATE: a 5
+fof(id13,hypothesis,sta(1,5,sym3)).%CATCHUP: a 5
+fof(id14,hypothesis,sta(2,5,sym3)).%CATCHUP: a 5
+fof(id15,hypothesis,sta(3,5,sym3)).%CATCHUP: a 5
+fof(id16,hypothesis,sta(4,5,sym3)).%CATCHUP: a 5
+fof(id17,hypothesis,sta(5,5,sym3)).%CATCHUP: a 5
+step
+fof(id18,hypothesis,sta(7,0,sym2)).%SYMBOLIC: a 0
+fof(id19,hypothesis,sta(7,2,2)).%SYMBOLIC: a 2
+fof(id20,hypothesis,sta(7,5,sym3)).%SYMBOLIC: a 5
+step
+fof(id21,hypothesis,sta(8,0,sym2)).%SYMBOLIC: a 0
+fof(id22,hypothesis,sta(8,2,2)).%SYMBOLIC: a 2
+fof(id23,hypothesis,sta(8,5,sym3)).%SYMBOLIC: a 5
+step
+fof(id24,hypothesis,sta(9,0,sym2)).%SYMBOLIC: a 0
+fof(id25,hypothesis,sta(9,2,2)).%SYMBOLIC: a 2
+fof(id26,hypothesis,sta(9,5,sym3)).%SYMBOLIC: a 5
+step
+fof(id27,hypothesis,sta(10,0,sym2)).%SYMBOLIC: a 0
+fof(id28,hypothesis,sta(10,2,2)).%SYMBOLIC: a 2
+fof(id29,hypothesis,sta(10,5,sym3)).%SYMBOLIC: a 5
+step
+fof(id30,hypothesis,sta(11,0,sym2)).%SYMBOLIC: a 0
+fof(id31,hypothesis,sta(11,2,2)).%SYMBOLIC: a 2
+fof(id32,hypothesis,sta(11,5,sym3)).%SYMBOLIC: a 5
+tff(symbolNext, type, sym4: $int).
+fof(id33,hypothesis,sta(11,10,sym4)).%CREATE: a 10
+fof(id34,hypothesis,sta(1,10,sym4)).%CATCHUP: a 10
+fof(id35,hypothesis,sta(2,10,sym4)).%CATCHUP: a 10
+fof(id36,hypothesis,sta(3,10,sym4)).%CATCHUP: a 10
+fof(id37,hypothesis,sta(4,10,sym4)).%CATCHUP: a 10
+fof(id38,hypothesis,sta(5,10,sym4)).%CATCHUP: a 10
+fof(id39,hypothesis,sta(6,10,sym4)).%CATCHUP: a 10
+fof(id40,hypothesis,sta(7,10,sym4)).%CATCHUP: a 10
+fof(id41,hypothesis,sta(8,10,sym4)).%CATCHUP: a 10
+fof(id42,hypothesis,sta(9,10,sym4)).%CATCHUP: a 10
+fof(id43,hypothesis,sta(10,10,sym4)).%CATCHUP: a 10
+step
+fof(id44,hypothesis,sta(12,0,sym2)).%SYMBOLIC: a 0
+fof(id45,hypothesis,sta(12,2,2)).%SYMBOLIC: a 2
+fof(id46,hypothesis,sta(12,5,sym3)).%SYMBOLIC: a 5
+fof(id47,hypothesis,sta(12,10,sym3)).%UPDATE: a 10
+step
+fof(id48,hypothesis,sta(13,0,sym2)).%SYMBOLIC: a 0
+fof(id49,hypothesis,sta(13,2,2)).%SYMBOLIC: a 2
+fof(id50,hypothesis,sta(13,5,sym3)).%SYMBOLIC: a 5
+fof(id51,hypothesis,sta(13,10,sym3)).%SYMBOLIC: a 10
+step
+fof(id52,hypothesis,sta(14,0,sym2)).%SYMBOLIC: a 0
+fof(id53,hypothesis,sta(14,2,2)).%SYMBOLIC: a 2
+fof(id54,hypothesis,sta(14,5,sym3)).%SYMBOLIC: a 5
+fof(id55,hypothesis,sta(14,10,sym3)).%SYMBOLIC: a 10
+step
+fof(id56,hypothesis,sta(15,0,sym2)).%SYMBOLIC: a 0
+fof(id57,hypothesis,sta(15,2,2)).%SYMBOLIC: a 2
+fof(id58,hypothesis,sta(15,5,sym3)).%SYMBOLIC: a 5
+fof(id59,hypothesis,sta(15,10,sym3)).%SYMBOLIC: a 10
+step
+fof(id60,hypothesis,sta(16,0,sym2)).%SYMBOLIC: a 0
+fof(id61,hypothesis,sta(16,2,2)).%SYMBOLIC: a 2
+fof(id62,hypothesis,sta(16,5,sym3)).%SYMBOLIC: a 5
+fof(id63,hypothesis,sta(16,10,sym3)).%SYMBOLIC: a 10
+step
+fof(id64,hypothesis,sta(17,0,sym2)).%SYMBOLIC: a 0
+fof(id65,hypothesis,sta(17,2,2)).%SYMBOLIC: a 2
+fof(id66,hypothesis,sta(17,5,sym3)).%SYMBOLIC: a 5
+fof(id67,hypothesis,sta(17,10,sym3)).%SYMBOLIC: a 10
+fof(final0,hypothesis,sta(0,0,sym2)).%FINAL: a 0
+fof(final1,hypothesis,sta(0,2,2)).%FINAL: a 2
+fof(final2,hypothesis,sta(0,5,sym3)).%FINAL: a 5
+fof(final3,hypothesis,sta(0,10,sym3)).%FINAL: a 10

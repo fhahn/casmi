@@ -1,0 +1,7 @@
+rule main = {
+  let x = undef in
+  let y : List(Int) = tail( x ) in skip
+
+  program( self ) := undef
+}
+init main

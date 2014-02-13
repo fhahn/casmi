@@ -1,0 +1,21 @@
+CASM const_prop
+
+init exec
+
+function foo : -> Int
+
+rule exec =
+{|
+    if foo = undef then
+    {
+        print 0xfa110000    
+    }
+    else
+    {
+        print 0xdeadbeef
+    }
+    
+    print 0xdeadbeef
+    
+    program(self) := undef
+|}

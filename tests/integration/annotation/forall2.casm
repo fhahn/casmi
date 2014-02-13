@@ -1,0 +1,10 @@
+function a: -> Int
+
+rule main =  {|
+  let x = [] in
+    forall i in x do
+      a := i
+
+  program( self ) := undef
+|}
+init main

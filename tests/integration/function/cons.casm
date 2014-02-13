@@ -1,0 +1,7 @@
+init main
+
+rule main = {
+  assert cons( 1, [ 2, 3 ] ) = [ 1, 2, 3 ]
+
+  program( self ) := undef
+}

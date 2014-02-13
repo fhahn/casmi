@@ -1,0 +1,11 @@
+// error annotation @4
+
+rule main = {
+  call (a) ( 1, "test" )
+  program( self ) := undef
+}
+
+rule a( b : Int, c : Int ) = {
+  skip
+}
+init main

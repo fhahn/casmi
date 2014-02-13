@@ -1,0 +1,27 @@
+init initR
+
+function a : -> RuleRef
+function b : Int -> Int initially {1->0, 2->0}
+
+rule foo(m:Int, x:Int, y:Int) =
+{|
+	if m = 1 then {
+		b(x) := 1
+	} else {
+		b(x) := b(x) + y
+        }
+|}
+
+rule initR =
+{|
+ a := @foo
+ par
+ forall i in [1..2] do
+	seqblock
+		call (a)(1,i,undef)
+		call (a)(2,i,1)
+	endseqblock
+ endpar
+ print b(1) + b(2)
+ program(self) := undef
+|}

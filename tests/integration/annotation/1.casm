@@ -1,0 +1,7 @@
+// error annotation @4
+
+rule main = {
+  let x = [] in skip
+  program( self ) := undef
+}
+init main

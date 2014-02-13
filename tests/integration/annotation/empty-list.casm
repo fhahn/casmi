@@ -1,0 +1,12 @@
+function foo: -> List /*ta: Int */
+
+rule main =  {|
+  let x = [] in foo := x
+
+  let x = [] in
+    let y = x in
+      foo := y
+
+  program( self ) := undef
+|}
+init main

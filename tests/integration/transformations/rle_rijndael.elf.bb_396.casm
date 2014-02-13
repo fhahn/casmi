@@ -1,0 +1,45 @@
+CASM rle
+
+init foo
+
+enum FieldValues = { FV_RT, FV_MT, FV_RS, FV_RD, FV_SHAMT, FV_IMM, FV_ADDR, FV_SEL, FV_OFF, FV_BBOFF, FV_BBADDR }
+
+function (static) PARG : Int * FieldValues -> Int initially { 
+         [10,FV_RS]  -> 123,
+         [10,FV_RT]  -> 321,
+         [10,FV_IMM] -> 231
+}
+
+function GPR : Int -> Int
+
+rule lw(addr : Int) = 
+let base = PARG(addr, FV_RS) in
+let rt = PARG(addr, FV_RT) in
+let offset = PARG(addr, FV_IMM) in
+	let EA = BVadd_result(32,GPR(base), BVse( 16, 32,offset)) in {
+		debuginfo mem "memop(" + hex(addr) +  ") read@ " + hex(EA)
+	}
+
+
+rule write(addr : Int) = 
+{
+    GPR(addr) := addr
+}
+
+
+rule foo =
+{|
+    call (@lw) (10)
+
+    call (@write) (10)
+    call (@write) (10)
+    call (@write) (10)
+    call (@write) (10)
+
+    call (@lw) (10)
+    
+    call (@write) (10)
+
+    program(self) := undef
+|}
+

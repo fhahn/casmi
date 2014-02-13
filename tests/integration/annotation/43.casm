@@ -1,0 +1,9 @@
+// error annotation @6
+
+function a: -> List(Int)
+
+rule main = {
+  let x = a = [ 1, "abc" ] in skip
+  program( self ) := undef
+}
+init main

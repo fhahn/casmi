@@ -1,0 +1,7 @@
+function a: -> List(Int)
+
+rule main = {
+	let x = [] in a := x
+	program( self ) := undef
+}
+init main

@@ -1,0 +1,8 @@
+rule main = {
+	let x:Int = undef in
+	let y = undef in
+	let z = x + y in skip
+
+	program( self ) := undef
+}
+init main

@@ -1,0 +1,10 @@
+derived d( p1, p2 ) = 3
+
+rule main = {
+  let x = undef in
+  let y = undef in
+  let z = d( x, y ) in skip
+
+  program( self ) := undef
+}
+init main

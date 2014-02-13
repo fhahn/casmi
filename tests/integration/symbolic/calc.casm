@@ -1,0 +1,74 @@
+// symbolic
+
+function (symbolic) a: -> Int
+function (symbolic) b: -> Int
+function (symbolic) c: -> Int
+
+rule main = {|
+  assert symbolic( 1 + a )
+  assert symbolic( a + 1 )
+  assert symbolic( a + b )
+
+  assert symbolic( 1 - a )
+  assert symbolic( a - 1 )
+  assert symbolic( a - b )
+
+  assert symbolic( 1 * a )
+  assert symbolic( a * 1 )
+  assert symbolic( a * b )
+
+  assert symbolic( 1 / a )
+  assert symbolic( a / 1 )
+  assert symbolic( a / b )
+
+  assert symbolic( 1 % a )
+  assert symbolic( a % 1 )
+  assert symbolic( a % b )
+
+  assert symbolic( 1 < a )
+  assert symbolic( a < 1 )
+  assert symbolic( a < b )
+
+  assert symbolic( 1 <= a )
+  assert symbolic( a <= 1 )
+  assert symbolic( a <= b )
+
+  assert symbolic( 1 >= a )
+  assert symbolic( a >= 1 )
+  assert symbolic( a >= b )
+
+  assert symbolic( 1 > a )
+  assert symbolic( a > 1 )
+  assert symbolic( a > b )
+
+  assert symbolic( 1 = a )
+  assert symbolic( a = 1 )
+
+  // undef = Symbol => false
+  assert ( undef = a ) = false
+  assert ( a = undef ) = false
+
+  assert symbolic( 1 != a )
+  assert symbolic( a != 1 )
+  assert ( a != undef )
+  assert ( undef != a )
+
+  // Symbol < Symbol
+  assert (a < a) = false
+  assert (a <= a) = true
+  assert (a > a) = false
+  assert (a >= a) = true
+
+  // symbols op undef
+  assert (a < undef) = undef
+  assert (a > undef) = undef
+
+  // undef zuweisen, muss in symbolic auch
+  // wieder undef rauskriegen
+  c := undef
+  assert c = undef
+
+  program( self ) := undef
+|}
+init main
+

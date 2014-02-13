@@ -1,0 +1,10 @@
+function a: -> List(Int) initially { [ 1 ] }
+function b: -> Int
+
+rule main =  {|
+  pop b from a
+  assert b = 1
+
+  program( self ) := undef
+|}
+init main

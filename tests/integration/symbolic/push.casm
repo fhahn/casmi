@@ -1,0 +1,15 @@
+// symbolic
+
+CASM test
+
+function (symbolic) a: -> List(Int)
+
+rule main = {
+  
+  push 1 into a
+
+  program( self ) := undef
+}
+
+init main
+

@@ -1,0 +1,1 @@
+initR=STATEMENTS(LET CONST(ident c0__,num 2),STATEMENTS(LET CONST(ident c1__,num 11),STATEMENTS(LET CONST(ident c2__,SELF),STATEMENTS(LET CONST(ident c3__,UNDEF),PARBLOCK(STATEMENTS(UPDATE(ident bf,ident c0__),STATEMENTS(UPDATE(ident af,ident c1__),STATEMENTS(UPDATE(LOOKUP(ident program,LIST(ident c2__,null)),ident c3__),null))),null)))))

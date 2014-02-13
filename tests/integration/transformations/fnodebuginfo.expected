@@ -1,0 +1,2 @@
+initR=PARBLOCK(STATEMENTS(CALL_DIRECT(ident foo,null),UPDATE(LOOKUP(ident program,LIST(SELF,null)),UNDEF)),null)
+foo=SKIP

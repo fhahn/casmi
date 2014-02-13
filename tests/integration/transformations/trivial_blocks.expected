@@ -1,0 +1,3 @@
+initR=PRINT(LIST(str no,null),null)
+bar=SEQBLOCK(STATEMENTS(CALL_DIRECT(ident initR,null),UPDATE(LOOKUP(ident program,LIST(SELF,null)),UNDEF)),null)
+baz=CALL_DIRECT(ident initR,null)

@@ -1,0 +1,12 @@
+rule main = {
+	testRule1
+}
+
+rule testRule1 = {
+	print "in testRule1"
+
+	program( self ) := undef
+}
+
+init main
+

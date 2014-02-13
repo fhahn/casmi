@@ -1,0 +1,10 @@
+function a: Int * List(Int) -> Int
+
+rule main = {
+  let x = undef in
+  let y = undef in
+  let z = a( x, y ) in skip
+
+  program( self ) := undef
+}
+init main

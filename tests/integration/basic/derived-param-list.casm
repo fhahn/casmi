@@ -1,0 +1,8 @@
+// error program
+
+derived x( a /*ta: List */ ) = a + ( b + c )
+
+rule main = {
+  program( self ) := undef
+}
+init main

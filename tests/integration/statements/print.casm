@@ -1,0 +1,13 @@
+rule main = {
+	print "Hallo Welt"
+	print 1
+	print true
+	print false
+	print 0
+	print 4711
+
+	program( self ) := undef
+}
+
+init main
+

@@ -1,0 +1,14 @@
+tff(symbolNext, type, sym2: $int).
+fof(id0,hypothesis,sta(1,0,sym2)).%CREATE: a 0
+tff(symbolNext, type, sym3: $int).
+fof(id1,hypothesis,sta(1,1,sym3)).%CREATE: a 1
+fof(id2,hypothesis,sta(2,0,sym2)).%SYMBOLIC: a 0
+fof(id3,hypothesis,sta(2,1,3)).%UPDATE: a 1
+fof(id4,hypothesis,sta(3,0,5)).%UPDATE: a 0
+fof(id5,hypothesis,sta(3,1,4)).%UPDATE: a 1
+fof(id6,hypothesis,sta(4,0,7)).%UPDATE: a 0
+fof(id7,hypothesis,sta(4,1,8)).%UPDATE: a 1
+fof(id8,hypothesis,sta(5,0,7)).%SYMBOLIC: a 0
+fof(id9,hypothesis,sta(5,1,8)).%SYMBOLIC: a 1
+fof(final0,hypothesis,sta(0,0,7)).%FINAL: a 0
+fof(final1,hypothesis,sta(0,1,8)).%FINAL: a 1

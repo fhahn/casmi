@@ -1,0 +1,10 @@
+// error annotation @8
+CASM test
+
+rule callee(x:Boolean) =
+ skip
+
+rule caller =
+ call callee(1)
+
+init caller

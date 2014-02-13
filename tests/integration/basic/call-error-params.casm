@@ -1,0 +1,11 @@
+// error annotation @4
+
+rule main = seqblock
+  call (a) ( "hallo", "welt" )
+  program( self ) := undef
+endseqblock
+
+rule a( b : Int, c : String ) = {
+  skip
+}
+init main

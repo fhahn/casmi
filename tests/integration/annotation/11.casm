@@ -1,0 +1,10 @@
+rule main = {
+	let x = [ 1, "Hey!", true ] in {
+		assert nth( x, 1 ) = 1
+		assert nth( x, 2 ) = "Hey!"
+		assert nth( x, 3 ) = true
+	}
+
+	program( self ) := undef
+}
+init main

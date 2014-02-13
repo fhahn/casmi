@@ -1,0 +1,26 @@
+function (static) a: -> Int initially { 2 }
+function (static) b: -> Int initially { 3 }
+function (static) c: -> Int initially { 4 }
+
+function (static) d: Int -> Int initially { 1 -> 1, 2 -> 2, 3 -> 3 }
+
+function (static) e: Int * Int -> Int initially { [ 1,2 ] -> 3, [ 2,2 ] -> 4, [ 2,3 ] -> 5 }
+
+init main
+
+rule main = {
+  assert a = 2
+  assert b = 3
+  assert c = 4
+
+  assert d( 1 ) = 1
+  assert d( 2 ) = 2
+  assert d( 3 ) = 3
+  assert d( 4 ) = undef
+
+  assert e( 1,2 ) = 3
+  assert e( 2,2 ) = 4
+  assert e( 3,3 ) = undef
+
+  program( self ) := undef
+}

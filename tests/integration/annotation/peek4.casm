@@ -1,0 +1,8 @@
+// error annotation @4
+
+rule main = {
+  let x = peek( [ 1, "hallo" ] ) in skip
+
+  program( self ) := undef
+}
+init main

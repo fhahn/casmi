@@ -1,0 +1,6 @@
+// error interpreter @6
+CASM impossible_
+
+init initR
+
+rule initR = impossible

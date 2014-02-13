@@ -1,0 +1,18 @@
+function a: -> Int
+function b: -> Int
+
+rule main =  {|
+  a := 3
+  b := 4
+
+  {
+    a := b
+    b := a
+  }
+
+  assert a = 4
+  assert b = 3
+
+  program( self ) := undef
+|}
+init main

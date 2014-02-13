@@ -1,0 +1,22 @@
+
+function (controlled) a: -> List(Int)
+
+function b : -> List(Int)
+
+rule main = seqblock
+  a := [ 1,2,3 ]
+  pop x from a
+
+  assert len( a ) = 2
+  assert nth( a, 1 ) = 2
+  assert nth( a, 2 ) = 3
+  assert x = 1
+
+  b := [undef]
+  pop y from b
+  assert y = undef
+
+  program( self ) := undef
+endseqblock
+
+init main

@@ -1,0 +1,9 @@
+// error interpreter @5
+CASM double
+
+function bar : -> Int initially { 1 }
+function foo : -> Int initially { 1, 2 }
+
+init initR
+
+rule initR = skip

@@ -1,0 +1,24 @@
+// symbolic
+
+function (symbolic) foo : Int -> Int
+function (symbolic) bar : Int -> Int
+function baz : Int -> Int
+function quux : Int -> Int
+
+rule main = {
+	
+	assert ( symbolic (foo(1)) )
+	assert ( symbolic (bar(23)) )
+	assert ( foo(1) != undef )
+	assert ( bar(23) != undef )
+
+	assert ( baz(1) = undef )
+	assert ( quux(5) = undef )
+	assert ( not symbolic( baz(1) ) )
+
+	program(self) := undef
+	
+}
+
+init main
+

@@ -1,0 +1,3 @@
+exec=STATEMENTS(LET CONST(ident c0__,num 20),STATEMENTS(LET CONST(ident c1__,num 123),STATEMENTS(LET CONST(ident c2__,num 22),STATEMENTS(LET CONST(ident c3__,SELF),STATEMENTS(LET CONST(ident c4__,UNDEF),STATEMENTS(LET CONST(ident c5__,FALSE),PARBLOCK(STATEMENTS(STATEMENTS(SKIP,PARBLOCK(PARBLOCK(STATEMENTS(PRINT(LIST(ident c1__,null),null),STATEMENTS(PRINT(LIST(ident c1__,null),null),STATEMENTS(IF(ident c5__,ELSE(PRINT(LIST(ident c1__,null),null),PRINT(LIST(ident c1__,null),null))),STATEMENTS(PRINT(LIST(ident c1__,null),null),STATEMENTS(PRINT(LIST(ident c0__,null),null),null))))),null),null)),STATEMENTS(UPDATE(LOOKUP(ident program,LIST(ident c3__,null)),ident c4__),null)),null)))))))
+
+func=PARBLOCK(STATEMENTS(PRINT(LIST(ident x,LIST(ident y,null)),null),null),null)

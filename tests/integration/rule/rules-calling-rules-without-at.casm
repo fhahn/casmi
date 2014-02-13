@@ -1,0 +1,27 @@
+rule main = {
+	print "Hallo Welt"
+	print "Noch ein Test"
+
+	program( self ) := testRule1
+}
+
+rule testRule1 = {
+	print "in testRule1"
+
+	program( self ) := testRule2
+}
+
+rule testRule2 = {
+	print "in testRule2"
+
+	program( self ) := testRule3
+}
+
+rule testRule3 = {
+	print "in testRule3"
+
+	program( self ) := undef
+}
+
+init main
+

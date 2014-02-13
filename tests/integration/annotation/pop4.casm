@@ -1,0 +1,11 @@
+// error annotation @7
+
+function a: -> List(Int) initially { [ 1 ] }
+function b: -> String
+
+rule main = {
+  pop b from a
+
+  program( self ) := undef
+}
+init main

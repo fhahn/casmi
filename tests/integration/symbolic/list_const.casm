@@ -1,0 +1,18 @@
+// symbolic
+CASM listconst
+
+function (symbolic) list  : -> List(Int)
+function (symbolic) stack : -> List(Tuple(Int, Int, Int))
+
+init initR
+
+rule initR =
+{|
+	list := [1,2,3]
+
+	push [4,5,6] into stack
+	skip
+	pop x from stack
+
+	program(self) := undef
+|}

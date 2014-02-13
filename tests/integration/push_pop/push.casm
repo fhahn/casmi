@@ -1,0 +1,23 @@
+
+function (controlled) a: -> List /*ta: Int */
+
+rule main = seqblock
+  a := [ 1,2,3 ]
+
+  assert len( a ) = 3
+  assert nth( a, 1 ) = 1
+  assert nth( a, 2 ) = 2
+  assert nth( a, 3 ) = 3
+
+  push 4 into a
+
+  assert len( a ) = 4
+  assert nth( a, 1 ) = 4
+  assert nth( a, 2 ) = 1
+  assert nth( a, 3 ) = 2
+  assert nth( a, 4 ) = 3
+
+  program( self ) := undef
+endseqblock
+
+init main

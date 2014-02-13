@@ -1,0 +1,10 @@
+CASM const_prop
+
+init foo
+
+rule foo =
+{
+    let x = 0 in print 0
+    
+    program(self) := undef
+}

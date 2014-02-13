@@ -1,0 +1,10 @@
+CASM ops
+
+init foo
+
+rule foo =
+{
+    
+    
+    program(self) := undef
+}

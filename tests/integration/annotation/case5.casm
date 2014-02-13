@@ -1,0 +1,13 @@
+rule main = {
+  let x = undef in {
+    case x of
+      2: skip
+      3: skip
+      4: skip
+      default: skip
+    endcase
+  }
+
+  program( self ) := undef
+}
+init main

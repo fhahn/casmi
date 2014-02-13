@@ -1,0 +1,20 @@
+function (controlled) a: -> Int initially { 1 }
+function (controlled) b: Int -> Int initially { 1 -> 2, 2 -> 3, 3 -> 4 }
+function c: -> Int initially { 1 }
+function d: Int -> Int initially { 1 -> 2, 2 -> 3, 3 -> 4 }
+
+init main
+
+rule main = {
+  assert a = 1
+  assert b( 1 ) = 2
+  assert b( 2 ) = 3
+  assert b( 3 ) = 4
+
+  assert c = 1
+  assert d( 1 ) = 2
+  assert d( 2 ) = 3
+  assert d( 3 ) = 4
+
+  program( self ) := undef
+}

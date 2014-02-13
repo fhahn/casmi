@@ -1,0 +1,12 @@
+// transform, cmdline "--fcf"
+
+CASM hf
+
+init foo
+
+rule foo = 
+{
+    print hex( 1234 )   // 0x4d2
+
+    program(self) := undef
+}

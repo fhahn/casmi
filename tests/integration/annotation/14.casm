@@ -1,0 +1,8 @@
+// error annotation @5
+
+rule main = {
+	let x = 3 in
+		assert nth( [ 1, true, "hallo" ], x ) = "hallo"
+	program( self ) := undef
+}
+init main

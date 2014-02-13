@@ -1,0 +1,41 @@
+// transform, cmdline "--frr"
+
+CASM rr
+
+init foo
+
+rule foo =
+{
+    let x = 10 in
+    {
+        print x
+    }
+
+    let x = 10 in
+    {
+        print x
+    }
+
+    let x = 10 in
+    {
+        print x
+    }
+
+    program(self) := undef
+}
+
+
+// transformation looks like
+// rule foo =
+// {
+//     __l0 := 10 
+//     print __l0
+
+//     __l1 := 10 
+//     print __l1
+
+//     __l2 := 10 
+//     print __l2
+
+//     program(self) := undef
+// }

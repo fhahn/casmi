@@ -1,0 +1,19 @@
+rule main = {
+  if 3>2 then assert true
+  if 3<2 then assert false
+
+  if 2<3 then
+    assert true
+  else
+    assert false
+
+  if 2>3 then
+    assert false
+  else
+    assert true
+
+	program(self) := undef
+}
+
+init main
+

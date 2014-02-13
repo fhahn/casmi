@@ -1,0 +1,10 @@
+// error program
+
+rule main = {
+  program( self ) := undef
+}
+
+rule x( a /*ta: List */ ) = {
+  skip
+}
+init main

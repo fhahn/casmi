@@ -1,0 +1,72 @@
+CASM rle_calls
+
+init run
+
+function x : -> Int
+
+function bar : Int -> Int
+
+rule qux = skip
+
+function (static) FUNC : -> RuleRef initially { @xuq }
+
+function (static) X : Int -> RuleRef initially { 20 -> @xuq }
+
+rule xuq(arg : Int) = 
+{
+    x := 0xdead
+}
+
+function cnt : -> Int initially { 0 }
+
+rule run =
+{
+    call foo
+    
+    cnt := cnt + 1
+    
+    if cnt > 1 then
+    {
+       program( self ) := undef
+    }
+}
+
+rule foo = 
+let arg = 20 in
+{|
+    bar(arg) := 10
+    
+    {
+        if true then
+        {|
+           call ( X(arg) ) ( 0xfa11 )
+           call ( FUNC  ) ( 0xfa11 )
+           call ( @xuq  ) ( 0xbeef )
+           call ( @qux  )
+           call   qux
+        |}
+        else
+           print "nop"
+    }
+    
+    debuginfo stdout bar(arg)
+|}
+
+rule baz = 
+{|
+    bar(2) := 10
+    
+    {
+        if true then
+        {|
+            call ( @qux )
+            call ( @qux )
+        |}
+        else
+           print "nop"
+    
+        print bar(2)
+    }
+    
+    program( self ) := undef
+|}

@@ -1,0 +1,14 @@
+// error annotation @9
+
+function a: -> Int
+function b: -> String
+
+rule main = {
+  let x = undef in {
+    a := x
+    b := x
+  }
+
+  program( self ) := undef
+}
+init main

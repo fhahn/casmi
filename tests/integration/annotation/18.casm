@@ -1,0 +1,11 @@
+function a: -> List(Int)
+
+rule main = {
+	let x = undef in
+	let y = undef in
+	let z = cons( x, y ) in
+		a := z
+
+	program( self ) := undef
+}
+init main

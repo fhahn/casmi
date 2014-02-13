@@ -1,0 +1,10 @@
+// error subrange @5
+
+CASM subr
+
+function x : -> Int(0..1) initially { 2 }	// must fail HERE!
+
+init initR 
+
+rule initR =
+	diedie // should never be reached

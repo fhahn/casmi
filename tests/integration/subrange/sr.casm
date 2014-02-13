@@ -1,0 +1,14 @@
+// error subrange @11
+CASM foo
+
+function x : -> Int(0..5)
+
+init initR
+
+rule initR = 
+seqblock
+	x := 5
+	x := 7
+	
+	program(self) := undef
+endseqblock

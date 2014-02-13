@@ -1,0 +1,19 @@
+// symbolic, error interpreter @9
+
+function (symbolic) a: -> Int
+function (symbolic) b: -> Int initially { 0 }
+
+rule main = {
+  
+
+  if a >= undef then {
+    b := 1
+  } else {
+    b := 2
+  }
+
+  diedie "not reached" // not reached
+  program( self ) := undef
+}
+init main
+

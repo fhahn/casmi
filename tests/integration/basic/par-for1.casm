@@ -1,0 +1,10 @@
+function x: Int -> Int
+
+rule main = {
+  forall i in [ 1, 2 ] do {
+    x( i ) := i
+  }
+
+  program( self ) := undef
+}
+init main

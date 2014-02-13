@@ -1,0 +1,10 @@
+// error annotation @6
+
+function a: Int -> Int
+
+rule main = {
+  debuginfo trace "test = " + a( "hallo" )
+
+  program( self ) := undef
+}
+init main

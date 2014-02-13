@@ -1,0 +1,24 @@
+CASM push_pop_are_updates
+
+function lst : -> List(Int)
+
+init initR
+
+rule initR=
+{|
+	lst := []
+	push 1 into lst
+	{
+		push 2 into lst
+		assert peek(lst) = 1
+	}
+	assert peek(lst) = 2
+
+	{
+		pop x from lst
+		assert peek(lst) = 2
+	}
+	assert peek(lst) = 1
+
+	program(self) := undef
+|}

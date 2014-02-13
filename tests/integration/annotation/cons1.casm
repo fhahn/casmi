@@ -1,0 +1,14 @@
+function a: -> List(Int)
+
+rule main = {
+  let x = undef in
+  let y = undef in
+    a := cons( x, y )
+
+  let x = cons( 1, undef ) in assert x = undef
+  let x = cons( undef, [ 1 ] ) in assert x = [ undef, 1 ]
+  let x = cons( [ 1 ], undef ) in assert x = undef
+
+  program( self ) := undef
+}
+init main

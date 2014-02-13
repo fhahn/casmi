@@ -1,0 +1,42 @@
+function (controlled) a: -> Int
+function (controlled) b: Int -> Int
+function (controlled) c: Int * Int -> Int
+
+function d: -> Int
+function e: Int -> Int
+function f: Int * Int -> Int
+
+init main
+
+rule main = {
+  seqblock
+
+	print "before a := 3"
+  a := 3
+	print "after a := 3"
+  assert a = 3
+	print "after a = 4"
+
+  a := 4
+  assert a = 4
+
+  b( 1 ) := 1
+  b( 2 ) := 2
+  b( 3 ) := 3
+
+  assert b( 1 ) = 1
+  assert b( 2 ) = 2
+  assert b( 3 ) = 3
+
+  c( 1, 1 ) := 1
+  c( 2, 2 ) := 2
+  c( 3, 3 ) := 3
+
+  assert c( 1, 1 ) = 1
+  assert c( 2, 2 ) = 2
+  assert c( 3, 3 ) = 3
+
+  program( self ) := undef
+
+  endseqblock
+}

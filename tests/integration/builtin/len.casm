@@ -1,0 +1,10 @@
+CASM len
+
+init main
+
+rule main = {
+	assert len( [ 1, 2, 3 ] ) = 3
+	assert len( [ undef, [] ] ) = 2
+
+	program( self ) := undef
+}

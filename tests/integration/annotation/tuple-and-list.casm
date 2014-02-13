@@ -1,0 +1,11 @@
+// error annotation @7
+
+function a: -> Tuple(Int,Int)
+
+rule main = {
+  a := [ 1, 2 ]
+  let x = len( a ) in skip
+
+  program( self ) := undef
+}
+init main

@@ -1,0 +1,8 @@
+// error annotation @3
+
+derived a : String = 3
+
+rule main = {
+  program( self ) := undef
+}
+init main

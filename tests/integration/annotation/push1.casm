@@ -1,0 +1,14 @@
+function a: -> List(Int) initially { [] }
+
+rule main =  {|
+  let x = undef in
+    push x into a
+
+  push 1 into a
+  push 2 into a
+
+  assert a = [ 2, 1, undef ]
+
+  program( self ) := undef
+|}
+init main

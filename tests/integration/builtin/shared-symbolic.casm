@@ -1,0 +1,27 @@
+// symbolic
+CASM test
+
+init main
+
+function (symbolic) a: -> Int // symbol
+function b: -> Int
+function (symbolic) c: -> Int // symbol
+function (symbolic) d: -> Int // symbol
+
+rule main = {
+  assert symbolic( BVequal( 0, a, 2 ) )
+  assert symbolic( BVadd_result( 20, c, d ) )
+  assert symbolic( BVadd_overflow( 20, c, d ) )
+  assert symbolic( BVadd_overflowsign( 20, c, d ) )
+  assert symbolic( BVadd_result( 20, c, d ) )
+  assert symbolic( BVadd_overflow( 20, c, d ) )
+  assert symbolic( BVsb( 0, 15, c, 38 ) )
+  assert symbolic( BVsb( 16, 31, 0, a ) )
+  assert symbolic( BVex( 0, 15,a  ) )
+  assert symbolic( BVex( 16, 31, a ) )
+  assert BVlez( 16, 0 ) = 1
+  assert BVze( 1, 1, 1 ) = 1
+  assert BVadd_result( 32, 13, 2 ) = 15
+
+  program( self ) := undef
+}

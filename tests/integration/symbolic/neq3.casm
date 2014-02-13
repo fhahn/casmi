@@ -1,0 +1,19 @@
+// symbolic
+
+function (symbolic) a: -> Int
+function (symbolic) b: -> Int
+function (symbolic) c: -> Int initially { 0 }
+
+rule main = {|
+  
+
+  if a != b then {
+    c := 1
+  } else {
+    c := 2
+  }
+
+  program( self ) := undef
+|}
+init main
+

@@ -1,0 +1,12 @@
+// error annotation @6
+CASM foo
+
+// cycle in initilizer dependencies
+
+function foo: Int -> Int initially { 1 -> foo(1) }
+
+init initR
+
+rule initR = seqblock
+	program(self) := undef
+endseqblock

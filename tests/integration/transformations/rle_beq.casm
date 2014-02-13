@@ -1,0 +1,25 @@
+CASM rle_beq
+
+init foo
+
+function bar : -> Int
+
+rule foo =
+{|
+    call qux
+
+    assert bar != 30
+    assert bar != 20
+    assert bar = 10
+
+    program(self) := undef    
+|}
+
+rule qux =
+    if true then
+       bar := 10
+    else
+        if false then
+           bar := 20
+        else
+           bar := 30

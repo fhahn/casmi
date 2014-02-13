@@ -1,0 +1,7 @@
+CASM cd
+
+init initR
+
+rule initR = call foo(1,2,3,4,"foo",6)
+
+rule foo(a:Int, b:Int, c:Int, d:Int, e:String, f:Int) = program(self) := undef

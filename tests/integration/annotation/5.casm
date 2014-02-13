@@ -1,0 +1,10 @@
+function a: List(Int) -> Int
+
+rule main = {
+	let x = [] in {
+		a( x ) := 2
+	}
+
+	program( self ) := undef
+}
+init main

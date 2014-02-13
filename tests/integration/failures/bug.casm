@@ -1,0 +1,14 @@
+// symbolic
+
+CASM bugSegmentationFault
+
+function a: Int -> Int
+
+init main
+
+rule main = seqblock
+  a( 1 ) := a( 0 )
+
+  program( self ) := undef
+endseqblock
+

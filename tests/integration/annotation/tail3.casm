@@ -1,0 +1,9 @@
+// error annotation @5
+
+rule main = {
+  let x = [] in
+  let y = tail( x ) in skip
+
+  program( self ) := undef
+}
+init main

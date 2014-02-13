@@ -1,0 +1,10 @@
+// error annotation @4
+
+rule main = {
+  call (bar)(3)
+  program( self ) := undef
+}
+
+rule bar( p : String ) = skip
+init main
+

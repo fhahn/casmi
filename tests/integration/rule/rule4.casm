@@ -1,0 +1,12 @@
+// error interpreter @6
+
+function a: -> RuleRef initially { @bar }
+
+rule main = {
+  call (a)(3,"Hallo")
+  program( self ) := undef
+}
+
+rule bar( p1 : Int, p2 : Int ) = skip
+init main
+

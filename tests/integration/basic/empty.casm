@@ -1,0 +1,8 @@
+rule main = {
+	program( self ) := undef
+}
+
+rule test3 = seqblock skip endseqblock
+rule test4 = {| skip |}
+rule test5 = par skip endpar
+init main

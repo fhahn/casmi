@@ -1,0 +1,13 @@
+CASM foo
+
+// tests if initializer dependencies are resovled correctly, that is bar is initialized before foo
+
+function foo: Int -> Int initially { 1 -> bar(1) }
+function (static) bar : Int -> Int initially { 1 -> 3 }
+
+init initR
+
+rule initR = seqblock
+	assert foo(1) = 3
+	program(self) := undef
+endseqblock

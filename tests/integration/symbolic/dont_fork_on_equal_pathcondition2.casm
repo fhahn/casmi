@@ -1,0 +1,36 @@
+// symbolic
+CASM dofeqpathcond
+
+// There are pathc conditions, i.e. if a symbolic fork was performed because of a certain decision 
+// and the very same decision is to make again -> do not fork but look up the path condition so far
+// if the decision to make is compatible with the path condition just continue w/o forking
+
+init initR
+
+function (symbolic) x : -> Int
+
+// for this program 2 path are enough!
+rule initR = {
+	if x <= 0 then {
+		if x <= 0 then {
+			if x <= 0 then {
+				print "<= 0"
+			} else	{
+				print "should not appear"
+			}
+		} else	{
+				print "should not appear"
+		}
+	} else	{
+		if x <= 0 then {
+				print "should not appear"
+		} else	{
+			if x <= 0 then {
+					print "should not appear"
+			} else	{
+				print "> 0"
+			}
+		}
+	}
+	program(self) := undef	
+}		

@@ -1,0 +1,26 @@
+// transform, cmdline "--fcfd"
+
+CASM cfd
+
+init foo
+
+function bar : Int -> Int
+
+function (static) baz : Int -> RuleRef initially { 5 -> @inline }
+
+rule inline =
+{
+    print 5
+}
+
+rule foo =
+{|
+    bar(10) := 5
+
+    let qux = bar(10) in
+    {
+        call ( baz(qux) )
+    }        
+    
+    program(self) := undef
+|}

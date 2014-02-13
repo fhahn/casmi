@@ -1,0 +1,23 @@
+CASM pu
+
+init foo
+
+function bar : -> Int
+
+rule foo =
+{
+    bar := 0xdead
+    
+    program(self) := undef
+}
+
+rule qux =
+{|
+    bar := 0xfa11
+
+    {
+        call foo
+    }
+
+    debuginfo out bar
+|}

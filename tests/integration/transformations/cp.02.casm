@@ -1,0 +1,40 @@
+CASM const_prop
+
+init exec
+
+function _z : -> Int
+
+enum alpha = {A, B, C}
+
+rule exec =
+{
+    _z := 10
+
+    // print A
+
+    // print A
+
+    // print B
+
+    let x = 20 in
+    {
+        print 123
+
+        print 0x123
+
+        print 123
+
+        print 0x123
+
+        print 0x123
+    
+        print x
+    }
+    
+    program(self) := undef
+}
+
+rule func(x : Int, y : Int) =
+{
+    print x + y
+}

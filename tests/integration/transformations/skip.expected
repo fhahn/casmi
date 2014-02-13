@@ -1,0 +1,7 @@
+initR=SKIP
+sw=SKIP
+if_=SKIP
+if2_=SKIP
+fa=SKIP
+already_skip=SKIP
+not_possible=PRINT(LIST(str Oh noes,null),null)

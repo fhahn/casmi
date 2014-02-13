@@ -1,0 +1,14 @@
+// symbolic
+CASM symbolic
+
+function (symbolic) a: -> Int
+function b: -> Int initially { 2 }
+
+init main
+
+rule main = {
+  assert symbolic( a )
+  assert symbolic( b ) = false
+
+  program( self ) := undef
+}

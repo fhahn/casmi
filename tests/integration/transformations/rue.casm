@@ -1,0 +1,51 @@
+CASM rue
+
+function x : -> Int
+
+init case_00
+
+rule case_00 = program(self) := undef
+
+// no reduction
+rule case_01 =
+{|
+    x := 10
+|}
+
+// override property with no use
+rule case_02 =
+{|
+    x := 10
+    x := 20
+|}
+
+// multiple override property with no use
+rule case_03 =
+{|
+    x := 10
+    x := 20
+    x := 30
+|}
+
+// multiple override property with seq use
+rule case_04 =
+{|
+    x := 10
+    x := x * 2
+    x := x / 3
+|}
+
+
+rule case_05 =
+{|
+    x := 10
+    x := x * 2
+
+    if true then
+        x := x + 4
+    else
+        assert false
+
+    x := x / 3
+|}
+

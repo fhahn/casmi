@@ -1,0 +1,18 @@
+function a: List(Int) * Int * Boolean * List(List(Int)) -> Tuple(List(Int),String,)
+
+derived b( pa : List(Int,), pb : String ) = 1
+
+rule main = {
+  let x : String = "Hallo" in skip
+  let x : List(Int) = [] in skip
+  let x = 1 in skip
+
+  program( self ) := undef
+}
+init main
+
+
+rule test( pa : Int, pb : List(String), pc : Int ) = {
+  skip
+}
+init main

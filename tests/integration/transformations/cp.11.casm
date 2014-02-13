@@ -1,0 +1,63 @@
+CASM cp
+
+init foo
+
+function x : -> Int initially { 0xdead }
+
+rule foo =
+{
+    {|
+        print x
+    {
+    
+    print 1
+
+    {|
+        print 1
+    |}
+    
+    }
+
+    |}
+    program(self) := @bar
+}
+
+rule bar =
+{
+    {|
+        print 1
+    |}
+
+    {|
+        print 1
+    |}
+    
+    {|
+        print 1
+    |}
+
+    program(self) := @baz
+}
+
+rule baz =
+{
+    {|
+        print 1
+    |}
+
+    print 1
+
+    program(self) := @qux
+}
+
+enum E = {A,B,C}
+
+rule qux =
+{
+    forall i in E do
+        print 1
+
+    print 1
+
+    program(self) := undef
+}

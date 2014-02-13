@@ -1,0 +1,412 @@
+// transform, cmdline "--frle"
+
+CASM rle
+
+function foo : -> Int initially { 0 }
+
+init case_00
+
+
+// PARALLEL USE CASES
+
+rule case_00 =
+{
+    {|
+        {
+            print foo
+        }
+    |}
+    
+    program(self) := @case_01
+}
+
+rule case_01 =
+{
+    {|
+        {
+            foo := 1
+            
+            print foo
+        }
+    |}
+
+    program(self) := @case_02
+}
+
+rule case_02 =
+{
+    {|
+        {
+            foo := 2
+        }
+                
+        {            
+            print foo
+        }
+    |}
+    
+    program(self) := @case_03
+}
+
+rule case_03 =
+{
+    // <-------------- insertion point of LOCAL u0__ := 3
+    {|
+        {
+            foo := 3 // do not modify!
+        }
+    |}
+// <------------------ common scope
+    {|
+        {            
+            print foo // use of u0__
+        }
+    |}
+
+    program(self) := @case_04
+}
+
+rule case_04 =
+{
+    {|
+        {
+            {|
+                foo := 4
+            |}
+            
+            print foo
+        }
+    |}
+
+    program(self) := @case_05
+}
+
+rule case_05 =
+{
+    {|
+        {
+            {|
+                {
+                    foo := 5
+                }
+            |}
+                    
+            print foo
+        }
+    |}
+
+    program(self) := @case_06
+}
+
+rule case_06 =
+{
+    {|
+    //<---------------- insertation point of LOCAL u0__ := 6
+        foo := 6 //---- expr 6 to u0__
+    //<---------------- common scope        
+        {
+            print foo //-- expr foo to u0__
+        }
+    |}
+
+    program(self) := @case_07
+}
+
+rule case_07 =
+{
+    foo := 7
+    
+    {|
+        {
+            print foo
+        }
+    |}
+
+    program(self) := @case_08
+}
+
+rule case_08 =
+{
+    {|
+        foo := 8
+    |}
+
+    {|
+        {            
+            print foo
+        }
+    |}
+
+    program(self) := @case_09
+}
+
+rule case_09 =
+{
+    {|
+        {
+            {|
+                foo := 9
+            |}
+        }
+    |}
+
+    {|
+        {            
+            print foo
+        }
+    |}
+
+    program(self) := @case_10
+}
+
+
+
+// SEQUENTIAL USE CASES
+
+rule case_10 =
+{|
+    {
+        {|
+            print foo
+        |}
+    }
+
+    program(self) := @case_11
+|}
+
+rule case_11 =
+{|
+    {
+        {|
+            foo := 11
+   
+            print foo
+        |}
+    }
+
+    program(self) := @case_12
+|}
+
+rule case_12 =
+{|
+    {
+        {|
+            foo := 12
+        |}
+        
+        {|            
+            print foo
+        |}
+    }
+
+    program(self) := @case_13
+|}
+
+rule case_13 =
+{|
+    {
+        {|
+            foo := 13
+        |}
+    }
+
+    {
+        {|            
+            print foo
+        |}
+    }
+
+    program(self) := @case_14
+|}
+
+rule case_14 =
+{|
+    {
+        {|
+            {
+                foo := 14
+            }
+                    
+            print foo
+        |}
+    }
+
+    program(self) := @case_15
+|}
+
+rule case_15 =
+{|
+    {
+        {|
+            {
+                {|
+                    foo := 15
+                |}
+            }
+                    
+            print foo
+        |}
+    }
+
+    program(self) := @case_16
+|}
+
+rule case_16 =
+{|
+    {
+        foo := 16
+                
+        {|
+            print foo
+        |}
+    }
+
+    program(self) := @case_17
+|}
+
+rule case_17 =
+{|
+    foo := 17
+    
+    {
+        {|
+            print foo
+        |}
+    }
+
+    program(self) := @case_18
+|}
+
+rule case_18 =
+{|
+    {
+        foo := 18
+    }
+
+    {
+        {|            
+            print foo
+        |}
+    }
+
+    program(self) := @case_19
+|}
+
+rule case_19 =
+{|
+    {
+        {|
+            {
+                foo := 19
+            }
+        |}
+    }
+
+    {
+        {|            
+            print foo
+        |}
+    }
+
+    program(self) := @case_20
+|}
+
+
+rule case_20 =
+{
+    {|
+        foo := 200
+    
+        {
+            foo := 20
+        
+            print foo
+        }
+    |}
+    
+    program(self) := undef
+}
+
+
+rule case_21 =
+{
+    {|
+        {
+            print foo
+            
+            print foo
+            
+            print foo
+        }
+    |}
+    
+    program(self) := undef
+}
+
+function qux : Int -> Int initially { 2 -> 0xdead }
+
+rule case_22 =
+{|
+    print "case: 22"
+    
+    forall i in [2 .. 22] do
+    {
+        let instr = i*2 in
+        {
+            print qux(instr)
+
+            print ".." + qux(instr)
+
+            print "...." + qux(instr)
+        }
+    }
+|}
+
+rule case_23 =
+{|
+    print "case: 23"
+
+    forall i in [3 .. 23] do
+    {
+        let instr = i*2 in
+        {|
+            qux(instr) := (i*i*i) / 0xdeadbabe
+            
+            print ">>" + qux(instr)
+
+            print ">>>>" + qux(instr)
+        |}
+    }
+|}
+
+
+rule case_24 =
+{
+    {|
+        {
+            if true then
+            {
+                foo := 100
+
+                print foo
+            }
+            else
+            {
+                print foo
+
+                print foo
+            }
+        }
+        
+        {
+            print foo
+
+            print foo
+        }
+    |}
+}
+
+
+
+
+

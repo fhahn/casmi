@@ -1,0 +1,23 @@
+// cmdline "-d trace"
+CASM dumps_
+
+init initR
+
+enum myEnum = {one, two, three}
+
+function a : -> Int
+function b : Int -> Int
+function c : Int * Int -> Int
+
+function bb: myEnum -> Int
+function bbb: Int -> myEnum
+
+rule initR dumps (a,b,c,bb,bbb)-> trace =
+{|
+  a := 3
+  b(2) := 4
+  c(2,3) := 5
+  bb(two) := 1
+  bbb(2) := three
+  program(self) := undef
+|}

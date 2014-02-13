@@ -1,0 +1,11 @@
+// error annotation @6
+
+function (static) a: -> List(Int) initially { [ 1 ] }
+
+rule main = {
+  pop x from a
+  assert x = 1
+
+  program( self ) := undef
+}
+init main

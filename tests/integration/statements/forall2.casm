@@ -1,0 +1,16 @@
+CASM forall2
+
+init initR
+
+enum E = { one, two, three }
+function pipe : E -> List(String) initially { one -> ["one"], two -> ["two"], three -> ["three"] }
+
+rule initR= {
+	forall s in E do
+	let e_rev:E = Int2Enum(Enum2Int(three) - Enum2Int(s)) in
+	forall o in pipe(e_rev) do
+	{|
+		print o
+	|}
+	program(self):=undef
+}

@@ -1,0 +1,32 @@
+// cmdline "-d trace"
+function x : -> List(Tuple(Int,Int,Int))
+
+init initR
+
+rule doit = {
+	let y = peek(x) in 
+	let a = nth(y,1) in
+	let b = nth(y,2) in
+	let c = nth(y,3) in 
+	let cmo = c - 1 in
+	{|
+		x := tail(x)
+		push [a,b,cmo] into x
+	|}
+}
+
+rule runner = {
+	debuginfo trace x
+	call doit
+	let y = peek(x) in 
+		if nth(y,3) = 0 then
+			program(self) := undef
+}
+
+rule initR =
+{|
+	x := []
+	push [1,2,3] into x
+
+	program(self) := @runner
+|}

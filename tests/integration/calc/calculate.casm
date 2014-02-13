@@ -1,0 +1,51 @@
+// success
+
+rule main = {
+  assert 2*3+2=8
+  assert 1+2*3=7
+  assert 1*2+3=5
+
+  assert undef + 1 = undef
+  assert 1 + undef = undef
+
+  assert undef - 1 = undef
+  assert 1 - undef = undef
+
+  assert undef * 1 = undef
+  assert 1 * undef = undef
+
+  assert undef / 1 = undef
+  assert 1 / undef = undef
+
+  assert undef % 1 = undef
+  assert 1 % undef = undef
+  assert undef % undef = undef
+
+  assert undef div 1 = undef
+  assert 1 div undef = undef
+  assert undef div undef = undef
+
+  assert (1 < undef) = undef
+  assert (undef < 1) = undef
+
+  assert (1 <= undef) = undef
+  assert (undef <= 1) = undef
+
+  assert (1 = undef) = false
+  assert (undef = 1) = false
+  assert (undef = undef)
+
+  assert (1 != undef) = true
+  assert (undef != 1) = true
+  assert (undef != undef) = false
+
+  assert (1 >= undef) = undef
+  assert (undef >= 1) = undef
+
+  assert (1 > undef) = undef
+  assert (undef > 1) = undef
+
+  program( self ) := undef
+}
+
+init main

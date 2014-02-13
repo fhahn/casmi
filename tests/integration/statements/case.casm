@@ -1,0 +1,45 @@
+enum myEnum = { enum1, enum2, enum3 }
+
+rule main = {
+  case 1 of
+    1: assert true
+    2: assert false
+    default: assert false
+  endcase
+
+  case 2 of
+    1: assert false
+    default: assert true
+  endcase
+
+  case 2 of
+    default: assert true
+    1: assert false
+  endcase
+
+  case "hallo" of
+    "Hallo": assert false
+    "hallo": assert true
+  endcase
+
+  case "hallo" of
+    "Hallo": assert false
+    default: assert true
+  endcase
+
+  case enum1 of
+    enum1: assert true
+    default: assert false
+  endcase
+
+  case enum2 of
+    enum1: assert false
+    default: assert false
+    enum2: assert true
+  endcase
+
+	program(self) := undef
+}
+
+init main
+

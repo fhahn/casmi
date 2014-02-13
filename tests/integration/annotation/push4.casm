@@ -1,0 +1,10 @@
+// error annotation @6
+
+function a: -> List(Int)
+
+rule main = {
+  push "hallo" into a
+
+  program( self ) := undef
+}
+init main

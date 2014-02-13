@@ -1,0 +1,5 @@
+trace: [ [ 1, 2, 3 ] ]
+trace: [ [ 1, 2, 2 ] ]
+trace: [ [ 1, 2, 1 ] ]
+trace: [ [ 1, 2, 0 ] ]
+5 steps later...

@@ -1,0 +1,7 @@
+rule main = {
+  let x = [ 1, 2 ] in
+  let y = len( x ) in skip
+
+  program( self ) := undef
+}
+init main

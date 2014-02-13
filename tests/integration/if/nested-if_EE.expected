@@ -1,0 +1,14 @@
+tff(symbolNext, type, sym2: $int).
+fof(id0,hypothesis,sta(1,sym2)).%CREATE: a 
+fof('idutils/tests/if/nested-if.casm:12',hypothesis,sym2=0).
+tff(symbolNext, type, sym3: $int).
+fof(id1,hypothesis,stb(1,sym3)).%CREATE: b 
+fof('idutils/tests/if/nested-if.casm:19',hypothesis,sym3=0).
+tff(symbolNext, type, sym4: $int).
+fof(id2,hypothesis,stc(1,sym4)).%CREATE: c 
+fof(id3,hypothesis,sta(2,sym2)).%SYMBOLIC: a 
+fof(id4,hypothesis,stb(2,sym3)).%SYMBOLIC: b 
+fof(id5,hypothesis,stc(2,3)).%UPDATE: c 
+fof(final0,hypothesis,sta(0,sym2)).%FINAL: a 
+fof(final1,hypothesis,stb(0,sym3)).%FINAL: b 
+fof(final2,hypothesis,stc(0,3)).%FINAL: c 

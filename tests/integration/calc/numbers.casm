@@ -1,0 +1,108 @@
+// Test module to exercise numerical calculations on all supported types:
+// Int, Float, and Rational. This should try to execute literal syntax, all
+// conversions, and arithmetic operators.
+CASM numbers
+
+init main
+
+function ints: Int -> Int initially { 0 -> 0, 1 -> +1, 2 -> -3 }
+
+// Float syntax requires a mantissa containing a decimal point and digits
+// both before and after the decimal point (that is, .25 and 2. are not
+// allowed) and allows an optional exponent declared with e or E.
+function e: -> Float initially { 2.718281828459045 }
+function flts: Int -> Float initially { 1 -> -2.0001, 2 -> +3.14159,
+                                        8 -> 1.2345E-6, 9 -> 2.0e-10 }
+
+// Rational constants can be written A/B without spaces, or Ar for an
+// integer A to be interpreted as rational.
+function rats: Int -> Rational initially { 0 -> 0r, 1 -> -2/1, 2 -> +1/2,
+                                           3 -> 0/1, 4 -> 0/2 }
+
+rule main = {
+    call calc_int
+    call calc_flt
+    call calc_rat
+    call conversions
+    call approx
+}
+
+rule calc_int = {
+    if ints(42) = undef then {
+        ints(42) := ints(1) + ints(2)
+        ints(43) := ints(1) - ints(2)
+        ints(44) := ints(1) * ints(2)
+        ints(45) := ints(1) / ints(2)
+        ints(46) := ints(1) % ints(2)
+        // The div operator takes Int operands and produces Rational.
+        rats(100) := ints(1) div ints(2)
+    }
+}
+
+rule calc_flt = {
+    if flts(42) = undef then {
+        flts(42) := flts(1) + flts(2)
+        flts(43) := flts(1) - flts(2)
+        flts(44) := flts(1) * flts(2)
+        flts(45) := flts(1) / flts(2)
+        // The % and div operators *only* take Int operands. The following
+        // two lines would not type-check.
+     // flts(46) := flts(1) % flts(2)
+     // rats(101) := flts(1) div flts(2)
+    }
+}
+
+rule calc_rat = {
+    if rats(42) = undef then {
+        rats(42) := rats(1) + rats(2)
+        rats(43) := rats(1) - rats(2)
+        rats(44) := rats(1) * rats(2)
+        rats(45) := rats(1) / rats(2)
+        // The % and div operators *only* take Int operands. The following
+        // two lines would not type-check.
+     // rats(46) := rats(1) % rats(2)
+     // rats(102) := rats(1) div rats(2)
+    }
+}
+
+rule conversions = {
+    if ints(10) = undef and ints(11) = undef then {
+        // Go Int -> Rational -> Float -> Int...
+        rats(10) := asRational(ints(42)) + 1/16
+        flts(10) := asFloat(rats(10))
+        ints(10) := asInt(flts(10))
+        // and Int -> Float -> Rational -> Int.
+        flts(11) := asFloat(ints(42)) + 0.125
+        rats(11) := asRational(flts(11))
+        ints(11) := asInt(rats(11))
+    }
+
+    // Here are some type errors.
+ // flts(66) := asInt(rats(10))
+ // flts(67) := asFloat("this is not a number!")
+}
+
+// Approximate the value of e by computing a series expansion. Terminate
+// when close enough to the expected value (given as a Float constant
+// above). Also computes factorials as a by-product.
+function n: -> Int initially { 0 }
+function e_approx: Int -> Rational initially { 0 -> 0r }
+function factorial: Int -> Rational initially { 0 -> 1r }
+function e_approx_float: -> Float
+function delta: -> Float
+
+rule approx = {
+    e_approx(n+1) := e_approx(n) + 1r / factorial(n)
+    factorial(n+1) := asRational(n+1) * factorial(n)
+    e_approx_float := asFloat(e_approx(n))
+    delta := e - e_approx_float
+    e := e  // fun hack to make this visible in every update set
+    n := n + 1
+
+    if delta != undef then {
+        if delta < 1.0e-9 then {
+            // Close enough.
+            program(self) := undef
+        }
+    }
+}

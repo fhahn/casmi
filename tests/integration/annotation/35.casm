@@ -1,0 +1,8 @@
+rule main = {
+  let x = undef in
+  let y = undef in
+    assert BVor( 1, x, y ) != 2
+
+  program( self ) := undef
+}
+init main

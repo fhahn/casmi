@@ -1,0 +1,17 @@
+CASM hex
+
+function a: -> Int
+
+init main
+
+rule main = {
+  assert hex( 1 ) = "1"
+  assert hex( 10 ) = "a"
+  assert hex( -1 ) = "-1"
+  assert hex( -255 ) = "-ff"
+
+  assert hex( undef ) = "undef"
+  assert hex( a ) = "undef"
+
+  program( self ) := undef
+}

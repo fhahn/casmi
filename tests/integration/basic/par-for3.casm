@@ -1,0 +1,10 @@
+// error interpreter
+
+function x: -> Int
+
+rule main = {
+  forall i in [ 1, 1 ] do x := i
+
+  program( self ) := undef
+}
+init main

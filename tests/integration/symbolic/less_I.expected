@@ -1,0 +1,9 @@
+tff(symbolNext, type, sym2: $int).
+fof(id0,hypothesis,sta(1,sym2)).%CREATE: a 
+tff(symbolNext, type, sym3: $int).
+fof(id1,hypothesis,stb(1,sym3)).%CREATE: b 
+fof('idutils/tests/symbolic/less.casm:10',hypothesis,$less(sym2, sym3)).
+fof(id2,hypothesis,sta(2,sym2)).%SYMBOLIC: a 
+fof(id3,hypothesis,stb(2,sym3)).%SYMBOLIC: b 
+fof(final0,hypothesis,sta(0,sym2)).%FINAL: a 
+fof(final1,hypothesis,stb(0,sym3)).%FINAL: b 

@@ -1,0 +1,10 @@
+function a: -> List(Int)
+
+rule main = {
+  let x = undef in
+  let y = undef in
+    a := nth( x, y )
+
+  program( self ) := undef
+}
+init main

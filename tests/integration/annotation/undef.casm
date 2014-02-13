@@ -1,0 +1,16 @@
+// error annotation @4
+
+rule main = {
+  assert undef + undef = undef
+  assert undef - undef = undef
+  assert undef * undef = undef
+  assert undef / undef = undef
+  assert (undef < undef) = undef
+  assert (undef <= undef) = undef
+  assert (undef >= undef) = undef
+  assert (undef > undef) = undef
+
+  program( self ) := undef
+}
+
+init main

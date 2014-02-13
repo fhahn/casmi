@@ -1,0 +1,14 @@
+// error annotation @9
+
+function a: List(Int) -> Int
+function b: List(String) -> Int
+
+rule main = {
+	let x = [] in {
+		a( x ) := 2
+		b( x ) := 3
+	}
+
+	program( self ) := undef
+}
+init main

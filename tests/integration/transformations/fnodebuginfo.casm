@@ -1,0 +1,19 @@
+// transform, cmdline "--fnodebuginfo --fnotrivialblock"
+CASM dead
+
+function dead : -> Int
+function alsodead : -> Int
+
+init initR
+
+rule initR = { 
+	skip 
+	dead := 3
+	let x = alsodead in skip
+	call foo
+	program(self) := undef
+}
+
+rule foo = {
+	debuginfo trace dead
+}

@@ -1,0 +1,11 @@
+// error annotation @7
+
+function (static) a: -> List(Int) initially { [ 1, 2, 3 ] }
+
+rule main = {
+  let x = undef in
+    push x into a
+
+  program( self ) := undef
+}
+init main

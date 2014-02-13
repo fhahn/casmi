@@ -1,0 +1,7 @@
+// error annotation
+
+function (static) a: -> Int initially { 2 -> 3 }
+
+rule main = {
+  program( self ) := undef
+}

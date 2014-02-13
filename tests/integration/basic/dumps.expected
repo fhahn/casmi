@@ -1,0 +1,6 @@
+trace: a = 3
+trace: b(2) = 4
+trace: c(2, 3) = 5
+trace: bb(two) = 1
+trace: bbb(2) = three
+1 step later...

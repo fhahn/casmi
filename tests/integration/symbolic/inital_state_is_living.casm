@@ -1,0 +1,13 @@
+// symbolic
+
+function (symbolic) foo : Int -> Int
+function bar: Int -> Int initially { 1 -> foo(1), 2-> foo(2), 3-> foo(1) }
+
+init initR
+
+rule initR = {
+	assert bar(1) = bar(3)
+	assert bar(1) != bar(2)
+	assert foo(1) != foo(2)
+	program(self) := undef
+}

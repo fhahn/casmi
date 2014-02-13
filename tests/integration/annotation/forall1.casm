@@ -1,0 +1,9 @@
+function a: -> List(Int)
+
+rule main =  {|
+  a := []
+  forall i in a do skip
+
+  program( self ) := undef
+|}
+init main

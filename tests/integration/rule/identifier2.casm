@@ -1,0 +1,11 @@
+// error annotation @4
+
+rule main = {
+	y
+}
+
+rule x( a:Int, b:Boolean ) = {
+	program( self ) := undef
+}
+init main
+

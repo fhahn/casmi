@@ -1,0 +1,25 @@
+function (static) a: -> Int initially { 2, }
+function (static) b: Int -> Int initially { 1 -> 1, 2 -> 2, 3 -> 3, }
+function c: Int * Int * -> Int
+
+derived derived_mul( param_a, param_b, ) = a * b( 2 )
+derived d_no_params( ) = 2
+
+enum testEnum = { enumA, enumB, enumC, }
+
+rule main = {
+  assert len([1,]) = 1
+  assert len([1,2,]) = 2
+  assert len([1,2,3,]) = 3
+
+  program( self ) := undef
+}
+
+rule r_no_params( ) = {
+  skip
+}
+
+rule test_rule( rule_param_a : Int, rule_param_b : Int, ) = {
+  skip
+}
+init main

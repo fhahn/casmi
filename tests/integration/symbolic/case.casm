@@ -1,0 +1,15 @@
+function (symbolic) a: -> Int
+
+rule main =
+{
+  
+  case a of
+    1: a := 1
+    2: a := 2
+    default: a := 3
+  endcase
+  program(self) := undef
+}
+
+init main
+

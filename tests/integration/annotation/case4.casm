@@ -1,0 +1,14 @@
+// error annotation @8
+
+rule main = {
+  case 1 of
+    2: skip
+    3: skip
+    4: skip
+    "Test": skip
+    default: skip
+  endcase
+
+  program( self ) := undef
+}
+init main

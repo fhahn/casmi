@@ -1,0 +1,20 @@
+// symbolic
+
+function (symbolic) a: -> Int
+function (symbolic) b: -> Int
+
+rule main = {|
+  // 2a1
+  assert symbolic( a )
+
+  // 2a2
+  b := undef
+  assert b = undef
+
+  // 2c
+  assert a != b
+  assert (a = b) = false
+
+  program( self ) := undef
+|}
+init main

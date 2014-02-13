@@ -1,0 +1,17 @@
+// error interpreter @12
+CASM t2
+
+init initR
+
+function x : -> Int
+
+rule initR =
+{|
+	{
+	x := 0
+		{|
+			x := 1
+		|}
+	}
+
+|}

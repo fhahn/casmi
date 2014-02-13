@@ -1,0 +1,16 @@
+CASM nth1
+
+function a: -> List(Int) initially { [] }
+
+init main
+
+rule main = {|
+  assert nth( a, 1 ) = undef
+  
+  a := [1]
+
+  assert nth( a, 1 ) = 1
+  assert nth( a, 2 ) = undef
+
+  program( self ) := undef
+|}
