@@ -1,12 +1,19 @@
 %{
-#include "parser.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "parser.tab.h"
 
+
+#define STRBUF_LENGTH 1000
 void yyerror(const char *s);
+extern int yycolumn;
+char strbuf[STRBUF_LENGTH];
 %}
 
-%s LCOMMENT
-%s COMMENT
-%s STRING
+%x LCOMMENT
+%x COMMENT
+%x STRING
 
 %%
 
@@ -95,12 +102,12 @@ objdump { return OBJDUMP; }
 
 [a-zA-Z_][a-zA-Z0-9\_]* { yylval.name = strdup( yytext ); return IDENTIFIER; }
 
-0x[0-9a-fA-F]+ { errno = 0; yylval.value = strtoull (yytext+2, NULL, 16); if (errno != 0) { err(1, "strtoull error in line %d", yylineno); } ; return INTCONST; }
-[0-9]+ { errno = 0; yylval.value = strtoull( yytext, NULL, 10 ); if (errno != 0) { err(1, "strtoull error in line %d", yylineno); }; return INTCONST; }
+0x[0-9a-fA-F]+ { errno = 0; yylval.value = strtoull (yytext+2, NULL, 16); if (errno != 0) { /*err(1, "strtoull error in line %d", yylineno);*/ } ; return INTCONST; }
+[0-9]+ { errno = 0; yylval.value = strtoull( yytext, NULL, 10 ); if (errno != 0) { /*err(1, "strtoull error in line %d", yylineno); */ }; return INTCONST; }
 
-[0-9]+\.[0-9]+([eE][+-]?[0-9]+)? { errno = 0; yylval.float_value = strtod(yytext, NULL); if (errno != 0) { err(1, "strtod error in line %d", yylineno); }; return FLOATCONST; }
-[0-9]+[/][0-9]+ { init_rational(yylval.rational_value, yytext); return RATIONALCONST; }
-[0-9]+r { init_rational(yylval.rational_value, yytext); return RATIONALCONST; }
+[0-9]+\.[0-9]+([eE][+-]?[0-9]+)? { errno = 0; yylval.float_value = strtod(yytext, NULL); if (errno != 0) { /*err(1, "strtod error in line %d", yylineno); */}; return FLOATCONST; }
+[0-9]+[/][0-9]+ { /*init_rational(yylval.rational_value, yytext);*/ return RATIONALCONST; }
+[0-9]+r { /*init_rational(yylval.rational_value, yytext); */return RATIONALCONST; }
 
 
 

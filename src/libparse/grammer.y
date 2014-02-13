@@ -1,3 +1,24 @@
+%{
+#include <stdio.h>
+
+#include "libparse/parser.h"
+
+
+extern int yyparse (void);
+extern FILE * yyin;
+%}
+
+%code {
+    /* handle locations */
+    int yycolumn = 1;
+
+    #define YY_USER_ACTION yylloc.first_line = yyloc.last_line = yylineno; \
+        yylloc.first_column = yycolumn; yylloc.last_column = yycolumn+yyleng-1; \
+        yycolumn += yyleng;
+}
+
+
+
 %token AND OR XOR NOT ASSERT ASSURE DIEDIE IMPOSSIBLE SKIP SEQBLOCK ENDSEQBLOCK
 %token PARBLOCK ENDPARBLOCK LET IN IF THEN ELSE PRINT DEBUGINFO DUMPS PUSH INTO
 %token POP FROM FORALL ITERATE DO CALL CASE DEFAULT OF ENDCASE INITIALLY FUNCTION
@@ -11,8 +32,18 @@
 %start SPECIFICATION
 
 
+%union  {
+   char* name;
+   long value;
+   double float_value;
+   double rational_value;
+   void* ast;
+}
+
+
 /* TODO: Check! */
 %left UMINUS UPLUS XIF
+
 %%
 
 
@@ -209,25 +240,25 @@ DUMPSPEC_LIST: DUMPSPEC ',' DUMPSPEC_LIST
 DUMPSPEC: '(' IDENTIFIER_LIST ')' ARROW IDENTIFIER
         ;
 
-STATEMENT: ASSERT_SYNTAX { $$ = $1; }
-         | ASSURE_SYNTAX { $$ = $1; }
-         | DIEDIE_SYNTAX { $$ = $1; }
-     | IMPOSSIBLE_SYNTAX { $$ = $1; }
-         | DEBUGINFO_SYNTAX { $$ = $1; }
-         | PRINT_SYNTAX { $$ = $1; }
-         | UPDATE_SYNTAX { $$ = $1; }
-         | CASE_SYNTAX { $$ = $1; }
-         | CALL_SYNTAX { $$ = $1; }
-         | KW_SEQBLOCK_SYNTAX { $$ = $1; }
-         | SEQBLOCK_SYNTAX { $$ = $1; }
-         | KW_PARBLOCK_SYNTAX { $$ = $1; }
-         | PARBLOCK_SYNTAX { $$ = $1; }
-         | IFTHENELSE { $$ = $1; }
-         | LET_SYNTAX { $$ = $1; }
-         | PUSH_SYNTAX { $$ = $1; }
-         | POP_SYNTAX { $$ = $1; }
-         | FORALL_SYNTAX { $$ = $1; }
-         | ITERATE_SYNTAX { $$ = $1; }
+STATEMENT: ASSERT_SYNTAX
+         | ASSURE_SYNTAX
+         | DIEDIE_SYNTAX
+         | IMPOSSIBLE_SYNTAX
+         | DEBUGINFO_SYNTAX
+         | PRINT_SYNTAX
+         | UPDATE_SYNTAX
+         | CASE_SYNTAX
+         | CALL_SYNTAX
+         | KW_SEQBLOCK_SYNTAX
+         | SEQBLOCK_SYNTAX
+         | KW_PARBLOCK_SYNTAX
+         | PARBLOCK_SYNTAX
+         | IFTHENELSE
+         | LET_SYNTAX
+         | PUSH_SYNTAX
+         | POP_SYNTAX
+         | FORALL_SYNTAX
+         | ITERATE_SYNTAX
          | SKIP 
          | IDENTIFIER 
          | INTERN EXPRESSION_LIST 
@@ -250,26 +281,26 @@ IMPOSSIBLE_SYNTAX: IMPOSSIBLE
 DEBUGINFO_SYNTAX: DEBUGINFO IDENTIFIER DEBUG_ATOM_LIST
                 ;
 
-DEBUG_ATOM_LIST: ATOM '+' DEBUG_ATOM_LIST 
-               | ATOM 
+DEBUG_ATOM_LIST: ATOM '+' DEBUG_ATOM_LIST
+               | ATOM
 
-PRINT_SYNTAX: PRINT DEBUG_ATOM_LIST 
+PRINT_SYNTAX: PRINT DEBUG_ATOM_LIST
             ;
 
-UPDATE_SYNTAX: FUNCTION_SYNTAX UPDATE EXPRESSION 
+UPDATE_SYNTAX: FUNCTION_SYNTAX UPDATE EXPRESSION
              ;
 
-CASE_SYNTAX: CASE EXPRESSION OF CASE_LABEL_LIST ENDCASE 
+CASE_SYNTAX: CASE EXPRESSION OF CASE_LABEL_LIST ENDCASE
            ;
 
 CASE_LABEL_LIST: CASE_LABEL CASE_LABEL_LIST 
                | CASE_LABEL 
                ;
 
-CASE_LABEL: CASE_LABEL_DEFAULT { $$ = $1; }
-          | CASE_LABEL_NUMBER { $$ = $1; }
-          | CASE_LABEL_IDENT { $$ = $1; }
-          | CASE_LABEL_STRING { $$ = $1; }
+CASE_LABEL: CASE_LABEL_DEFAULT
+          | CASE_LABEL_NUMBER
+          | CASE_LABEL_IDENT
+          | CASE_LABEL_STRING
           ;
 
 CASE_LABEL_DEFAULT: DEFAULT ':' STATEMENT
@@ -325,3 +356,16 @@ FORALL_SYNTAX: FORALL IDENTIFIER IN EXPRESSION DO STATEMENT
 
 ITERATE_SYNTAX: ITERATE STATEMENT
           ;
+
+
+%%
+
+int yyerror(const char *s) {
+    printf("Syntax Error %s\n", s);
+    exit(2);
+}
+
+int parse(FILE* f) {
+    yyin = f;
+    return yyparse();
+}

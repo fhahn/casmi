@@ -13,8 +13,9 @@ ADD_CUSTOM_COMMAND(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/lexer.l
 
 ADD_CUSTOM_COMMAND(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/grammer.y
                    COMMAND ${BISON}
-                   ARGS --output parser.c -d
-                   ${CMAKE_CURRENT_SOURCE_DIR}/grammer.y
+                   ARGS --output parser.c 
+                        --defines=parser.tab.h
+                        ${CMAKE_CURRENT_SOURCE_DIR}/grammer.y
                    TARGET ${CMAKE_CURRENT_BINARY_DIR}/parser.c
                    OUTPUTS ${CMAKE_CURRENT_BINARY_DIR}/parser.c
 )
@@ -23,4 +24,5 @@ SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/parser.c GENERATED)
 SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/lexer.c GENERATED)
 
 
-add_executable(parser parser.c lexer.c main.c)
+add_library(parser parser.c lexer.c)
+target_link_libraries(parser fl y)
