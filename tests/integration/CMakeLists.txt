@@ -10,6 +10,11 @@ foreach(file ${files})
     list(GET dir_list 0 filename)
     add_test(NAME "${dir}/${filename}"
              COMMAND test_parser ${file}
-             DEPENDS test_parser
     )
 endforeach()
+
+add_custom_target(
+    check
+    COMMAND ctest
+    DEPENDS test_parser
+)
