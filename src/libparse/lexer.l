@@ -3,12 +3,20 @@
 #include <stdlib.h>
 #include <string.h>
 #include "parser.tab.h"
+#include "libparse/lexer_helper.h"
 
 
 #define STRBUF_LENGTH 1000
 void yyerror(const char *s);
 extern int yycolumn;
 char strbuf[STRBUF_LENGTH];
+extern int linenumber;
+
+#define YY_INPUT(buf,result,max_size)  {\
+    result = get_next_char(buf, max_size); \
+    if (  result <= 0  ) \
+        result = YY_NULL; \
+    }
 %}
 
 %x LCOMMENT
@@ -17,8 +25,8 @@ char strbuf[STRBUF_LENGTH];
 
 %%
 
-and { return AND; }
-or { return OR; }
+and { begin_token("and"); return AND; }
+or { begin_token("or"); return OR; }
 xor { return XOR; }
 not { return NOT; }
 assert { return ASSERT; }
@@ -62,7 +70,7 @@ self { return SELF; }
 undef { return UNDEF; }
 true { return TRUE; }
 false { return FALSE; }
-CASM { return CASM; }
+CASM { begin_token("CASM"); return CASM; }
 symbol { return SYMBOL; }
 intern_debug { return INTERN; }
 div { return RATIONAL_DIV; }
@@ -72,7 +80,7 @@ objdump { return OBJDUMP; }
 "/*ta:" { return TYPEANNOTATION; }
 "*/" { return ENDTYPEANNOTATION; }
 
-"+" { return '+'; }
+"+" { begin_token("+"); return '+'; }
 "-" { return '-'; }
 "=" { return '='; }
 "(" { return '('; }
@@ -100,7 +108,7 @@ objdump { return OBJDUMP; }
 "{|" { return SEQBLOCK_BRACKET; }
 "|}" { return ENDSEQBLOCK_BRACKET; }
 
-[a-zA-Z_][a-zA-Z0-9\_]* { yylval.name = strdup( yytext ); return IDENTIFIER; }
+[a-zA-Z_][a-zA-Z0-9\_]* { begin_token(yytext); yylval.name = strdup( yytext ); return IDENTIFIER; }
 
 0x[0-9a-fA-F]+ { errno = 0; yylval.value = strtoull (yytext+2, NULL, 16); if (errno != 0) { /*err(1, "strtoull error in line %d", yylineno);*/ } ; return INTCONST; }
 [0-9]+ { errno = 0; yylval.value = strtoull( yytext, NULL, 10 ); if (errno != 0) { /*err(1, "strtoull error in line %d", yylineno); */ }; return INTCONST; }
@@ -113,7 +121,7 @@ objdump { return OBJDUMP; }
 
 [ \t\r]+ /* ignore spaces */
 
-\n { yycolumn = 1; } /* ignore newlines too, but reset yycolumn */
+\n { yycolumn = 1; linenumber += 1 ;} /* ignore newlines too, but reset yycolumn */
 
 "//" { BEGIN(LCOMMENT); }
 <LCOMMENT>.

@@ -24,5 +24,5 @@ SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/parser.c GENERATED)
 SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/lexer.c GENERATED)
 
 
-add_library(parser parser.c lexer.c)
+add_library(parser parser.c lexer.c lexer_helper.c)
 target_link_libraries(parser fl y)

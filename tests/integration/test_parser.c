@@ -3,6 +3,8 @@
 
 #include "libparse/parser.h"
 
+extern char *filename;
+
 int main(int argc, char *argv[]) {
     if (argc != 2) {
         fprintf(stderr, "%s: Invalid number of arguments\n", argv[0]);
@@ -14,5 +16,6 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
+    filename = argv[1];
     return parse(f);
 }

@@ -2,10 +2,16 @@
 #include <stdio.h>
 
 #include "libparse/parser.h"
+#include "libparse/lexer_helper.h"
 
 
 extern int yyparse (void);
 extern FILE * yyin;
+
+
+#define YYERROR_VERBOSE 1
+
+int linenumber = 1;
 %}
 
 %code {
@@ -361,7 +367,7 @@ ITERATE_SYNTAX: ITERATE STATEMENT
 %%
 
 int yyerror(const char *s) {
-    printf("Syntax Error %s\n", s);
+    print_error_msg(s);
     exit(2);
 }
 
