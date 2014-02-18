@@ -1,7 +1,7 @@
 add_executable(test_parser test_parser.c)
 target_link_libraries(test_parser parser)
 
-file(GLOB_RECURSE files "*.casm")
+file(GLOB_RECURSE files "run-pass/*.casm")
 
 foreach(file ${files})
     string(REPLACE "/" ";" dir_list ${file})
