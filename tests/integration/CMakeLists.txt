@@ -1,4 +1,4 @@
-add_executable(test_parser test_parser.c)
+add_executable(test_parser test_parser.cpp)
 target_link_libraries(test_parser parser)
 
 file(GLOB_RECURSE run-pass_files "run-pass/*.casm")

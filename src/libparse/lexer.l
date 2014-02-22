@@ -12,6 +12,8 @@ extern int yycolumn;
 char strbuf[STRBUF_LENGTH];
 extern int linenumber;
 
+extern "C" int yylex(void);
+
 #define YY_NO_INPUT 1
 
 #define YY_INPUT(buf,result,max_size)  {\

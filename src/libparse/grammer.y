@@ -1,14 +1,16 @@
 %{
-#include <stdio.h>
+#include <cstdio>
 #include <stdlib.h>
 
 #include "libparse/parser.h"
 #include "libparse/lexer_helper.h"
 
 
-extern int yyparse (void);
-extern int yylex();
+extern int yyparse(void);
+extern "C" int yylex(void);
+
 extern FILE * yyin;
+
 int yyerror(const char *s);
 
 

@@ -20,7 +20,7 @@ extern FILE* yyin;
 
 char *filename;
 
-void begin_token(char *token) {
+void begin_token(const char *token) {
     n_token_start = n_token_next_start;
     n_token_length = strlen(token);
     n_token_next_start += n_token_length;
