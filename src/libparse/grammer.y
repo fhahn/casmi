@@ -60,8 +60,7 @@ SPECIFICATION: HEADER BODY_ELEMENTS
 HEADER: CASM IDENTIFIER 
       ;
 
-/* XXX this is right recursive, should be left recursive */
-BODY_ELEMENTS: BODY_ELEMENT BODY_ELEMENTS 
+BODY_ELEMENTS: BODY_ELEMENTS BODY_ELEMENT
             | BODY_ELEMENT 
             ;
 
