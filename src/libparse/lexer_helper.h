@@ -5,5 +5,6 @@
 
 void begin_token(char *token);
 int get_next_char(char buffer[], int max_len);
+void print_error_msg(const char *msg);
 
 #endif

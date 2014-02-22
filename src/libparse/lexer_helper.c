@@ -12,7 +12,6 @@ static int n_token_start = 0;
 static int n_token_next_start = 0;
 static int n_token_length = 0;
 static int buffer_pos = 0;
-static int buffer_len;
 static bool eof = false;
 
 static char internal_buffer[BUFFER_LEN];
@@ -47,8 +46,7 @@ int get_next_char(char b[], int max_len) {
     return -1;
 }
 
-
-void print_error_msg(char *msg) {
+void print_error_msg(const char *msg) {
     fprintf(stderr, "error at %s:%d:%d: %s\n", filename, row, column, msg);
 
     fprintf(stderr, "  ");

@@ -12,12 +12,16 @@ extern int yycolumn;
 char strbuf[STRBUF_LENGTH];
 extern int linenumber;
 
+#define YY_NO_INPUT 1
+
 #define YY_INPUT(buf,result,max_size)  {\
     result = get_next_char(buf, max_size); \
     if (  result <= 0  ) \
         result = YY_NULL; \
     }
 %}
+
+%option nounput
 
 %x LCOMMENT
 %x COMMENT
@@ -134,7 +138,7 @@ objdump { return OBJDUMP; }
 <COMMENT>([^*]|\n|\r)+|.
 <COMMENT><<EOF>> { printf( "Multiline comment not terminated on line %d", yylineno ); exit( 2 ); }
 
-\" { BEGIN(STRING); char *strbuf = '\0'; }
+\" { BEGIN(STRING); strbuf[0] = '\0'; }
 <STRING>[^\\\"\n]* { strncat( strbuf, yytext, STRBUF_LENGTH-1 ); } /* alle Zeichen */
 <STRING>\n { yycolumn = 1; }
 <STRING>\\n { strncat( strbuf, "\n", STRBUF_LENGTH-1 ); }
