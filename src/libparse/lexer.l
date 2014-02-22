@@ -3,154 +3,175 @@
 #include <stdlib.h>
 #include <string.h>
 #include "parser.tab.h"
-#include "libparse/lexer_helper.h"
+#include "libparse/driver.h"
+
+# undef yywrap
+# define yywrap() 1
+
+// The location of the current token.
+static yy::location loc;
 
 
 #define STRBUF_LENGTH 1000
 void yyerror(const char *s);
-extern int yycolumn;
 char strbuf[STRBUF_LENGTH];
-extern int linenumber;
 
-extern "C" int yylex(void);
 
-#define YY_NO_INPUT 1
+#define yyterminate() return( yy::casmi_parser::make_END(loc) )
 
-#define YY_INPUT(buf,result,max_size)  {\
-    result = get_next_char(buf, max_size); \
-    if (  result <= 0  ) \
-        result = YY_NULL; \
-    }
 %}
 
-%option nounput
+%option noyywrap nounput batch debug noinput
 
 %x LCOMMENT
 %x COMMENT
 %x STRING
 
+%{
+    // Code run each time a pattern is matched.
+    # define YY_USER_ACTION  loc.columns (yyleng);
+%}
 %%
+%{
+    // Code run each time yylex is called.
+    loc.step ();
+%}
 
-and { begin_token("and"); return AND; }
-or { begin_token("or"); return OR; }
-xor { return XOR; }
-not { return NOT; }
-assert { return ASSERT; }
-assure { return ASSURE; }
-diedie { return DIEDIE; }
-impossible { return IMPOSSIBLE; }
-skip { return SKIP; }
-seqblock { return SEQBLOCK; }
-endseqblock { return ENDSEQBLOCK; }
-par { return PARBLOCK; }
-endpar { return ENDPARBLOCK; }
-let { return LET; }
-in { return IN; }
-if { return IF; }
-then { return THEN; }
-else { return ELSE; }
-print { return PRINT; }
-debuginfo { return DEBUGINFO; }
-dumps { return DUMPS; }
-push { return PUSH; }
-into { return INTO; }
-pop { return POP; }
-from { return FROM; }
-forall { return FORALL; }
-iterate { return ITERATE; }
-do { return DO; }
-call { return CALL; }
-case { return CASE; }
-default { return DEFAULT; }
-of { return OF; }
-endcase { return ENDCASE; }
-initially { return INITIALLY; }
-function { return FUNCTION; }
-derived { return DERIVED; }
-enum { return ENUM; }
-rule { return RULE; }
-provider { return PROVIDER; }
-init { return INIT; }
-option { return OPTION; }
-self { return SELF; }
-undef { return UNDEF; }
-true { return TRUE; }
-false { return FALSE; }
-CASM { begin_token("CASM"); return CASM; }
-symbol { return SYMBOL; }
-intern_debug { return INTERN; }
-div { return RATIONAL_DIV; }
-objdump { return OBJDUMP; }
-
-
-"/*ta:" { return TYPEANNOTATION; }
-"*/" { return ENDTYPEANNOTATION; }
-
-"+" { begin_token("+"); return '+'; }
-"-" { return '-'; }
-"=" { return '='; }
-"(" { return '('; }
-")" { return ')'; }
-"[" { return '['; }
-"]" { return ']'; }
-"{" { return '{'; }
-"}" { return '}'; }
-"\." { return '.'; }
-":" { return ':'; }
-"@" { return '@'; }
-"," { return ','; }
-"<" { return '<'; }
-">" { return '>'; }
-"*" { return '*'; }
-"/" { return '/'; }
-"%" { return '%'; }
-
-".." { return DOTDOT; }
-"->" { return ARROW; }
-":=" { return UPDATE; }
-"!=" { return NEQUAL; }
-"<=" { return LESSEQ; }
-">=" { return GREATEREQ; }
-"{|" { return SEQBLOCK_BRACKET; }
-"|}" { return ENDSEQBLOCK_BRACKET; }
-
-[a-zA-Z_][a-zA-Z0-9\_]* { begin_token(yytext); yylval.name = strdup( yytext ); return IDENTIFIER; }
-
-0x[0-9a-fA-F]+ { errno = 0; yylval.value = strtoull (yytext+2, NULL, 16); if (errno != 0) { /*err(1, "strtoull error in line %d", yylineno);*/ } ; return INTCONST; }
-[0-9]+ { errno = 0; yylval.value = strtoull( yytext, NULL, 10 ); if (errno != 0) { /*err(1, "strtoull error in line %d", yylineno); */ }; return INTCONST; }
-
-[0-9]+\.[0-9]+([eE][+-]?[0-9]+)? { errno = 0; yylval.float_value = strtod(yytext, NULL); if (errno != 0) { /*err(1, "strtod error in line %d", yylineno); */}; return FLOATCONST; }
-[0-9]+[/][0-9]+ { /*init_rational(yylval.rational_value, yytext);*/ return RATIONALCONST; }
-[0-9]+r { /*init_rational(yylval.rational_value, yytext); */return RATIONALCONST; }
+and { return yy::casmi_parser::make_AND(loc); }
+or { return yy::casmi_parser::make_OR(loc); }
+xor { return yy::casmi_parser::make_XOR(loc); }
+not { return yy::casmi_parser::make_NOT(loc); }
+assert { return yy::casmi_parser::make_ASSERT(loc); }
+assure { return yy::casmi_parser::make_ASSURE(loc); }
+diedie { return yy::casmi_parser::make_DIEDIE(loc); }
+impossible { return yy::casmi_parser::make_IMPOSSIBLE(loc); }
+skip { return yy::casmi_parser::make_SKIP(loc); }
+seqblock { return yy::casmi_parser::make_SEQBLOCK(loc); }
+endseqblock { return yy::casmi_parser::make_ENDSEQBLOCK(loc); }
+par { return yy::casmi_parser::make_PARBLOCK(loc); }
+endpar { return yy::casmi_parser::make_ENDPARBLOCK(loc); }
+let { return yy::casmi_parser::make_LET(loc); }
+in { return yy::casmi_parser::make_IN(loc); }
+if { return yy::casmi_parser::make_IF(loc); }
+then { return yy::casmi_parser::make_THEN(loc); }
+else { return yy::casmi_parser::make_ELSE(loc); }
+print { return yy::casmi_parser::make_PRINT(loc); }
+debuginfo { return yy::casmi_parser::make_DEBUGINFO(loc); }
+dumps { return yy::casmi_parser::make_DUMPS(loc); }
+push { return yy::casmi_parser::make_PUSH(loc); }
+into { return yy::casmi_parser::make_INTO(loc); }
+pop { return yy::casmi_parser::make_POP(loc); }
+from { return yy::casmi_parser::make_FROM(loc); }
+forall { return yy::casmi_parser::make_FORALL(loc); }
+iterate { return yy::casmi_parser::make_ITERATE(loc); }
+do { return yy::casmi_parser::make_DO(loc); }
+call { return yy::casmi_parser::make_CALL(loc); }
+case { return yy::casmi_parser::make_CASE(loc); }
+default { return yy::casmi_parser::make_DEFAULT(loc); }
+of { return yy::casmi_parser::make_OF(loc); }
+endcase { return yy::casmi_parser::make_ENDCASE(loc); }
+initially { return yy::casmi_parser::make_INITIALLY(loc); }
+function { return yy::casmi_parser::make_FUNCTION(loc); }
+derived { return yy::casmi_parser::make_DERIVED(loc); }
+enum { return yy::casmi_parser::make_ENUM(loc); }
+rule { return yy::casmi_parser::make_RULE(loc); }
+provider { return yy::casmi_parser::make_PROVIDER(loc); }
+init { return yy::casmi_parser::make_INIT(loc); }
+option { return yy::casmi_parser::make_OPTION(loc); }
+self { return yy::casmi_parser::make_SELF(loc); }
+undef { return yy::casmi_parser::make_UNDEF(loc); }
+true { return yy::casmi_parser::make_TRUE(loc); }
+false { return yy::casmi_parser::make_FALSE(loc); }
+CASM { return yy::casmi_parser::make_CASM(loc); }
+symbol { return yy::casmi_parser::make_SYMBOL(loc); }
+intern_debug { return yy::casmi_parser::make_INTERN(loc); }
+div { return yy::casmi_parser::make_RATIONAL_DIV(loc); }
+objdump { return yy::casmi_parser::make_OBJDUMP(loc); }
 
 
+"/*ta:" { return yy::casmi_parser::make_TYPEANNOTATION(loc); }
+"*/" { return yy::casmi_parser::make_ENDTYPEANNOTATION(loc); }
 
-[ \t\r]+ /* ignore spaces */
+"+" { return  yy::casmi_parser::make_PLUS(loc); }
+"-" { return yy::casmi_parser::make_MINUS(loc); }
+"=" { return yy::casmi_parser::make_EQ(loc); }
+"(" { return yy::casmi_parser::make_LPAREN(loc); }
+")" { return yy::casmi_parser::make_RPAREN(loc); }
+"[" { return yy::casmi_parser::make_LSQPAREN(loc); }
+"]" { return yy::casmi_parser::make_RSQPAREN(loc); }
+"{" { return yy::casmi_parser::make_LCURPAREN(loc); }
+"}" { return yy::casmi_parser::make_RCURPAREN(loc); }
+"\." { return yy::casmi_parser::make_DOT(loc); }
+":" { return yy::casmi_parser::make_COLON(loc); }
+"@" { return yy::casmi_parser::make_AT(loc); }
+"," { return yy::casmi_parser::make_COMMA(loc); }
+"<" { return yy::casmi_parser::make_LESSER(loc); }
+">" { return yy::casmi_parser::make_GREATER(loc); }
+"*" { return yy::casmi_parser::make_STAR(loc); }
+"/" { return yy::casmi_parser::make_SLASH(loc); }
+"%" { return yy::casmi_parser::make_PERCENT(loc); }
 
-\n { yycolumn = 1; linenumber += 1 ;} /* ignore newlines too, but reset yycolumn */
+".." { return yy::casmi_parser::make_DOTDOT(loc); }
+"->" { return yy::casmi_parser::make_ARROW(loc); }
+":=" { return yy::casmi_parser::make_UPDATE(loc); }
+"!=" { return yy::casmi_parser::make_NEQUAL(loc); }
+"<=" { return yy::casmi_parser::make_LESSEQ(loc); }
+">=" { return yy::casmi_parser::make_GREATEREQ(loc); }
+"{|" { return yy::casmi_parser::make_SEQBLOCK_BRACKET(loc); }
+"|}" { return yy::casmi_parser::make_ENDSEQBLOCK_BRACKET(loc); }
+
+[a-zA-Z_][a-zA-Z0-9\_]* { return yy::casmi_parser::make_IDENTIFIER(yytext, loc); }
+
+0x[0-9a-fA-F]+ { return yy::casmi_parser::make_INTCONST(loc); }
+[0-9]+ { return yy::casmi_parser::make_INTCONST(loc); }
+
+[0-9]+\.[0-9]+([eE][+-]?[0-9]+)? { return yy::casmi_parser::make_FLOATCONST(loc); }
+[0-9]+[/][0-9]+ { return yy::casmi_parser::make_RATIONALCONST(loc); }
+[0-9]+r { return yy::casmi_parser::make_RATIONALCONST(loc); }
+
+
+
+[ \t\r]+ loc.step();/* ignore spaces */
+
+\n+ {loc.lines(yyleng); loc.step(); } /* ignore newlines too, but reset yycolumn */
 
 "//" { BEGIN(LCOMMENT); }
 <LCOMMENT>.
-<LCOMMENT>\n { yycolumn = 1; BEGIN( INITIAL ); }
+<LCOMMENT>\n { BEGIN( INITIAL ); }
 <LCOMMENT><<EOF>> { BEGIN( INITIAL ); }
 
 "/*" { BEGIN(COMMENT); } /* ignore multi line comment */
 <COMMENT>"*/" { BEGIN(INITIAL); }
-<COMMENT>\n { yycolumn = 1; }
+<COMMENT>\n { }
 <COMMENT>([^*]|\n|\r)+|.
 <COMMENT><<EOF>> { printf( "Multiline comment not terminated on line %d", yylineno ); exit( 2 ); }
 
 \" { BEGIN(STRING); strbuf[0] = '\0'; }
 <STRING>[^\\\"\n]* { strncat( strbuf, yytext, STRBUF_LENGTH-1 ); } /* alle Zeichen */
-<STRING>\n { yycolumn = 1; }
+<STRING>\n { }
 <STRING>\\n { strncat( strbuf, "\n", STRBUF_LENGTH-1 ); }
 <STRING>\\t { strncat( strbuf, "\t", STRBUF_LENGTH-1 ); }
 <STRING>\\\" { strncat( strbuf, "\"", STRBUF_LENGTH-1 ); }
 <STRING>\\' { strncat( strbuf, "\'", STRBUF_LENGTH-1 ); }
 <STRING><<EOF>> { fprintf( stderr, "unclosed string\n" ); exit( 1 ); }
-<STRING>\" { yylval.name = strdup( strbuf );  BEGIN(INITIAL); return STRCONST; }
+<STRING>\" { BEGIN(INITIAL); return yy::casmi_parser::make_STRCONST(loc); }
 
 . { fprintf( stderr, "Unrecognized character: %s (ASCII-Code: %d) on line %d.\n",
   yytext, *yytext, yylineno ); exit( 1 );
 }
 
+%%
+
+void casmi_driver::scan_begin() {
+    yy_flex_debug = trace_scanning;
+    if (file.empty () || file == "-") {
+        yyin = stdin;
+    } else if (!(yyin = fopen (file.c_str (), "r"))) {
+        error ("cannot open " + file + ": " + strerror(errno));
+        exit (EXIT_FAILURE);
+    }
+}
+
+void casmi_driver::scan_end() {
+    fclose (yyin);
+}
