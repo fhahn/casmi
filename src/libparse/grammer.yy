@@ -9,7 +9,9 @@
 
 %code requires
 {
+    #include <cstdint>
     #include <string>
+    #include "libparse/ast.h"
     class casmi_driver;
 }
 
@@ -62,6 +64,8 @@
     ;
 %token FLOATCONST INTCONST RATIONALCONST STRCONST
 %token <std::string> IDENTIFIER "identifier"
+%type <Value*> NUMBER
+%type <uint64_t> INTCONST
 
 %start SPECIFICATION
 
@@ -194,15 +198,15 @@ VALUE: RULEREF
      | FALSE 
      ;
 
-NUMBER: "+" INTCONST %prec UPLUS 
-      | "-" INTCONST %prec UMINUS 
-      | INTCONST 
-      | "+" FLOATCONST %prec UPLUS 
-      | "-" FLOATCONST %prec UMINUS 
-      | FLOATCONST 
-      | "+" RATIONALCONST %prec UPLUS 
-      | "-" RATIONALCONST %prec UMINUS 
-      | RATIONALCONST 
+NUMBER: "+" INTCONST %prec UPLUS { $$ = new IntValue(); }
+      | "-" INTCONST %prec UMINUS { $$ = new IntValue(); }
+      | INTCONST { $$ = new IntValue(); }
+      | "+" FLOATCONST %prec UPLUS { $$ = new IntValue(); }
+      | "-" FLOATCONST %prec UMINUS { $$ = new IntValue(); }
+      | FLOATCONST { $$ = new IntValue(); }
+      | "+" RATIONALCONST %prec UPLUS { $$ = new IntValue(); }
+      | "-" RATIONALCONST %prec UMINUS { $$ = new IntValue(); }
+      | RATIONALCONST { $$ = new IntValue(); }
       ;
 
 RULEREF: "@" IDENTIFIER 

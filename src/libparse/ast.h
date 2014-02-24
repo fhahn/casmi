@@ -7,6 +7,15 @@ class AstNode {
         int column;
 };
 
-class SpecificationNode : public AstNode {};
+class Value {};
+
+
+class IntValue: public Value {
+    private:
+        int value;
+    public:
+        IntValue(int v) { this->value = v; }
+        IntValue() { this->value = 0; }
+};
 
 #endif

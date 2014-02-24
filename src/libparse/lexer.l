@@ -2,8 +2,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "parser.tab.h"
+#include <cstdint>
+
 #include "libparse/driver.h"
+#include "libparse/lexer_helpers.h"
+
+#include "parser.tab.h"
 
 # undef yywrap
 # define yywrap() 1
@@ -122,8 +126,14 @@ objdump { return yy::casmi_parser::make_OBJDUMP(loc); }
 
 [a-zA-Z_][a-zA-Z0-9\_]* { return yy::casmi_parser::make_IDENTIFIER(yytext, loc); }
 
-0x[0-9a-fA-F]+ { return yy::casmi_parser::make_INTCONST(loc); }
-[0-9]+ { return yy::casmi_parser::make_INTCONST(loc); }
+0x[0-9a-fA-F]+ { 
+            uint64_t val = convert_to_long(yytext, 10, driver, loc);
+            return yy::casmi_parser::make_INTCONST(val, loc);
+            }
+[0-9]+ {
+            uint64_t val = convert_to_long(yytext, 10, driver, loc);
+            return yy::casmi_parser::make_INTCONST(val, loc);
+       }
 
 [0-9]+\.[0-9]+([eE][+-]?[0-9]+)? { return yy::casmi_parser::make_FLOATCONST(loc); }
 [0-9]+[/][0-9]+ { return yy::casmi_parser::make_RATIONALCONST(loc); }
