@@ -31,7 +31,6 @@
 
 %code {
     #include "libparse/driver.h"
-    static bool first_body_element = false;
 }
 
 %token AND OR XOR NOT ASSERT ASSURE DIEDIE IMPOSSIBLE SKIP SEQBLOCK ENDSEQBLOCK

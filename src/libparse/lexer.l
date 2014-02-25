@@ -23,6 +23,9 @@ char strbuf[STRBUF_LENGTH];
 
 #define yyterminate() return( yy::casmi_parser::make_END(loc) )
 
+// flex uses `register` keyword, which is deprecated in c++11
+#pragma GCC diagnostic ignored "-Wdeprecated-register"
+
 %}
 
 %option noyywrap nounput batch debug noinput
