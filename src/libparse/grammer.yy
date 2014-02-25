@@ -31,6 +31,7 @@
 
 %code {
     #include "libparse/driver.h"
+    static bool first_body_element = false;
 }
 
 %token AND OR XOR NOT ASSERT ASSURE DIEDIE IMPOSSIBLE SKIP SEQBLOCK ENDSEQBLOCK
@@ -64,7 +65,11 @@
     ;
 %token FLOATCONST INTCONST RATIONALCONST STRCONST
 %token <std::string> IDENTIFIER "identifier"
+
+%type <AstNode*> ATOM INIT_SYNTAX BODY_ELEMENT SPECIFICATION
+%type <AstListNode*> BODY_ELEMENTS
 %type <Value*> NUMBER
+%type <Value*> VALUE
 %type <uint64_t> INTCONST
 
 %start SPECIFICATION
@@ -76,27 +81,27 @@
 %%
 
 
-SPECIFICATION: HEADER BODY_ELEMENTS
-             | BODY_ELEMENTS
+SPECIFICATION: HEADER BODY_ELEMENTS { driver.result = new AstNode(NodeType::SPECIFICATION); }
+             | BODY_ELEMENTS { driver.result = $1; }
              ;
 
 HEADER: CASM IDENTIFIER
       ;
 
-BODY_ELEMENTS: BODY_ELEMENTS BODY_ELEMENT
-            | BODY_ELEMENT 
+BODY_ELEMENTS: BODY_ELEMENTS BODY_ELEMENT { $1->add($2); $$ = $1; }
+            | BODY_ELEMENT { $$ = new AstListNode(); $$->add($1); }
             ;
 
-BODY_ELEMENT: PROVIDER_SYNTAX
-           | OPTION_SYNTAX
-           | ENUM_SYNTAX
-           | FUNCTION_DEFINITION 
-           | DERIVED_SYNTAX 
-           | INIT_SYNTAX 
-           | RULE_SYNTAX 
+BODY_ELEMENT: PROVIDER_SYNTAX { $$ = new AstNode(NodeType::PROVIDER); }
+           | OPTION_SYNTAX { $$ = new AstNode(NodeType::OPTION); }
+           | ENUM_SYNTAX { $$ = new AstNode(NodeType::ENUM); }
+           | FUNCTION_DEFINITION { $$ = new AstNode(NodeType::FUNCTION); }
+           | DERIVED_SYNTAX { $$ = new AstNode(NodeType::DERIVED); }
+           | INIT_SYNTAX { $$ = $1; }
+           | RULE_SYNTAX { $$ = new AstNode(NodeType::RULE); }
            ;
 
-INIT_SYNTAX: INIT IDENTIFIER 
+INIT_SYNTAX: INIT IDENTIFIER { $$ = new AstNode(NodeType::INIT); }
            ;
 
 PROVIDER_SYNTAX: PROVIDER IDENTIFIER 
@@ -181,32 +186,32 @@ INITIALIZER: ATOM
            | ATOM ARROW ATOM 
            ;
 
-ATOM: FUNCTION_SYNTAX 
-    | VALUE 
-    | BRACKET_EXPRESSION 
+ATOM: FUNCTION_SYNTAX { $$ = new AstNode(NodeType::ATOM); }
+    | VALUE { $$ = new AstNode(NodeType::ATOM); }
+    | BRACKET_EXPRESSION { $$ = new AstNode(NodeType::ATOM); }
     ;
 
-VALUE: RULEREF 
-     | NUMBER 
-     | STRCONST 
-     | LISTCONST 
-     | NUMBER_RANGE 
-     | SYMBOL 
-     | SELF 
-     | UNDEF 
-     | TRUE 
-     | FALSE 
+VALUE: RULEREF { $$ = new Value(); }
+     | NUMBER { $$ = $1; }
+     | STRCONST { $$ = new Value(); }
+     | LISTCONST { $$ = new Value(); }
+     | NUMBER_RANGE { $$ = new Value(); }
+     | SYMBOL { $$ = new Value(); }
+     | SELF { $$ = new Value(); }
+     | UNDEF { $$ = new Value(); }
+     | TRUE { $$ = new Value(); }
+     | FALSE { $$ = new Value(); }
      ;
 
-NUMBER: "+" INTCONST %prec UPLUS { $$ = new IntValue(); }
-      | "-" INTCONST %prec UMINUS { $$ = new IntValue(); }
-      | INTCONST { $$ = new IntValue(); }
-      | "+" FLOATCONST %prec UPLUS { $$ = new IntValue(); }
-      | "-" FLOATCONST %prec UMINUS { $$ = new IntValue(); }
-      | FLOATCONST { $$ = new IntValue(); }
-      | "+" RATIONALCONST %prec UPLUS { $$ = new IntValue(); }
-      | "-" RATIONALCONST %prec UMINUS { $$ = new IntValue(); }
-      | RATIONALCONST { $$ = new IntValue(); }
+NUMBER: "+" INTCONST %prec UPLUS { $$ = new IntValue($2); }
+      | "-" INTCONST %prec UMINUS { $$ = new IntValue($2); }
+      | INTCONST { $$ = new IntValue($1); }
+      | "+" FLOATCONST %prec UPLUS { $$ = new Value(); }
+      | "-" FLOATCONST %prec UMINUS { $$ = new Value(); }
+      | FLOATCONST { $$ = new Value(); }
+      | "+" RATIONALCONST %prec UPLUS { $$ = new Value(); }
+      | "-" RATIONALCONST %prec UMINUS { $$ = new Value(); }
+      | RATIONALCONST { $$ = new Value(); }
       ;
 
 RULEREF: "@" IDENTIFIER 

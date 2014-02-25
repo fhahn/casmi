@@ -3,6 +3,7 @@
 #include <string>
 #include <map>
 
+#include "libparse/ast.h"
 #include "libparse/parser.tab.h"
 
 // Tell Flex the lexer's prototype ...
@@ -17,7 +18,7 @@ public:
 
   std::map<std::string, int> variables;
 
-  int result;
+  AstNode *result;
 
   // Handling the scanner.
   void scan_begin ();
