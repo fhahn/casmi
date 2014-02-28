@@ -22,10 +22,13 @@ TEST_F(ParserTest, parse_simple) {
                      "rule main = {\n"
                      "    x := 1 - 2\n"
                      "}\n";
-  EXPECT_EQ(0, driver_.parse(test));
+  AstNode *root = driver_.parse(test);
+  PrintVisitor v;
+  root->visit(v);
+ 
 }
 
 TEST_F(ParserTest, parse_error) {
   std::string test = "init\n";
-  EXPECT_EQ(1, driver_.parse(test));
+  EXPECT_EQ(nullptr, driver_.parse(test));
 }

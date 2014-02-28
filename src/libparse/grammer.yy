@@ -67,8 +67,12 @@
 %token FLOATCONST INTCONST RATIONALCONST STRCONST
 %token <std::string> IDENTIFIER "identifier"
 
-%type <AstNode*> ATOM INIT_SYNTAX BODY_ELEMENT SPECIFICATION
-%type <AstListNode*> BODY_ELEMENTS
+%type <AstNode*> INIT_SYNTAX BODY_ELEMENT SPECIFICATION PARBLOCK_SYNTAX KW_PARBLOCK_SYNTAX
+%type <AstNode*> RULE_SYNTAX STATEMENT
+%type <AstListNode*> BODY_ELEMENTS STATEMENTS
+%type <AtomNode*> ATOM
+%type <Expression*> EXPRESSION
+%type <UpdateNode*> UPDATE_SYNTAX
 %type <Value*> NUMBER
 %type <Value*> VALUE
 %type <uint64_t> INTCONST
@@ -99,7 +103,7 @@ BODY_ELEMENT: PROVIDER_SYNTAX { $$ = new AstNode(NodeType::PROVIDER); }
            | FUNCTION_DEFINITION { $$ = new AstNode(NodeType::FUNCTION); }
            | DERIVED_SYNTAX { $$ = new AstNode(NodeType::DERIVED); }
            | INIT_SYNTAX { $$ = $1; }
-           | RULE_SYNTAX { $$ = new AstNode(NodeType::RULE); }
+           | RULE_SYNTAX { $$ = $1; }
            ;
 
 INIT_SYNTAX: INIT IDENTIFIER { $$ = new AstNode(NodeType::INIT); }
@@ -187,9 +191,9 @@ INITIALIZER: ATOM
            | ATOM ARROW ATOM 
            ;
 
-ATOM: FUNCTION_SYNTAX { $$ = new AstNode(NodeType::ATOM); }
-    | VALUE { $$ = new AstNode(NodeType::ATOM); }
-    | BRACKET_EXPRESSION { $$ = new AstNode(NodeType::ATOM); }
+ATOM: FUNCTION_SYNTAX { $$ = new AtomNode(nullptr); }
+    | VALUE { $$ = new AtomNode($1); }
+    | BRACKET_EXPRESSION { $$ = new AtomNode(nullptr); }
     ;
 
 VALUE: RULEREF { $$ = new Value(); }
@@ -231,23 +235,23 @@ EXPRESSION_LIST: EXPRESSION "," EXPRESSION_LIST
                | EXPRESSION 
                ;
 
-EXPRESSION: EXPRESSION "+" EXPRESSION 
-          | EXPRESSION "-" EXPRESSION 
-          | EXPRESSION NEQUAL EXPRESSION 
-          | EXPRESSION "=" EXPRESSION 
-          | EXPRESSION "<" EXPRESSION 
-          | EXPRESSION ">" EXPRESSION 
-          | EXPRESSION LESSEQ EXPRESSION 
-          | EXPRESSION GREATEREQ EXPRESSION 
-          | EXPRESSION "*" EXPRESSION 
-          | EXPRESSION "/" EXPRESSION 
-          | EXPRESSION "%" EXPRESSION 
-          | EXPRESSION RATIONAL_DIV EXPRESSION
-          | EXPRESSION OR EXPRESSION 
-          | EXPRESSION XOR EXPRESSION 
-          | EXPRESSION AND EXPRESSION 
-          | NOT EXPRESSION 
-          | ATOM 
+EXPRESSION: EXPRESSION "+" ATOM { $$ = new Expression($1, $3);}
+          | EXPRESSION "-" ATOM { $$ = new Expression($1, $3);}
+          | EXPRESSION NEQUAL ATOM { $$ = new Expression($1, $3);}
+          | EXPRESSION "=" ATOM { $$ = new Expression($1, $3);}
+          | EXPRESSION "<" ATOM { $$ = new Expression($1, $3);}
+          | EXPRESSION ">" ATOM { $$ = new Expression($1, $3);}
+          | EXPRESSION LESSEQ ATOM { $$ = new Expression($1, $3);}
+          | EXPRESSION GREATEREQ ATOM { $$ = new Expression($1, $3);}
+          | EXPRESSION "*" ATOM { $$ = new Expression($1, $3);}
+          | EXPRESSION "/" ATOM { $$ = new Expression($1, $3);}
+          | EXPRESSION "%" ATOM { $$ = new Expression($1, $3);}
+          | EXPRESSION RATIONAL_DIV ATOM { $$ = new Expression($1, $3);}
+          | EXPRESSION OR  ATOM { $$ = new Expression($1, $3);}
+          | EXPRESSION XOR ATOM { $$ = new Expression($1, $3);}
+          | EXPRESSION AND ATOM { $$ = new Expression($1, $3);}
+          | NOT EXPRESSION  { $$ = new Expression($2, nullptr);}
+          | ATOM  { $$ = new Expression(nullptr, $1);}
           ;
 
 BRACKET_EXPRESSION: "(" EXPRESSION ")" 
@@ -258,13 +262,18 @@ FUNCTION_SYNTAX: IDENTIFIER
                | IDENTIFIER "(" EXPRESSION_LIST ")"
                ;
 
-RULE_SYNTAX: RULE IDENTIFIER "=" STATEMENT 
-           | RULE IDENTIFIER "(" ")" "=" STATEMENT 
+RULE_SYNTAX: RULE IDENTIFIER "=" STATEMENT { $$ = new UnaryNode(NodeType::RULE, $4); }
+           | RULE IDENTIFIER "(" ")" "=" STATEMENT
+              { $$ = new UnaryNode(NodeType::RULE, $6); }
            | RULE IDENTIFIER "(" PARAM_LIST ")" "=" STATEMENT
+              { $$ = new UnaryNode(NodeType::RULE, $7); }
 /* nochmals, mit dump specification */
-           | RULE IDENTIFIER DUMPS DUMPSPEC_LIST "=" STATEMENT 
-           | RULE IDENTIFIER "(" ")" DUMPS DUMPSPEC_LIST "=" STATEMENT 
+           | RULE IDENTIFIER DUMPS DUMPSPEC_LIST "=" STATEMENT
+              { $$ = new UnaryNode(NodeType::RULE, $6); }
+           | RULE IDENTIFIER "(" ")" DUMPS DUMPSPEC_LIST "=" STATEMENT
+              { $$ = new UnaryNode(NodeType::RULE, $8); }
            | RULE IDENTIFIER "(" PARAM_LIST ")" DUMPS DUMPSPEC_LIST "=" STATEMENT
+              { $$ = new UnaryNode(NodeType::RULE, $9); }
            ;
 
 DUMPSPEC_LIST: DUMPSPEC "," DUMPSPEC_LIST 
@@ -274,29 +283,29 @@ DUMPSPEC_LIST: DUMPSPEC "," DUMPSPEC_LIST
 DUMPSPEC: "(" IDENTIFIER_LIST ")" ARROW IDENTIFIER
         ;
 
-STATEMENT: ASSERT_SYNTAX
-         | ASSURE_SYNTAX
-         | DIEDIE_SYNTAX
-         | IMPOSSIBLE_SYNTAX
-         | DEBUGINFO_SYNTAX
-         | PRINT_SYNTAX
-         | UPDATE_SYNTAX
-         | CASE_SYNTAX
-         | CALL_SYNTAX
-         | KW_SEQBLOCK_SYNTAX
-         | SEQBLOCK_SYNTAX
-         | KW_PARBLOCK_SYNTAX
-         | PARBLOCK_SYNTAX
-         | IFTHENELSE
-         | LET_SYNTAX
-         | PUSH_SYNTAX
-         | POP_SYNTAX
-         | FORALL_SYNTAX
-         | ITERATE_SYNTAX
-         | SKIP 
-         | IDENTIFIER 
-         | INTERN EXPRESSION_LIST 
-         | OBJDUMP "(" IDENTIFIER ")"  
+STATEMENT: ASSERT_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
+         | ASSURE_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
+         | DIEDIE_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
+         | IMPOSSIBLE_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
+         | DEBUGINFO_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
+         | PRINT_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
+         | UPDATE_SYNTAX { $$ = $1; }
+         | CASE_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
+         | CALL_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
+         | KW_SEQBLOCK_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
+         | SEQBLOCK_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
+         | KW_PARBLOCK_SYNTAX { $$ = $1; }
+         | PARBLOCK_SYNTAX { $$ = $1; }
+         | IFTHENELSE { $$ = new AstNode(NodeType::STATEMENT); }
+         | LET_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
+         | PUSH_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
+         | POP_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
+         | FORALL_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
+         | ITERATE_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
+         | SKIP  { $$ = new AstNode(NodeType::STATEMENT); }
+         | IDENTIFIER  { $$ = new AstNode(NodeType::STATEMENT); }
+         | INTERN EXPRESSION_LIST  { $$ = new AstNode(NodeType::STATEMENT); }
+         | OBJDUMP "(" IDENTIFIER ")"   { $$ = new AstNode(NodeType::STATEMENT);}
          ;
 
 ASSERT_SYNTAX: ASSERT EXPRESSION
@@ -321,7 +330,7 @@ DEBUG_ATOM_LIST: ATOM "+" DEBUG_ATOM_LIST
 PRINT_SYNTAX: PRINT DEBUG_ATOM_LIST
             ;
 
-UPDATE_SYNTAX: FUNCTION_SYNTAX UPDATE EXPRESSION
+UPDATE_SYNTAX: FUNCTION_SYNTAX UPDATE EXPRESSION { $$ = new UpdateNode($3); }
              ;
 
 CASE_SYNTAX: CASE EXPRESSION OF CASE_LABEL_LIST ENDCASE
@@ -362,13 +371,13 @@ KW_SEQBLOCK_SYNTAX: SEQBLOCK STATEMENTS ENDSEQBLOCK
 SEQBLOCK_SYNTAX: SEQBLOCK_BRACKET STATEMENTS ENDSEQBLOCK_BRACKET  
                ; 
 
-KW_PARBLOCK_SYNTAX: PARBLOCK STATEMENTS ENDPARBLOCK 
+KW_PARBLOCK_SYNTAX: PARBLOCK STATEMENTS ENDPARBLOCK { $$ = new UnaryNode(NodeType::PARBLOCK, $2); }
           ;
-PARBLOCK_SYNTAX: "{" STATEMENTS "}" 
+PARBLOCK_SYNTAX: "{" STATEMENTS "}" { $$ = new UnaryNode(NodeType::PARBLOCK, $2); }
                ;
 
-STATEMENTS: STATEMENT STATEMENTS 
-          | STATEMENT 
+STATEMENTS: STATEMENTS STATEMENT { $1->add($2); $$ = $1; }
+          | STATEMENT { $$ = new AstListNode(); $$->add($1); }
           ;
 
 IFTHENELSE: IF EXPRESSION THEN STATEMENT %prec XIF 

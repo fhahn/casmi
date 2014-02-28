@@ -7,10 +7,21 @@
 #include "macros.h"
 #include "libparse/visitor.h"
 
-// TODO enum class, but how to print?
-enum NodeType { ATOM, INIT, BODY_ELEMENTS, PROVIDER, OPTION, ENUM, FUNCTION, DERIVED, RULE, SPECIFICATION };
+class Value {};
 
-static const char* node_type_names[] = { "ATOM", "INIT", "BODY_ELEMENTS", "PROVIDER",  "OPTION", "ENUM", "FUNCTION", "DERIVED", "RULE", "SPECIFICATION"};
+class IntValue: public Value {
+    private:
+        int value;
+    public:
+        IntValue(int v) { this->value = v; DEBUG(v); }
+        IntValue() { this->value = 0; }
+};
+
+
+// TODO enum class, but how to print?
+enum NodeType { ATOM, INIT, BODY_ELEMENTS, PROVIDER, OPTION, ENUM, FUNCTION, DERIVED, RULE, SPECIFICATION, EXPRESSION, UPDATE, STATEMENT, PARBLOCK};
+
+static const char* node_type_names[] = { "ATOM", "INIT", "BODY_ELEMENTS", "PROVIDER",  "OPTION", "ENUM", "FUNCTION", "DERIVED", "RULE", "SPECIFICATION", "EXPRESSION", "UPDATE", "STATEMENT", "PARBLOCK"};
 
 class AstVisitor;
 
@@ -36,15 +47,41 @@ class AstListNode: public AstNode {
         virtual void visit(AstVisitor &v);
 };
 
-class Value {};
+class AtomNode: public AstNode {
+  private:
+    Value *val_;
 
-
-class IntValue: public Value {
-    private:
-        int value;
-    public:
-        IntValue(int v) { this->value = v; DEBUG(v); }
-        IntValue() { this->value = 0; }
+  public:
+    AtomNode(Value *val);
 };
+
+class Expression : public AstNode {
+  private:
+    Expression *left_;
+    AtomNode *right_;
+
+  public:
+    Expression(Expression *left, AtomNode *right);
+    virtual void visit(AstVisitor &v);
+};
+
+class UnaryNode: public AstNode {
+  private:
+    AstNode *child_;
+
+  public:
+    UnaryNode(NodeType type, AstNode *child);
+    virtual void visit(AstVisitor &v);
+};
+
+class UpdateNode: public AstNode {
+  private:
+    Expression *expr_;
+
+  public:
+    UpdateNode(Expression *expr);
+    virtual void visit(AstVisitor &v);
+};
+
 
 #endif

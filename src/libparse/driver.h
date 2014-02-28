@@ -35,9 +35,8 @@ public:
   size_t get_next_chars(char buffer[], size_t max_size);
 
   // Run the parser. Return 0 on success.
-  int parse (const std::string& f);
+  AstNode *parse(const std::string& f);
 
-  
   // Error handling.
   void error (const yy::location& l, const std::string& m);
   void error (const std::string& m);
@@ -50,7 +49,7 @@ class casmi_string_driver : public casmi_driver {
     std::string::iterator end_;
 
   public:
-    int parse (const std::string& str);
+    AstNode *parse (const std::string& str);
 };
 
 #endif

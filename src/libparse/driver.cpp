@@ -30,27 +30,32 @@ size_t casmi_driver::get_next_chars(char buf[], size_t max_size) {
   }
 }
 
-int casmi_driver::parse (const std::string &f) {
+AstNode *casmi_driver::parse (const std::string &f) {
   int res = -1;
 
   filename_ = f;
   file_ = fopen(filename_.c_str(), "rt");
   if (file_ == NULL) {
     std::cerr << "error: could not open `" << filename_ << "´" << std::endl;
-    return -1;
+    return nullptr;
   }
 
   yy::casmi_parser parser (*this);
   parser.set_debug_level (trace_parsing);
 
   try {
-      res = parser.parse ();
+    res = parser.parse ();
+
+    if (res != 0) {
+      return nullptr;
+    }
+
   } catch (const std::exception& e) {
-      std::cerr << "error: got exception: " << e.what() << " -- exiting" << std::endl;
-      return -1;
+    std::cerr << "error: got exception: " << e.what() << " -- exiting" << std::endl;
+    return nullptr;
   }
 
-  return res;
+  return result;
 }
 
 void casmi_driver::error (const yy::location& l, const std::string& m) {
@@ -62,28 +67,25 @@ void casmi_driver::error (const std::string& m) {
   std::cerr << m << std::endl;
 }
 
-int casmi_string_driver::parse (const std::string &str) {
-
-  int res = 0;
+AstNode *casmi_string_driver::parse (const std::string &str) {
   char tmpname[] = "/tmp/casmi_test_XXXXXX";
-  
   int fd = mkstemp(&tmpname[0]);
 
   if (fd == -1) {
     std::cerr << "Could not create tmpfile" << std::endl;
-    res = -1;
-  } else {
-    FILE *file = fdopen(fd, "w");
-    if (file == NULL) {
-      std::cerr << "Could not open file stream for tmpfile" << std::endl;
-      res = -1;
-    } else {
-      fwrite(str.c_str(), str.length(), sizeof(char), file);
-      fclose(file);
-      res = casmi_driver::parse(tmpname);
-      remove(tmpname);
-    }
+    return nullptr;
   }
+
+  FILE *file = fdopen(fd, "w");
+  if (file == NULL) {
+    std::cerr << "Could not open file stream for tmpfile" << std::endl;
+    return nullptr;
+  } 
+
+  fwrite(str.c_str(), str.length(), sizeof(char), file);
+  fclose(file);
+  AstNode *res = casmi_driver::parse(tmpname);
+  remove(tmpname);
 
   return res;
 }
