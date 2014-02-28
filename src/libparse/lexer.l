@@ -17,18 +17,17 @@ static yy::location loc;
 
 // driver must be global, because it is needed for YY_INPUT
 // defined in src/libparse/driver.cpp
-extern casmi_driver driver;
+extern casmi_driver *global_driver;
 
 #define STRBUF_LENGTH 1000
 void yyerror(const char *s);
 char strbuf[STRBUF_LENGTH];
 
-#define YY_INPUT(buf,result,max_size)  {\
-    result = driver.get_next_chars(buf, max_size); \
-    if (  result <= 0  ) \
-        result = YY_NULL; \
+#define YY_INPUT(buf,result,max_size) { \
+  result = global_driver->get_next_chars(buf, max_size); \
+  if (  result <= 0  ) \
+      result = YY_NULL; \
 }
-
 
 #define yyterminate() return( yy::casmi_parser::make_END(loc) )
 
@@ -37,7 +36,8 @@ char strbuf[STRBUF_LENGTH];
 
 %}
 
-%option noyywrap nounput batch debug noinput
+/* use debug option for more output */
+%option noyywrap nounput batch noinput
 
 %x LCOMMENT
 %x COMMENT

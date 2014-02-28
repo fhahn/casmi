@@ -1,3 +1,4 @@
+#include <iostream>
 #include <stdexcept>
 
 #include "gtest/gtest.h"
@@ -7,15 +8,18 @@
 
 #include "libparse/parser.tab.h"
 
+
 class LexerHelpersTest: public ::testing::Test {
   protected:
-    virtual void SetUp() {}
+    virtual void SetUp() { }
 
-    yy::location loc;
     casmi_driver driver;
+    yy::location loc;
 };
+
 // tests convert_to_long with a valid string, base 10
 TEST_F(LexerHelpersTest, convert_to_long_10_ok) {
+
   EXPECT_EQ(200, convert_to_long("200", 10, driver, loc));
 }
 

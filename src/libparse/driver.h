@@ -43,4 +43,14 @@ public:
   void error (const std::string& m);
 };
 
+class casmi_string_driver : public casmi_driver {
+  private:
+    std::string str_;
+    std::string::iterator iter_;
+    std::string::iterator end_;
+
+  public:
+    int parse (const std::string& str);
+};
+
 #endif
