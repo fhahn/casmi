@@ -23,7 +23,9 @@
 %initial-action
 {
   // Initialize the initial location.
-    @$.begin.filename = @$.end.filename = &driver.filename_;
+  // Error messages are printed in casmi_driver, I guess location does not 
+  // need to know about the filename
+  //@$.begin.filename = @$.end.filename = &driver.filename_;
 };
 
 %define parse.trace

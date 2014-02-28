@@ -15,6 +15,10 @@
     YY_DECL;
 
 class casmi_driver {
+private:
+  std::string filename_;
+  FILE *file_;
+ 
 public:
   casmi_driver ();
   virtual ~casmi_driver ();
@@ -24,8 +28,6 @@ public:
   AstNode *result;
 
   // State information for the lexer
-  std::string filename_;
-  FILE *file_;
   bool trace_parsing;
   bool trace_scanning;
 
