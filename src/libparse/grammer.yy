@@ -23,7 +23,7 @@
 %initial-action
 {
   // Initialize the initial location.
-    @$.begin.filename = @$.end.filename = &driver.file;
+    @$.begin.filename = @$.end.filename = &driver.filename_;
 };
 
 %define parse.trace

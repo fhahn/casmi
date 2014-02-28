@@ -2,6 +2,9 @@
 #define CASMI_LIBPARSE_DRIVER_H
 #include <string>
 #include <map>
+#include <fstream>
+#include <cstdint>
+#include <cstdio>
 
 #include "libparse/ast.h"
 #include "libparse/parser.tab.h"
@@ -20,18 +23,22 @@ public:
 
   AstNode *result;
 
-  // Handling the scanner.
-  void scan_begin ();
-  void scan_end ();
+  // State information for the lexer
+  std::string filename_;
+  FILE *file_;
+  bool trace_parsing;
   bool trace_scanning;
 
-  // Run the parser.  Return 0 on success.
-  int parse (const std::string& f);
-  std::string file;
-  bool trace_parsing;
+  // Handling the scanner.
+  size_t get_next_chars(char buffer[], size_t max_size);
 
+  // Run the parser. Return 0 on success.
+  int parse (const std::string& f);
+
+  
   // Error handling.
   void error (const yy::location& l, const std::string& m);
   void error (const std::string& m);
 };
+
 #endif

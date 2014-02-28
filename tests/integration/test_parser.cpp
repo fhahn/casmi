@@ -3,10 +3,13 @@
 #include "libparse/driver.h"
 #include "libparse/parser.tab.h"
 
+// driver must be global, because it is needed for YY_INPUT
+// defined in src/libparse/driver.cpp
+extern casmi_driver driver;
+
 int main (int argc, char *argv[]) {
     int res = 0;
     bool print = false;
-    casmi_driver driver;
     for (int i = 1; i < argc; ++i)
         if (argv[i] == std::string ("-p"))
             driver.trace_parsing = true;
