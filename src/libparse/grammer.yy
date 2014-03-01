@@ -196,27 +196,27 @@ ATOM: FUNCTION_SYNTAX { $$ = new AtomNode(nullptr); }
     | BRACKET_EXPRESSION { $$ = new AtomNode(nullptr); }
     ;
 
-VALUE: RULEREF { $$ = new Value(); }
+VALUE: RULEREF { $$ = new IntValue(0); }
      | NUMBER { $$ = $1; }
-     | STRCONST { $$ = new Value(); }
-     | LISTCONST { $$ = new Value(); }
-     | NUMBER_RANGE { $$ = new Value(); }
-     | SYMBOL { $$ = new Value(); }
-     | SELF { $$ = new Value(); }
-     | UNDEF { $$ = new Value(); }
-     | TRUE { $$ = new Value(); }
-     | FALSE { $$ = new Value(); }
+     | STRCONST { $$ = new IntValue(0); }
+     | LISTCONST { $$ = new IntValue(0); }
+     | NUMBER_RANGE { $$ = new IntValue(0); }
+     | SYMBOL { $$ = new IntValue(0); }
+     | SELF { $$ = new IntValue(0); }
+     | UNDEF { $$ = new IntValue(0); }
+     | TRUE { $$ = new IntValue(0); }
+     | FALSE { $$ = new IntValue(0); }
      ;
 
 NUMBER: "+" INTCONST %prec UPLUS { $$ = new IntValue($2); }
       | "-" INTCONST %prec UMINUS { $$ = new IntValue($2); }
       | INTCONST { $$ = new IntValue($1); }
-      | "+" FLOATCONST %prec UPLUS { $$ = new Value(); }
-      | "-" FLOATCONST %prec UMINUS { $$ = new Value(); }
-      | FLOATCONST { $$ = new Value(); }
-      | "+" RATIONALCONST %prec UPLUS { $$ = new Value(); }
-      | "-" RATIONALCONST %prec UMINUS { $$ = new Value(); }
-      | RATIONALCONST { $$ = new Value(); }
+      | "+" FLOATCONST %prec UPLUS { $$ = new IntValue(0); }
+      | "-" FLOATCONST %prec UMINUS { $$ = new IntValue(0); }
+      | FLOATCONST { $$ = new IntValue(0); }
+      | "+" RATIONALCONST %prec UPLUS { $$ = new IntValue(0); }
+      | "-" RATIONALCONST %prec UMINUS { $$ = new IntValue(0); }
+      | RATIONALCONST { $$ = new IntValue(0); }
       ;
 
 RULEREF: "@" IDENTIFIER 

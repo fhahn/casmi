@@ -1,3 +1,6 @@
+// gtest macros raise -Wsign-compare
+#pragma GCC diagnostic ignored "-Wsign-compare"
+
 #include <string>
 #include <stdexcept>
 #include <memory>

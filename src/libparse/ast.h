@@ -9,7 +9,7 @@
 
 class Value {
   public:
-    virtual bool equals(Value *other) { return false; };
+    virtual bool equals(Value *other) = 0;
 };
 
 class IntValue: public Value {
@@ -17,7 +17,6 @@ class IntValue: public Value {
     int value_;
   public:
     IntValue(int v) { this->value_ = v; }
-    IntValue() { this->value_ = 0; }
     virtual bool equals(Value *other);
 };
 
