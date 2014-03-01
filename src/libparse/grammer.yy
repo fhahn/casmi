@@ -94,7 +94,7 @@ HEADER: CASM IDENTIFIER
       ;
 
 BODY_ELEMENTS: BODY_ELEMENTS BODY_ELEMENT { $1->add($2); $$ = $1; }
-            | BODY_ELEMENT { $$ = new AstListNode(); $$->add($1); }
+            | BODY_ELEMENT { $$ = new AstListNode(NodeType::BODY_ELEMENTS); $$->add($1); }
             ;
 
 BODY_ELEMENT: PROVIDER_SYNTAX { $$ = new AstNode(NodeType::PROVIDER); }
@@ -377,7 +377,7 @@ PARBLOCK_SYNTAX: "{" STATEMENTS "}" { $$ = new UnaryNode(NodeType::PARBLOCK, $2)
                ;
 
 STATEMENTS: STATEMENTS STATEMENT { $1->add($2); $$ = $1; }
-          | STATEMENT { $$ = new AstListNode(); $$->add($1); }
+          | STATEMENT { $$ = new AstListNode(NodeType::STATEMENTS); $$->add($1); }
           ;
 
 IFTHENELSE: IF EXPRESSION THEN STATEMENT %prec XIF 

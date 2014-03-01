@@ -7,21 +7,25 @@
 #include "macros.h"
 #include "libparse/visitor.h"
 
-class Value {};
+class Value {
+  public:
+    virtual bool equals(Value *other) { return false; };
+};
 
 class IntValue: public Value {
-    private:
-        int value;
-    public:
-        IntValue(int v) { this->value = v; DEBUG(v); }
-        IntValue() { this->value = 0; }
+  private:
+    int value_;
+  public:
+    IntValue(int v) { this->value_ = v; }
+    IntValue() { this->value_ = 0; }
+    virtual bool equals(Value *other);
 };
 
 
 // TODO enum class, but how to print?
-enum NodeType { ATOM, INIT, BODY_ELEMENTS, PROVIDER, OPTION, ENUM, FUNCTION, DERIVED, RULE, SPECIFICATION, EXPRESSION, UPDATE, STATEMENT, PARBLOCK};
+enum NodeType { ATOM, INIT, BODY_ELEMENTS, PROVIDER, OPTION, ENUM, FUNCTION, DERIVED, RULE, SPECIFICATION, EXPRESSION, UPDATE, STATEMENT, PARBLOCK, STATEMENTS};
 
-static const char* node_type_names[] = { "ATOM", "INIT", "BODY_ELEMENTS", "PROVIDER",  "OPTION", "ENUM", "FUNCTION", "DERIVED", "RULE", "SPECIFICATION", "EXPRESSION", "UPDATE", "STATEMENT", "PARBLOCK"};
+static const char* node_type_names[] = { "ATOM", "INIT", "BODY_ELEMENTS", "PROVIDER",  "OPTION", "ENUM", "FUNCTION", "DERIVED", "RULE", "SPECIFICATION", "EXPRESSION", "UPDATE", "STATEMENT", "PARBLOCK", "STATEMENTS"};
 
 class AstVisitor;
 
@@ -35,6 +39,7 @@ class AstNode {
         AstNode(NodeType t);
         virtual std::string to_str();
         virtual void visit(AstVisitor &v);
+        virtual bool equals(AstNode *other);
 };
 
 class AstListNode: public AstNode {
@@ -42,9 +47,10 @@ class AstListNode: public AstNode {
         std::vector<AstNode*> nodes;
 
     public:
-        AstListNode();
+        AstListNode(NodeType type);
         void add(AstNode* n);
         virtual void visit(AstVisitor &v);
+        virtual bool equals(AstNode *other);
 };
 
 class AtomNode: public AstNode {
@@ -53,6 +59,7 @@ class AtomNode: public AstNode {
 
   public:
     AtomNode(Value *val);
+    virtual bool equals(AstNode *other);
 };
 
 class Expression : public AstNode {
@@ -63,6 +70,7 @@ class Expression : public AstNode {
   public:
     Expression(Expression *left, AtomNode *right);
     virtual void visit(AstVisitor &v);
+    virtual bool equals(AstNode *other);
 };
 
 class UnaryNode: public AstNode {
@@ -72,6 +80,7 @@ class UnaryNode: public AstNode {
   public:
     UnaryNode(NodeType type, AstNode *child);
     virtual void visit(AstVisitor &v);
+    virtual bool equals(AstNode *other);
 };
 
 class UpdateNode: public AstNode {
@@ -81,6 +90,7 @@ class UpdateNode: public AstNode {
   public:
     UpdateNode(Expression *expr);
     virtual void visit(AstVisitor &v);
+    virtual bool equals(AstNode *other);
 };
 
 
