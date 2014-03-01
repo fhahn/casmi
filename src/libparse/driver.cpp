@@ -4,18 +4,21 @@
 
 #include "libparse/driver.h"
 
+extern int yylex_destroy(void);
+
 // driver must be global, because it is needed for YY_INPUT
 casmi_driver *global_driver;
 
 casmi_driver::casmi_driver () 
     : trace_parsing (false), trace_scanning (false) {
-  file_ = NULL;
+  file_ = nullptr;
 }
 
 casmi_driver::~casmi_driver () {
-  if (file_ != NULL) {
+  if (file_ != nullptr) {
     fclose(file_);
   }
+  yylex_destroy();
 }
 
 size_t casmi_driver::get_next_chars(char buf[], size_t max_size) {
@@ -32,6 +35,10 @@ size_t casmi_driver::get_next_chars(char buf[], size_t max_size) {
 
 AstNode *casmi_driver::parse (const std::string &f) {
   int res = -1;
+
+  if (file_ != nullptr) {
+    fclose(file_);
+  }
 
   filename_ = f;
   file_ = fopen(filename_.c_str(), "rt");

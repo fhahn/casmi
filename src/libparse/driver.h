@@ -1,10 +1,11 @@
 #ifndef CASMI_LIBPARSE_DRIVER_H
 #define CASMI_LIBPARSE_DRIVER_H
 #include <string>
-#include <map>
 #include <fstream>
 #include <cstdint>
 #include <cstdio>
+#include <map>
+#include <memory>
 
 #include "libparse/ast.h"
 #include "libparse/parser.tab.h"

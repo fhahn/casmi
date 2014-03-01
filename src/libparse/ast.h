@@ -37,6 +37,7 @@ class AstNode {
 
     public:
         AstNode(NodeType t);
+        virtual ~AstNode();
         virtual std::string to_str();
         virtual void visit(AstVisitor &v);
         virtual bool equals(AstNode *other);
@@ -48,6 +49,7 @@ class AstListNode: public AstNode {
 
     public:
         AstListNode(NodeType type);
+        virtual ~AstListNode();
         void add(AstNode* n);
         virtual void visit(AstVisitor &v);
         virtual bool equals(AstNode *other);
@@ -59,6 +61,7 @@ class AtomNode: public AstNode {
 
   public:
     AtomNode(Value *val);
+    virtual ~AtomNode();
     virtual bool equals(AstNode *other);
 };
 
@@ -69,6 +72,7 @@ class Expression : public AstNode {
 
   public:
     Expression(Expression *left, AtomNode *right);
+    virtual ~Expression();
     virtual void visit(AstVisitor &v);
     virtual bool equals(AstNode *other);
 };
@@ -79,6 +83,7 @@ class UnaryNode: public AstNode {
 
   public:
     UnaryNode(NodeType type, AstNode *child);
+    virtual ~UnaryNode();
     virtual void visit(AstVisitor &v);
     virtual bool equals(AstNode *other);
 };
@@ -89,9 +94,9 @@ class UpdateNode: public AstNode {
 
   public:
     UpdateNode(Expression *expr);
+    virtual ~UpdateNode();
     virtual void visit(AstVisitor &v);
     virtual bool equals(AstNode *other);
 };
-
 
 #endif

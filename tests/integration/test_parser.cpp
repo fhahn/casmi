@@ -19,8 +19,7 @@ int main (int argc, char *argv[]) {
             driver.trace_scanning = true;
         else if (argv[i] == std::string ("--print-ast")) {
             print = true;
-        } 
-        else if (driver.parse (argv[i]) != nullptr) {
+        } else if (driver.parse (argv[i]) != nullptr) {
             std::cout << driver.result << std::endl;
             if (print) {
                 PrintVisitor v;
