@@ -80,9 +80,19 @@
 %start SPECIFICATION
 
 /* TODO: Check! */
-%left UMINUS UPLUS XIF
+%right UMINUS 
+%right UPLUS
+%left XIF
 
+%precedence THEN ELSE
 
+%precedence UPDATE PRINT ASSURE ASSERT DIEDIE NOT
+
+%precedence ","
+%precedence FLOATCONST INTCONST STRCONST RATIONALCONST IDENTIFIER
+%precedence AND OR XOR
+%precedence RATIONAL_DIV  NEQUAL LESSEQ GREATEREQ "=" "<" ">" "*"  "/" "%"
+%precedence "-" "+"
 %%
 
 
@@ -230,10 +240,11 @@ LISTCONST: "[" EXPRESSION_LIST "]"
          | "[" "]" 
          ;
 
-EXPRESSION_LIST: EXPRESSION "," EXPRESSION_LIST 
-               | EXPRESSION "," 
-               | EXPRESSION 
+EXPRESSION_LIST: EXPRESSION "," EXPRESSION_LIST
+               | EXPRESSION ","
+               | EXPRESSION
                ;
+
 
 EXPRESSION: EXPRESSION "+" ATOM { $$ = new Expression($1, $3);}
           | EXPRESSION "-" ATOM { $$ = new Expression($1, $3);}
@@ -310,11 +321,11 @@ STATEMENT: ASSERT_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
 
 ASSERT_SYNTAX: ASSERT EXPRESSION
              ;
-ASSURE_SYNTAX: ASSURE EXPRESSION 
+ASSURE_SYNTAX: ASSURE EXPRESSION
              ;
 
-DIEDIE_SYNTAX: DIEDIE 
-             | DIEDIE EXPRESSION 
+DIEDIE_SYNTAX: DIEDIE EXPRESSION
+             | DIEDIE
              ;
 
 /* when symbolic execution: abor trace, do not write it, no error, in concrete mode: an error like diedie */
@@ -324,7 +335,7 @@ IMPOSSIBLE_SYNTAX: IMPOSSIBLE
 DEBUGINFO_SYNTAX: DEBUGINFO IDENTIFIER DEBUG_ATOM_LIST
                 ;
 
-DEBUG_ATOM_LIST: ATOM "+" DEBUG_ATOM_LIST
+DEBUG_ATOM_LIST: DEBUG_ATOM_LIST "+" ATOM
                | ATOM
 
 PRINT_SYNTAX: PRINT DEBUG_ATOM_LIST
