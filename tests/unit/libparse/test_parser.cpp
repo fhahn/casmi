@@ -17,11 +17,11 @@ extern casmi_driver *global_driver;
 
 TEST(CompareTest, test_list_two_nodes) {
   AstListNode *ast1 = new AstListNode(NodeType::BODY_ELEMENTS);
-  ast1->add(new AstNode(NodeType::ATOM));
+  ast1->add(new AstNode(NodeType::PROVIDER));
   ast1->add(new AstNode(NodeType::INIT));
 
   AstListNode *ast2 = new AstListNode(NodeType::BODY_ELEMENTS);
-  ast2->add(new AstNode(NodeType::ATOM));
+  ast2->add(new AstNode(NodeType::PROVIDER));
   ast2->add(new AstNode(NodeType::INIT));
 
   EXPECT_EQ(true, ast1->equals(ast2));
@@ -32,11 +32,11 @@ TEST(CompareTest, test_list_two_nodes) {
 
 TEST(CompareTest, test_list_two_nodes_not_equals) {
   AstListNode *ast1 = new AstListNode(NodeType::BODY_ELEMENTS);
-  ast1->add(new AstNode(NodeType::ATOM));
+  ast1->add(new AstNode(NodeType::PROVIDER));
   ast1->add(new AstNode(NodeType::INIT));
 
   AstListNode *ast2 = new AstListNode(NodeType::BODY_ELEMENTS);
-  ast2->add(new AstNode(NodeType::ATOM));
+  ast2->add(new AstNode(NodeType::PROVIDER));
   ast2->add(new AstNode(NodeType::RULE));
 
   EXPECT_EQ(false, ast1->equals(ast2));
@@ -48,11 +48,11 @@ TEST(CompareTest, test_list_two_nodes_not_equals) {
 
 TEST(CompareTest, test_list_length_unequal) {
   AstListNode *ast1 = new AstListNode(NodeType::BODY_ELEMENTS);
-  ast1->add(new AstNode(NodeType::ATOM));
+  ast1->add(new AstNode(NodeType::PROVIDER));
   ast1->add(new AstNode(NodeType::INIT));
 
   AstListNode *ast2 = new AstListNode(NodeType::BODY_ELEMENTS);
-  ast2->add(new AstNode(NodeType::ATOM));
+  ast2->add(new AstNode(NodeType::PROVIDER));
   ast1->add(new AstNode(NodeType::INIT));
   ast1->add(new AstNode(NodeType::INIT));
 
@@ -65,13 +65,13 @@ TEST(CompareTest, test_list_length_unequal) {
 
 TEST(CompareTest, test_expression) {
   Expression *ast1 = new Expression(
-      new Expression(nullptr, new AtomNode(new IntValue(10))),
-      new AtomNode(new IntValue(50))
+      new Expression(nullptr, create_atom(10)),
+      create_atom(50)
   );
 
   Expression *ast2 = new Expression(
-      new Expression(nullptr, new AtomNode(new IntValue(10))),
-      new AtomNode(new IntValue(50))
+      new Expression(nullptr, create_atom(10)),
+      create_atom(50)
   );
 
   EXPECT_EQ(true, ast1->equals(ast2));
@@ -84,13 +84,13 @@ TEST(CompareTest, test_expression) {
 
 TEST(CompareTest, test_expression_not_equal) {
   Expression *ast1 = new Expression(
-      new Expression(nullptr, new AtomNode(new IntValue(10))),
-      new AtomNode(new IntValue(10)) // this values differs from ast2
+      new Expression(nullptr, create_atom(10)),
+      create_atom(10) // this values differs from ast2
   );
 
   Expression *ast2 = new Expression(
-      new Expression(nullptr, new AtomNode(new IntValue(10))),
-      new AtomNode(new IntValue(50))
+      new Expression(nullptr, create_atom(10)),
+      create_atom(50)
   );
 
   EXPECT_EQ(false, ast1->equals(ast2));
@@ -102,16 +102,16 @@ TEST(CompareTest, test_expression_not_equal) {
 
 TEST(CompareTest, test_expression_wrong_balance) {
   Expression *ast1 = new Expression(
-      new Expression(nullptr, new AtomNode(new IntValue(10))),
-      new AtomNode(new IntValue(10)) // this values differs from ast2
+      new Expression(nullptr, create_atom(10)),
+      create_atom(10) // this values differs from ast2
   );
 
   Expression *ast2 = new Expression(
       new Expression(
-          new Expression(nullptr, new AtomNode(new IntValue(10))),
-          new AtomNode(new IntValue(10))
+          new Expression(nullptr, create_atom(10)),
+          create_atom(10)
       ),
-      new AtomNode(new IntValue(50))
+      create_atom(50)
   );
 
   EXPECT_EQ(false, ast1->equals(ast2));
@@ -124,15 +124,15 @@ TEST(CompareTest, test_expression_wrong_balance) {
 TEST(CompareTest, test_update_node) {
   UpdateNode *ast1 = new UpdateNode(
       new Expression(
-          new Expression(nullptr, new AtomNode(new IntValue(10))),
-          new AtomNode(new IntValue(50))
+          new Expression(nullptr, create_atom(10)),
+          create_atom(50)
         )
   );
 
   UpdateNode *ast2 = new UpdateNode(
       new Expression(
-          new Expression(nullptr, new AtomNode(new IntValue(10))),
-          new AtomNode(new IntValue(50))
+          new Expression(nullptr, create_atom(10)),
+          create_atom(50)
         )
   );
 
@@ -146,15 +146,15 @@ TEST(CompareTest, test_update_node) {
 TEST(CompareTest, test_update_node_not_equal) {
   UpdateNode *ast1 = new UpdateNode(
       new Expression(
-          new Expression(nullptr, new AtomNode(new IntValue(10))),
-          new AtomNode(new IntValue(50))
+          new Expression(nullptr, create_atom(10)),
+          create_atom(50)
         )
   );
 
   UpdateNode *ast2 = new UpdateNode(
       new Expression(
           nullptr,
-          new AtomNode(new IntValue(50))
+          create_atom(50)
       )
   );
 
@@ -167,11 +167,11 @@ TEST(CompareTest, test_update_node_not_equal) {
 
 TEST(CompareTest, test_unary_node) {
   UnaryNode *ast1 = new UnaryNode(NodeType::ENUM,
-      new Expression(nullptr, new AtomNode(new IntValue(10)))
+      new Expression(nullptr, create_atom(10))
   );
 
   UnaryNode *ast2 = new UnaryNode(NodeType::ENUM,
-      new Expression(nullptr, new AtomNode(new IntValue(10)))
+      new Expression(nullptr, create_atom(10))
   );
 
   EXPECT_EQ(true, ast1->equals(ast2));
@@ -183,11 +183,11 @@ TEST(CompareTest, test_unary_node) {
 
 TEST(CompareTest, test_unary_node_wrong_type) {
   UnaryNode *ast1 = new UnaryNode(NodeType::ENUM,
-      new Expression(nullptr, new AtomNode(new IntValue(10)))
+      new Expression(nullptr, create_atom(10))
   );
 
   UnaryNode *ast2 = new UnaryNode(NodeType::FUNCTION,
-      new Expression(nullptr, new AtomNode(new IntValue(10)))
+      new Expression(nullptr, create_atom(10))
   );
 
   EXPECT_EQ(false, ast1->equals(ast2));
@@ -214,8 +214,8 @@ TEST_F(ParserTest, parse_simple) {
   AstListNode *stmts = new AstListNode(NodeType::STATEMENTS);
   stmts->add(new UpdateNode(
         new Expression(
-            new Expression(nullptr, new AtomNode(new IntValue(1))),
-            new AtomNode(new IntValue(2)))
+            new Expression(nullptr, create_atom(1)),
+            create_atom(2))
   ));
 
   AstListNode *ast = new AstListNode(NodeType::BODY_ELEMENTS);

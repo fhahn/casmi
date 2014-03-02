@@ -6,25 +6,12 @@
 
 #include "macros.h"
 #include "libparse/visitor.h"
-
-class Value {
-  public:
-    virtual bool equals(Value *other) = 0;
-};
-
-class IntValue: public Value {
-  private:
-    int value_;
-  public:
-    IntValue(int v) { this->value_ = v; }
-    virtual bool equals(Value *other);
-};
-
+#include "libparse/types.h"
 
 // TODO enum class, but how to print?
-enum NodeType { ATOM, INIT, BODY_ELEMENTS, PROVIDER, OPTION, ENUM, FUNCTION, DERIVED, RULE, SPECIFICATION, EXPRESSION, UPDATE, STATEMENT, PARBLOCK, STATEMENTS};
+enum NodeType { INT_ATOM, DUMMY_ATOM, INIT, BODY_ELEMENTS, PROVIDER, OPTION, ENUM, FUNCTION, DERIVED, RULE, SPECIFICATION, EXPRESSION, UPDATE, STATEMENT, PARBLOCK, STATEMENTS};
 
-static const char* node_type_names[] = { "ATOM", "INIT", "BODY_ELEMENTS", "PROVIDER",  "OPTION", "ENUM", "FUNCTION", "DERIVED", "RULE", "SPECIFICATION", "EXPRESSION", "UPDATE", "STATEMENT", "PARBLOCK", "STATEMENTS"};
+static const char* node_type_names[] = { "INT_ATOM", "DUMMY_ATOM", "INIT", "BODY_ELEMENTS", "PROVIDER",  "OPTION", "ENUM", "FUNCTION", "DERIVED", "RULE", "SPECIFICATION", "EXPRESSION", "UPDATE", "STATEMENT", "PARBLOCK", "STATEMENTS"};
 
 class AstVisitor;
 
@@ -55,14 +42,21 @@ class AstListNode: public AstNode {
 };
 
 class AtomNode: public AstNode {
+  public:
+    AtomNode() : AstNode(NodeType::DUMMY_ATOM) {}
+    AtomNode(NodeType t) : AstNode(t) {}
+};
+
+class IntAtom : public AtomNode {
   private:
-    Value *val_;
+    INT_T val_;
 
   public:
-    AtomNode(Value *val);
-    virtual ~AtomNode();
-    virtual bool equals(AstNode *other);
+    IntAtom(INT_T val);
+    ~IntAtom();
+    bool equals(AstNode *other);
 };
+
 
 class Expression : public AstNode {
   private:
@@ -98,4 +92,6 @@ class UpdateNode: public AstNode {
     virtual bool equals(AstNode *other);
 };
 
+
+AtomNode* create_atom(INT_T val);
 #endif

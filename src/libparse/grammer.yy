@@ -73,8 +73,8 @@
 %type <AtomNode*> ATOM
 %type <Expression*> EXPRESSION
 %type <UpdateNode*> UPDATE_SYNTAX
-%type <Value*> NUMBER
-%type <Value*> VALUE
+%type <AtomNode*> NUMBER
+%type <AtomNode*> VALUE
 %type <uint64_t> INTCONST
 
 %start SPECIFICATION
@@ -93,6 +93,7 @@
 %precedence AND OR XOR
 %precedence RATIONAL_DIV  NEQUAL LESSEQ GREATEREQ "=" "<" ">" "*"  "/" "%"
 %precedence "-" "+"
+
 %%
 
 
@@ -201,32 +202,32 @@ INITIALIZER: ATOM
            | ATOM ARROW ATOM 
            ;
 
-ATOM: FUNCTION_SYNTAX { $$ = new AtomNode(nullptr); }
-    | VALUE { $$ = new AtomNode($1); }
-    | BRACKET_EXPRESSION { $$ = new AtomNode(nullptr); }
+ATOM: FUNCTION_SYNTAX { $$ = new AtomNode(); }
+    | VALUE { $$ = $1; }
+    | BRACKET_EXPRESSION { $$ = new AtomNode(); }
     ;
 
-VALUE: RULEREF { $$ = new IntValue(0); }
+VALUE: RULEREF { $$ = create_atom(0); }
      | NUMBER { $$ = $1; }
-     | STRCONST { $$ = new IntValue(0); }
-     | LISTCONST { $$ = new IntValue(0); }
-     | NUMBER_RANGE { $$ = new IntValue(0); }
-     | SYMBOL { $$ = new IntValue(0); }
-     | SELF { $$ = new IntValue(0); }
-     | UNDEF { $$ = new IntValue(0); }
-     | TRUE { $$ = new IntValue(0); }
-     | FALSE { $$ = new IntValue(0); }
+     | STRCONST { $$ = create_atom(0); }
+     | LISTCONST { $$ = create_atom(0); }
+     | NUMBER_RANGE { $$ = create_atom(0); }
+     | SYMBOL { $$ = create_atom(0); }
+     | SELF { $$ = create_atom(0); }
+     | UNDEF { $$ = create_atom(0); }
+     | TRUE { $$ = create_atom(0); }
+     | FALSE { $$ = create_atom(0); }
      ;
 
-NUMBER: "+" INTCONST %prec UPLUS { $$ = new IntValue($2); }
-      | "-" INTCONST %prec UMINUS { $$ = new IntValue($2); }
-      | INTCONST { $$ = new IntValue($1); }
-      | "+" FLOATCONST %prec UPLUS { $$ = new IntValue(0); }
-      | "-" FLOATCONST %prec UMINUS { $$ = new IntValue(0); }
-      | FLOATCONST { $$ = new IntValue(0); }
-      | "+" RATIONALCONST %prec UPLUS { $$ = new IntValue(0); }
-      | "-" RATIONALCONST %prec UMINUS { $$ = new IntValue(0); }
-      | RATIONALCONST { $$ = new IntValue(0); }
+NUMBER: "+" INTCONST %prec UPLUS { $$ = create_atom($2); }
+      | "-" INTCONST %prec UMINUS { $$ = create_atom($2); }
+      | INTCONST { $$ = create_atom($1); }
+      | "+" FLOATCONST %prec UPLUS { $$ = create_atom(0); }
+      | "-" FLOATCONST %prec UMINUS { $$ = create_atom(0); }
+      | FLOATCONST { $$ = create_atom(0); }
+      | "+" RATIONALCONST %prec UPLUS { $$ = create_atom(0); }
+      | "-" RATIONALCONST %prec UMINUS { $$ = create_atom(0); }
+      | RATIONALCONST { $$ = create_atom(0); }
       ;
 
 RULEREF: "@" IDENTIFIER 
@@ -369,8 +370,8 @@ CASE_LABEL_IDENT: IDENTIFIER ":" STATEMENT
 CASE_LABEL_STRING: STRCONST ":" STATEMENT 
                  ;
 
-CALL_SYNTAX: CALL "(" EXPRESSION ")" "(" EXPRESSION_LIST ")"    
-           | CALL "(" EXPRESSION ")"                
+CALL_SYNTAX: CALL "(" EXPRESSION ")" "(" EXPRESSION_LIST ")"
+           | CALL "(" EXPRESSION ")"
            | CALL IDENTIFIER "(" EXPRESSION_LIST ")"
            | CALL IDENTIFIER
            ;

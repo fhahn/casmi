@@ -1,5 +1,14 @@
 #include "libparse/ast.h"
 
+bool IntValue::equals(Value *other) {
+  IntValue *other_cast = dynamic_cast<IntValue*>(other);
+  if (other_cast == nullptr) {
+    return false;
+  } else {
+    return value_ == other_cast->value_;
+  }
+}
+
 AstNode::AstNode(NodeType t) {
     this->type = t;
    // DEBUG(this->to_str());
@@ -66,19 +75,21 @@ bool AstListNode::equals(AstNode *other) {
   }
 }
 
-IntAtom::IntAtom(INT_T val) : AtomNode(NodeType::INT_ATOM) {
+AtomNode::AtomNode(Value *val) : AstNode(NodeType::ATOM) {
   val_ = val;
 }
 
-IntAtom::~IntAtom() {}
+AtomNode::~AtomNode() {
+  delete val_;
+}
 
-bool IntAtom::equals(AstNode *other) {
+bool AtomNode::equals(AstNode *other) {
   if (!AstNode::equals(other)) {
     return false;
   }
 
-  IntAtom *other_cast = static_cast<IntAtom*>(other);
-  return val_ == other_cast->val_;
+  AtomNode *other_cast = static_cast<AtomNode*>(other);
+  return val_->equals(other_cast->val_);
 }
 
 Expression::Expression(Expression *left, AtomNode *right) : AstNode(NodeType::EXPRESSION) {
@@ -155,8 +166,4 @@ bool UnaryNode::equals(AstNode *other) {
 
   UnaryNode *other_cast = static_cast<UnaryNode*>(other);
   return child_->equals(other_cast->child_);
-}
-
-AtomNode* create_atom(INT_T val) {
-    return new IntAtom(val);
 }
