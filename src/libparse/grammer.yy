@@ -131,7 +131,7 @@ DERIVED_SYNTAX: DERIVED IDENTIFIER "(" PARAM_LIST ")" "=" EXPRESSION
               | DERIVED IDENTIFIER "=" EXPRESSION
               | DERIVED IDENTIFIER "(" ")" "=" EXPRESSION
 
-              /* jetzt nochmals mit Typangabe */
+              /* again with type syntax */
               | DERIVED IDENTIFIER "(" PARAM_LIST ")" ":" NEW_TYPE_SYNTAX "=" EXPRESSION
               | DERIVED IDENTIFIER ":" NEW_TYPE_SYNTAX "=" EXPRESSION
               | DERIVED IDENTIFIER "(" ")" ":" NEW_TYPE_SYNTAX "=" EXPRESSION
@@ -168,7 +168,7 @@ TYPE_IDENTIFIER_STARLIST: NEW_TYPE_SYNTAX "*" TYPE_IDENTIFIER_STARLIST
                         | NEW_TYPE_SYNTAX 
                         ;
 
-/* Die neue Typ-Syntax */
+/* new type syntax */
 NEW_TYPE_SYNTAX: IDENTIFIER 
                | IDENTIFIER "(" NEW_TYPE_SYNTAX_LIST ")" 
                | IDENTIFIER TYPEANNOTATION IDENTIFIER ENDTYPEANNOTATION
@@ -181,7 +181,7 @@ NEW_TYPE_SYNTAX_LIST: NEW_TYPE_SYNTAX "," NEW_TYPE_SYNTAX_LIST
                     | NEW_TYPE_SYNTAX
                     ;
 
-/* Alte Typ-Syntax für Parameter, rule main(  a /ta: Int/ ) */
+/* old type syntax for parameters, rule main(  a /ta: Int/ ) */
 OLD_TYPE_SYNTAX: TYPEANNOTATION IDENTIFIER ENDTYPEANNOTATION
 
 TUPLE_LIST: IDENTIFIER "," TUPLE_LIST 
@@ -279,7 +279,7 @@ RULE_SYNTAX: RULE IDENTIFIER "=" STATEMENT { $$ = new UnaryNode(NodeType::RULE, 
               { $$ = new UnaryNode(NodeType::RULE, $6); }
            | RULE IDENTIFIER "(" PARAM_LIST ")" "=" STATEMENT
               { $$ = new UnaryNode(NodeType::RULE, $7); }
-/* nochmals, mit dump specification */
+/* again, with dump specification */
            | RULE IDENTIFIER DUMPS DUMPSPEC_LIST "=" STATEMENT
               { $$ = new UnaryNode(NodeType::RULE, $6); }
            | RULE IDENTIFIER "(" ")" DUMPS DUMPSPEC_LIST "=" STATEMENT
@@ -329,7 +329,13 @@ DIEDIE_SYNTAX: DIEDIE EXPRESSION
              | DIEDIE
              ;
 
-/* when symbolic execution: abor trace, do not write it, no error, in concrete mode: an error like diedie */
+/* when symbolic execution:
+    * abort trace
+    * do not write it
+    * no error
+  in concrete mode:
+    * an error like diedie
+*/
 IMPOSSIBLE_SYNTAX: IMPOSSIBLE 
          ;
 
