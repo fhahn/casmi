@@ -288,7 +288,7 @@ RULE_SYNTAX: RULE IDENTIFIER "=" STATEMENT { $$ = new UnaryNode(NodeType::RULE, 
               { $$ = new UnaryNode(NodeType::RULE, $9); }
            ;
 
-DUMPSPEC_LIST: DUMPSPEC "," DUMPSPEC_LIST 
+DUMPSPEC_LIST: DUMPSPEC_LIST "," DUMPSPEC
              | DUMPSPEC 
              ;
 
