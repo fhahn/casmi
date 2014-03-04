@@ -14,7 +14,11 @@ include_directories( "${casmi_BINARY_DIR}/src" )
 
 # add dependency here, added include directories must be visible in subdirectories
 add_subdirectory( "deps/gtest-1.7.0" )
-include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
+include_directories( ${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR} )
+
+add_subdirectory( "deps/hayai" )
+include_directories( "deps/hayai/src" )
 
 add_subdirectory( src )
 add_subdirectory( tests )
+add_subdirectory( bench )
