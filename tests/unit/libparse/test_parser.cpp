@@ -21,6 +21,7 @@ TEST_F(ParserTest, parse_simple) {
   std::string test = "init main\n"
                      "rule main = {\n"
                      "    x := 1 - 2\n"
+                     "    y := 5 - 10\n"
                      "}\n";
   AstNode *root = driver_.parse(test);
 
@@ -30,6 +31,12 @@ TEST_F(ParserTest, parse_simple) {
             new Expression(nullptr, create_atom(1)),
             create_atom(2))
   ));
+  stmts->add(new UpdateNode(
+        new Expression(
+            new Expression(nullptr, create_atom(5)),
+            create_atom(10))
+  ));
+
 
   AstListNode *ast = new AstListNode(NodeType::BODY_ELEMENTS);
   ast->add(new AstNode(NodeType::INIT));
