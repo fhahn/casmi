@@ -12,5 +12,9 @@ set( CMAKE_CXX_FLAGS "-std=c++11 -pedantic -Wall -Wextra -O3 -D_XOPEN_SOURCE=500
 include_directories( src )
 include_directories( "${casmi_BINARY_DIR}/src" )
 
+# add dependency here, added include directories must be visible in subdirectories
+add_subdirectory( "deps/gtest-1.7.0" )
+include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
+
 add_subdirectory( src )
 add_subdirectory( tests )
