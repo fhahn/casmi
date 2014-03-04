@@ -2,9 +2,11 @@ casmi
 =====
 
 To build `casmi` you'll need
-    * flex (>= 2.5.0)
-    * bison (>= 3.0)
-    * cmake (>= 2.6)
+
+* flex (>= 2.5.0)
+* bison (>= 3.0)
+* cmake (>= 2.6)
+
 
 ```
 $ cd path/to/casmi
