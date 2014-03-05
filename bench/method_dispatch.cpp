@@ -179,5 +179,12 @@ BENCHMARK_F(AstFixture, SwitchDispatch, 10, 100) {
       }
     }
   }
+}
 
+BENCHMARK_F(AstFixture, NoDispatch, 10, 100) {
+  for(auto node : ast->nodes) {
+      UpdateNode *n = reinterpret_cast<UpdateNode*>(node);
+      IntAtom *ia = reinterpret_cast<IntAtom*>(n->expr_->right_);
+      context[n->index_] = ia->value() + 20 + 10;
+  }
 }
