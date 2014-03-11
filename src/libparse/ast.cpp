@@ -1,7 +1,16 @@
 #include "libparse/ast.h"
 
-AstNode::AstNode(NodeType t) {
-    this->type = t;
+Symbol::Symbol(const std::string name) : name_(name), type(Type::UNKNOWN) {}
+
+AstNode::AstNode(NodeType node_type) {
+    node_type_ = node_type;
+    type_ = Type::UNKNOWN;
+   // DEBUG(this->to_str());
+}
+
+AstNode::AstNode(NodeType node_type, Type type) {
+    node_type_ = node_type;
+    type_ = type;
    // DEBUG(this->to_str());
 }
 
@@ -10,7 +19,7 @@ AstNode::~AstNode() {
 }
 
 std::string AstNode::to_str() {
-    return std::string("AStNode: ")+ node_type_names[type];
+    return std::string("AStNode: ")+ node_type_names[node_type_];
 }
 
 void AstNode::visit(AstVisitor &v) {
@@ -18,10 +27,10 @@ void AstNode::visit(AstVisitor &v) {
 }
 
 bool AstNode::equals(AstNode *other) {
-  return type == other->type;
+  return node_type_ == other->node_type_;
 }
 
-AstListNode::AstListNode(NodeType type) : AstNode(type) {}
+AstListNode::AstListNode(NodeType node_type) : AstNode(node_type) {}
 
 AstListNode::~AstListNode() {
   for (auto n : nodes) {
@@ -66,7 +75,7 @@ bool AstListNode::equals(AstNode *other) {
   }
 }
 
-IntAtom::IntAtom(INT_T val) : AtomNode(NodeType::INT_ATOM) {
+IntAtom::IntAtom(INT_T val) : AtomNode(NodeType::INT_ATOM, Type::INT) {
   val_ = val;
 }
 
@@ -84,6 +93,21 @@ bool IntAtom::equals(AstNode *other) {
 Expression::Expression(Expression *left, AtomNode *right) : AstNode(NodeType::EXPRESSION) {
   left_ = left;
   right_ = right;
+
+  // Propagate known types
+  if (left_ == nullptr) {
+    if(right_->type_ != Type::UNKNOWN) {
+      type_ = right_->type_;
+    }
+  } else if (right_ == nullptr) {
+    if (left_->type_ != Type::UNKNOWN) {
+      type_ = left_->type_;
+    }
+  } else {
+    if (left_->type_ == right_->type_) {
+      type_ = right_->type_;
+    }
+  }
 }
 
 Expression::~Expression() {
@@ -135,7 +159,7 @@ bool UpdateNode::equals(AstNode *other) {
   return expr_->equals(other_cast->expr_);
 }
 
-UnaryNode::UnaryNode(NodeType type, AstNode *child) : AstNode(type) {
+UnaryNode::UnaryNode(NodeType node_type, AstNode *child) : AstNode(node_type) {
   child_ = child;
 }
 

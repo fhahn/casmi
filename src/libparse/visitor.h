@@ -1,6 +1,8 @@
 #ifndef CASMI_LIBPARSE_VISITOR_H
 #define CASMI_LIBPARSE_VISITOR_H
 
+#include <functional>
+
 #include "libparse/ast.h"
 
 class AstNode;
@@ -16,9 +18,11 @@ class PrintVisitor : public AstVisitor {
         void visit_node(AstNode *node);
 };
 
-class SerializeVisitor: public AstVisitor {
+class LambdaVisitor: public AstVisitor {
+  std::function<bool (AstNode *node)> func_;
+
   public:
-    std::vector<AstNode*> items;
+    LambdaVisitor(std::function<bool (AstNode *node)> func) { func_ = func; }
     void visit_node(AstNode *node);
 };
 

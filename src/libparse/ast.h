@@ -13,16 +13,28 @@ enum NodeType { INT_ATOM, DUMMY_ATOM, INIT, BODY_ELEMENTS, PROVIDER, OPTION, ENU
 
 static const char* node_type_names[] = { "INT_ATOM", "DUMMY_ATOM", "INIT", "BODY_ELEMENTS", "PROVIDER",  "OPTION", "ENUM", "FUNCTION", "DERIVED", "RULE", "SPECIFICATION", "EXPRESSION", "UPDATE", "STATEMENT", "PARBLOCK", "STATEMENTS"};
 
+
+class Symbol {
+  private:
+    const std::string name_;
+  public:
+    Type type;
+    Symbol(const std::string name);
+};
+
 class AstVisitor;
 
 class AstNode {
     private:
         int line_number;
         int column;
-        NodeType type;
 
     public:
-        AstNode(NodeType t);
+        Type type_;
+        NodeType node_type_;
+
+        AstNode(NodeType node_type);
+        AstNode(NodeType node_type, Type type);
         virtual ~AstNode();
         virtual std::string to_str();
         virtual void visit(AstVisitor &v);
@@ -34,7 +46,7 @@ class AstListNode: public AstNode {
         std::vector<AstNode*> nodes;
 
     public:
-        AstListNode(NodeType type);
+        AstListNode(NodeType node_type);
         virtual ~AstListNode();
         void add(AstNode* n);
         virtual void visit(AstVisitor &v);
@@ -44,7 +56,7 @@ class AstListNode: public AstNode {
 class AtomNode: public AstNode {
   public:
     AtomNode() : AstNode(NodeType::DUMMY_ATOM) {}
-    AtomNode(NodeType t) : AstNode(t) {}
+    AtomNode(NodeType node_type, Type type) : AstNode(node_type, type) {}
 };
 
 class IntAtom : public AtomNode {
@@ -75,7 +87,7 @@ class UnaryNode: public AstNode {
     AstNode *child_;
 
   public:
-    UnaryNode(NodeType type, AstNode *child);
+    UnaryNode(NodeType node_type, AstNode *child);
     virtual ~UnaryNode();
     virtual void visit(AstVisitor &v);
     virtual bool equals(AstNode *other);

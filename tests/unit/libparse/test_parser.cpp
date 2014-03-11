@@ -51,3 +51,24 @@ TEST_F(ParserTest, parse_error) {
   std::string test = "init\n";
   EXPECT_EQ(nullptr, driver_.parse(test));
 }
+
+TEST_F(ParserTest, parse_simple_types) {
+  std::string test = "init main\n"
+                     "rule main = {\n"
+                     "    x := 1 - 2\n"
+                     "    y := 5 - 10\n"
+                     "}\n";
+  AstNode *root = driver_.parse(test);
+
+  LambdaVisitor v([&] (AstNode *n) {
+      if (n->node_type_ == NodeType::EXPRESSION) {
+        return n->type_ == Type::INT;
+      } else {
+        return true;
+      }
+  });
+
+  root->visit(v);
+
+  delete root;
+}
