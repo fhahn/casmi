@@ -19,6 +19,11 @@ casmi_driver::~casmi_driver () {
     fclose(file_);
   }
   yylex_destroy();
+
+  // cleanup symbol table
+  for (auto entry : symbol_table) {
+    delete entry.second;
+  }
 }
 
 size_t casmi_driver::get_next_chars(char buf[], size_t max_size) {
@@ -74,6 +79,16 @@ void casmi_driver::error (const std::string& m) {
   std::cerr << m << std::endl;
 }
 
+Symbol *casmi_driver::add_symbol(const std::string& s) {
+  try {
+    return symbol_table.at(s);
+  } catch (const std::out_of_range& e) {
+    Symbol *sym = new Symbol(s);
+    symbol_table[s] = sym;
+    return sym;
+  }
+}
+
 AstNode *casmi_string_driver::parse (const std::string &str) {
   char tmpname[] = "/tmp/casmi_test_XXXXXX";
   int fd = mkstemp(&tmpname[0]);
@@ -96,3 +111,4 @@ AstNode *casmi_string_driver::parse (const std::string &str) {
 
   return res;
 }
+

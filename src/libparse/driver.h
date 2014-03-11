@@ -24,8 +24,6 @@ public:
   casmi_driver ();
   virtual ~casmi_driver ();
 
-  std::map<std::string, int> variables;
-
   AstNode *result;
 
   // State information for the lexer
@@ -41,6 +39,10 @@ public:
   // Error handling.
   void error (const yy::location& l, const std::string& m);
   void error (const std::string& m);
+
+  // symbol table stuff
+  std::map<std::string, Symbol*> symbol_table;
+  Symbol *add_symbol(const std::string& s);
 };
 
 class casmi_string_driver : public casmi_driver {

@@ -72,3 +72,20 @@ TEST_F(ParserTest, parse_simple_types) {
 
   delete root;
 }
+
+TEST_F(ParserTest, parse_simple_symbols) {
+  std::string test = "init main\n"
+                     "rule main = {\n"
+                     "    x := 1 - 2\n"
+                     "    y := 5 - 10\n"
+                     "}\n";
+  AstNode *root = driver_.parse(test);
+
+  EXPECT_EQ(2, driver_.symbol_table.size());
+  EXPECT_NO_THROW({
+      driver_.symbol_table.at("x");
+      driver_.symbol_table.at("y");
+  });
+
+  delete root;
+}
