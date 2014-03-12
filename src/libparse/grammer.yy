@@ -269,7 +269,7 @@ EXPRESSION: EXPRESSION "+" ATOM { $$ = new Expression($1, $3);}
 BRACKET_EXPRESSION: "(" EXPRESSION ")" 
                   ;
 
-FUNCTION_SYNTAX: IDENTIFIER { driver.add_symbol($1); }
+FUNCTION_SYNTAX: IDENTIFIER { driver.current_symbol_table->add_symbol($1); }
                | IDENTIFIER "(" ")" 
                | IDENTIFIER "(" EXPRESSION_LIST ")"
                ;

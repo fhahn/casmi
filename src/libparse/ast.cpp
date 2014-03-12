@@ -1,7 +1,5 @@
 #include "libparse/ast.h"
 
-Symbol::Symbol(const std::string name) : name_(name), type(Type::UNKNOWN) {}
-
 AstNode::AstNode(NodeType node_type) {
     node_type_ = node_type;
     type_ = Type::UNKNOWN;

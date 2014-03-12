@@ -8,6 +8,7 @@
 #include <memory>
 
 #include "libparse/ast.h"
+#include "libparse/symbols.h"
 #include "libparse/parser.tab.h"
 
 // Tell Flex the lexer's prototype ...
@@ -41,8 +42,7 @@ public:
   void error (const std::string& m);
 
   // symbol table stuff
-  std::map<std::string, Symbol*> symbol_table;
-  Symbol *add_symbol(const std::string& s);
+  SymbolTable *current_symbol_table;
 };
 
 class casmi_string_driver : public casmi_driver {

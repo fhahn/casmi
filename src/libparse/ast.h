@@ -13,15 +13,6 @@ enum NodeType { INT_ATOM, DUMMY_ATOM, INIT, BODY_ELEMENTS, PROVIDER, OPTION, ENU
 
 static const char* node_type_names[] = { "INT_ATOM", "DUMMY_ATOM", "INIT", "BODY_ELEMENTS", "PROVIDER",  "OPTION", "ENUM", "FUNCTION", "DERIVED", "RULE", "SPECIFICATION", "EXPRESSION", "UPDATE", "STATEMENT", "PARBLOCK", "STATEMENTS"};
 
-
-class Symbol {
-  private:
-    const std::string name_;
-  public:
-    Type type;
-    Symbol(const std::string name);
-};
-
 class AstVisitor;
 
 class AstNode {

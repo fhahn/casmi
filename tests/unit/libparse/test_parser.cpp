@@ -81,11 +81,8 @@ TEST_F(ParserTest, parse_simple_symbols) {
                      "}\n";
   AstNode *root = driver_.parse(test);
 
-  EXPECT_EQ(2, driver_.symbol_table.size());
-  EXPECT_NO_THROW({
-      driver_.symbol_table.at("x");
-      driver_.symbol_table.at("y");
-  });
+  EXPECT_EQ(2, driver_.current_symbol_table->size());
+  EXPECT_EQ("x", driver_.current_symbol_table->get("x")->name());
 
   delete root;
 }
