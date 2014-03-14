@@ -4,6 +4,10 @@
 
 #include "libparse/driver.h"
 
+#define BOLD_BLACK  "\x1b[1m"
+#define BOLD_RED    "\x1b[1;31m"
+#define RESET       "\x1b[0m"
+
 extern int yylex_destroy(void);
 
 // driver must be global, because it is needed for YY_INPUT
@@ -69,12 +73,8 @@ AstNode *casmi_driver::parse (const std::string &f) {
 }
 
 void casmi_driver::error (const yy::location& l, const std::string& m) {
-  std::cerr << l << ": " << m << std::endl;
-
-}
-
-void casmi_driver::error (const std::string& m) {
-  std::cerr << m << std::endl;
+  std::cerr << BOLD_BLACK << filename_ << ":" << l << ": " <<
+      BOLD_RED << "error: " << RESET << BOLD_BLACK << m << RESET << std::endl;
 }
 
 AstNode *casmi_string_driver::parse (const std::string &str) {
