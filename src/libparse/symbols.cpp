@@ -1,5 +1,6 @@
 #include "libparse/symbols.h"
 
+
 // -------------------------------------------------------------------------
 // Implementation of Symbol
 // -------------------------------------------------------------------------
@@ -8,6 +9,10 @@ Symbol::Symbol(const std::string name) : name_(name), type(Type::UNKNOWN) {}
 
 const std::string& Symbol::name() const {
   return name_;
+}
+
+bool Symbol::equals(Symbol *other) const {
+  return type == other->type && name_ == other->name_;
 }
 // -------------------------------------------------------------------------
 // Implementation of SymbolTable
@@ -23,13 +28,13 @@ SymbolTable::~SymbolTable() {
   }
 }
 
-Symbol *SymbolTable::add_symbol(const std::string& s) {
+bool SymbolTable::add(Symbol *sym) {
   try {
-    return table_.at(s);
+    table_.at(sym->name());
+    return false;
   } catch (const std::out_of_range& e) {
-    Symbol *sym = new Symbol(s);
-    table_[s] = sym;
-    return sym;
+    table_[sym->name()] = sym;
+    return true;
   }
 }
 

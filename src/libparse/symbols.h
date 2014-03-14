@@ -7,14 +7,17 @@
 #include "libparse/types.h"
 
 
+
 class Symbol {
   private:
     const std::string name_;
+
   public:
     Type type;
     Symbol(const std::string name);
 
     const std::string& name() const;
+    bool equals(Symbol *other) const;
 };
 
 
@@ -29,7 +32,7 @@ class SymbolTable {
     ~SymbolTable();
 
     size_t size() const;
-    Symbol *add_symbol(const std::string& s);
+    bool add(Symbol *s);
     Symbol *get(const std::string& name) const;
 };
 

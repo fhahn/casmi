@@ -76,6 +76,7 @@
 %type <AtomNode*> NUMBER
 %type <AtomNode*> VALUE
 %type <uint64_t> INTCONST
+%type <Symbol*> FUNCTION_SYNTAX FUNCTION_DEFINITION
 
 %start SPECIFICATION
 
@@ -111,7 +112,12 @@ BODY_ELEMENTS: BODY_ELEMENTS BODY_ELEMENT { $1->add($2); $$ = $1; }
 BODY_ELEMENT: PROVIDER_SYNTAX { $$ = new AstNode(NodeType::PROVIDER); }
            | OPTION_SYNTAX { $$ = new AstNode(NodeType::OPTION); }
            | ENUM_SYNTAX { $$ = new AstNode(NodeType::ENUM); }
-           | FUNCTION_DEFINITION { $$ = new AstNode(NodeType::FUNCTION); }
+           | FUNCTION_DEFINITION {
+                $$ = new AstNode(NodeType::FUNCTION);
+                if (!driver.current_symbol_table->add($1)) {
+                    driver.error(@$, "redefintion of symbol");
+                }; 
+                }
            | DERIVED_SYNTAX { $$ = new AstNode(NodeType::DERIVED); }
            | INIT_SYNTAX { $$ = $1; }
            | RULE_SYNTAX { $$ = $1; }
@@ -138,9 +144,13 @@ DERIVED_SYNTAX: DERIVED IDENTIFIER "(" PARAM_LIST ")" "=" EXPRESSION
               ;
 
 FUNCTION_DEFINITION: FUNCTION "(" IDENTIFIER_LIST ")" IDENTIFIER FUNCTION_SIGNATURE INITIALIZERS
+                   { $$ = new Symbol($5); }
            | FUNCTION "(" IDENTIFIER_LIST ")" IDENTIFIER FUNCTION_SIGNATURE
+                   { $$ = new Symbol($5); }
            | FUNCTION IDENTIFIER FUNCTION_SIGNATURE INITIALIZERS
+                   { $$ = new Symbol($2); }
            | FUNCTION IDENTIFIER FUNCTION_SIGNATURE
+                   { $$ = new Symbol($2); }
            ;
 
 
@@ -269,7 +279,7 @@ EXPRESSION: EXPRESSION "+" ATOM { $$ = new Expression($1, $3);}
 BRACKET_EXPRESSION: "(" EXPRESSION ")" 
                   ;
 
-FUNCTION_SYNTAX: IDENTIFIER { driver.current_symbol_table->add_symbol($1); }
+FUNCTION_SYNTAX: IDENTIFIER { $$ = new Symbol($1); }
                | IDENTIFIER "(" ")" 
                | IDENTIFIER "(" EXPRESSION_LIST ")"
                ;
@@ -348,7 +358,7 @@ DEBUG_ATOM_LIST: DEBUG_ATOM_LIST "+" ATOM
 PRINT_SYNTAX: PRINT DEBUG_ATOM_LIST
             ;
 
-UPDATE_SYNTAX: FUNCTION_SYNTAX UPDATE EXPRESSION { $$ = new UpdateNode($3); }
+UPDATE_SYNTAX: FUNCTION_SYNTAX UPDATE EXPRESSION { $$ = new UpdateNode($1, $3); }
              ;
 
 CASE_SYNTAX: CASE EXPRESSION OF CASE_LABEL_LIST ENDCASE

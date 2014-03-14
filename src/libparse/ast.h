@@ -7,6 +7,8 @@
 #include "macros.h"
 #include "libparse/visitor.h"
 #include "libparse/types.h"
+#include "libparse/symbols.h"
+#include "libparse/location.hh" // reuse bison's location class
 
 // TODO enum class, but how to print?
 enum NodeType { INT_ATOM, DUMMY_ATOM, INIT, BODY_ELEMENTS, PROVIDER, OPTION, ENUM, FUNCTION, DERIVED, RULE, SPECIFICATION, EXPRESSION, UPDATE, STATEMENT, PARBLOCK, STATEMENTS};
@@ -16,16 +18,14 @@ static const char* node_type_names[] = { "INT_ATOM", "DUMMY_ATOM", "INIT", "BODY
 class AstVisitor;
 
 class AstNode {
-    private:
-        int line_number;
-        int column;
-
     public:
         Type type_;
         NodeType node_type_;
+        yy::location location;
 
         AstNode(NodeType node_type);
         AstNode(NodeType node_type, Type type);
+        AstNode(NodeType node_type, yy::location& loc);
         virtual ~AstNode();
         virtual std::string to_str();
         virtual void visit(AstVisitor &v);
@@ -86,10 +86,11 @@ class UnaryNode: public AstNode {
 
 class UpdateNode: public AstNode {
   private:
+    Symbol *sym_;
     Expression *expr_;
 
   public:
-    UpdateNode(Expression *expr);
+    UpdateNode(Symbol *sym, Expression *expr);
     virtual ~UpdateNode();
     virtual void visit(AstVisitor &v);
     virtual bool equals(AstNode *other);

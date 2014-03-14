@@ -37,7 +37,7 @@ char strbuf[STRBUF_LENGTH];
 %}
 
 /* use debug option for more output */
-%option noyywrap nounput batch noinput debug
+%option noyywrap nounput batch noinput
 
 %x LCOMMENT
 %x COMMENT

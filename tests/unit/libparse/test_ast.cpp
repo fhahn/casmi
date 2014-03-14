@@ -117,6 +117,7 @@ TEST(EqualsTest, test_expression_wrong_balance) {
 
 TEST(EqualsTest, test_update_node) {
   UpdateNode *ast1 = new UpdateNode(
+      new Symbol("x"),
       new Expression(
           new Expression(nullptr, create_atom(10)),
           create_atom(50)
@@ -124,6 +125,7 @@ TEST(EqualsTest, test_update_node) {
   );
 
   UpdateNode *ast2 = new UpdateNode(
+      new Symbol("x"),
       new Expression(
           new Expression(nullptr, create_atom(10)),
           create_atom(50)
@@ -139,6 +141,7 @@ TEST(EqualsTest, test_update_node) {
 
 TEST(EqualsTest, test_update_node_not_equal) {
   UpdateNode *ast1 = new UpdateNode(
+      new Symbol("x"),
       new Expression(
           new Expression(nullptr, create_atom(10)),
           create_atom(50)
@@ -146,6 +149,7 @@ TEST(EqualsTest, test_update_node_not_equal) {
   );
 
   UpdateNode *ast2 = new UpdateNode(
+      new Symbol("x"),
       new Expression(
           nullptr,
           create_atom(50)

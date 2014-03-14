@@ -12,6 +12,12 @@ AstNode::AstNode(NodeType node_type, Type type) {
    // DEBUG(this->to_str());
 }
 
+
+AstNode::AstNode(NodeType node_type, yy::location& loc) {
+  node_type_ = node_type;
+  location = loc;
+}
+
 AstNode::~AstNode() {
   // no dynamically alloceted stuff here
 }
@@ -135,11 +141,12 @@ bool Expression::equals(AstNode *other) {
 }
 
 
-UpdateNode::UpdateNode(Expression *expr) : AstNode(NodeType::UPDATE) {
-  expr_ = expr;
+UpdateNode::UpdateNode(Symbol *sym, Expression *expr) : AstNode(NodeType::UPDATE),
+                                           sym_(sym), expr_(expr) {
 }
 
 UpdateNode::~UpdateNode() {
+  delete sym_;
   delete expr_;
 }
 
@@ -154,7 +161,7 @@ bool UpdateNode::equals(AstNode *other) {
   }
 
   UpdateNode *other_cast = static_cast<UpdateNode*>(other);
-  return expr_->equals(other_cast->expr_);
+  return expr_->equals(other_cast->expr_) && sym_->equals(other_cast->sym_);
 }
 
 UnaryNode::UnaryNode(NodeType node_type, AstNode *child) : AstNode(node_type) {
