@@ -20,7 +20,8 @@ class casmi_driver {
 private:
   std::string filename_;
   FILE *file_;
- 
+  std::vector<std::string> lines_;
+
 public:
   casmi_driver ();
   virtual ~casmi_driver ();

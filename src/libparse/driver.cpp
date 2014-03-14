@@ -6,6 +6,7 @@
 
 #define BOLD_BLACK  "\x1b[1m"
 #define BOLD_RED    "\x1b[1;31m"
+#define RED         "\x1b[31m"
 #define RESET       "\x1b[0m"
 
 extern int yylex_destroy(void);
@@ -17,6 +18,7 @@ casmi_driver::casmi_driver ()
     : trace_parsing (false), trace_scanning (false) {
   file_ = nullptr;
   current_symbol_table = new SymbolTable();
+  lines_.push_back("");
 }
 
 casmi_driver::~casmi_driver () {
@@ -36,6 +38,11 @@ size_t casmi_driver::get_next_chars(char buf[], size_t max_size) {
       return 0;
     }
   } else {
+    // lines_ must not be empty (initialized with empty string in constructor)
+    lines_.back().append(buf);
+    if (buf[strlen(buf)-1] == '\n') {
+      lines_.push_back("");
+    }
     return strlen(buf);
   }
 }
@@ -74,7 +81,21 @@ AstNode *casmi_driver::parse (const std::string &f) {
 
 void casmi_driver::error (const yy::location& l, const std::string& m) {
   std::cerr << BOLD_BLACK << filename_ << ":" << l << ": " <<
-      BOLD_RED << "error: " << RESET << BOLD_BLACK << m << RESET << std::endl;
+     BOLD_RED << "error: " << RESET << BOLD_BLACK << m << RESET << std::endl;
+
+  if (l.begin.line == l.end.line && l.begin.line <= lines_.size()) {
+    const std::string& error_line = lines_[l.begin.line-1];
+    std::cerr << filename_ <<":" << l.begin.line <<" " << error_line;
+
+    size_t length_to_error = error_line.size()+4+std::to_string(l.begin.line).size()+l.begin.column;
+    std::cerr << std::string(length_to_error, ' ');
+    std::cerr << RED << std::string(l.end.column-l.begin.column, '^') << RESET;
+    std::cerr << std::endl;
+  } else {
+    for (size_t i=l.begin.line-1; (i < l.end.line && i < lines_.size()); i++) {
+      std::cerr << filename_ <<":" << i <<" " << lines_[i];
+    }
+  }
 }
 
 AstNode *casmi_string_driver::parse (const std::string &str) {
