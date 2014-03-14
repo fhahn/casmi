@@ -3,18 +3,21 @@
 
 #include <string>
 #include <map>
+#include <vector>
 
 #include "libparse/types.h"
 
 
-
+// Only used for functions at the moment
 class Symbol {
   private:
     const std::string name_;
+    std::vector<Type> *types_;
 
   public:
-    Type type;
+    Symbol(const std::string name, std::vector<Type> *t);
     Symbol(const std::string name);
+    ~Symbol();
 
     const std::string& name() const;
     bool equals(Symbol *other) const;

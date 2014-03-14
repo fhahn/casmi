@@ -17,6 +17,7 @@ class ParserTest: public ::testing::Test {
     casmi_string_driver driver_;
 };
 
+/*
 TEST_F(ParserTest, parse_simple) {
   std::string test = "init main\n"
                      "rule main = {\n"
@@ -46,12 +47,14 @@ TEST_F(ParserTest, parse_simple) {
   delete ast;
   delete root;
 }
+*/
 
 TEST_F(ParserTest, parse_error) {
   std::string test = "init\n";
   EXPECT_EQ(nullptr, driver_.parse(test));
 }
 
+/*
 TEST_F(ParserTest, parse_simple_types) {
   std::string test = "init main\n"
                      "rule main = {\n"
@@ -72,6 +75,7 @@ TEST_F(ParserTest, parse_simple_types) {
 
   delete root;
 }
+*/
 
 /*
 TEST_F(ParserTest, parse_simple_symbols) {
@@ -88,3 +92,20 @@ TEST_F(ParserTest, parse_simple_symbols) {
   delete root;
 }
 */
+
+TEST_F(ParserTest, parser_test_function_symbol_with_multiple_params) {
+  std::string test = "function x : Int * Int -> Int\n"
+                     "init main\n"
+                     "rule main = { skip }\n";
+  AstNode *root = driver_.parse(test);
+
+  std::vector<Type> *types = new std::vector<Type>;
+  types->push_back(Type::INT);
+  types->push_back(Type::INT);
+  types->push_back(Type::INT);
+  Symbol x("x", types);
+
+  EXPECT_EQ(true, x.equals(driver_.current_symbol_table->get("x")));
+
+  delete root;
+}

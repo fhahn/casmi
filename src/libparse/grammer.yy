@@ -77,6 +77,8 @@
 %type <AtomNode*> VALUE
 %type <uint64_t> INTCONST
 %type <Symbol*> FUNCTION_SYNTAX FUNCTION_DEFINITION
+%type <Type> NEW_TYPE_SYNTAX
+%type <std::vector<Type>*> FUNCTION_SIGNATURE TYPE_IDENTIFIER_STARLIST
 
 %start SPECIFICATION
 
@@ -144,13 +146,13 @@ DERIVED_SYNTAX: DERIVED IDENTIFIER "(" PARAM_LIST ")" "=" EXPRESSION
               ;
 
 FUNCTION_DEFINITION: FUNCTION "(" IDENTIFIER_LIST ")" IDENTIFIER FUNCTION_SIGNATURE INITIALIZERS
-                   { $$ = new Symbol($5); }
+                   { $$ = new Symbol($5, $6); }
            | FUNCTION "(" IDENTIFIER_LIST ")" IDENTIFIER FUNCTION_SIGNATURE
-                   { $$ = new Symbol($5); }
+                   { $$ = new Symbol($5, $6); }
            | FUNCTION IDENTIFIER FUNCTION_SIGNATURE INITIALIZERS
-                   { $$ = new Symbol($2); }
+                   { $$ = new Symbol($2, $3); }
            | FUNCTION IDENTIFIER FUNCTION_SIGNATURE
-                   { $$ = new Symbol($2); }
+                   { $$ = new Symbol($2, $3); }
            ;
 
 
@@ -160,7 +162,10 @@ IDENTIFIER_LIST: IDENTIFIER "," IDENTIFIER_LIST
                ;
 
 FUNCTION_SIGNATURE: ":" ARROW NEW_TYPE_SYNTAX 
+                  /* this constructor is implementation dependant! */
+                  { $$ = new std::vector<Type>(1); $$->push_back($3); }
                   | ":" TYPE_IDENTIFIER_STARLIST ARROW NEW_TYPE_SYNTAX
+                  { $$ = $2; $$->push_back($4); }
                   ;
 
 PARAM: IDENTIFIER OLD_TYPE_SYNTAX 
@@ -173,13 +178,26 @@ PARAM_LIST: PARAM "," PARAM_LIST
           | PARAM 
           ;
 
-TYPE_IDENTIFIER_STARLIST: NEW_TYPE_SYNTAX "*" TYPE_IDENTIFIER_STARLIST
+/* TODO: right recursion */
+TYPE_IDENTIFIER_STARLIST: NEW_TYPE_SYNTAX "*" TYPE_IDENTIFIER_STARLIST 
+                        {
+                            $3->insert($3->begin(), $1);
+                            $$ = $3;
+                        }
                         | NEW_TYPE_SYNTAX "*" 
+                        { // TODO: limit memory size
+                            $$ = new std::vector<Type>;
+                            $$->push_back($1);
+                        }
                         | NEW_TYPE_SYNTAX 
+                        { // TODO: limit memory size
+                            $$ = new std::vector<Type>;
+                            $$->push_back($1);
+                        }
                         ;
 
 /* new type syntax */
-NEW_TYPE_SYNTAX: IDENTIFIER 
+NEW_TYPE_SYNTAX: IDENTIFIER { $$ = str_to_type($1); /* TODO check invalid types */}
                | IDENTIFIER "(" NEW_TYPE_SYNTAX_LIST ")" 
                | IDENTIFIER TYPEANNOTATION IDENTIFIER ENDTYPEANNOTATION
                | IDENTIFIER TYPEANNOTATION "[" TUPLE_LIST "]" ENDTYPEANNOTATION
@@ -279,7 +297,7 @@ EXPRESSION: EXPRESSION "+" ATOM { $$ = new Expression($1, $3);}
 BRACKET_EXPRESSION: "(" EXPRESSION ")" 
                   ;
 
-FUNCTION_SYNTAX: IDENTIFIER { $$ = new Symbol($1); }
+FUNCTION_SYNTAX: IDENTIFIER { /*$$ = new Symbol($1); */}
                | IDENTIFIER "(" ")" 
                | IDENTIFIER "(" EXPRESSION_LIST ")"
                ;
