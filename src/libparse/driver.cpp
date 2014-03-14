@@ -15,7 +15,7 @@ extern int yylex_destroy(void);
 casmi_driver *global_driver;
 
 casmi_driver::casmi_driver () 
-    : trace_parsing (false), trace_scanning (false) {
+    : error_(false), trace_parsing (false), trace_scanning (false) {
   file_ = nullptr;
   current_symbol_table = new SymbolTable();
   lines_.push_back("");
@@ -67,7 +67,7 @@ AstNode *casmi_driver::parse (const std::string &f) {
   try {
     res = parser.parse ();
 
-    if (res != 0) {
+    if (res != 0 || error_) {
       return nullptr;
     }
 
@@ -80,6 +80,9 @@ AstNode *casmi_driver::parse (const std::string &f) {
 }
 
 void casmi_driver::error (const yy::location& l, const std::string& m) {
+  // Set state to error!
+  error_ = true;
+
   std::cerr << BOLD_BLACK << filename_ << ":" << l << ": " <<
      BOLD_RED << "error: " << RESET << BOLD_BLACK << m << RESET << std::endl;
 
@@ -87,7 +90,7 @@ void casmi_driver::error (const yy::location& l, const std::string& m) {
     const std::string& error_line = lines_[l.begin.line-1];
     std::cerr << filename_ <<":" << l.begin.line <<" " << error_line;
 
-    size_t length_to_error = error_line.size()+4+std::to_string(l.begin.line).size()+l.begin.column;
+    size_t length_to_error = filename_.size()+1+std::to_string(l.begin.line).size()+l.begin.column;
     std::cerr << std::string(length_to_error, ' ');
     std::cerr << RED << std::string(l.end.column-l.begin.column, '^') << RESET;
     std::cerr << std::endl;

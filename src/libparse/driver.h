@@ -21,6 +21,7 @@ private:
   std::string filename_;
   FILE *file_;
   std::vector<std::string> lines_;
+  bool error_;
 
 public:
   casmi_driver ();
