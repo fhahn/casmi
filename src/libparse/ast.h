@@ -16,6 +16,7 @@ enum NodeType { INT_ATOM, DUMMY_ATOM, INIT, BODY_ELEMENTS, PROVIDER, OPTION, ENU
 static const char* node_type_names[] = { "INT_ATOM", "DUMMY_ATOM", "INIT", "BODY_ELEMENTS", "PROVIDER",  "OPTION", "ENUM", "FUNCTION", "DERIVED", "RULE", "SPECIFICATION", "EXPRESSION", "UPDATE", "STATEMENT", "PARBLOCK", "STATEMENTS"};
 
 class AstVisitor;
+class SymbolUsage;
 
 class AstNode {
     public:
@@ -86,11 +87,11 @@ class UnaryNode: public AstNode {
 
 class UpdateNode: public AstNode {
   private:
-    Symbol *sym_;
+    SymbolUsage *sym_;
     Expression *expr_;
 
   public:
-    UpdateNode(Symbol *sym, Expression *expr);
+    UpdateNode(SymbolUsage *sym, Expression *expr);
     virtual ~UpdateNode();
     virtual void visit(AstVisitor &v);
     virtual bool equals(AstNode *other);

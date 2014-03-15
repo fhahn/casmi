@@ -13,3 +13,7 @@ const std::string type_to_str(Type t) {
   if (t == Type::INT) return "Int";
   return "Invalid";
 }
+
+
+FunctionInfo::FunctionInfo(std::vector<Type> *args, Type return_type) :
+    arguments_(args), return_type_(return_type) {}

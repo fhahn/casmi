@@ -5,17 +5,20 @@
 #include <map>
 #include <vector>
 
+#include "libparse/ast.h"
 #include "libparse/types.h"
 
+class Expression;
 
 // Only used for functions at the moment
 class Symbol {
   private:
     const std::string name_;
-    std::vector<Type> *types_;
+    std::vector<Type> *arguments_;
+    Type return_type_;
 
   public:
-    Symbol(const std::string name, std::vector<Type> *t);
+    Symbol(const std::string name, std::vector<Type> *args, Type return_type);
     Symbol(const std::string name);
     ~Symbol();
 
@@ -23,6 +26,16 @@ class Symbol {
     bool equals(Symbol *other) const;
 };
 
+class SymbolUsage {
+  private:
+    const std::string name_;
+    std::vector<Expression*> *arguments_;
+
+  public:
+    SymbolUsage(const std::string name);
+    ~SymbolUsage();
+    bool equals(SymbolUsage *other) const;
+};
 
 class SymbolTable {
   private:

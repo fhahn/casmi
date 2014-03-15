@@ -6,15 +6,15 @@
 // Implementation of Symbol
 // -------------------------------------------------------------------------
 
-Symbol::Symbol(const std::string name, std::vector<Type> *types) : name_(name), types_(types) {}
+Symbol::Symbol(const std::string name, std::vector<Type> *args,
+              Type return_type) : name_(name), arguments_(args),
+                                  return_type_(return_type) {}
 
-Symbol::Symbol(const std::string name) : name_(name) {
-  types_ = new std::vector<Type>;
-  types_->push_back(Type::UNKNOWN);
-}
+Symbol::Symbol(const std::string name) :
+        name_(name), arguments_(nullptr), return_type_(Type::UNKNOWN) {}
 
 Symbol::~Symbol() {
-  delete types_;
+  delete arguments_;
 }
 
 const std::string& Symbol::name() const {
@@ -22,16 +22,42 @@ const std::string& Symbol::name() const {
 }
 
 bool Symbol::equals(Symbol *other) const {
-  if (name_ != other->name_ || types_->size() != other->types_->size()) {
+  if (name_ != other->name_) {
     return false;
   }
-  for (int i=0; i < types_->size(); i++) {
-    if ((*types_)[i] != (*other->types_)[i]) {
-      std::cout << type_to_str((*types_)[i]) << "\n";
+
+  if (arguments_ != nullptr && other->arguments_ != nullptr) {
+    if (arguments_->size() != other->arguments_->size()) {
       return false;
     }
+    for (size_t i=0; i < arguments_->size(); i++) {
+      if ((*arguments_)[i] != (*other->arguments_)[i]) {
+        return false;
+      }
+    }
   }
-  return true;
+  return return_type_ == other->return_type_;
+}
+
+SymbolUsage::SymbolUsage(const std::string name) :
+        name_(name), arguments_(nullptr){}
+
+SymbolUsage::~SymbolUsage() {
+  delete arguments_;
+}
+
+bool SymbolUsage::equals(SymbolUsage *other) const {
+  if (arguments_ != nullptr && other->arguments_ != nullptr) {
+    if (arguments_->size() != other->arguments_->size()) {
+      return false;
+    }
+    for (size_t i=0; i < arguments_->size(); i++) {
+      if ((*arguments_)[i] != (*other->arguments_)[i]) {
+        return false;
+      }
+    }
+  }
+  return arguments_ == other->arguments_ && name_ == other->name_;
 }
 // -------------------------------------------------------------------------
 // Implementation of SymbolTable

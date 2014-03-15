@@ -11,6 +11,8 @@
 {
     #include <cstdint>
     #include <string>
+    #include <utility>
+
     #include "libparse/ast.h"
     class casmi_driver;
 }
@@ -76,9 +78,11 @@
 %type <AtomNode*> NUMBER
 %type <AtomNode*> VALUE
 %type <uint64_t> INTCONST
-%type <Symbol*> FUNCTION_SYNTAX FUNCTION_DEFINITION
+%type <Symbol*> FUNCTION_DEFINITION
+%type <SymbolUsage*> FUNCTION_SYNTAX 
+%type <std::pair<std::vector<Type>*, Type>> FUNCTION_SIGNATURE
 %type <Type> NEW_TYPE_SYNTAX
-%type <std::vector<Type>*> FUNCTION_SIGNATURE TYPE_IDENTIFIER_STARLIST
+%type <std::vector<Type>*> TYPE_IDENTIFIER_STARLIST
 
 %start SPECIFICATION
 
@@ -146,13 +150,13 @@ DERIVED_SYNTAX: DERIVED IDENTIFIER "(" PARAM_LIST ")" "=" EXPRESSION
               ;
 
 FUNCTION_DEFINITION: FUNCTION "(" IDENTIFIER_LIST ")" IDENTIFIER FUNCTION_SIGNATURE INITIALIZERS
-                   { $$ = new Symbol($5, $6); }
+                   { $$ = new Symbol($5, $6.first, $6.second); }
            | FUNCTION "(" IDENTIFIER_LIST ")" IDENTIFIER FUNCTION_SIGNATURE
-                   { $$ = new Symbol($5, $6); }
+                   { $$ = new Symbol($5, $6.first, $6.second); }
            | FUNCTION IDENTIFIER FUNCTION_SIGNATURE INITIALIZERS
-                   { $$ = new Symbol($2, $3); }
+                   { $$ = new Symbol($2, $3.first, $3.second); }
            | FUNCTION IDENTIFIER FUNCTION_SIGNATURE
-                   { $$ = new Symbol($2, $3); }
+                   { $$ = new Symbol($2, $3.first, $3.second); }
            ;
 
 
@@ -163,9 +167,9 @@ IDENTIFIER_LIST: IDENTIFIER "," IDENTIFIER_LIST
 
 FUNCTION_SIGNATURE: ":" ARROW NEW_TYPE_SYNTAX 
                   /* this constructor is implementation dependant! */
-                  { $$ = new std::vector<Type>(1); $$->push_back($3); }
+                  { $$ = std::pair<std::vector<Type>*, Type>(nullptr, $3); }
                   | ":" TYPE_IDENTIFIER_STARLIST ARROW NEW_TYPE_SYNTAX
-                  { $$ = $2; $$->push_back($4); }
+                  { $$ = std::pair<std::vector<Type>*, Type>($2, $4); }
                   ;
 
 PARAM: IDENTIFIER OLD_TYPE_SYNTAX 
@@ -297,9 +301,9 @@ EXPRESSION: EXPRESSION "+" ATOM { $$ = new Expression($1, $3);}
 BRACKET_EXPRESSION: "(" EXPRESSION ")" 
                   ;
 
-FUNCTION_SYNTAX: IDENTIFIER { /*$$ = new Symbol($1); */}
-               | IDENTIFIER "(" ")" 
-               | IDENTIFIER "(" EXPRESSION_LIST ")"
+FUNCTION_SYNTAX: IDENTIFIER { $$ = new SymbolUsage($1); }
+               | IDENTIFIER "(" ")" { $$ = new SymbolUsage($1); }
+               | IDENTIFIER "(" EXPRESSION_LIST ")" { $$ = new SymbolUsage($1); }
                ;
 
 RULE_SYNTAX: RULE IDENTIFIER "=" STATEMENT { $$ = new UnaryNode(NodeType::RULE, $4); }

@@ -17,7 +17,6 @@ class ParserTest: public ::testing::Test {
     casmi_string_driver driver_;
 };
 
-/*
 TEST_F(ParserTest, parse_simple) {
   std::string test = "init main\n"
                      "rule main = {\n"
@@ -27,17 +26,20 @@ TEST_F(ParserTest, parse_simple) {
   AstNode *root = driver_.parse(test);
 
   AstListNode *stmts = new AstListNode(NodeType::STATEMENTS);
-  stmts->add(new UpdateNode(new Symbol("x"),
+
+  stmts->add(new UpdateNode(
+        new SymbolUsage("x"),
         new Expression(
             new Expression(nullptr, create_atom(1)),
             create_atom(2))
   ));
-  stmts->add(new UpdateNode(new Symbol("y"),
+
+  stmts->add(new UpdateNode(
+        new SymbolUsage("y"),
         new Expression(
             new Expression(nullptr, create_atom(5)),
             create_atom(10))
   ));
-
 
   AstListNode *ast = new AstListNode(NodeType::BODY_ELEMENTS);
   ast->add(new AstNode(NodeType::INIT));
@@ -47,7 +49,6 @@ TEST_F(ParserTest, parse_simple) {
   delete ast;
   delete root;
 }
-*/
 
 TEST_F(ParserTest, parse_error) {
   std::string test = "init\n";
@@ -102,8 +103,7 @@ TEST_F(ParserTest, parser_test_function_symbol_with_multiple_params) {
   std::vector<Type> *types = new std::vector<Type>;
   types->push_back(Type::INT);
   types->push_back(Type::INT);
-  types->push_back(Type::INT);
-  Symbol x("x", types);
+  Symbol x("x", types, Type::INT);
 
   EXPECT_EQ(true, x.equals(driver_.current_symbol_table->get("x")));
 

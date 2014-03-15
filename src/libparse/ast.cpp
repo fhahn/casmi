@@ -141,7 +141,7 @@ bool Expression::equals(AstNode *other) {
 }
 
 
-UpdateNode::UpdateNode(Symbol *sym, Expression *expr) : AstNode(NodeType::UPDATE),
+UpdateNode::UpdateNode(SymbolUsage *sym, Expression *expr) : AstNode(NodeType::UPDATE),
                                            sym_(sym), expr_(expr) {
 }
 
