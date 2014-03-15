@@ -55,7 +55,7 @@ class IntAtom : public AtomNode {
     INT_T val_;
 
     IntAtom(INT_T val);
-    ~IntAtom();
+    virtual ~IntAtom();
     bool equals(AstNode *other);
 };
 
