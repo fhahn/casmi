@@ -104,7 +104,7 @@
 %%
 
 
-SPECIFICATION: HEADER BODY_ELEMENTS { driver.result = new AstNode(NodeType::SPECIFICATION); }
+SPECIFICATION: HEADER BODY_ELEMENTS { driver.result = $2; } /* TODO: header ignored atm */ 
              | BODY_ELEMENTS { driver.result = $1; }
              ;
 
