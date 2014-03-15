@@ -34,10 +34,9 @@ class AstNode {
 };
 
 class AstListNode: public AstNode {
-    private:
+    public:
         std::vector<AstNode*> nodes;
 
-    public:
         AstListNode(NodeType node_type);
         virtual ~AstListNode();
         void add(AstNode* n);
@@ -52,10 +51,9 @@ class AtomNode: public AstNode {
 };
 
 class IntAtom : public AtomNode {
-  private:
+  public:
     INT_T val_;
 
-  public:
     IntAtom(INT_T val);
     ~IntAtom();
     bool equals(AstNode *other);
@@ -63,11 +61,10 @@ class IntAtom : public AtomNode {
 
 
 class Expression : public AstNode {
-  private:
+  public:
     Expression *left_;
     AtomNode *right_;
 
-  public:
     Expression(Expression *left, AtomNode *right);
     virtual ~Expression();
     virtual void visit(AstVisitor &v);
@@ -75,10 +72,9 @@ class Expression : public AstNode {
 };
 
 class UnaryNode: public AstNode {
-  private:
+  public:
     AstNode *child_;
 
-  public:
     UnaryNode(NodeType node_type, AstNode *child);
     virtual ~UnaryNode();
     virtual void visit(AstVisitor &v);
@@ -86,11 +82,10 @@ class UnaryNode: public AstNode {
 };
 
 class UpdateNode: public AstNode {
-  private:
+  public:
     SymbolUsage *sym_;
     Expression *expr_;
 
-  public:
     UpdateNode(SymbolUsage *sym, Expression *expr);
     virtual ~UpdateNode();
     virtual void visit(AstVisitor &v);
