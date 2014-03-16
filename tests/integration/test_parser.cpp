@@ -1,6 +1,8 @@
 #include <iostream>
 
 #include "libparse/driver.h"
+#include "libparse/visitor.h"
+#include "libparse/types.h"
 #include "libparse/parser.tab.h"
 
 // driver must be global, because it is needed for YY_INPUT
@@ -25,6 +27,8 @@ int main (int argc, char *argv[]) {
                 PrintVisitor v;
                 driver.result->visit(v);
             }
+            driver.result->propagate_types(Type::NO_TYPE, driver);
+            delete driver.result;
         } else
             res = 1;
     }

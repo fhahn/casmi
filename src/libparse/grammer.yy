@@ -74,6 +74,7 @@
 %type <AstListNode*> BODY_ELEMENTS STATEMENTS
 %type <AtomNode*> ATOM
 %type <Expression*> EXPRESSION
+%type <std::vector<Expression*>*> EXPRESSION_LIST EXPRESSION_LIST_NO_COMMA
 %type <UpdateNode*> UPDATE_SYNTAX
 %type <AtomNode*> NUMBER
 %type <AtomNode*> VALUE
@@ -274,11 +275,19 @@ LISTCONST: "[" EXPRESSION_LIST "]"
          ;
 
 
-EXPRESSION_LIST: EXPRESSION_LIST_NO_COMMA 
-               | EXPRESSION_LIST_NO_COMMA ","
+EXPRESSION_LIST: EXPRESSION_LIST_NO_COMMA { $$ = $1; }
+               | EXPRESSION_LIST_NO_COMMA "," { $$ = $1; }
 
 EXPRESSION_LIST_NO_COMMA: EXPRESSION_LIST_NO_COMMA"," EXPRESSION 
+                        {
+                          $$ = $1;
+                          $$->push_back($3);
+                        }
                         | EXPRESSION
+                        {
+                          $$ = new std::vector<Expression*>;
+                          $$->push_back($1);
+                        }
                         ;
 
 
@@ -306,7 +315,7 @@ BRACKET_EXPRESSION: "(" EXPRESSION ")"
 
 FUNCTION_SYNTAX: IDENTIFIER { $$ = new SymbolUsage($1); }
                | IDENTIFIER "(" ")" { $$ = new SymbolUsage($1); }
-               | IDENTIFIER "(" EXPRESSION_LIST ")" { $$ = new SymbolUsage($1); }
+               | IDENTIFIER "(" EXPRESSION_LIST ")" { $$ = new SymbolUsage($1, $3); }
                ;
 
 RULE_SYNTAX: RULE IDENTIFIER "=" STATEMENT { $$ = new UnaryNode(NodeType::RULE, $4); }

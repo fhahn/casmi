@@ -6,7 +6,7 @@
 
 #define INT_T int32_t
 
-enum class Type { INT, UNKNOWN, INVALID };
+enum class Type { INT, UNKNOWN, INVALID, NO_TYPE };
 
 
 Type str_to_type(const std::string& type_name);

@@ -15,9 +15,10 @@ class Symbol {
   private:
     const std::string name_;
     std::vector<Type> *arguments_;
-    Type return_type_;
 
   public:
+    Type return_type_;
+
     Symbol(const std::string name, std::vector<Type> *args, Type return_type);
     Symbol(const std::string name);
     ~Symbol();
@@ -28,11 +29,13 @@ class Symbol {
 
 class SymbolUsage {
   private:
-    const std::string name_;
     std::vector<Expression*> *arguments_;
 
   public:
+    const std::string name_;
+
     SymbolUsage(const std::string name);
+    SymbolUsage(const std::string name, std::vector<Expression*> *args);
     ~SymbolUsage();
     bool equals(SymbolUsage *other) const;
 };
@@ -50,6 +53,7 @@ class SymbolTable {
     size_t size() const;
     bool add(Symbol *s);
     Symbol *get(const std::string& name) const;
+    Type get(const SymbolUsage *sym) const;
 };
 
 #endif

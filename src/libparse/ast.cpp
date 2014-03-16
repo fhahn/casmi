@@ -1,4 +1,6 @@
 #include "libparse/ast.h"
+#include "libparse/visitor.h"
+#include "libparse/driver.h"
 
 AstNode::AstNode(NodeType node_type) {
     node_type_ = node_type;
@@ -32,6 +34,10 @@ void AstNode::visit(AstVisitor &v) {
 
 bool AstNode::equals(AstNode *other) {
   return node_type_ == other->node_type_;
+}
+
+Type AstNode::propagate_types(Type top, casmi_driver &driver) {
+  return Type::NO_TYPE;
 }
 
 AstListNode::AstListNode(NodeType node_type) : AstNode(node_type) {}
@@ -79,6 +85,13 @@ bool AstListNode::equals(AstNode *other) {
   }
 }
 
+Type AstListNode::propagate_types(Type top, casmi_driver &driver) {
+  for (auto n : nodes) {
+    n->propagate_types(top, driver);
+  }
+  return Type::NO_TYPE;
+}
+
 IntAtom::IntAtom(INT_T val) : AtomNode(NodeType::INT_ATOM, Type::INT) {
   val_ = val;
 }
@@ -92,6 +105,11 @@ bool IntAtom::equals(AstNode *other) {
 
   IntAtom *other_cast = static_cast<IntAtom*>(other);
   return val_ == other_cast->val_;
+}
+
+
+Type IntAtom::propagate_types(Type top, casmi_driver &driver) {
+  return Type::INT;
 }
 
 Expression::Expression(Expression *left, AtomNode *right) : AstNode(NodeType::EXPRESSION) {
@@ -141,6 +159,19 @@ bool Expression::equals(AstNode *other) {
 }
 
 
+Type Expression::propagate_types(Type top, casmi_driver &driver) {
+  if (left_ != nullptr) {
+    Type down_t = left_->propagate_types(top, driver);
+    if (down_t == right_->propagate_types(top, driver)) {
+      return down_t;
+    } else {
+      throw "did not match";
+    }
+  } else {
+    return right_->propagate_types(top, driver);
+  }
+}
+
 UpdateNode::UpdateNode(SymbolUsage *sym, Expression *expr) : AstNode(NodeType::UPDATE),
                                            sym_(sym), expr_(expr) {
 }
@@ -164,6 +195,18 @@ bool UpdateNode::equals(AstNode *other) {
   return expr_->equals(other_cast->expr_) && sym_->equals(other_cast->sym_);
 }
 
+Type UpdateNode::propagate_types(Type top, casmi_driver &driver) {
+  Type sym_type = driver.current_symbol_table->get(sym_);
+  if (sym_type == Type::INVALID) {
+    driver.error(location, "use of undefined function `"+sym_->name_+"`");
+  }
+  if (sym_type != expr_->propagate_types(sym_type, driver)) {
+    driver.error(location, "type of `"+sym_->name_+
+                            "` does not match type of expression");
+  }
+  return sym_type;
+}
+
 UnaryNode::UnaryNode(NodeType node_type, AstNode *child) : AstNode(node_type) {
   child_ = child;
 }
@@ -184,6 +227,10 @@ bool UnaryNode::equals(AstNode *other) {
 
   UnaryNode *other_cast = static_cast<UnaryNode*>(other);
   return child_->equals(other_cast->child_);
+}
+
+Type UnaryNode::propagate_types(Type top, casmi_driver &driver) {
+  return child_->propagate_types(top, driver);
 }
 
 AtomNode* create_atom(INT_T val) {

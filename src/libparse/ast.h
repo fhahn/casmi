@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "macros.h"
-#include "libparse/visitor.h"
+
 #include "libparse/types.h"
 #include "libparse/symbols.h"
 #include "libparse/location.hh" // reuse bison's location class
@@ -14,6 +14,8 @@
 enum NodeType { INT_ATOM, DUMMY_ATOM, INIT, BODY_ELEMENTS, PROVIDER, OPTION, ENUM, FUNCTION, DERIVED, RULE, SPECIFICATION, EXPRESSION, UPDATE, STATEMENT, PARBLOCK, STATEMENTS};
 
 static const char* node_type_names[] = { "INT_ATOM", "DUMMY_ATOM", "INIT", "BODY_ELEMENTS", "PROVIDER",  "OPTION", "ENUM", "FUNCTION", "DERIVED", "RULE", "SPECIFICATION", "EXPRESSION", "UPDATE", "STATEMENT", "PARBLOCK", "STATEMENTS"};
+
+class casmi_driver;
 
 class AstVisitor;
 class SymbolUsage;
@@ -31,6 +33,7 @@ class AstNode {
         virtual std::string to_str();
         virtual void visit(AstVisitor &v);
         virtual bool equals(AstNode *other);
+        virtual Type propagate_types(Type top, casmi_driver &driver);
 };
 
 class AstListNode: public AstNode {
@@ -42,6 +45,7 @@ class AstListNode: public AstNode {
         void add(AstNode* n);
         virtual void visit(AstVisitor &v);
         virtual bool equals(AstNode *other);
+        virtual Type propagate_types(Type top, casmi_driver &driver);
 };
 
 class AtomNode: public AstNode {
@@ -57,6 +61,7 @@ class IntAtom : public AtomNode {
     IntAtom(INT_T val);
     virtual ~IntAtom();
     bool equals(AstNode *other);
+    virtual Type propagate_types(Type top, casmi_driver &driver);
 };
 
 
@@ -69,6 +74,7 @@ class Expression : public AstNode {
     virtual ~Expression();
     virtual void visit(AstVisitor &v);
     virtual bool equals(AstNode *other);
+    virtual Type propagate_types(Type top, casmi_driver &driver);
 };
 
 class UnaryNode: public AstNode {
@@ -79,6 +85,7 @@ class UnaryNode: public AstNode {
     virtual ~UnaryNode();
     virtual void visit(AstVisitor &v);
     virtual bool equals(AstNode *other);
+    virtual Type propagate_types(Type top, casmi_driver &driver);
 };
 
 class UpdateNode: public AstNode {
@@ -90,6 +97,7 @@ class UpdateNode: public AstNode {
     virtual ~UpdateNode();
     virtual void visit(AstVisitor &v);
     virtual bool equals(AstNode *other);
+    virtual Type propagate_types(Type top, casmi_driver &driver);
 };
 
 

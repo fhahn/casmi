@@ -7,14 +7,10 @@
 #include <map>
 #include <memory>
 
-#include "libparse/ast.h"
-#include "libparse/symbols.h"
 #include "libparse/parser.tab.h"
+#include "libparse/symbols.h"
 
-// Tell Flex the lexer's prototype ...
-#define YY_DECL \
-    yy::casmi_parser::symbol_type yylex (casmi_driver& driver)
-    YY_DECL;
+class AstNode;
 
 class casmi_driver {
 private:
@@ -55,5 +51,11 @@ class casmi_string_driver : public casmi_driver {
   public:
     AstNode *parse (const std::string& str);
 };
+
+// Tell Flex the lexer's prototype ...
+#define YY_DECL \
+    yy::casmi_parser::symbol_type yylex (casmi_driver& driver)
+    YY_DECL;
+
 
 #endif

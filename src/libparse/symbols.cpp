@@ -40,10 +40,20 @@ bool Symbol::equals(Symbol *other) const {
 }
 
 SymbolUsage::SymbolUsage(const std::string name) :
-        name_(name), arguments_(nullptr){}
+        name_(name), arguments_(nullptr) {}
+
+SymbolUsage::SymbolUsage(const std::string name,
+                         std::vector<Expression*> *args) :
+        name_(name), arguments_(args) {}
+
 
 SymbolUsage::~SymbolUsage() {
-  delete arguments_;
+  if (arguments_ != nullptr) {
+    for (auto a : *arguments_) {
+      delete a;
+    }
+    delete arguments_;
+  }
 }
 
 bool SymbolUsage::equals(SymbolUsage *other) const {
@@ -88,6 +98,15 @@ Symbol *SymbolTable::get(const std::string& name) const {
     return table_.at(name);
   } catch (const std::out_of_range& e) {
     return nullptr;
+  }
+}
+
+Type SymbolTable::get(const SymbolUsage *usage) const {
+  Symbol *sym = get(usage->name_);
+  if (sym == nullptr) {
+    return Type::INVALID;
+  } else {
+    return sym->return_type_;
   }
 }
 
