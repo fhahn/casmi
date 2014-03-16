@@ -273,10 +273,13 @@ LISTCONST: "[" EXPRESSION_LIST "]"
          | "[" "]" 
          ;
 
-EXPRESSION_LIST: EXPRESSION "," EXPRESSION_LIST
-               | EXPRESSION ","
-               | EXPRESSION
-               ;
+
+EXPRESSION_LIST: EXPRESSION_LIST_NO_COMMA 
+               | EXPRESSION_LIST_NO_COMMA ","
+
+EXPRESSION_LIST_NO_COMMA: EXPRESSION_LIST_NO_COMMA"," EXPRESSION 
+                        | EXPRESSION
+                        ;
 
 
 EXPRESSION: EXPRESSION "+" ATOM { $$ = new Expression($1, $3);}
