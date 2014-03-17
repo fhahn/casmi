@@ -8,17 +8,11 @@ AstNode::AstNode(NodeType node_type) {
    // DEBUG(this->to_str());
 }
 
-AstNode::AstNode(NodeType node_type, Type type) {
-    node_type_ = node_type;
-    type_ = type;
-   // DEBUG(this->to_str());
-}
+AstNode::AstNode(yy::location& loc, NodeType nt) :
+        location(loc), node_type_(nt), type_(Type::UNKNOWN) {}
 
-
-AstNode::AstNode(NodeType node_type, yy::location& loc) {
-  node_type_ = node_type;
-  location = loc;
-}
+AstNode::AstNode(yy::location& loc, NodeType nt, Type t) :
+        location(loc), node_type_(nt), type_(t) {}
 
 AstNode::~AstNode() {
   // no dynamically alloceted stuff here
@@ -40,7 +34,8 @@ Type AstNode::propagate_types(Type top, casmi_driver &driver) {
   return Type::NO_TYPE;
 }
 
-AstListNode::AstListNode(NodeType node_type) : AstNode(node_type) {}
+AstListNode::AstListNode(yy::location& loc, NodeType node_type) :
+        AstNode(loc, node_type) {}
 
 AstListNode::~AstListNode() {
   for (auto n : nodes) {
@@ -92,7 +87,8 @@ Type AstListNode::propagate_types(Type top, casmi_driver &driver) {
   return Type::NO_TYPE;
 }
 
-IntAtom::IntAtom(INT_T val) : AtomNode(NodeType::INT_ATOM, Type::INT) {
+IntAtom::IntAtom(yy::location& loc, INT_T val) :
+        AtomNode(loc, NodeType::INT_ATOM, Type::INT) {
   val_ = val;
 }
 
@@ -112,7 +108,7 @@ Type IntAtom::propagate_types(Type top, casmi_driver &driver) {
   return Type::INT;
 }
 
-Expression::Expression(Expression *left, AtomNode *right) : AstNode(NodeType::EXPRESSION) {
+Expression::Expression(yy::location& loc, Expression *left, AtomNode *right) : AstNode(NodeType::EXPRESSION) {
   left_ = left;
   right_ = right;
 
@@ -172,7 +168,7 @@ Type Expression::propagate_types(Type top, casmi_driver &driver) {
   }
 }
 
-UpdateNode::UpdateNode(SymbolUsage *sym, Expression *expr) : AstNode(NodeType::UPDATE),
+UpdateNode::UpdateNode(yy::location& loc, SymbolUsage *sym, Expression *expr) : AstNode(loc, NodeType::UPDATE),
                                            sym_(sym), expr_(expr) {
 }
 
@@ -207,7 +203,7 @@ Type UpdateNode::propagate_types(Type top, casmi_driver &driver) {
   return sym_type;
 }
 
-UnaryNode::UnaryNode(NodeType node_type, AstNode *child) : AstNode(node_type) {
+UnaryNode::UnaryNode(yy::location& loc, NodeType node_type, AstNode *child) : AstNode(loc, node_type) {
   child_ = child;
 }
 
@@ -233,6 +229,6 @@ Type UnaryNode::propagate_types(Type top, casmi_driver &driver) {
   return child_->propagate_types(top, driver);
 }
 
-AtomNode* create_atom(INT_T val) {
-    return new IntAtom(val);
+AtomNode* create_atom(yy::location& loc, INT_T val) {
+    return new IntAtom(loc, val);
 }

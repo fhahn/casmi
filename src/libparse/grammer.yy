@@ -113,7 +113,7 @@ HEADER: CASM IDENTIFIER
       ;
 
 BODY_ELEMENTS: BODY_ELEMENTS BODY_ELEMENT { $1->add($2); $$ = $1; }
-            | BODY_ELEMENT { $$ = new AstListNode(NodeType::BODY_ELEMENTS); $$->add($1); }
+            | BODY_ELEMENT { $$ = new AstListNode(@$, NodeType::BODY_ELEMENTS); $$->add($1); }
             ;
 
 BODY_ELEMENT: PROVIDER_SYNTAX { $$ = new AstNode(NodeType::PROVIDER); }
@@ -240,27 +240,27 @@ ATOM: FUNCTION_SYNTAX { $$ = new AtomNode(); }
     | BRACKET_EXPRESSION { $$ = new AtomNode(); }
     ;
 
-VALUE: RULEREF { $$ = create_atom(0); }
+VALUE: RULEREF { $$ = create_atom(@$, 0); }
      | NUMBER { $$ = $1; }
-     | STRCONST { $$ = create_atom(0); }
-     | LISTCONST { $$ = create_atom(0); }
-     | NUMBER_RANGE { $$ = create_atom(0); }
-     | SYMBOL { $$ = create_atom(0); }
-     | SELF { $$ = create_atom(0); }
-     | UNDEF { $$ = create_atom(0); }
-     | TRUE { $$ = create_atom(0); }
-     | FALSE { $$ = create_atom(0); }
+     | STRCONST { $$ = create_atom(@$, 0); }
+     | LISTCONST { $$ = create_atom(@$, 0); }
+     | NUMBER_RANGE { $$ = create_atom(@$, 0); }
+     | SYMBOL { $$ = create_atom(@$, 0); }
+     | SELF { $$ = create_atom(@$, 0); }
+     | UNDEF { $$ = create_atom(@$, 0); }
+     | TRUE { $$ = create_atom(@$, 0); }
+     | FALSE { $$ = create_atom(@$, 0); }
      ;
 
-NUMBER: "+" INTCONST %prec UPLUS { $$ = create_atom($2); }
-      | "-" INTCONST %prec UMINUS { $$ = create_atom($2); }
-      | INTCONST { $$ = create_atom($1); }
-      | "+" FLOATCONST %prec UPLUS { $$ = create_atom(0); }
-      | "-" FLOATCONST %prec UMINUS { $$ = create_atom(0); }
-      | FLOATCONST { $$ = create_atom(0); }
-      | "+" RATIONALCONST %prec UPLUS { $$ = create_atom(0); }
-      | "-" RATIONALCONST %prec UMINUS { $$ = create_atom(0); }
-      | RATIONALCONST { $$ = create_atom(0); }
+NUMBER: "+" INTCONST %prec UPLUS { $$ = create_atom(@$, $2); }
+      | "-" INTCONST %prec UMINUS { $$ = create_atom(@$, $2); }
+      | INTCONST { $$ = create_atom(@$, $1); }
+      | "+" FLOATCONST %prec UPLUS { $$ = create_atom(@$, 0); }
+      | "-" FLOATCONST %prec UMINUS { $$ = create_atom(@$, 0); }
+      | FLOATCONST { $$ = create_atom(@$, 0); }
+      | "+" RATIONALCONST %prec UPLUS { $$ = create_atom(@$, 0); }
+      | "-" RATIONALCONST %prec UMINUS { $$ = create_atom(@$, 0); }
+      | RATIONALCONST { $$ = create_atom(@$, 0); }
       ;
 
 RULEREF: "@" IDENTIFIER 
@@ -291,23 +291,23 @@ EXPRESSION_LIST_NO_COMMA: EXPRESSION_LIST_NO_COMMA"," EXPRESSION
                         ;
 
 
-EXPRESSION: EXPRESSION "+" ATOM { $$ = new Expression($1, $3);}
-          | EXPRESSION "-" ATOM { $$ = new Expression($1, $3);}
-          | EXPRESSION NEQUAL ATOM { $$ = new Expression($1, $3);}
-          | EXPRESSION "=" ATOM { $$ = new Expression($1, $3);}
-          | EXPRESSION "<" ATOM { $$ = new Expression($1, $3);}
-          | EXPRESSION ">" ATOM { $$ = new Expression($1, $3);}
-          | EXPRESSION LESSEQ ATOM { $$ = new Expression($1, $3);}
-          | EXPRESSION GREATEREQ ATOM { $$ = new Expression($1, $3);}
-          | EXPRESSION "*" ATOM { $$ = new Expression($1, $3);}
-          | EXPRESSION "/" ATOM { $$ = new Expression($1, $3);}
-          | EXPRESSION "%" ATOM { $$ = new Expression($1, $3);}
-          | EXPRESSION RATIONAL_DIV ATOM { $$ = new Expression($1, $3);}
-          | EXPRESSION OR  ATOM { $$ = new Expression($1, $3);}
-          | EXPRESSION XOR ATOM { $$ = new Expression($1, $3);}
-          | EXPRESSION AND ATOM { $$ = new Expression($1, $3);}
-          | NOT EXPRESSION  { $$ = new Expression($2, nullptr);}
-          | ATOM  { $$ = new Expression(nullptr, $1);}
+EXPRESSION: EXPRESSION "+" ATOM { $$ = new Expression(@$, $1, $3);}
+          | EXPRESSION "-" ATOM { $$ = new Expression(@$, $1, $3);}
+          | EXPRESSION NEQUAL ATOM { $$ = new Expression(@$, $1, $3);}
+          | EXPRESSION "=" ATOM { $$ = new Expression(@$, $1, $3);}
+          | EXPRESSION "<" ATOM { $$ = new Expression(@$, $1, $3);}
+          | EXPRESSION ">" ATOM { $$ = new Expression(@$, $1, $3);}
+          | EXPRESSION LESSEQ ATOM { $$ = new Expression(@$, $1, $3);}
+          | EXPRESSION GREATEREQ ATOM { $$ = new Expression(@$, $1, $3);}
+          | EXPRESSION "*" ATOM { $$ = new Expression(@$, $1, $3);}
+          | EXPRESSION "/" ATOM { $$ = new Expression(@$, $1, $3);}
+          | EXPRESSION "%" ATOM { $$ = new Expression(@$, $1, $3);}
+          | EXPRESSION RATIONAL_DIV ATOM { $$ = new Expression(@$, $1, $3);}
+          | EXPRESSION OR  ATOM { $$ = new Expression(@$, $1, $3);}
+          | EXPRESSION XOR ATOM { $$ = new Expression(@$, $1, $3);}
+          | EXPRESSION AND ATOM { $$ = new Expression(@$, $1, $3);}
+          | NOT EXPRESSION  { $$ = new Expression(@$, $2, nullptr);}
+          | ATOM  { $$ = new Expression(@$, nullptr, $1);}
           ;
 
 BRACKET_EXPRESSION: "(" EXPRESSION ")" 
@@ -318,18 +318,18 @@ FUNCTION_SYNTAX: IDENTIFIER { $$ = new SymbolUsage($1); }
                | IDENTIFIER "(" EXPRESSION_LIST ")" { $$ = new SymbolUsage($1, $3); }
                ;
 
-RULE_SYNTAX: RULE IDENTIFIER "=" STATEMENT { $$ = new UnaryNode(NodeType::RULE, $4); }
+RULE_SYNTAX: RULE IDENTIFIER "=" STATEMENT { $$ = new UnaryNode(@$, NodeType::RULE, $4); }
            | RULE IDENTIFIER "(" ")" "=" STATEMENT
-              { $$ = new UnaryNode(NodeType::RULE, $6); }
+              { $$ = new UnaryNode(@$, NodeType::RULE, $6); }
            | RULE IDENTIFIER "(" PARAM_LIST ")" "=" STATEMENT
-              { $$ = new UnaryNode(NodeType::RULE, $7); }
+              { $$ = new UnaryNode(@$, NodeType::RULE, $7); }
 /* again, with dump specification */
            | RULE IDENTIFIER DUMPS DUMPSPEC_LIST "=" STATEMENT
-              { $$ = new UnaryNode(NodeType::RULE, $6); }
+              { $$ = new UnaryNode(@$, NodeType::RULE, $6); }
            | RULE IDENTIFIER "(" ")" DUMPS DUMPSPEC_LIST "=" STATEMENT
-              { $$ = new UnaryNode(NodeType::RULE, $8); }
+              { $$ = new UnaryNode(@$, NodeType::RULE, $8); }
            | RULE IDENTIFIER "(" PARAM_LIST ")" DUMPS DUMPSPEC_LIST "=" STATEMENT
-              { $$ = new UnaryNode(NodeType::RULE, $9); }
+              { $$ = new UnaryNode(@$, NodeType::RULE, $9); }
            ;
 
 DUMPSPEC_LIST: DUMPSPEC_LIST "," DUMPSPEC
@@ -392,7 +392,7 @@ DEBUG_ATOM_LIST: DEBUG_ATOM_LIST "+" ATOM
 PRINT_SYNTAX: PRINT DEBUG_ATOM_LIST
             ;
 
-UPDATE_SYNTAX: FUNCTION_SYNTAX UPDATE EXPRESSION { $$ = new UpdateNode($1, $3); }
+UPDATE_SYNTAX: FUNCTION_SYNTAX UPDATE EXPRESSION { $$ = new UpdateNode(@$, $1, $3); }
              ;
 
 CASE_SYNTAX: CASE EXPRESSION OF CASE_LABEL_LIST ENDCASE
@@ -433,13 +433,13 @@ KW_SEQBLOCK_SYNTAX: SEQBLOCK STATEMENTS ENDSEQBLOCK
 SEQBLOCK_SYNTAX: SEQBLOCK_BRACKET STATEMENTS ENDSEQBLOCK_BRACKET  
                ; 
 
-KW_PARBLOCK_SYNTAX: PARBLOCK STATEMENTS ENDPARBLOCK { $$ = new UnaryNode(NodeType::PARBLOCK, $2); }
+KW_PARBLOCK_SYNTAX: PARBLOCK STATEMENTS ENDPARBLOCK { $$ = new UnaryNode(@$, NodeType::PARBLOCK, $2); }
           ;
-PARBLOCK_SYNTAX: "{" STATEMENTS "}" { $$ = new UnaryNode(NodeType::PARBLOCK, $2); }
+PARBLOCK_SYNTAX: "{" STATEMENTS "}" { $$ = new UnaryNode(@$, NodeType::PARBLOCK, $2); }
                ;
 
 STATEMENTS: STATEMENTS STATEMENT { $1->add($2); $$ = $1; }
-          | STATEMENT { $$ = new AstListNode(NodeType::STATEMENTS); $$->add($1); }
+          | STATEMENT { $$ = new AstListNode(@$, NodeType::STATEMENTS); $$->add($1); }
           ;
 
 IFTHENELSE: IF EXPRESSION THEN STATEMENT %prec XIF 

@@ -7,6 +7,7 @@
 
 #include "libparse/driver.h"
 #include "libparse/parser.tab.h"
+#include "libparse/location.hh"
 
 extern casmi_driver *global_driver;
 
@@ -15,6 +16,7 @@ class ParserTest: public ::testing::Test {
     virtual void SetUp() { global_driver = &driver_; }
 
     casmi_string_driver driver_;
+    yy::location loc;
 };
 
 TEST_F(ParserTest, parse_simple) {
@@ -25,25 +27,25 @@ TEST_F(ParserTest, parse_simple) {
                      "}\n";
   AstNode *root = driver_.parse(test);
 
-  AstListNode *stmts = new AstListNode(NodeType::STATEMENTS);
+  AstListNode *stmts = new AstListNode(loc, NodeType::STATEMENTS);
 
-  stmts->add(new UpdateNode(
+  stmts->add(new UpdateNode(loc,
         new SymbolUsage("x"),
-        new Expression(
-            new Expression(nullptr, create_atom(1)),
-            create_atom(2))
+        new Expression(loc,
+            new Expression(loc, nullptr, create_atom(loc, 1)),
+            create_atom(loc, 2))
   ));
 
-  stmts->add(new UpdateNode(
+  stmts->add(new UpdateNode(loc,
         new SymbolUsage("y"),
-        new Expression(
-            new Expression(nullptr, create_atom(5)),
-            create_atom(10))
+        new Expression(loc,
+            new Expression(loc, nullptr, create_atom(loc, 5)),
+            create_atom(loc, 10))
   ));
 
-  AstListNode *ast = new AstListNode(NodeType::BODY_ELEMENTS);
-  ast->add(new AstNode(NodeType::INIT));
-  ast->add(new UnaryNode(NodeType::RULE, new UnaryNode(NodeType::PARBLOCK, stmts)));
+  AstListNode *ast = new AstListNode(loc, NodeType::BODY_ELEMENTS);
+  ast->add(new AstNode(loc, NodeType::INIT));
+  ast->add(new UnaryNode(loc, NodeType::RULE, new UnaryNode(loc, NodeType::PARBLOCK, stmts)));
   EXPECT_EQ(true, root->equals(ast));
 
   delete ast;

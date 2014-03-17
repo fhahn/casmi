@@ -22,13 +22,14 @@ class SymbolUsage;
 
 class AstNode {
     public:
-        Type type_;
-        NodeType node_type_;
         yy::location location;
+        NodeType node_type_;
+
+        Type type_;
 
         AstNode(NodeType node_type);
-        AstNode(NodeType node_type, Type type);
-        AstNode(NodeType node_type, yy::location& loc);
+        AstNode(yy::location& loc, NodeType node_type);
+        AstNode(yy::location& loc, NodeType node_type, Type type);
         virtual ~AstNode();
         virtual std::string to_str();
         virtual void visit(AstVisitor &v);
@@ -40,7 +41,7 @@ class AstListNode: public AstNode {
     public:
         std::vector<AstNode*> nodes;
 
-        AstListNode(NodeType node_type);
+        AstListNode(yy::location& loc, NodeType node_type);
         virtual ~AstListNode();
         void add(AstNode* n);
         virtual void visit(AstVisitor &v);
@@ -51,14 +52,14 @@ class AstListNode: public AstNode {
 class AtomNode: public AstNode {
   public:
     AtomNode() : AstNode(NodeType::DUMMY_ATOM) {}
-    AtomNode(NodeType node_type, Type type) : AstNode(node_type, type) {}
+    AtomNode(yy::location& loc, NodeType node_type, Type type) : AstNode(loc, node_type, type) {}
 };
 
 class IntAtom : public AtomNode {
   public:
     INT_T val_;
 
-    IntAtom(INT_T val);
+    IntAtom(yy::location& loc, INT_T val);
     virtual ~IntAtom();
     bool equals(AstNode *other);
     virtual Type propagate_types(Type top, casmi_driver &driver);
@@ -70,7 +71,7 @@ class Expression : public AstNode {
     Expression *left_;
     AtomNode *right_;
 
-    Expression(Expression *left, AtomNode *right);
+    Expression(yy::location& loc, Expression *left, AtomNode *right);
     virtual ~Expression();
     virtual void visit(AstVisitor &v);
     virtual bool equals(AstNode *other);
@@ -81,7 +82,7 @@ class UnaryNode: public AstNode {
   public:
     AstNode *child_;
 
-    UnaryNode(NodeType node_type, AstNode *child);
+    UnaryNode(yy::location& loc, NodeType node_type, AstNode *child);
     virtual ~UnaryNode();
     virtual void visit(AstVisitor &v);
     virtual bool equals(AstNode *other);
@@ -93,7 +94,7 @@ class UpdateNode: public AstNode {
     SymbolUsage *sym_;
     Expression *expr_;
 
-    UpdateNode(SymbolUsage *sym, Expression *expr);
+    UpdateNode(yy::location& loc, SymbolUsage *sym, Expression *expr);
     virtual ~UpdateNode();
     virtual void visit(AstVisitor &v);
     virtual bool equals(AstNode *other);
@@ -101,5 +102,5 @@ class UpdateNode: public AstNode {
 };
 
 
-AtomNode* create_atom(INT_T val);
+AtomNode* create_atom(yy::location& loc, INT_T val);
 #endif
