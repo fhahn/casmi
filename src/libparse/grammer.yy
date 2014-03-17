@@ -235,7 +235,7 @@ INITIALIZER: ATOM
            | ATOM ARROW ATOM 
            ;
 
-ATOM: FUNCTION_SYNTAX { $$ = new AtomNode(); }
+ATOM: FUNCTION_SYNTAX { $$ = create_atom(@$, $1); }
     | VALUE { $$ = $1; }
     | BRACKET_EXPRESSION { $$ = new AtomNode(); }
     ;
@@ -313,9 +313,9 @@ EXPRESSION: EXPRESSION "+" ATOM { $$ = new Expression(@$, $1, $3);}
 BRACKET_EXPRESSION: "(" EXPRESSION ")" 
                   ;
 
-FUNCTION_SYNTAX: IDENTIFIER { $$ = new SymbolUsage($1); }
-               | IDENTIFIER "(" ")" { $$ = new SymbolUsage($1); }
-               | IDENTIFIER "(" EXPRESSION_LIST ")" { $$ = new SymbolUsage($1, $3); }
+FUNCTION_SYNTAX: IDENTIFIER { $$ = new SymbolUsage(@$, $1); }
+               | IDENTIFIER "(" ")" { $$ = new SymbolUsage(@$, $1); }
+               | IDENTIFIER "(" EXPRESSION_LIST ")" { $$ = new SymbolUsage(@$, $1, $3); }
                ;
 
 RULE_SYNTAX: RULE IDENTIFIER "=" STATEMENT { $$ = new UnaryNode(@$, NodeType::RULE, $4); }

@@ -39,12 +39,12 @@ bool Symbol::equals(Symbol *other) const {
   return return_type_ == other->return_type_;
 }
 
-SymbolUsage::SymbolUsage(const std::string name) :
-        name_(name), arguments_(nullptr) {}
+SymbolUsage::SymbolUsage(yy::location& loc, const std::string name) :
+        name_(name), arguments_(nullptr), location(loc) {}
 
-SymbolUsage::SymbolUsage(const std::string name,
+SymbolUsage::SymbolUsage(yy::location& loc, const std::string name,
                          std::vector<Expression*> *args) :
-        name_(name), arguments_(args) {}
+        name_(name), arguments_(args), location(loc) {}
 
 
 SymbolUsage::~SymbolUsage() {
@@ -88,6 +88,7 @@ bool SymbolTable::add(Symbol *sym) {
     table_.at(sym->name());
     return false;
   } catch (const std::out_of_range& e) {
+    DEBUG("Add symbol "+sym->name());
     table_[sym->name()] = sym;
     return true;
   }
@@ -104,8 +105,10 @@ Symbol *SymbolTable::get(const std::string& name) const {
 Type SymbolTable::get(const SymbolUsage *usage) const {
   Symbol *sym = get(usage->name_);
   if (sym == nullptr) {
+    DEBUG("did not find symbol with name "+usage->name_);
     return Type::INVALID;
   } else {
+    DEBUG("found symbol with name "+usage->name_);
     return sym->return_type_;
   }
 }

@@ -30,14 +30,14 @@ TEST_F(ParserTest, parse_simple) {
   AstListNode *stmts = new AstListNode(loc, NodeType::STATEMENTS);
 
   stmts->add(new UpdateNode(loc,
-        new SymbolUsage("x"),
+        new SymbolUsage(loc, "x"),
         new Expression(loc,
             new Expression(loc, nullptr, create_atom(loc, 1)),
             create_atom(loc, 2))
   ));
 
   stmts->add(new UpdateNode(loc,
-        new SymbolUsage("y"),
+        new SymbolUsage(loc, "y"),
         new Expression(loc,
             new Expression(loc, nullptr, create_atom(loc, 5)),
             create_atom(loc, 10))

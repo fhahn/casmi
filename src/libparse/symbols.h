@@ -7,6 +7,7 @@
 
 #include "libparse/ast.h"
 #include "libparse/types.h"
+#include "libparse/location.hh" // reuse bison's location class
 
 class Expression;
 
@@ -33,9 +34,10 @@ class SymbolUsage {
 
   public:
     const std::string name_;
+    yy::location location;
 
-    SymbolUsage(const std::string name);
-    SymbolUsage(const std::string name, std::vector<Expression*> *args);
+    SymbolUsage(yy::location& loc, const std::string name);
+    SymbolUsage(yy::location& loc, const std::string name, std::vector<Expression*> *args);
     ~SymbolUsage();
     bool equals(SymbolUsage *other) const;
 };

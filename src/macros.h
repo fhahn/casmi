@@ -3,6 +3,6 @@
 
 #include <iostream>
 
-#define DEBUG(x) do { std::cerr << x << std::endl; } while (0)
+#define DEBUG(x) do { std::cerr << "DEBUG: " << x << std::endl; } while (0)
 
 #endif

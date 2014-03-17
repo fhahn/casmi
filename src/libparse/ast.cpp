@@ -87,6 +87,11 @@ Type AstListNode::propagate_types(Type top, casmi_driver &driver) {
   return Type::NO_TYPE;
 }
 
+
+Type AtomNode::propagate_types(Type top, casmi_driver &driver) {
+  return Type::UNKNOWN;
+}
+
 IntAtom::IntAtom(yy::location& loc, INT_T val) :
         AtomNode(loc, NodeType::INT_ATOM, Type::INT) {
   val_ = val;
@@ -108,7 +113,32 @@ Type IntAtom::propagate_types(Type top, casmi_driver &driver) {
   return Type::INT;
 }
 
-Expression::Expression(yy::location& loc, Expression *left, AtomNode *right) : AstNode(NodeType::EXPRESSION) {
+FunctionAtom::FunctionAtom(yy::location& loc, SymbolUsage *val) :
+        AtomNode(loc, NodeType::FUNCTION_ATOM, Type::UNKNOWN), func_(val) {}
+
+FunctionAtom::~FunctionAtom() {
+  delete func_;
+}
+
+bool FunctionAtom::equals(AstNode *other) {
+  throw "not implemented";
+    /*
+  if (!AstNode::equals(other)) {
+    return false;
+  }
+
+  IntAtom *other_cast = static_cast<IntAtom*>(other);
+  return val_ == other_cast->val_;
+  */
+}
+
+
+Type FunctionAtom::propagate_types(Type top, casmi_driver &driver) {
+  return driver.current_symbol_table->get(func_);
+}
+
+
+Expression::Expression(yy::location& loc, Expression *left, AtomNode *right) : AstNode(loc, NodeType::EXPRESSION) {
   left_ = left;
   right_ = right;
 
@@ -158,11 +188,10 @@ bool Expression::equals(AstNode *other) {
 Type Expression::propagate_types(Type top, casmi_driver &driver) {
   if (left_ != nullptr) {
     Type down_t = left_->propagate_types(top, driver);
-    if (down_t == right_->propagate_types(top, driver)) {
-      return down_t;
-    } else {
-      throw "did not match";
+    if (down_t != right_->propagate_types(top, driver)) {
+      driver.error(location, "type of expressions did not match");
     }
+    return down_t;
   } else {
     return right_->propagate_types(top, driver);
   }
@@ -194,7 +223,7 @@ bool UpdateNode::equals(AstNode *other) {
 Type UpdateNode::propagate_types(Type top, casmi_driver &driver) {
   Type sym_type = driver.current_symbol_table->get(sym_);
   if (sym_type == Type::INVALID) {
-    driver.error(location, "use of undefined function `"+sym_->name_+"`");
+    driver.error(sym_->location, "use of undefined function `"+sym_->name_+"`");
   }
   if (sym_type != expr_->propagate_types(sym_type, driver)) {
     driver.error(location, "type of `"+sym_->name_+
@@ -227,6 +256,10 @@ bool UnaryNode::equals(AstNode *other) {
 
 Type UnaryNode::propagate_types(Type top, casmi_driver &driver) {
   return child_->propagate_types(top, driver);
+}
+
+AtomNode* create_atom(yy::location& loc, SymbolUsage *val) {
+    return new FunctionAtom(loc, val);
 }
 
 AtomNode* create_atom(yy::location& loc, INT_T val) {

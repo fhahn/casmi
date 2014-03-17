@@ -5,12 +5,14 @@
 
 Type str_to_type(const std::string& type_name) {
   if (type_name == "Int") return Type::INT;
+  if (type_name == "Float") return Type::FLOAT;
   return Type::INVALID;
 }
 
 
 const std::string type_to_str(Type t) {
   if (t == Type::INT) return "Int";
+  if (t == Type::FLOAT) return "Float";
   return "Invalid";
 }
 
