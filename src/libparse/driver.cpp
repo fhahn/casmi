@@ -67,6 +67,7 @@ AstNode *casmi_driver::parse (const std::string &f) {
   try {
     res = parser.parse ();
 
+    // TODO check leak on parser error
     if (res != 0 || error_) {
       return nullptr;
     }
@@ -99,6 +100,10 @@ void casmi_driver::error (const yy::location& l, const std::string& m) {
       std::cerr << filename_ <<":" << i <<" " << lines_[i];
     }
   }
+}
+
+bool casmi_driver::ok() const {
+  return !error_;
 }
 
 AstNode *casmi_string_driver::parse (const std::string &str) {

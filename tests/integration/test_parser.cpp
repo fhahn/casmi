@@ -28,6 +28,9 @@ int main (int argc, char *argv[]) {
                 driver.result->visit(v);
             }
             driver.result->propagate_types(Type::NO_TYPE, driver);
+            if (!driver.ok()) {
+              res = 1;
+            }
             delete driver.result;
         } else
             res = 1;

@@ -37,6 +37,7 @@ public:
 
   // Error handling.
   void error (const yy::location& l, const std::string& m);
+  bool ok() const;
 
   // symbol table stuff
   SymbolTable *current_symbol_table;
