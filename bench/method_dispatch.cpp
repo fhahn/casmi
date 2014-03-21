@@ -5,6 +5,9 @@
 
 #include "libparse/types.h"
 
+
+#define NUM_ITERATIONS 1000
+
 enum class NodeType { INT_ATOM, DUMMY_ATOM, INIT, BODY_ELEMENTS, PROVIDER, OPTION, ENUM, FUNCTION, DERIVED, RULE, SPECIFICATION, EXPRESSION, UPDATE, STATEMENT, PARBLOCK, STATEMENTS};
 
 class AstNode {
@@ -147,11 +150,11 @@ class AstFixture: public hayai::Fixture {
     std::vector<INT_T> context;
 };
 
-BENCHMARK_F(AstFixture, VirtualFunctions, 10, 100) {
+BENCHMARK_F(AstFixture, VirtualFunctions, 10, NUM_ITERATIONS) {
   ast->execute_virtual(context);
 }
 
-BENCHMARK_F(AstFixture, NormalFunctionsWithCast, 10, 100) {
+BENCHMARK_F(AstFixture, NormalFunctionsWithCast, 10, NUM_ITERATIONS) {
   ast->execute_normal(context);
 }
 
@@ -166,7 +169,7 @@ INT_T exec_expr(Expression *e) {
   return tmp + ia->value();
 }
 
-BENCHMARK_F(AstFixture, SwitchDispatch, 10, 100) {
+BENCHMARK_F(AstFixture, SwitchDispatch, 10, NUM_ITERATIONS) {
   for(auto node : ast->nodes) {
     switch (node->type) {
       case NodeType::UPDATE: {
@@ -181,10 +184,50 @@ BENCHMARK_F(AstFixture, SwitchDispatch, 10, 100) {
   }
 }
 
-BENCHMARK_F(AstFixture, NoDispatch, 10, 100) {
+BENCHMARK_F(AstFixture, NoDispatch, 10, NUM_ITERATIONS) {
   for(auto node : ast->nodes) {
       UpdateNode *n = reinterpret_cast<UpdateNode*>(node);
       IntAtom *ia = reinterpret_cast<IntAtom*>(n->expr_->right_);
       context[n->index_] = ia->value() + 20 + 10;
   }
 }
+
+
+class Visitor {
+  public:
+    inline int visit_expression(Expression *e, std::vector<INT_T> &context) {
+      int value = 0;
+      value += (reinterpret_cast<IntAtom*>(e->right_))->value();
+
+      if (e->left_ != nullptr) {
+        value += visit_expression(e->left_, context);
+      }
+      return value;
+    }
+
+    inline void visit_update(UpdateNode *update_node, std::vector<INT_T> &context) {
+      context[update_node->index_] = visit_expression(update_node->expr_, context);
+    }
+
+    inline void visit_statements(AstListNode *list_node, std::vector<INT_T> &context) {
+      for(auto node : list_node->nodes) {
+        switch (node->type) {
+          case NodeType::STATEMENTS: {
+            visit_statements(reinterpret_cast<AstListNode*>(node), context);
+            break;
+          }
+          case NodeType::UPDATE: {
+            visit_update(reinterpret_cast<UpdateNode*>(node), context);
+            break;
+          }
+        }
+      }
+    }
+};
+
+BENCHMARK_F(AstFixture, VisitorDispatch, 10, NUM_ITERATIONS) {
+  Visitor v;
+  v.visit_statements(ast, context);
+}
+
+

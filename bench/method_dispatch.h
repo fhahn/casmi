@@ -1,20 +1,18 @@
 class AstNode {
-    private:
+    public:
         int line_number;
         int column;
         NodeType type;
 
-    public:
         AstNode(NodeType t);
         virtual ~AstNode();
         virtual bool execute_virtual();
 };
 
 class AstListNode: public AstNode {
-    private:
+    public:
         std::vector<AstNode*> nodes;
 
-    public:
         AstListNode(NodeType type);
         virtual ~AstListNode();
         virtual bool execute_virtual();
@@ -27,30 +25,27 @@ class AtomNode: public AstNode {
 };
 
 class IntAtom : public AtomNode {
-  private:
+  public:
     INT_T val_;
 
-  public:
     IntAtom(INT_T val);
     ~IntAtom();
 };
 
 
 class Expression : public AstNode {
-  private:
+  public:
     Expression *left_;
     AtomNode *right_;
 
-  public:
     Expression(Expression *left, AtomNode *right);
     virtual ~Expression();
 };
 
 class UpdateNode: public AstNode {
-  private:
+  public:
     Expression *expr_;
 
-  public:
     UpdateNode(Expression *expr);
     virtual ~UpdateNode();
 };
