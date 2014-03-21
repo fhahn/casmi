@@ -247,7 +247,7 @@ VALUE: RULEREF { $$ = create_atom(@$, 0); }
      | NUMBER_RANGE { $$ = create_atom(@$, 0); }
      | SYMBOL { $$ = create_atom(@$, 0); }
      | SELF { $$ = create_atom(@$, 0); }
-     | UNDEF { $$ = create_atom(@$, 0); }
+     | UNDEF { $$ = create_atom(@$); }
      | TRUE { $$ = create_atom(@$, 0); }
      | FALSE { $$ = create_atom(@$, 0); }
      ;

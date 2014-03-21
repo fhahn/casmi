@@ -18,6 +18,10 @@ casmi_driver::casmi_driver ()
     : error_(false), trace_parsing (false), trace_scanning (false) {
   file_ = nullptr;
   current_symbol_table = new SymbolTable();
+
+  // TODO: Handle self
+  current_symbol_table->add(new Symbol("program", nullptr, Type::RULE));
+
   lines_.push_back("");
 }
 

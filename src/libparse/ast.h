@@ -11,9 +11,9 @@
 #include "libparse/location.hh" // reuse bison's location class
 
 // TODO enum class, but how to print?
-enum NodeType { INT_ATOM, DUMMY_ATOM, INIT, BODY_ELEMENTS, PROVIDER, OPTION, ENUM, FUNCTION, DERIVED, RULE, SPECIFICATION, EXPRESSION, UPDATE, STATEMENT, PARBLOCK, STATEMENTS, FUNCTION_ATOM};
+enum NodeType { UNDEF_ATOM, INT_ATOM, DUMMY_ATOM, INIT, BODY_ELEMENTS, PROVIDER, OPTION, ENUM, FUNCTION, DERIVED, RULE, SPECIFICATION, EXPRESSION, UPDATE, STATEMENT, PARBLOCK, STATEMENTS, FUNCTION_ATOM};
 
-static const char* node_type_names[] = { "INT_ATOM", "DUMMY_ATOM", "INIT", "BODY_ELEMENTS", "PROVIDER",  "OPTION", "ENUM", "FUNCTION", "DERIVED", "RULE", "SPECIFICATION", "EXPRESSION", "UPDATE", "STATEMENT", "PARBLOCK", "STATEMENTS"};
+static const char* node_type_names[] = { "UNDEF_ATOM", "INT_ATOM", "DUMMY_ATOM", "INIT", "BODY_ELEMENTS", "PROVIDER",  "OPTION", "ENUM", "FUNCTION", "DERIVED", "RULE", "SPECIFICATION", "EXPRESSION", "UPDATE", "STATEMENT", "PARBLOCK", "STATEMENTS"};
 
 class casmi_driver;
 
@@ -66,6 +66,15 @@ class IntAtom : public AtomNode {
     virtual Type propagate_types(Type top, casmi_driver &driver);
 };
 
+class UndefAtom : public AtomNode {
+  public:
+    UndefAtom(yy::location& loc);
+    bool equals(AstNode *other);
+    virtual Type propagate_types(Type top, casmi_driver &driver);
+};
+
+
+
 class FunctionAtom : public AtomNode {
   public:
     SymbolUsage *func_;
@@ -116,4 +125,5 @@ class UpdateNode: public AstNode {
 
 AtomNode* create_atom(yy::location& loc, INT_T val);
 AtomNode* create_atom(yy::location& loc, SymbolUsage *val);
+AtomNode* create_atom(yy::location& loc);
 #endif

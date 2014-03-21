@@ -113,6 +113,21 @@ Type IntAtom::propagate_types(Type top, casmi_driver &driver) {
   return Type::INT;
 }
 
+UndefAtom::UndefAtom(yy::location& loc) :
+        AtomNode(loc, NodeType::UNDEF_ATOM, Type::UNKNOWN) {}
+
+bool UndefAtom::equals(AstNode *other) {
+  if (!AstNode::equals(other)) {
+    return false;
+  } else {
+    return true;
+  }
+}
+
+Type UndefAtom::propagate_types(Type top, casmi_driver &driver) {
+  return top;
+}
+
 FunctionAtom::FunctionAtom(yy::location& loc, SymbolUsage *val) :
         AtomNode(loc, NodeType::FUNCTION_ATOM, Type::UNKNOWN), func_(val) {}
 
@@ -264,4 +279,8 @@ AtomNode* create_atom(yy::location& loc, SymbolUsage *val) {
 
 AtomNode* create_atom(yy::location& loc, INT_T val) {
     return new IntAtom(loc, val);
+}
+
+AtomNode* create_atom(yy::location& loc) {
+    return new UndefAtom(loc);
 }
