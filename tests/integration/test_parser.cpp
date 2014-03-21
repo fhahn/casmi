@@ -22,7 +22,6 @@ int main (int argc, char *argv[]) {
         else if (argv[i] == std::string ("--print-ast")) {
             print = true;
         } else if (driver.parse (argv[i]) != nullptr) {
-            std::cout << driver.result << std::endl;
             if (print) {
                 PrintVisitor v;
                 driver.result->visit(v);
