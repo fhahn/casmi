@@ -34,4 +34,4 @@ add_library(parser
   symbols.cpp
   types.cpp
 )
-target_link_libraries(parser y)
+target_link_libraries(parser y util)

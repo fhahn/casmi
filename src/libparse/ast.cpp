@@ -1,5 +1,4 @@
 #include "libparse/ast.h"
-#include "libparse/visitor.h"
 #include "libparse/driver.h"
 
 AstNode::AstNode(NodeType node_type) {
@@ -22,10 +21,6 @@ std::string AstNode::to_str() {
     return std::string("AStNode: ")+ node_type_names[node_type_];
 }
 
-void AstNode::visit(AstVisitor &v) {
-    v.visit_node(this);
-}
-
 bool AstNode::equals(AstNode *other) {
   return node_type_ == other->node_type_;
 }
@@ -46,13 +41,6 @@ AstListNode::~AstListNode() {
 
 void AstListNode::add(AstNode* n) {
     this->nodes.push_back(n);
-}
-
-void AstListNode::visit(AstVisitor &v) {
-    v.visit_node(this);
-    for(AstNode *n : nodes) {
-      n->visit(v);
-    }
 }
 
 bool AstListNode::equals(AstNode *other) {
@@ -178,14 +166,6 @@ Expression::~Expression() {
   delete right_;
 }
 
-void Expression::visit(AstVisitor &v) {
-    v.visit_node(this);
-    if (left_ != nullptr) {
-      left_->visit(v);
-    }
-    right_->visit(v);
-}
-
 bool Expression::equals(AstNode *other) {
   if (!AstNode::equals(other)) {
     return false;
@@ -221,11 +201,6 @@ UpdateNode::~UpdateNode() {
   delete expr_;
 }
 
-void UpdateNode::visit(AstVisitor &v) {
-    v.visit_node(this);
-    expr_->visit(v);
-}
-
 bool UpdateNode::equals(AstNode *other) {
   if (!AstNode::equals(other)) {
     return false;
@@ -253,11 +228,6 @@ UnaryNode::UnaryNode(yy::location& loc, NodeType node_type, AstNode *child) : As
 
 UnaryNode::~UnaryNode() {
   delete child_;
-}
-
-void UnaryNode::visit(AstVisitor &v) {
-    v.visit_node(this);
-    child_->visit(v);
 }
 
 bool UnaryNode::equals(AstNode *other) {

@@ -32,7 +32,6 @@ class AstNode {
         AstNode(yy::location& loc, NodeType node_type, Type type);
         virtual ~AstNode();
         virtual std::string to_str();
-        virtual void visit(AstVisitor &v);
         virtual bool equals(AstNode *other);
         virtual Type propagate_types(Type top, casmi_driver &driver);
 };
@@ -44,7 +43,6 @@ class AstListNode: public AstNode {
         AstListNode(yy::location& loc, NodeType node_type);
         virtual ~AstListNode();
         void add(AstNode* n);
-        virtual void visit(AstVisitor &v);
         virtual bool equals(AstNode *other);
         virtual Type propagate_types(Type top, casmi_driver &driver);
 };
@@ -94,7 +92,6 @@ class Expression : public AstNode {
 
     Expression(yy::location& loc, Expression *left, AtomNode *right);
     virtual ~Expression();
-    virtual void visit(AstVisitor &v);
     virtual bool equals(AstNode *other);
     virtual Type propagate_types(Type top, casmi_driver &driver);
 };
@@ -105,7 +102,6 @@ class UnaryNode: public AstNode {
 
     UnaryNode(yy::location& loc, NodeType node_type, AstNode *child);
     virtual ~UnaryNode();
-    virtual void visit(AstVisitor &v);
     virtual bool equals(AstNode *other);
     virtual Type propagate_types(Type top, casmi_driver &driver);
 };
@@ -117,7 +113,6 @@ class UpdateNode: public AstNode {
 
     UpdateNode(yy::location& loc, SymbolUsage *sym, Expression *expr);
     virtual ~UpdateNode();
-    virtual void visit(AstVisitor &v);
     virtual bool equals(AstNode *other);
     virtual Type propagate_types(Type top, casmi_driver &driver);
 };
