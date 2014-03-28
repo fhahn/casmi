@@ -1,5 +1,5 @@
 add_executable(test_parser test_parser.cpp)
-target_link_libraries(test_parser parser)
+target_link_libraries(test_parser parser interpreter)
 
 
 add_custom_target(
