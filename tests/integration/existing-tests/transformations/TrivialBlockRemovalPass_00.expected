@@ -1,0 +1,1 @@
+foo=UPDATE(LOOKUP(ident program,LIST(SELF,null)),UNDEF)

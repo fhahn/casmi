@@ -1,0 +1,7 @@
+tff(symbolNext, type, sym2: $int).
+fof(id0,hypothesis,sta(1,sym2)).%CREATE: a 
+tff(symbolNext, type, sym3: $int).
+tff(symbolNext, type, sym4: $int).
+fof(id1,hypothesis,fpop(sym2,sym4,sym3)).
+fof(id2,hypothesis,sta(2,sym3)).%UPDATE: a 
+fof(final0,hypothesis,sta(0,sym3)).%FINAL: a 

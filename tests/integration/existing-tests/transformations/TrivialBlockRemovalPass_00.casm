@@ -1,0 +1,14 @@
+// transform, cmdline "--tb"
+
+CASM TrivialBlockRemovalPass
+
+init foo
+
+rule foo =
+{
+    {
+        skip
+    }
+    
+    program(self) := undef
+}

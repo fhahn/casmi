@@ -1,0 +1,1 @@
+foo=STATEMENTS(LOCAL(ident v0__,ident bar),PARBLOCK(STATEMENTS(UPDATE(ident bar,ident v0__),STATEMENTS(PRINT(LIST(ident v0__,null),null),STATEMENTS(PRINT(LIST(ident v0__,null),null),STATEMENTS(UPDATE(LOOKUP(ident program,LIST(SELF,null)),UNDEF),null)))),null))

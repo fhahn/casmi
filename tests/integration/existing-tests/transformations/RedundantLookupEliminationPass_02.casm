@@ -1,0 +1,85 @@
+// transform, cmdline "--rle"
+
+CASM rle
+
+function x : -> Int
+
+init case_00
+
+rule case_00 = 
+{|
+    x := 0xbeef
+
+    print x
+|}
+
+rule case_01 = 
+{|
+    if true then
+    {
+        x := 0xbeef 
+    }
+    else
+    {
+        assert false
+    }
+
+    print x
+|}
+
+rule case_02 = 
+{|
+    x := 0xdead
+    
+    if true then
+    {
+        x := 0xbeef 
+    }
+    else
+    {
+        assert false
+    }
+
+    print x
+|}
+
+rule case_03 = 
+{|
+    x := 0xdead
+    
+    if true then
+    {
+        x := 0xbeef 
+    }
+    else
+    {
+        assert false
+    }
+
+    x := 0xdeef
+    
+    print x
+
+    print x
+|}
+
+rule case_04 = 
+{|
+    x := 0xdead
+    
+    if true then
+    {
+        x := 0xbeef 
+    }
+    else
+    {
+        assert false
+    }
+
+    print x
+
+    print x
+    
+    print x
+|}
+

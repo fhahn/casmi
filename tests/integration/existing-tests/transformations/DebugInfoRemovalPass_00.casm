@@ -1,0 +1,12 @@
+// transform, cmdline "--dr"
+
+CASM DebugInfoRemovalPass00
+
+init foo
+
+rule foo = 
+{
+    debuginfo output "hello world"
+    
+    program(self) := undef
+}

@@ -1,0 +1,40 @@
+// transform, cmdline "--cf"
+
+CASM ConstantFoldingPass
+
+init foo
+
+function (static) bar : -> Int initially { 1234 }
+
+function (static) baz : Int -> Int initially { 0 -> 3210, 1 -> 4321 }
+
+function (static) qux : Int * Int -> Int initially { [5, 12] -> 1987 }
+
+function (static) prog_mem : Int -> RuleRef initially
+{
+	1 -> @foo,
+	2 -> @bbb,
+	3 -> @ccc,
+}
+
+rule foo = 
+{
+    print bar
+
+    print baz(0)
+    print baz(-1)
+    print baz(1)
+    
+    print qux(5, 12)
+
+    call ( prog_mem( 2 ) )
+
+    let x = 3 in
+        call ( prog_mem( x ) )
+    
+    program( self ) := undef
+}
+
+rule bbb = skip
+
+rule ccc = skip

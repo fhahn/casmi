@@ -1,0 +1,73 @@
+// transform, cmdline "--ir --cf --rle"
+
+CASM RedundantLookupEliminationPass
+
+init foo
+
+function BLOCK : -> Int initially { 500 }
+
+rule foo =
+{|
+	BLOCK := undef
+
+    call (@bb_beq)(0x80001f58)// -> 648
+    // --------------------------------
+    // let l0__ = 10 in
+    //   let l1__ = 10 in
+    //     let l2__ = 648 in
+	//       if l0__ = l1__ then
+	// 	       BLOCK := l2__
+    
+	if BLOCK!=648 and  true then 
+    {|
+        assert( false )
+	|}
+    
+	if BLOCK=650 then 
+    {|
+        assert( false )
+    |}
+    
+	if BLOCK=648 then 
+    {|
+        BLOCK:=654
+	    call (@bb_bne)(0x80001f98)// -> 653
+        // --------------------------------
+        // let l3__ = 20 in
+        //   let l4__ = 30 in
+        //     let l5__ = 653 in
+	    //       if l3__ = l4__ then
+		//         BLOCK := l5__
+	|}
+	
+    if BLOCK=654 then 
+    {|
+        BLOCK:=651
+    	call (@bb_j)(0x80001fa0)// -> 54
+	    // -----------------------------
+        // let l6__ = 54 in
+	    //   BLOCK := l6__
+    |}
+
+    program(self) := undef
+|}
+
+rule bb_beq(addr : Int) =
+let rs = 10 in
+let rt = 10 in
+let offset = 648 in
+	if rs = rt then
+		BLOCK := offset
+
+rule bb_bne(addr : Int) =
+let rs = 20 in
+let rt = 30 in
+let offset = 653 in
+	if rs = rt then
+		BLOCK := offset
+
+rule bb_j(addr : Int) =
+let _addr = 54 in
+	BLOCK := _addr
+
+

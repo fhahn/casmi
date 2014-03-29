@@ -1,0 +1,19 @@
+// transform, cmdline "--ir"
+
+CASM InlineRuleStatementPass
+
+init foo
+
+rule foo =
+{
+    call  inline (1)
+    call (inline)(2)
+        
+    program(self) := undef
+}
+
+rule inline( x : Int ) =
+{
+    let y = 1 in
+        print (x * y)
+}

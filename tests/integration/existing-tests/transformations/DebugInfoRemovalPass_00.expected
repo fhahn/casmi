@@ -1,0 +1,1 @@
+foo=PARBLOCK(STATEMENTS(SKIP,STATEMENTS(UPDATE(LOOKUP(ident program,LIST(SELF,null)),UNDEF),null)),null)

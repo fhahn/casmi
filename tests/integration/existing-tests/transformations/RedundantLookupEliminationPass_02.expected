@@ -1,0 +1,9 @@
+case_00=SEQBLOCK(STATEMENTS(STATEMENTS(LOCAL(ident v0__,num 48879),UPDATE(ident x,ident v0__)),STATEMENTS(PRINT(LIST(ident v0__,null),null),null)),null)
+
+case_01=SEQBLOCK(STATEMENTS(IF(TRUE,ELSE(PARBLOCK(STATEMENTS(UPDATE(ident x,num 48879),null),null),PARBLOCK(STATEMENTS(ASSERT(FALSE,null),null),null))),STATEMENTS(PRINT(LIST(ident x,null),null),null)),null)
+
+case_02=SEQBLOCK(STATEMENTS(UPDATE(ident x,num 57005),STATEMENTS(IF(TRUE,ELSE(PARBLOCK(STATEMENTS(UPDATE(ident x,num 48879),null),null),PARBLOCK(STATEMENTS(ASSERT(FALSE,null),null),null))),STATEMENTS(PRINT(LIST(ident x,null),null),null))),null)
+
+case_03=SEQBLOCK(STATEMENTS(UPDATE(ident x,num 57005),STATEMENTS(IF(TRUE,ELSE(PARBLOCK(STATEMENTS(UPDATE(ident x,num 48879),null),null),PARBLOCK(STATEMENTS(ASSERT(FALSE,null),null),null))),STATEMENTS(STATEMENTS(LOCAL(ident v0__,num 57071),UPDATE(ident x,ident v0__)),STATEMENTS(PRINT(LIST(ident v0__,null),null),STATEMENTS(PRINT(LIST(ident v0__,null),null),null))))),null)
+
+case_04=SEQBLOCK(STATEMENTS(UPDATE(ident x,num 57005),STATEMENTS(IF(TRUE,ELSE(PARBLOCK(STATEMENTS(UPDATE(ident x,num 48879),null),null),PARBLOCK(STATEMENTS(ASSERT(FALSE,null),null),null))),STATEMENTS(LOCAL(ident v0__,ident x),STATEMENTS(PRINT(LIST(ident v0__,null),null),STATEMENTS(PRINT(LIST(ident v0__,null),null),STATEMENTS(PRINT(LIST(ident v0__,null),null),null)))))),null)

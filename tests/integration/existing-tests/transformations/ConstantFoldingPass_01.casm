@@ -1,0 +1,16 @@
+// transform, cmdline "--cf"
+
+CASM ConstantFoldingPass
+
+init foo
+
+function af : -> Int
+function bf : -> Int
+
+rule foo = 
+{
+	bf := BVadd_result(32, 1, 1)
+	af := 2*3 + 5
+
+    program(self) := undef
+}

@@ -1,0 +1,48 @@
+// transform, cmdline "--cf"
+
+CASM ConstantFoldingPass
+
+init foo
+
+rule foo = 
+{
+    print 4321
+
+    if 1234 != 4321 then
+       print 1234
+       
+    if 1234 = 1234 and 4321 = 4321 then
+       print 4321
+
+    program(self) := undef
+}
+
+function x : -> Int initially { 0xfeed }
+function y : -> Int initially { 0xfeed }
+
+rule bar =
+{|
+    if x = y and true then
+       assert(true)
+    
+    if true and x = y then
+       assert(true)
+
+    if x = y and false then
+       assert(false)
+
+    if false and x = y then
+       assert(false)
+       
+    if x = y or false then
+       assert(true)
+
+    if false or x = y then
+       assert(true)
+
+    if x = y or true then
+       assert(true)
+
+    if true or x = y then
+       assert(true)
+|}

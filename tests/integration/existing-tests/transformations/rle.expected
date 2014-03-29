@@ -1,0 +1,50 @@
+case_00=PARBLOCK(STATEMENTS(SEQBLOCK(STATEMENTS(PARBLOCK(STATEMENTS(PRINT(LIST(ident foo,null),null),null),null),null),null),STATEMENTS(UPDATE(LOOKUP(ident program,LIST(SELF,null)),RULEREF(ident case_01,null)),null)),null)
+
+case_01=STATEMENTS(LOCAL(ident u0__,null),PARBLOCK(STATEMENTS(SEQBLOCK(STATEMENTS(PARBLOCK(STATEMENTS(STATEMENTS(LOCAL(ident u0__,num 1),UPDATE(ident foo,ident u0__)),STATEMENTS(PRINT(LIST(ident u0__,null),null),null)),null),null),null),STATEMENTS(UPDATE(LOOKUP(ident program,LIST(SELF,null)),RULEREF(ident case_02,null)),null)),null))
+
+case_02=STATEMENTS(LOCAL(ident u0__,null),PARBLOCK(STATEMENTS(SEQBLOCK(STATEMENTS(PARBLOCK(STATEMENTS(STATEMENTS(LOCAL(ident u0__,num 2),UPDATE(ident foo,ident u0__)),null),null),STATEMENTS(PARBLOCK(STATEMENTS(PRINT(LIST(ident u0__,null),null),null),null),null)),null),STATEMENTS(UPDATE(LOOKUP(ident program,LIST(SELF,null)),RULEREF(ident case_03,null)),null)),null))
+
+case_03=STATEMENTS(LOCAL(ident u0__,null),PARBLOCK(STATEMENTS(SEQBLOCK(STATEMENTS(PARBLOCK(STATEMENTS(STATEMENTS(LOCAL(ident u0__,num 3),UPDATE(ident foo,ident u0__)),null),null),null),null),STATEMENTS(SEQBLOCK(STATEMENTS(PARBLOCK(STATEMENTS(PRINT(LIST(ident u0__,null),null),null),null),null),null),STATEMENTS(UPDATE(LOOKUP(ident program,LIST(SELF,null)),RULEREF(ident case_04,null)),null))),null))
+
+case_04=STATEMENTS(LOCAL(ident u0__,null),PARBLOCK(STATEMENTS(SEQBLOCK(STATEMENTS(PARBLOCK(STATEMENTS(SEQBLOCK(STATEMENTS(STATEMENTS(LOCAL(ident u0__,num 4),UPDATE(ident foo,ident u0__)),null),null),STATEMENTS(PRINT(LIST(ident u0__,null),null),null)),null),null),null),STATEMENTS(UPDATE(LOOKUP(ident program,LIST(SELF,null)),RULEREF(ident case_05,null)),null)),null))
+
+case_05=STATEMENTS(LOCAL(ident u0__,null),PARBLOCK(STATEMENTS(SEQBLOCK(STATEMENTS(PARBLOCK(STATEMENTS(SEQBLOCK(STATEMENTS(PARBLOCK(STATEMENTS(STATEMENTS(LOCAL(ident u0__,num 5),UPDATE(ident foo,ident u0__)),null),null),null),null),STATEMENTS(PRINT(LIST(ident u0__,null),null),null)),null),null),null),STATEMENTS(UPDATE(LOOKUP(ident program,LIST(SELF,null)),RULEREF(ident case_06,null)),null)),null))
+
+case_06=STATEMENTS(LOCAL(ident u0__,null),PARBLOCK(STATEMENTS(SEQBLOCK(STATEMENTS(STATEMENTS(LOCAL(ident u0__,num 6),UPDATE(ident foo,ident u0__)),STATEMENTS(PARBLOCK(STATEMENTS(PRINT(LIST(ident u0__,null),null),null),null),null)),null),STATEMENTS(UPDATE(LOOKUP(ident program,LIST(SELF,null)),RULEREF(ident case_07,null)),null)),null))
+
+case_07=STATEMENTS(LOCAL(ident u0__,null),PARBLOCK(STATEMENTS(STATEMENTS(LOCAL(ident u0__,num 7),UPDATE(ident foo,ident u0__)),STATEMENTS(SEQBLOCK(STATEMENTS(PARBLOCK(STATEMENTS(PRINT(LIST(ident u0__,null),null),null),null),null),null),STATEMENTS(UPDATE(LOOKUP(ident program,LIST(SELF,null)),RULEREF(ident case_08,null)),null))),null))
+
+case_08=STATEMENTS(LOCAL(ident u0__,null),PARBLOCK(STATEMENTS(SEQBLOCK(STATEMENTS(STATEMENTS(LOCAL(ident u0__,num 8),UPDATE(ident foo,ident u0__)),null),null),STATEMENTS(SEQBLOCK(STATEMENTS(PARBLOCK(STATEMENTS(PRINT(LIST(ident u0__,null),null),null),null),null),null),STATEMENTS(UPDATE(LOOKUP(ident program,LIST(SELF,null)),RULEREF(ident case_09,null)),null))),null))
+
+case_09=STATEMENTS(LOCAL(ident u0__,null),PARBLOCK(STATEMENTS(SEQBLOCK(STATEMENTS(PARBLOCK(STATEMENTS(SEQBLOCK(STATEMENTS(STATEMENTS(LOCAL(ident u0__,num 9),UPDATE(ident foo,ident u0__)),null),null),null),null),null),null),STATEMENTS(SEQBLOCK(STATEMENTS(PARBLOCK(STATEMENTS(PRINT(LIST(ident u0__,null),null),null),null),null),null),STATEMENTS(UPDATE(LOOKUP(ident program,LIST(SELF,null)),RULEREF(ident case_10,null)),null))),null))
+
+case_10=SEQBLOCK(STATEMENTS(PARBLOCK(STATEMENTS(SEQBLOCK(STATEMENTS(PRINT(LIST(ident foo,null),null),null),null),null),null),STATEMENTS(UPDATE(LOOKUP(ident program,LIST(SELF,null)),RULEREF(ident case_11,null)),null)),null)
+
+case_11=STATEMENTS(LOCAL(ident u0__,null),SEQBLOCK(STATEMENTS(PARBLOCK(STATEMENTS(SEQBLOCK(STATEMENTS(STATEMENTS(LOCAL(ident u0__,num 11),UPDATE(ident foo,ident u0__)),STATEMENTS(PRINT(LIST(ident u0__,null),null),null)),null),null),null),STATEMENTS(UPDATE(LOOKUP(ident program,LIST(SELF,null)),RULEREF(ident case_12,null)),null)),null))
+
+case_12=STATEMENTS(LOCAL(ident u0__,null),SEQBLOCK(STATEMENTS(PARBLOCK(STATEMENTS(SEQBLOCK(STATEMENTS(STATEMENTS(LOCAL(ident u0__,num 12),UPDATE(ident foo,ident u0__)),null),null),STATEMENTS(SEQBLOCK(STATEMENTS(PRINT(LIST(ident u0__,null),null),null),null),null)),null),STATEMENTS(UPDATE(LOOKUP(ident program,LIST(SELF,null)),RULEREF(ident case_13,null)),null)),null))
+
+case_13=STATEMENTS(LOCAL(ident u0__,null),SEQBLOCK(STATEMENTS(PARBLOCK(STATEMENTS(SEQBLOCK(STATEMENTS(STATEMENTS(LOCAL(ident u0__,num 13),UPDATE(ident foo,ident u0__)),null),null),null),null),STATEMENTS(PARBLOCK(STATEMENTS(SEQBLOCK(STATEMENTS(PRINT(LIST(ident u0__,null),null),null),null),null),null),STATEMENTS(UPDATE(LOOKUP(ident program,LIST(SELF,null)),RULEREF(ident case_14,null)),null))),null))
+
+case_14=STATEMENTS(LOCAL(ident u0__,null),SEQBLOCK(STATEMENTS(PARBLOCK(STATEMENTS(SEQBLOCK(STATEMENTS(PARBLOCK(STATEMENTS(STATEMENTS(LOCAL(ident u0__,num 14),UPDATE(ident foo,ident u0__)),null),null),STATEMENTS(PRINT(LIST(ident u0__,null),null),null)),null),null),null),STATEMENTS(UPDATE(LOOKUP(ident program,LIST(SELF,null)),RULEREF(ident case_15,null)),null)),null))
+
+case_15=STATEMENTS(LOCAL(ident u0__,null),SEQBLOCK(STATEMENTS(PARBLOCK(STATEMENTS(SEQBLOCK(STATEMENTS(PARBLOCK(STATEMENTS(SEQBLOCK(STATEMENTS(STATEMENTS(LOCAL(ident u0__,num 15),UPDATE(ident foo,ident u0__)),null),null),null),null),STATEMENTS(PRINT(LIST(ident u0__,null),null),null)),null),null),null),STATEMENTS(UPDATE(LOOKUP(ident program,LIST(SELF,null)),RULEREF(ident case_16,null)),null)),null))
+
+case_16=STATEMENTS(LOCAL(ident u0__,null),SEQBLOCK(STATEMENTS(PARBLOCK(STATEMENTS(STATEMENTS(LOCAL(ident u0__,num 16),UPDATE(ident foo,ident u0__)),STATEMENTS(SEQBLOCK(STATEMENTS(PRINT(LIST(ident u0__,null),null),null),null),null)),null),STATEMENTS(UPDATE(LOOKUP(ident program,LIST(SELF,null)),RULEREF(ident case_17,null)),null)),null))
+
+case_17=STATEMENTS(LOCAL(ident u0__,null),SEQBLOCK(STATEMENTS(STATEMENTS(LOCAL(ident u0__,num 17),UPDATE(ident foo,ident u0__)),STATEMENTS(PARBLOCK(STATEMENTS(SEQBLOCK(STATEMENTS(PRINT(LIST(ident u0__,null),null),null),null),null),null),STATEMENTS(UPDATE(LOOKUP(ident program,LIST(SELF,null)),RULEREF(ident case_18,null)),null))),null))
+
+case_18=STATEMENTS(LOCAL(ident u0__,null),SEQBLOCK(STATEMENTS(PARBLOCK(STATEMENTS(STATEMENTS(LOCAL(ident u0__,num 18),UPDATE(ident foo,ident u0__)),null),null),STATEMENTS(PARBLOCK(STATEMENTS(SEQBLOCK(STATEMENTS(PRINT(LIST(ident u0__,null),null),null),null),null),null),STATEMENTS(UPDATE(LOOKUP(ident program,LIST(SELF,null)),RULEREF(ident case_19,null)),null))),null))
+
+case_19=STATEMENTS(LOCAL(ident u0__,null),SEQBLOCK(STATEMENTS(PARBLOCK(STATEMENTS(SEQBLOCK(STATEMENTS(PARBLOCK(STATEMENTS(STATEMENTS(LOCAL(ident u0__,num 19),UPDATE(ident foo,ident u0__)),null),null),null),null),null),null),STATEMENTS(PARBLOCK(STATEMENTS(SEQBLOCK(STATEMENTS(PRINT(LIST(ident u0__,null),null),null),null),null),null),STATEMENTS(UPDATE(LOOKUP(ident program,LIST(SELF,null)),RULEREF(ident case_20,null)),null))),null))
+
+case_20=STATEMENTS(LOCAL(ident u0__,null),PARBLOCK(STATEMENTS(SEQBLOCK(STATEMENTS(UPDATE(ident foo,num 200),STATEMENTS(PARBLOCK(STATEMENTS(STATEMENTS(LOCAL(ident u0__,num 20),UPDATE(ident foo,ident u0__)),STATEMENTS(PRINT(LIST(ident u0__,null),null),null)),null),null)),null),STATEMENTS(UPDATE(LOOKUP(ident program,LIST(SELF,null)),UNDEF),null)),null))
+
+case_21=PARBLOCK(STATEMENTS(SEQBLOCK(STATEMENTS(STATEMENTS(LOCAL(ident u0__,ident foo),PARBLOCK(STATEMENTS(PRINT(LIST(ident u0__,null),null),STATEMENTS(PRINT(LIST(ident u0__,null),null),STATEMENTS(PRINT(LIST(ident u0__,null),null),null))),null)),null),null),STATEMENTS(UPDATE(LOOKUP(ident program,LIST(SELF,null)),UNDEF),null)),null)
+
+case_22=SEQBLOCK(STATEMENTS(PRINT(LIST(str case: 22,null),null),STATEMENTS(FORALL(ident i,FORALL(RANGE(num 2,num 22),PARBLOCK(STATEMENTS(LET(ident instr,LET(null,LET(*(ident i,num 2),STATEMENTS(LOCAL(ident u0__,LOOKUP(ident qux,LIST(ident instr,null))),PARBLOCK(PARBLOCK(STATEMENTS(PRINT(LIST(ident u0__,null),null),STATEMENTS(PRINT(LIST(str ..,LIST(ident u0__,null)),null),STATEMENTS(PRINT(LIST(str ....,LIST(ident u0__,null)),null),null))),null),null))))),null),null))),null)),null)
+
+case_23=STATEMENTS(LOCAL(ident u0__,null),SEQBLOCK(STATEMENTS(PRINT(LIST(str case: 23,null),null),STATEMENTS(FORALL(ident i,FORALL(RANGE(num 3,num 23),PARBLOCK(STATEMENTS(LET(ident instr,LET(null,LET(*(ident i,num 2),PARBLOCK(SEQBLOCK(STATEMENTS(STATEMENTS(LOCAL(ident u0__,/(*(*(ident i,ident i),ident i),num 3735927486)),UPDATE(LOOKUP(ident qux,LIST(ident instr,null)),ident u0__)),STATEMENTS(PRINT(LIST(str >>,LIST(ident u0__,null)),null),STATEMENTS(PRINT(LIST(str >>>>,LIST(ident u0__,null)),null),null))),null),null)))),null),null))),null)),null))
+
+case_24=STATEMENTS(LOCAL(ident u1__,null),PARBLOCK(STATEMENTS(SEQBLOCK(STATEMENTS(STATEMENTS(LOCAL(ident u0__,ident foo),PARBLOCK(STATEMENTS(IF(TRUE,ELSE(PARBLOCK(STATEMENTS(STATEMENTS(LOCAL(ident u1__,num 100),UPDATE(ident foo,ident u1__)),STATEMENTS(PRINT(LIST(ident u1__,null),null),null)),null),PARBLOCK(STATEMENTS(PRINT(LIST(ident u0__,null),null),STATEMENTS(PRINT(LIST(ident u0__,null),null),null)),null))),null),null)),STATEMENTS(PARBLOCK(STATEMENTS(PRINT(LIST(ident u1__,null),null),STATEMENTS(PRINT(LIST(ident u1__,null),null),null)),null),null)),null),null),null))
+

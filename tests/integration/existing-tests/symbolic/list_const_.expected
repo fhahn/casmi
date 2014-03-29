@@ -1,0 +1,24 @@
+tff(symbolNext, type, sym2: $int).
+fof(id0,hypothesis,fcons(eEmptyList,1,sym2)).
+tff(symbolNext, type, sym3: $int).
+fof(id1,hypothesis,fcons(sym2,2,sym3)).
+tff(symbolNext, type, sym4: $int).
+fof(id2,hypothesis,fcons(sym3,3,sym4)).
+tff(symbolNext, type, sym5: $int).
+fof(id3,hypothesis,stlist(1,sym5)).%CREATE: list 
+tff(symbolNext, type, sym6: $int).
+fof(id4,hypothesis,fcons(eEmptyList,4,sym6)).
+tff(symbolNext, type, sym7: $int).
+fof(id5,hypothesis,fcons(sym6,5,sym7)).
+tff(symbolNext, type, sym8: $int).
+fof(id6,hypothesis,fcons(sym7,6,sym8)).
+tff(symbolNext, type, sym9: $int).
+fof(id7,hypothesis,ststack(1,sym9)).%CREATE: stack 
+tff(symbolNext, type, sym10: $int).
+fof(id8,hypothesis, fpush(sym9,sym8,sym10)).
+tff(symbolNext, type, sym11: $int).
+fof(id9,hypothesis,fpop(sym10,sym8,sym11)).
+fof(id10,hypothesis,stlist(2,sym4)).%UPDATE: list 
+fof(id11,hypothesis,ststack(2,sym11)).%UPDATE: stack 
+fof(final0,hypothesis,stlist(0,sym4)).%FINAL: list 
+fof(final1,hypothesis,ststack(0,sym11)).%FINAL: stack 

@@ -1,0 +1,26 @@
+// transform, cmdline "--db"
+
+CASM DeadBranchEliminationPass
+
+init foo
+
+rule foo =
+{
+    if true then
+        assert true
+    
+    if false then
+        assert false
+    
+    if true then
+        assert true
+    else
+        assert false
+    
+    if false then
+        assert false
+    else
+        assert true
+    
+    program( self ) := undef
+}

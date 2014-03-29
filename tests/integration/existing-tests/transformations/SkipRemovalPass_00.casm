@@ -1,0 +1,19 @@
+// transform, cmdline "--sr"
+
+CASM SkipRemovalPass
+
+init foo
+
+rule foo = 
+{
+    skip
+    
+    if true then
+    {
+        skip
+    }
+    
+    skip
+    
+    program(self) := undef
+}

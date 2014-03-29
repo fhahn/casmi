@@ -1,0 +1,15 @@
+// transform, cmdline "--cf"
+
+CASM ConstantFoldingPass
+
+init foo
+
+function bar : -> Int
+
+rule foo = 
+{
+    bar := 2 * 3 + 4
+    
+    program(self) := undef
+}
+
