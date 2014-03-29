@@ -32,7 +32,7 @@ int main (int argc, char *argv[]) {
               ExecutionContext ctx(driver.current_symbol_table);
               ExecutionVisitor visitor(driver.result, ctx);
               AstWalker<ExecutionVisitor> walker(visitor);
-              walker.walk_specification(driver.result);
+              walker.walk_rule(driver.get_init_rule());
               delete driver.result;
             }
         } else {

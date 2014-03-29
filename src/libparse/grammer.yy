@@ -140,7 +140,7 @@ BODY_ELEMENT: PROVIDER_SYNTAX { $$ = new AstNode(NodeType::PROVIDER); }
            }
            ;
 
-INIT_SYNTAX: INIT IDENTIFIER { $$ = new AstNode(NodeType::INIT); }
+INIT_SYNTAX: INIT IDENTIFIER { $$ = new AstNode(NodeType::INIT); driver.init_name = $2; }
            ;
 
 PROVIDER_SYNTAX: PROVIDER IDENTIFIER 

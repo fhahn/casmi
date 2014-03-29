@@ -110,9 +110,8 @@ bool casmi_driver::ok() const {
   return !error_;
 }
 
-
 bool casmi_driver::add(RuleNode *rule_root) {
-  // TODO can rules and functions have the same name? at the moment, yes
+  // TODO can rules and functions have the same name?
   try {
     rules_map_.at(rule_root->name);
     return false;
@@ -121,6 +120,10 @@ bool casmi_driver::add(RuleNode *rule_root) {
     rules_map_[rule_root->name] = rule_root;
     return true;
   }
+}
+
+RuleNode *casmi_driver::get_init_rule() const {
+  return rules_map_.at(init_name);
 }
 
 AstNode *casmi_string_driver::parse (const std::string &str) {

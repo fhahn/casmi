@@ -18,13 +18,15 @@ private:
   FILE *file_;
   std::vector<std::string> lines_;
   bool error_;
-  std::map<std::string, AstNode*> rules_map_;
+  std::map<std::string, RuleNode*> rules_map_;
 
 public:
   casmi_driver ();
   virtual ~casmi_driver ();
 
   AstNode *result;
+
+  std::string init_name;
 
   // State information for the lexer
   bool trace_parsing;
@@ -42,6 +44,7 @@ public:
 
   // Rule handling
   bool add(RuleNode *rule_root);
+  RuleNode *get_init_rule() const;
 
   // symbol table stuff
   SymbolTable *current_symbol_table;

@@ -29,7 +29,7 @@ template<class T> class AstWalker {
           case NodeType::FUNCTION: {break;} // TODO implement
           case NodeType::DERIVED: {break;} // TODO implement
           case NodeType::RULE: {
-            walk_rule(reinterpret_cast<UnaryNode*>(e));
+            walk_rule(reinterpret_cast<RuleNode*>(e));
             break; 
           } 
           case NodeType::INIT: {break;} // TODO implement
@@ -44,7 +44,7 @@ template<class T> class AstWalker {
       }
     }
 
-    void walk_rule(UnaryNode *rule) {
+    void walk_rule(RuleNode *rule) {
       visitor.visit_rule(rule);
       walk_statement(rule->child_);
     }

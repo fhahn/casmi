@@ -15,7 +15,7 @@ class ExecutionVisitor {
 
     void visit_specification(AstNode *spec) {}
     void visit_body_elements(AstListNode *body_elements) {}
-    void visit_rule(UnaryNode *rule) {}
+    void visit_rule(RuleNode *rule) {}
     void visit_statement(AstNode *stmt) {}
     void visit_parblock(UnaryNode *parblock) {}
     void visit_statements(AstListNode *stmts) {}
