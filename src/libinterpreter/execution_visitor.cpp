@@ -1,8 +1,9 @@
 #include "libinterpreter/execution_visitor.h"
 
 
-ExecutionVisitor::ExecutionVisitor(AstNode *root) : root_(root) {}
+ExecutionVisitor::ExecutionVisitor(AstNode *root, ExecutionContext& ctx) 
+  : root_(root), context_(ctx) {}
 
-void ExecutionVisitor::execute() {
-  walk_specification(root_);
+void ExecutionVisitor::visit_update(UpdateNode *update) {
+  std::cout << "HALLO\n";
 }

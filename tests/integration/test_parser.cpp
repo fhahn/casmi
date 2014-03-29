@@ -5,6 +5,7 @@
 #include "libparse/parser.tab.h"
 
 #include "libinterpreter/execution_visitor.h"
+#include "libinterpreter/execution_context.h"
 
 // driver must be global, because it is needed for YY_INPUT
 // defined in src/libparse/driver.cpp
@@ -27,8 +28,10 @@ int main (int argc, char *argv[]) {
             if (!driver.ok()) {
               res = 1;
             }
-            ExecutionVisitor exec(driver.result);
-            exec.execute();
+            ExecutionContext ctx(driver.current_symbol_table);
+            ExecutionVisitor visitor(driver.result, ctx);
+            AstWalker<ExecutionVisitor> walker(visitor);
+            walker.walk_specification(driver.result);
             delete driver.result;
         } else
             res = 1;

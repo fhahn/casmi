@@ -6,6 +6,7 @@
 #include "libutil/exceptions.h"
 
 
+/*
 void AstVisitor::walk_specification(AstNode *spec) {
   if (spec->node_type_ == NodeType::BODY_ELEMENTS) {
     visit_specification(spec);
@@ -45,24 +46,6 @@ void AstVisitor::walk_rule(UnaryNode *rule) {
 }
 
 void AstVisitor::walk_statement(AstNode *stmt) {
-  switch(stmt->node_type_) {
-    case NodeType::PARBLOCK: {
-      walk_parblock(reinterpret_cast<UnaryNode*>(stmt));
-      break;
-    }
-    case NodeType::UPDATE: {
-      walk_update(reinterpret_cast<UpdateNode*>(stmt));
-      break;
-    }
-    default: {
-        throw RuntimeException(
-          std::string("Invalid node type: ")+
-          type_to_str(stmt->node_type_)+
-          std::string(" at ")+
-          stmt->location_str());
-
-    }
-  }
 }
 
 void AstVisitor::walk_parblock(UnaryNode *parblock) {
@@ -103,3 +86,4 @@ void AstVisitor::walk_atom(AtomNode *atom) {
     }
   }
 }
+*/
