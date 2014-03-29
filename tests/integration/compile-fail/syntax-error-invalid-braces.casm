@@ -1,0 +1,6 @@
+function x : -> List(Int)
+
+init main
+
+rule main = { 
+    x := 1 //~ unexpected end of file
