@@ -122,12 +122,17 @@ BODY_ELEMENT: PROVIDER_SYNTAX { $$ = new AstNode(NodeType::PROVIDER); }
            | FUNCTION_DEFINITION {
                 $$ = new AstNode(NodeType::FUNCTION);
                 if (!driver.current_symbol_table->add($1)) {
-                    driver.error(@$, "redefintion of symbol");
-                }; 
-                }
+                    driver.error(@$, "redefinition of symbol");
+                } 
+            }
            | DERIVED_SYNTAX { $$ = new AstNode(NodeType::DERIVED); }
            | INIT_SYNTAX { $$ = $1; }
-           | RULE_SYNTAX { $$ = $1; }
+           | RULE_SYNTAX { $$ = $1;
+              // TODO check, we trust bison to pass only RuleNodes up
+              if (!driver.add(reinterpret_cast<RuleNode*>($1))) {
+                    driver.error(@$, "redefinition of rule");
+              } 
+           }
            ;
 
 INIT_SYNTAX: INIT IDENTIFIER { $$ = new AstNode(NodeType::INIT); }
@@ -318,18 +323,18 @@ FUNCTION_SYNTAX: IDENTIFIER { $$ = new SymbolUsage(@$, $1); }
                | IDENTIFIER "(" EXPRESSION_LIST ")" { $$ = new SymbolUsage(@$, $1, $3); }
                ;
 
-RULE_SYNTAX: RULE IDENTIFIER "=" STATEMENT { $$ = new UnaryNode(@$, NodeType::RULE, $4); }
+RULE_SYNTAX: RULE IDENTIFIER "=" STATEMENT { $$ = new RuleNode(@$, $4, $2); }
            | RULE IDENTIFIER "(" ")" "=" STATEMENT
-              { $$ = new UnaryNode(@$, NodeType::RULE, $6); }
+              { $$ = new RuleNode(@$, $6, $2); }
            | RULE IDENTIFIER "(" PARAM_LIST ")" "=" STATEMENT
-              { $$ = new UnaryNode(@$, NodeType::RULE, $7); }
+              { $$ = new RuleNode(@$, $7, $2); }
 /* again, with dump specification */
            | RULE IDENTIFIER DUMPS DUMPSPEC_LIST "=" STATEMENT
-              { $$ = new UnaryNode(@$, NodeType::RULE, $6); }
+              { $$ = new RuleNode(@$, $6, $2); }
            | RULE IDENTIFIER "(" ")" DUMPS DUMPSPEC_LIST "=" STATEMENT
-              { $$ = new UnaryNode(@$, NodeType::RULE, $8); }
+              { $$ = new RuleNode(@$, $8, $2); }
            | RULE IDENTIFIER "(" PARAM_LIST ")" DUMPS DUMPSPEC_LIST "=" STATEMENT
-              { $$ = new UnaryNode(@$, NodeType::RULE, $9); }
+              { $$ = new RuleNode(@$, $9, $2); }
            ;
 
 DUMPSPEC_LIST: DUMPSPEC_LIST "," DUMPSPEC

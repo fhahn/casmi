@@ -108,6 +108,14 @@ class UnaryNode: public AstNode {
     virtual Type propagate_types(Type top, casmi_driver &driver);
 };
 
+class RuleNode: public UnaryNode {
+  public:
+    RuleNode(yy::location& loc, AstNode *child, const std::string &name);
+    const std::string name;
+};
+
+
+
 class UpdateNode: public AstNode {
   public:
     SymbolUsage *sym_;

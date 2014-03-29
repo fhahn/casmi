@@ -1,0 +1,11 @@
+function x : -> Int
+
+init main
+
+rule main = { 
+    x := 1
+}
+
+rule main = { //~ redefinition of rule
+    x := 1
+}

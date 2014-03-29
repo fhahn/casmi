@@ -280,6 +280,10 @@ Type UnaryNode::propagate_types(Type top, casmi_driver &driver) {
   return child_->propagate_types(top, driver);
 }
 
+RuleNode::RuleNode(yy::location& loc, AstNode *child, const std::string& n)
+  : UnaryNode(loc, NodeType::RULE, child), name(n) {}
+
+
 AtomNode* create_atom(yy::location& loc, SymbolUsage *val) {
     return new FunctionAtom(loc, val);
 }

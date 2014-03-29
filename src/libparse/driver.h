@@ -18,6 +18,7 @@ private:
   FILE *file_;
   std::vector<std::string> lines_;
   bool error_;
+  std::map<std::string, AstNode*> rules_map_;
 
 public:
   casmi_driver ();
@@ -38,6 +39,9 @@ public:
   // Error handling.
   void error (const yy::location& l, const std::string& m);
   bool ok() const;
+
+  // Rule handling
+  bool add(RuleNode *rule_root);
 
   // symbol table stuff
   SymbolTable *current_symbol_table;

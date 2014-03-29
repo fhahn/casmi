@@ -1,0 +1,9 @@
+function x : -> Int
+
+init main
+
+rule main = {
+    x := 1
+}
+
+function x : -> Int  //~ redefinition of symbol

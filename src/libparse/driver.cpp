@@ -110,6 +110,19 @@ bool casmi_driver::ok() const {
   return !error_;
 }
 
+
+bool casmi_driver::add(RuleNode *rule_root) {
+  // TODO can rules and functions have the same name? at the moment, yes
+  try {
+    rules_map_.at(rule_root->name);
+    return false;
+  } catch (const std::out_of_range& e) {
+    DEBUG("Add symbol "+rule_root->name);
+    rules_map_[rule_root->name] = rule_root;
+    return true;
+  }
+}
+
 AstNode *casmi_string_driver::parse (const std::string &str) {
   char tmpname[] = "/tmp/casmi_test_XXXXXX";
   int fd = mkstemp(&tmpname[0]);
@@ -132,4 +145,5 @@ AstNode *casmi_string_driver::parse (const std::string &str) {
 
   return res;
 }
+
 
