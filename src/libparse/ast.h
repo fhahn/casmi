@@ -114,8 +114,6 @@ class RuleNode: public UnaryNode {
     const std::string name;
 };
 
-
-
 class UpdateNode: public AstNode {
   public:
     SymbolUsage *sym_;

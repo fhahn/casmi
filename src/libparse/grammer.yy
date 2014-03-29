@@ -123,6 +123,9 @@ BODY_ELEMENT: PROVIDER_SYNTAX { $$ = new AstNode(NodeType::PROVIDER); }
                 $$ = new AstNode(NodeType::FUNCTION);
                 if (!driver.current_symbol_table->add($1)) {
                     driver.error(@$, "redefinition of symbol");
+                    // if another symbol with same name exists we need to delete
+                    // the symbol here, because it is not inserted in the symbol table
+                    delete $1;
                 } 
             }
            | DERIVED_SYNTAX { $$ = new AstNode(NodeType::DERIVED); }
@@ -131,6 +134,8 @@ BODY_ELEMENT: PROVIDER_SYNTAX { $$ = new AstNode(NodeType::PROVIDER); }
               // TODO check, we trust bison to pass only RuleNodes up
               if (!driver.add(reinterpret_cast<RuleNode*>($1))) {
                     driver.error(@$, "redefinition of rule");
+                    // we do not need to delete $1 here, because it's already in
+                    // the AST, so it will be deleted later
               } 
            }
            ;

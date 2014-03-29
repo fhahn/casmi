@@ -27,14 +27,18 @@ int main (int argc, char *argv[]) {
             driver.result->propagate_types(Type::NO_TYPE, driver);
             if (!driver.ok()) {
               res = 1;
+              delete driver.result;
+            } else {
+              ExecutionContext ctx(driver.current_symbol_table);
+              ExecutionVisitor visitor(driver.result, ctx);
+              AstWalker<ExecutionVisitor> walker(visitor);
+              walker.walk_specification(driver.result);
+              delete driver.result;
             }
-            ExecutionContext ctx(driver.current_symbol_table);
-            ExecutionVisitor visitor(driver.result, ctx);
-            AstWalker<ExecutionVisitor> walker(visitor);
-            walker.walk_specification(driver.result);
-            delete driver.result;
-        } else
-            res = 1;
+        } else {
+          res = 1;
+          delete driver.result;
+        }
     }
     return res;
 }
