@@ -1,0 +1,73 @@
+#include <iostream>
+#include <string>
+
+#include "boost/program_options.hpp"
+
+#include "libparse/driver.h"
+#include "libparse/types.h"
+#include "libparse/parser.tab.h"
+
+#include "libinterpreter/execution_visitor.h"
+#include "libinterpreter/execution_context.h"
+
+// driver must be global, because it is needed for YY_INPUT
+// defined in src/libparse/driver.cpp
+extern casmi_driver *global_driver;
+
+namespace po = boost::program_options;
+
+int main (int argc, char *argv[]) {
+  int res = 0;
+
+  po::options_description desc("Allowed options");
+  desc.add_options()
+    ("help", "produce help message")
+    ("compression", po::value<int>(), "set compression level")
+    ("input-file", po::value< std::string >(), "input file")
+  ;
+
+  po::positional_options_description p;
+  p.add("input-file", -1);
+
+  po::variables_map vm;
+  po::store(po::command_line_parser(argc, argv).
+                options(desc).positional(p).run(), vm);
+  po::notify(vm);
+
+  if (vm.count("help")) {
+    std::cout << desc << "\n";
+    return 1;
+  }
+
+  if (!vm.count("input-file")) {
+    std::cout << "No filename provided" << std::endl;
+    std::cout << desc << "\n";
+  }
+
+  // Setup the driver
+  casmi_driver driver = casmi_driver();
+  global_driver = &driver;
+
+  if (driver.parse(vm["input-file"].as<std::string>()) != nullptr) {
+    driver.result->propagate_types(Type::NO_TYPE, driver);
+    if (!driver.ok()) {
+      res = 1;
+    } else {
+      ExecutionContext ctx(driver.current_symbol_table);
+      ExecutionVisitor visitor(driver.result, ctx);
+      AstWalker<ExecutionVisitor> walker(visitor);
+      walker.walk_rule(driver.get_init_rule());
+    }
+  } else {
+    res = 1;
+  }
+
+  delete driver.result;
+  return res;
+  /*
+        if (argv[i] == std::string ("-p"))
+            driver.trace_parsing = true;
+        else if (argv[i] == std::string ("-s"))
+            driver.trace_scanning = true;
+  */
+}

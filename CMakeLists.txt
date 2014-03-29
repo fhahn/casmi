@@ -9,8 +9,10 @@ set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${casmi_BINARY_DIR}/lib )
 
 set( CMAKE_CXX_FLAGS "-std=c++11 -pedantic -Wall -Wextra -O3 -D_XOPEN_SOURCE=500 -D_BSD_SOURCE" )
 
-include_directories( src )
-include_directories( "${casmi_BINARY_DIR}/src" )
+find_package( Boost 1.50 COMPONENTS program_options REQUIRED )
+
+include_directories( src "${casmi_BINARY_DIR}/src" ${Boost_INCLUDE_DIR} )
+
 
 # add dependency here, added include directories must be visible in subdirectories
 add_subdirectory( "deps/gtest-1.7.0" )
