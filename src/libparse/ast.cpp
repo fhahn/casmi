@@ -1,5 +1,33 @@
+#include <map>
+
 #include "libparse/ast.h"
 #include "libparse/driver.h"
+
+
+static std::map<NodeType, const std::string> node_type_names_ = {
+    {NodeType::UNDEF_ATOM, std::string("UNDEF ATOM")},
+    {NodeType::INT_ATOM, std::string("INT ATOM")},
+    {NodeType::DUMMY_ATOM, std::string("DUMMY ATOM")},
+    {NodeType::INIT, std::string("INIT")},
+    {NodeType::BODY_ELEMENTS, std::string("BODY ELEMENTS")},
+    {NodeType::PROVIDER, std::string("PROVIDER")},
+    {NodeType::OPTION, std::string("OPTION")},
+    {NodeType::ENUM, std::string("ENUM")},
+    {NodeType::FUNCTION, std::string("FUNCTION")},
+    {NodeType::DERIVED, std::string("DERIVED")},
+    {NodeType::RULE, std::string("RULE")},
+    {NodeType::SPECIFICATION, std::string("SPECIFICATION")},
+    {NodeType::EXPRESSION, std::string("EXPRESSION")},
+    {NodeType::UPDATE, std::string("UPDATE")},
+    {NodeType::STATEMENT, std::string("STATEMENT")},
+    {NodeType::PARBLOCK, std::string("PARBLOCK")},
+    {NodeType::STATEMENTS, std::string("STATEMENTS")},
+    {NodeType::FUNCTION_ATOM, std::string("FUNCTION ATOM")},
+};
+
+const std::string& type_to_str(NodeType t) {
+    return node_type_names_.at(t);
+}
 
 AstNode::AstNode(NodeType node_type) {
     node_type_ = node_type;
@@ -27,6 +55,15 @@ bool AstNode::equals(AstNode *other) {
 
 Type AstNode::propagate_types(Type top, casmi_driver &driver) {
   return Type::NO_TYPE;
+}
+
+std::string AstNode::location_str() const {
+  if (location.begin.filename != nullptr) {
+    return *location.begin.filename;
+  } else {
+    return "NO FILE";
+  }
+
 }
 
 AstListNode::AstListNode(yy::location& loc, NodeType node_type) :

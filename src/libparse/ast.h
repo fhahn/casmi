@@ -14,6 +14,7 @@
 enum NodeType { UNDEF_ATOM, INT_ATOM, DUMMY_ATOM, INIT, BODY_ELEMENTS, PROVIDER, OPTION, ENUM, FUNCTION, DERIVED, RULE, SPECIFICATION, EXPRESSION, UPDATE, STATEMENT, PARBLOCK, STATEMENTS, FUNCTION_ATOM};
 
 static const char* node_type_names[] = { "UNDEF_ATOM", "INT_ATOM", "DUMMY_ATOM", "INIT", "BODY_ELEMENTS", "PROVIDER",  "OPTION", "ENUM", "FUNCTION", "DERIVED", "RULE", "SPECIFICATION", "EXPRESSION", "UPDATE", "STATEMENT", "PARBLOCK", "STATEMENTS"};
+const std::string& type_to_str(NodeType t);
 
 class casmi_driver;
 
@@ -34,6 +35,7 @@ class AstNode {
         virtual std::string to_str();
         virtual bool equals(AstNode *other);
         virtual Type propagate_types(Type top, casmi_driver &driver);
+        std::string location_str() const;
 };
 
 class AstListNode: public AstNode {
