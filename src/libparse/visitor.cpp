@@ -28,7 +28,11 @@ void AstVisitor::walk_body_elements(AstListNode *body_elements) {
       } 
       case NodeType::INIT: {break;} // TODO implement
       default: {
-        throw RuntimeException("Invalid node type");
+        throw RuntimeException(
+          std::string("Invalid node type: ")+
+          type_to_str(e->node_type_)+
+          std::string(" at ")+
+          e->location_str());
       }
     }
   
@@ -51,7 +55,12 @@ void AstVisitor::walk_statement(AstNode *stmt) {
       break;
     }
     default: {
-      throw RuntimeException("Invalid node type");
+        throw RuntimeException(
+          std::string("Invalid node type: ")+
+          type_to_str(stmt->node_type_)+
+          std::string(" at ")+
+          stmt->location_str());
+
     }
   }
 }
