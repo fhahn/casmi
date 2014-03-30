@@ -3,5 +3,5 @@ function x : -> Int
 init main
 
 rule main = { 
-    x := 1
+    x := 1 + 1
 }

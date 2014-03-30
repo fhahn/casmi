@@ -1,0 +1,8 @@
+function y : -> List(Int)
+
+init main
+
+rule main = { 
+    x := 1 //~ use of undefined function `x`
+           //~^ type of `x` does not match type of expression
+}
