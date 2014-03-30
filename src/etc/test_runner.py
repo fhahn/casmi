@@ -50,7 +50,14 @@ def test_compile_fail(filename):
         for l in f.readlines():
             parts = l.split("//~")
             if len(parts) == 2:
-                expected_errors[line_number] = parts[1].strip()
+                line_offset = 0
+                for i in range(0, len(parts[1])):
+                    if parts[1][i] != '^':
+                        break
+                    line_offset += 1
+                errors =  expected_errors.get(line_number-line_offset, [])
+                errors.append(parts[1][line_offset:].strip())
+                expected_errors[line_number-line_offset] = errors
             line_number += 1
 
     p1 = subprocess.Popen([test_exe, filename], stderr=subprocess.PIPE)
@@ -75,8 +82,12 @@ def test_compile_fail(filename):
                                     filename,
                                     'unexpected error message: '+l,
                                     HR))
-                expected_error = expected_errors[int(m.groupdict()['line'])]
-                if m.groupdict()['msg'].find(expected_error) == -1:
+                found = False
+                for expected_error in expected_errors[int(m.groupdict()['line'])]:
+                    if m.groupdict()['msg'].find(expected_error) != -1:
+                        found = True
+
+                if not found:
                     print('  [compile-fail] '+short_filename+' ... fail')
                     return (False, COMPILE_FAIL_TEMPLATE.format(HR,
                                                 filename,
