@@ -3,8 +3,10 @@
 
 #include <cstdint>
 #include <vector>
+#include <string>
 
 #define INT_T int32_t
+#define FLOAT_T double
 
 enum class Type { RULE, INT, FLOAT, UNKNOWN, INVALID, NO_TYPE };
 
