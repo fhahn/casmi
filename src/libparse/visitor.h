@@ -6,7 +6,7 @@
 
 class AstNode;
 
-template<class T> class AstWalker {
+template<class T, class V> class AstWalker {
   public:
     T visitor;
 
@@ -82,24 +82,36 @@ template<class T> class AstWalker {
     }
 
     void walk_update(UpdateNode *update) {
-      visitor.visit_update(update);
-      walk_expression(update->expr_);
+      V v = walk_expression(update->expr_);
+      visitor.visit_update(update, v);
     }
 
-    void walk_expression(Expression *expr) {
-      visitor.visit_expression(expr);
+    V walk_expression(Expression *expr) {
+      if (expr->left_ != nullptr && expr->right_ != nullptr) {
+        V v1 = walk_expression(expr->left_);
+        V v2 = walk_atom(expr->right_);
+        return visitor.visit_expression(expr, v1, v2);
+      }
+
       if (expr->left_ != nullptr) {
-        walk_expression(expr->left_);
+        V v = walk_expression(expr->left_);
+
+        return visitor.visit_expression_single(expr, v);
       }
+
       if (expr->right_ != nullptr) {
-        walk_atom(expr->right_);
+        V v = walk_atom(expr->right_);
+
+        return visitor.visit_expression_single(expr, v);
       }
+
+      throw RuntimeException("Invalid expression structure");
     }
 
-    void walk_atom(AtomNode *atom) {
+    V walk_atom(AtomNode *atom) {
       switch(atom->node_type_) {
         case NodeType::INT_ATOM: {
-          visitor.visit_int_atom(reinterpret_cast<IntAtom*>(atom));
+          return visitor.visit_int_atom(reinterpret_cast<IntAtom*>(atom));
           break;
         }
         default: {

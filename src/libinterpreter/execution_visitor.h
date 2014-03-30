@@ -1,9 +1,13 @@
 #ifndef CASMI_LIBINTERPRETER_EXEC_VISITOR
 #define CASMI_LIBINTERPRETER_EXEC_VISITOR
 
+#include <utility>
+
 #include "libparse/ast.h"
 #include "libparse/visitor.h"
+
 #include "libinterpreter/execution_context.h"
+#include "libinterpreter/value.h"
 
 class ExecutionVisitor {
   private:
@@ -19,9 +23,10 @@ class ExecutionVisitor {
     void visit_statement(AstNode *stmt) {}
     void visit_parblock(UnaryNode *parblock) {}
     void visit_statements(AstListNode *stmts) {}
-    void visit_update(UpdateNode *update);
-    void visit_expression(Expression *expr) {}
-    void visit_int_atom(IntAtom *atom) {}
+    void visit_update(UpdateNode *update, Value& val);
+    Value&& visit_expression(Expression *expr, Value& left_val, Value& right_val);
+    Value&& visit_expression_single(Expression *expr, Value& val);
+    Value&& visit_int_atom(IntAtom *atom) { return std::move(Value(atom->val_)); }
 };
 
 #endif //CASMI_LIBINTERPRETER_EXEC_VISITOR

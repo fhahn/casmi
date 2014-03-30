@@ -5,10 +5,12 @@
 
 #include "libparse/driver.h"
 #include "libparse/types.h"
+#include "libparse/typecheck_visitor.h"
 #include "libparse/parser.tab.h"
 
 #include "libinterpreter/execution_visitor.h"
 #include "libinterpreter/execution_context.h"
+#include "libinterpreter/value.h"
 
 // driver must be global, because it is needed for YY_INPUT
 // defined in src/libparse/driver.cpp
@@ -49,13 +51,16 @@ int main (int argc, char *argv[]) {
   global_driver = &driver;
 
   if (driver.parse(vm["input-file"].as<std::string>()) != nullptr) {
-    driver.result->propagate_types(Type::NO_TYPE, driver);
+
+    TypecheckVisitor typecheck_visitor(driver);
+    AstWalker<TypecheckVisitor, Type> typecheck_walker(typecheck_visitor);
+    typecheck_walker.walk_specification(driver.result);
     if (!driver.ok()) {
       res = 1;
     } else {
       ExecutionContext ctx(driver.current_symbol_table);
       ExecutionVisitor visitor(driver.result, ctx);
-      AstWalker<ExecutionVisitor> walker(visitor);
+      AstWalker<ExecutionVisitor, Value> walker(visitor);
       walker.walk_rule(driver.get_init_rule());
     }
   } else {

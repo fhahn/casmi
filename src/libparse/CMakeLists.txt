@@ -33,5 +33,6 @@ add_library(parser
   ast.cpp
   symbols.cpp
   types.cpp
+  typecheck_visitor.cpp
 )
 target_link_libraries(parser y util)
