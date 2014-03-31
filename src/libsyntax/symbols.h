@@ -35,6 +35,7 @@ class SymbolUsage {
   public:
     const std::string name_;
     yy::location location;
+    Symbol *symbol;
 
     SymbolUsage(yy::location& loc, const std::string name);
     SymbolUsage(yy::location& loc, const std::string name, std::vector<Expression*> *args);

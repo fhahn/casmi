@@ -4,14 +4,15 @@
 TypecheckVisitor::TypecheckVisitor(Driver& driver) : driver_(driver) {}
 
 void TypecheckVisitor::visit_update(UpdateNode *update, Type val) {
-  Type sym_type = driver_.current_symbol_table->get(update->sym_);
-  if (sym_type == Type::INVALID) {
+  Symbol *sym = driver_.current_symbol_table->get(update->sym_->name_);
+  if (sym == nullptr) {
     driver_.error(update->sym_->location, "use of undefined function `"+update->sym_->name_+"`");
   }
-  if (sym_type != val) {
+  if (sym->return_type_ != val) {
     driver_.error(update->location, "type of `"+update->sym_->name_+
                             "` does not match type of expression");
   }
+  update->sym_->symbol = sym;
 }
 
 Type TypecheckVisitor::visit_expression(Expression *expr, Type left_val, Type right_val) {
