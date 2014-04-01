@@ -8,10 +8,10 @@ class AstNode;
 
 template<class T, class V> class AstWalker {
   public:
-    T visitor;
+    T& visitor;
 
 
-    AstWalker(T v) : visitor(v) {}
+    AstWalker(T& v) : visitor(v) {}
 
     void walk_specification(AstNode *spec) {
       if (spec->node_type_ == NodeType::BODY_ELEMENTS) {
@@ -42,6 +42,7 @@ template<class T, class V> class AstWalker {
           }
         }
       }
+      visitor.visit_body_elements(body_elements);
     }
 
     void walk_rule(RuleNode *rule) {

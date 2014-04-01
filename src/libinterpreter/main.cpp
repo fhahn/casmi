@@ -5,11 +5,12 @@
 
 #include "libsyntax/driver.h"
 #include "libsyntax/types.h"
+#include "libsyntax/ast_dump_visitor.h"
 #include "libsyntax/parser.tab.h"
 
 #include "libmiddle/typecheck_visitor.h"
 
-#include "libinterpreter/execution_visitor.h"
+//#include "libinterpreter/execution_visitor.h"
 #include "libinterpreter/execution_context.h"
 #include "libinterpreter/value.h"
 
@@ -27,6 +28,7 @@ int main (int argc, char *argv[]) {
     ("help", "produce help message")
     ("compression", po::value<int>(), "set compression level")
     ("input-file", po::value< std::string >(), "input file")
+    ("dump-ast", po::value<bool>(), "dump AST as dot graph")
   ;
 
   po::positional_options_description p;
@@ -53,16 +55,25 @@ int main (int argc, char *argv[]) {
 
   if (driver.parse(vm["input-file"].as<std::string>()) != nullptr) {
 
+    if (vm.count("dump-ast")) {
+      AstDumpVisitor dump_visitor;
+      AstWalker<AstDumpVisitor, bool> dump_walker(dump_visitor);
+      dump_walker.walk_specification(driver.result);
+      std::cout << dump_visitor.get_dump();
+      return 0;
+    }
     TypecheckVisitor typecheck_visitor(driver);
     AstWalker<TypecheckVisitor, Type> typecheck_walker(typecheck_visitor);
     typecheck_walker.walk_specification(driver.result);
     if (!driver.ok()) {
       res = 1;
     } else {
+      /*
       ExecutionContext ctx(driver.current_symbol_table);
       ExecutionVisitor visitor(ctx);
       AstWalker<ExecutionVisitor, Value> walker(visitor);
       walker.walk_rule(driver.get_init_rule());
+      */
     }
   } else {
     res = 1;

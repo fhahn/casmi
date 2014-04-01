@@ -3,6 +3,7 @@
 
 #include <utility>
 #include <string>
+#include <sstream>
 
 #include "libsyntax/ast.h"
 #include "libsyntax/visitor.h"
@@ -12,19 +13,25 @@
 
 class AstDumpVisitor {
   private:
-    std::string output;
+    std::stringstream dump_stream_;
+
+    void add_node(uint64_t key, const std::string& name);
 
   public:
+
+    AstDumpVisitor();
+
+    std::string get_dump();
     void visit_specification(AstNode *spec) {}
-    void visit_body_elements(AstListNode *body_elements) {}
+    void visit_body_elements(AstListNode *body_elements);
     void visit_rule(RuleNode *rule) {}
     void visit_statement(AstNode *stmt) {}
     void visit_parblock(UnaryNode *parblock) {}
     void visit_statements(AstListNode *stmts) {}
-    void visit_update(UpdateNode *update, Value& val);
-    Value&& visit_expression(Expression *expr, Value& left_val, Value& right_val);
-    Value&& visit_expression_single(Expression *expr, Value& val);
-    Value&& visit_int_atom(IntAtom *atom) { return std::move(Value(atom->val_)); }
+    bool visit_update(UpdateNode *update, bool);
+    bool visit_expression(Expression *expr, bool, bool);
+    bool visit_expression_single(Expression *expr, bool);
+    bool visit_int_atom(IntAtom *atom) { return false; }
 };
 
 #endif //CASMI_LIBINTERPRETER_EXEC_VISITOR

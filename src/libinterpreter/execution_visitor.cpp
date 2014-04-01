@@ -2,25 +2,35 @@
 
 #include "libinterpreter/execution_visitor.h"
 
+/*
+ExecutionVisitor::ExecutionVisitor() { }
 
-ExecutionVisitor::ExecutionVisitor(ExecutionContext& ctx) : context_(ctx) {}
-
-void ExecutionVisitor::visit_update(UpdateNode *update, Value& val) {
-  DEBUG("update "<< val.value.ival);
+std::string ExecutionVisitor::get_dump() {
+  
+  return std::string("digraph \"main\" {\n") + dump_stream_.str() + std::string("}");
 }
 
-Value&& ExecutionVisitor::visit_expression(Expression *expr, Value &left_val, Value &right_val) {
-  switch (left_val.type) {
-    case Type::INT: {
-      left_val.value.ival += right_val.value.ival;
-      return std::move(left_val);
-    }
-    default: {
-      throw std::string("KABOOM");
-    }
+void ExecutionVisitor::add_node(uint64_t key, const std::string& name) {
+  dump_stream_ << "    " << key << " [label=\"" << name << "\"];" << std::endl;
+}
+
+void ExecutionVisitor::visit_body_elements(AstListNode *body_elements) {
+  add_node((uint64_t) body_elements, "Body Elements");
+
+  for (AstNode *s : body_elements->nodes) {
+    dump_stream_ << "    " << (uint64_t) body_elements << " -> " << (uint64_t) s << ";" << std::endl;
   }
 }
 
-Value&& ExecutionVisitor::visit_expression_single(Expression *expr, Value &val) {
-  return std::move(val);
+bool ExecutionVisitor::visit_update(UpdateNode *update, bool) {
+  return true;
 }
+
+bool ExecutionVisitor::visit_expression(Expression *expr, bool, bool) {
+  return true;
+}
+
+bool ExecutionVisitor::visit_expression_single(Expression *expr, bool) {
+  return true;
+}
+*/

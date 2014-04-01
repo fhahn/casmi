@@ -12,6 +12,7 @@
 #include "libinterpreter/value.h"
 
 class ExecutionVisitor {
+
   private:
     ExecutionContext& context_;
 
