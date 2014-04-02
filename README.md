@@ -15,17 +15,10 @@ $ cmake ..
 $ make
 ```
 
-This will build the whole project and generate the following files:
-
-* `build/bin/test_parser`
-* `build/bin/unittest_runner`
-* `build/lib/libparser.a`
-
-
 Tests
 ------------------------
 
-At the moment `ctest` is used for the integration tests.
-To run the tests, use `make check`. 
+Use `make check-unit` to run the unit tests (using gtest) and
+`make check-integration` to run the integration tests.
 
-To pass options to `ctest` use `make ARGS="-E foo"`
+`make check` is equivalent to `make check-unit check-integration`
