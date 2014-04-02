@@ -5,4 +5,6 @@
 
 #define DEBUG(x) do { std::cerr << "DEBUG: " << x << std::endl; } while (0)
 
+#define UNUSED(expr) do { (void)(expr); } while (0)
+
 #endif

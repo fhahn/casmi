@@ -22,5 +22,7 @@ Type TypecheckVisitor::visit_expression(Expression *expr, Type left_val, Type ri
 }
 
 Type TypecheckVisitor::visit_expression_single(Expression *expr, Type val) {
+  // just pass to type of the expression up, nothing to check here
+  UNUSED(expr);
   return val;
 }
