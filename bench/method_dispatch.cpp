@@ -3,6 +3,7 @@
 #include <cassert>
 #include <vector>
 
+#include "macros.h"
 #include "libparse/types.h"
 
 
@@ -11,11 +12,13 @@
 enum class NodeType { INT_ATOM, DUMMY_ATOM, INIT, BODY_ELEMENTS, PROVIDER, OPTION, ENUM, FUNCTION, DERIVED, RULE, SPECIFICATION, EXPRESSION, UPDATE, STATEMENT, PARBLOCK, STATEMENTS};
 
 class AstNode {
-    public:
-        NodeType type;
-        AstNode(NodeType t) : type(t) {}
-        virtual ~AstNode(){}
-        virtual INT_T execute_virtual(std::vector<INT_T> &context) { return 0; }
+  public:
+    NodeType type;
+    AstNode(NodeType t) : type(t) {}
+    virtual ~AstNode(){}
+    virtual INT_T execute_virtual(std::vector<INT_T> &context) {
+      UNUSED(context); return 0;
+    }
 };
 
 class AtomNode: public AstNode {
@@ -88,42 +91,42 @@ class UpdateNode: public AstNode {
     }
 };
 
-
 class AstListNode: public AstNode {
-    public:
-        std::vector<AstNode*> nodes;
-        AstListNode(NodeType type) : AstNode(type) {}
+  public:
+    std::vector<AstNode*> nodes;
+    AstListNode(NodeType type) : AstNode(type) {}
 
-        virtual ~AstListNode() {
-          for (auto n : nodes) {
-            delete n;
+    virtual ~AstListNode() {
+      for (auto n : nodes) {
+        delete n;
+      }
+      nodes.clear();
+    }
+
+    void add(AstNode* n) { nodes.push_back(n); }
+
+    virtual INT_T execute_virtual(std::vector<INT_T> &context) {
+      for (auto node: nodes) {
+        node->execute_virtual(context);
+      }
+      return 0;
+    }
+
+    inline INT_T execute_normal(std::vector<INT_T> &context) {
+      for (auto node: nodes) {
+        switch (node->type) {
+          case NodeType::UPDATE: {
+            reinterpret_cast<UpdateNode*>(node)->execute_normal(context);
+            break;
           }
-          nodes.clear();
-        }
-
-        void add(AstNode* n) { nodes.push_back(n); }
-
-        virtual INT_T execute_virtual(std::vector<INT_T> &context) {
-          for (auto node: nodes) {
-            node->execute_virtual(context);
+          case NodeType::STATEMENT: {
+            assert(false);
           }
-          return 0;
+          default: assert(false);
         }
-
-        inline INT_T execute_normal(std::vector<INT_T> &context) {
-          for (auto node: nodes) {
-            switch (node->type) {
-              case NodeType::UPDATE: {
-                reinterpret_cast<UpdateNode*>(node)->execute_normal(context);
-                break;
-              }
-              case NodeType::STATEMENT: {
-                assert(false);
-              }
-            }
-          }
-          return 0;
-        }
+      }
+      return 0;
+    }
 };
 
 class AstFixture: public hayai::Fixture {
@@ -180,6 +183,7 @@ BENCHMARK_F(AstFixture, SwitchDispatch, 10, NUM_ITERATIONS) {
       case NodeType::STATEMENT: {
         assert(false);
       }
+      default: assert(false);
     }
   }
 }
@@ -220,6 +224,7 @@ class Visitor {
             visit_update(reinterpret_cast<UpdateNode*>(node), context);
             break;
           }
+          default: assert(false);
         }
       }
     }
@@ -229,5 +234,3 @@ BENCHMARK_F(AstFixture, VisitorDispatch, 10, NUM_ITERATIONS) {
   Visitor v;
   v.visit_statements(ast, context);
 }
-
-
