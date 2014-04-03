@@ -13,11 +13,10 @@
 
 class ExecutionVisitor {
   private:
-    AstNode *root_;
     ExecutionContext& context_;
 
   public:
-    ExecutionVisitor(AstNode *root, ExecutionContext& context);
+    ExecutionVisitor(ExecutionContext& context);
 
     void visit_specification(AstNode *spec) { UNUSED(spec); }
     void visit_body_elements(AstListNode *body_elements) { UNUSED(body_elements); }

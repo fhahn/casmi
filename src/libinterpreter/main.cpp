@@ -59,7 +59,7 @@ int main (int argc, char *argv[]) {
       res = 1;
     } else {
       ExecutionContext ctx(driver.current_symbol_table);
-      ExecutionVisitor visitor(driver.result, ctx);
+      ExecutionVisitor visitor(ctx);
       AstWalker<ExecutionVisitor, Value> walker(visitor);
       walker.walk_rule(driver.get_init_rule());
     }

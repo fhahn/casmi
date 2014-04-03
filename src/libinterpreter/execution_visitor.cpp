@@ -1,13 +1,13 @@
+#include "macros.h"
+
 #include "libinterpreter/execution_visitor.h"
 
 
-ExecutionVisitor::ExecutionVisitor(AstNode *root, ExecutionContext& ctx) 
-  : root_(root), context_(ctx) {}
+ExecutionVisitor::ExecutionVisitor(ExecutionContext& ctx) : context_(ctx) {}
 
 void ExecutionVisitor::visit_update(UpdateNode *update, Value& val) {
-  std::cout << "HALLO "<< val.value.ival <<"\n";
+  DEBUG("update "<< val.value.ival);
 }
-
 
 Value&& ExecutionVisitor::visit_expression(Expression *expr, Value &left_val, Value &right_val) {
   switch (left_val.type) {
