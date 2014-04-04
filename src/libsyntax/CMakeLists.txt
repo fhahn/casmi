@@ -29,10 +29,9 @@ add_library(parser
   lexer.cpp
   driver.cpp
   lexer_helpers.cpp
-  visitor.cpp
   ast.cpp
   symbols.cpp
   types.cpp
-  typecheck_visitor.cpp
+  ast_dump_visitor.cpp
 )
 target_link_libraries(parser y util)

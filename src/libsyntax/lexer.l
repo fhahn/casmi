@@ -4,8 +4,8 @@
 #include <string.h>
 #include <cstdint>
 
-#include "libparse/driver.h"
-#include "libparse/lexer_helpers.h"
+#include "libsyntax/driver.h"
+#include "libsyntax/lexer_helpers.h"
 
 #include "parser.tab.h"
 
@@ -16,7 +16,7 @@
 static yy::location loc;
 
 // driver must be global, because it is needed for YY_INPUT
-// defined in src/libparse/driver.cpp
+// defined in src/libsyntax/driver.cpp
 extern Driver *global_driver;
 
 #define STRBUF_LENGTH 1000

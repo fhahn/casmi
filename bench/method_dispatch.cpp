@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "macros.h"
-#include "libparse/types.h"
+#include "libsyntax/types.h"
 
 
 #define NUM_ITERATIONS 1000

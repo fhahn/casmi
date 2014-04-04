@@ -1,5 +1,6 @@
-#include "libparse/symbols.h"
 #include <iostream>
+
+#include "libsyntax/symbols.h"
 
 
 // -------------------------------------------------------------------------

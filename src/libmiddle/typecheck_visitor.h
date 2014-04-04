@@ -5,10 +5,10 @@
 
 #include "macros.h"
 
-#include "libparse/ast.h"
-#include "libparse/visitor.h"
-#include "libparse/types.h"
-#include "libparse/driver.h"
+#include "libsyntax/ast.h"
+#include "libsyntax/visitor.h"
+#include "libsyntax/types.h"
+#include "libsyntax/driver.h"
 
 class TypecheckVisitor {
   private:

@@ -1,7 +1,7 @@
 #ifndef CASMI_LIBINTERPRETER_VALUE_H
 #define CASMI_LIBINTERPRETER_VALUE_H
 
-#include "libparse/types.h"
+#include "libsyntax/types.h"
 
 class Value {
   public:

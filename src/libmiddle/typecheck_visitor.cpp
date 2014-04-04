@@ -1,4 +1,4 @@
-#include "libparse/typecheck_visitor.h"
+#include "libmiddle/typecheck_visitor.h"
 
 
 TypecheckVisitor::TypecheckVisitor(Driver& driver) : driver_(driver) {}

@@ -3,9 +3,9 @@
 
 #include "gtest/gtest.h"
 
-#include "libparse/driver.h"
-#include "libparse/parser.tab.h"
-#include "libparse/location.hh"
+#include "libsyntax/driver.h"
+#include "libsyntax/parser.tab.h"
+#include "libsyntax/location.hh"
 
 
 yy::location loc;

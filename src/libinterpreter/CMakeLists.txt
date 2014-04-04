@@ -4,7 +4,7 @@ add_library(interpreter
   value.cpp
 )
 
-target_link_libraries(interpreter parser)
+target_link_libraries(interpreter parser middle)
 
 add_executable(casmi main.cpp)
 target_link_libraries(casmi interpreter ${Boost_LIBRARIES})

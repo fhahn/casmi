@@ -135,7 +135,7 @@ if __name__ == '__main__':
     print('')
     print(HR)
     if fail_count_sum == 0:
-        print('\nTest summary (OK):')
+        print('\n\nTest summary (OK):')
     else:
         print('\nTest summary (FAIL):')
     print('  run {} tests, ok: {}\tfailed: {}\n'.format(

@@ -6,9 +6,9 @@
 
 #include "macros.h"
 
-#include "libparse/types.h"
-#include "libparse/symbols.h"
-#include "libparse/location.hh" // reuse bison's location class
+#include "libsyntax/types.h"
+#include "libsyntax/symbols.h"
+#include "libsyntax/location.hh" // reuse bison's location class
 
 enum class NodeType {
   UNDEF_ATOM,

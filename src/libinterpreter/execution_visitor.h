@@ -5,8 +5,8 @@
 
 #include "macros.h"
 
-#include "libparse/ast.h"
-#include "libparse/visitor.h"
+#include "libsyntax/ast.h"
+#include "libsyntax/visitor.h"
 
 #include "libinterpreter/execution_context.h"
 #include "libinterpreter/value.h"

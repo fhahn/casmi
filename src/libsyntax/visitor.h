@@ -2,7 +2,7 @@
 #define CASMI_LIBPARSE_VISITOR_H
 
 #include "libutil/exceptions.h"
-#include "libparse/ast.h"
+#include "libsyntax/ast.h"
 
 class AstNode;
 

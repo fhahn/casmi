@@ -13,7 +13,7 @@
     #include <string>
     #include <utility>
 
-    #include "libparse/ast.h"
+    #include "libsyntax/ast.h"
     class Driver;
 }
 
@@ -34,7 +34,7 @@
 %define parse.error verbose
 
 %code {
-    #include "libparse/driver.h"
+    #include "libsyntax/driver.h"
 }
 
 %token AND OR XOR NOT ASSERT ASSURE DIEDIE IMPOSSIBLE SKIP SEQBLOCK ENDSEQBLOCK

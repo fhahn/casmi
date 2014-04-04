@@ -1,7 +1,7 @@
 #include <map>
 
-#include "libparse/ast.h"
-#include "libparse/driver.h"
+#include "libsyntax/ast.h"
+#include "libsyntax/driver.h"
 
 
 static std::map<NodeType, const std::string> node_type_names_ = {

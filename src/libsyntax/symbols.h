@@ -5,9 +5,9 @@
 #include <map>
 #include <vector>
 
-#include "libparse/ast.h"
-#include "libparse/types.h"
-#include "libparse/location.hh" // reuse bison's location class
+#include "libsyntax/ast.h"
+#include "libsyntax/types.h"
+#include "libsyntax/location.hh" // reuse bison's location class
 
 class Expression;
 

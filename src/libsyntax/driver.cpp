@@ -2,7 +2,7 @@
 #include <cstdio>
 #include <cstring>
 
-#include "libparse/driver.h"
+#include "libsyntax/driver.h"
 
 #define BOLD_BLACK  "\x1b[1m"
 #define BOLD_RED    "\x1b[1;31m"

@@ -2,7 +2,7 @@
 #include <cstdlib>
 #include <stdexcept>
 
-#include "libparse/lexer_helpers.h"
+#include "libsyntax/lexer_helpers.h"
 
 
 uint64_t convert_to_long(const char* val, int base, Driver &driver, yy::location loc) {

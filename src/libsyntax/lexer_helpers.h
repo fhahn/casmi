@@ -4,8 +4,8 @@
 #include <cstdint>
 #include <iostream>
 
-#include "libparse/driver.h"
-#include "libparse/parser.tab.h"
+#include "libsyntax/driver.h"
+#include "libsyntax/parser.tab.h"
 
 uint64_t convert_to_long(const char* val, int base, Driver &driver, yy::location loc);
 

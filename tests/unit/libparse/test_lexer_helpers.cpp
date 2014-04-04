@@ -6,10 +6,10 @@
 
 #include "gtest/gtest.h"
 
-#include "libparse/driver.h"
-#include "libparse/lexer_helpers.h"
+#include "libsyntax/driver.h"
+#include "libsyntax/lexer_helpers.h"
 
-#include "libparse/parser.tab.h"
+#include "libsyntax/parser.tab.h"
 
 
 class LexerHelpersTest: public ::testing::Test {

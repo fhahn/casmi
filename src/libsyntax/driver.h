@@ -7,8 +7,8 @@
 #include <map>
 #include <memory>
 
-#include "libparse/parser.tab.h"
-#include "libparse/symbols.h"
+#include "libsyntax/parser.tab.h"
+#include "libsyntax/symbols.h"
 
 class AstNode;
 

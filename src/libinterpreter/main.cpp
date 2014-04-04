@@ -3,17 +3,18 @@
 
 #include "boost/program_options.hpp"
 
-#include "libparse/driver.h"
-#include "libparse/types.h"
-#include "libparse/typecheck_visitor.h"
-#include "libparse/parser.tab.h"
+#include "libsyntax/driver.h"
+#include "libsyntax/types.h"
+#include "libsyntax/parser.tab.h"
+
+#include "libmiddle/typecheck_visitor.h"
 
 #include "libinterpreter/execution_visitor.h"
 #include "libinterpreter/execution_context.h"
 #include "libinterpreter/value.h"
 
 // driver must be global, because it is needed for YY_INPUT
-// defined in src/libparse/driver.cpp
+// defined in src/libsyntax/driver.cpp
 extern Driver *global_driver;
 
 namespace po = boost::program_options;
