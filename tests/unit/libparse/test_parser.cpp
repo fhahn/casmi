@@ -9,13 +9,13 @@
 #include "libparse/parser.tab.h"
 #include "libparse/location.hh"
 
-extern casmi_driver *global_driver;
+extern Driver *global_driver;
 
 class ParserTest: public ::testing::Test {
   protected:
     virtual void SetUp() { global_driver = &driver_; }
 
-    casmi_string_driver driver_;
+    StringDriver driver_;
     yy::location loc;
 };
 

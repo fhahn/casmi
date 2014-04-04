@@ -14,7 +14,7 @@
 
 // driver must be global, because it is needed for YY_INPUT
 // defined in src/libparse/driver.cpp
-extern casmi_driver *global_driver;
+extern Driver *global_driver;
 
 namespace po = boost::program_options;
 
@@ -47,7 +47,7 @@ int main (int argc, char *argv[]) {
   }
 
   // Setup the driver
-  casmi_driver driver = casmi_driver();
+  Driver driver = Driver();
   global_driver = &driver;
 
   if (driver.parse(vm["input-file"].as<std::string>()) != nullptr) {

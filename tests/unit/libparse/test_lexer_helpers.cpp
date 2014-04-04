@@ -16,7 +16,7 @@ class LexerHelpersTest: public ::testing::Test {
   protected:
     virtual void SetUp() { }
 
-    casmi_driver driver;
+    Driver driver;
     yy::location loc;
 };
 

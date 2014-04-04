@@ -17,7 +17,7 @@ static yy::location loc;
 
 // driver must be global, because it is needed for YY_INPUT
 // defined in src/libparse/driver.cpp
-extern casmi_driver *global_driver;
+extern Driver *global_driver;
 
 #define STRBUF_LENGTH 1000
 void yyerror(const char *s);
@@ -183,19 +183,3 @@ objdump { return yy::casmi_parser::make_OBJDUMP(loc); }
 }
 
 %%
-
-/*
-void casmi_driver::scan_begin() {
-    yy_flex_debug = trace_scanning;
-    if (file.empty () || file == "-") {
-        yyin = stdin;
-    } else if (!(yyin = fopen (file.c_str (), "r"))) {
-        error ("cannot open " + file + ": " + strerror(errno));
-        exit (EXIT_FAILURE);
-    }
-}
-
-void casmi_driver::scan_end() {
-    fclose (yyin);
-}
-*/

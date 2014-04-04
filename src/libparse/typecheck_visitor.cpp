@@ -1,7 +1,7 @@
 #include "libparse/typecheck_visitor.h"
 
 
-TypecheckVisitor::TypecheckVisitor(casmi_driver& driver) : driver_(driver) {}
+TypecheckVisitor::TypecheckVisitor(Driver& driver) : driver_(driver) {}
 
 void TypecheckVisitor::visit_update(UpdateNode *update, Type val) {
   Type sym_type = driver_.current_symbol_table->get(update->sym_);

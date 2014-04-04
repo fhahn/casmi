@@ -16,8 +16,6 @@ enum NodeType { UNDEF_ATOM, INT_ATOM, DUMMY_ATOM, INIT, BODY_ELEMENTS, PROVIDER,
 static const char* node_type_names[] = { "UNDEF_ATOM", "INT_ATOM", "DUMMY_ATOM", "INIT", "BODY_ELEMENTS", "PROVIDER",  "OPTION", "ENUM", "FUNCTION", "DERIVED", "RULE", "SPECIFICATION", "EXPRESSION", "UPDATE", "STATEMENT", "PARBLOCK", "STATEMENTS"};
 const std::string& type_to_str(NodeType t);
 
-class casmi_driver;
-
 class AstVisitor;
 class SymbolUsage;
 

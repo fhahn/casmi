@@ -7,6 +7,6 @@
 #include "libparse/driver.h"
 #include "libparse/parser.tab.h"
 
-uint64_t convert_to_long(const char* val, int base, casmi_driver &driver, yy::location loc);
+uint64_t convert_to_long(const char* val, int base, Driver &driver, yy::location loc);
 
 #endif

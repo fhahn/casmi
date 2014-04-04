@@ -12,45 +12,45 @@
 
 class AstNode;
 
-class casmi_driver {
-private:
-  std::string filename_;
-  FILE *file_;
-  std::vector<std::string> lines_;
-  bool error_;
-  std::map<std::string, RuleNode*> rules_map_;
+class Driver {
+  private:
+    std::string filename_;
+    FILE *file_;
+    std::vector<std::string> lines_;
+    bool error_;
+    std::map<std::string, RuleNode*> rules_map_;
 
-public:
-  casmi_driver ();
-  virtual ~casmi_driver ();
+  public:
+    Driver ();
+    virtual ~Driver ();
 
-  AstNode *result;
+    AstNode *result;
 
-  std::string init_name;
+    std::string init_name;
 
-  // State information for the lexer
-  bool trace_parsing;
-  bool trace_scanning;
+    // State information for the lexer
+    bool trace_parsing;
+    bool trace_scanning;
 
-  // Handling the scanner.
-  size_t get_next_chars(char buffer[], size_t max_size);
+    // Handling the scanner.
+    size_t get_next_chars(char buffer[], size_t max_size);
 
-  // Run the parser. Return 0 on success.
-  AstNode *parse(const std::string& f);
+    // Run the parser. Return 0 on success.
+    AstNode *parse(const std::string& f);
 
-  // Error handling.
-  void error (const yy::location& l, const std::string& m);
-  bool ok() const;
+    // Error handling.
+    void error (const yy::location& l, const std::string& m);
+    bool ok() const;
 
-  // Rule handling
-  bool add(RuleNode *rule_root);
-  RuleNode *get_init_rule() const;
+    // Rule handling
+    bool add(RuleNode *rule_root);
+    RuleNode *get_init_rule() const;
 
-  // symbol table stuff
-  SymbolTable *current_symbol_table;
+    // symbol table stuff
+    SymbolTable *current_symbol_table;
 };
 
-class casmi_string_driver : public casmi_driver {
+class StringDriver: public Driver {
   private:
     std::string str_;
     std::string::iterator iter_;
@@ -62,7 +62,7 @@ class casmi_string_driver : public casmi_driver {
 
 // Tell Flex the lexer's prototype ...
 #define YY_DECL \
-    yy::casmi_parser::symbol_type yylex (casmi_driver& driver)
+    yy::casmi_parser::symbol_type yylex (Driver& driver)
     YY_DECL;
 
 

@@ -14,18 +14,18 @@
     #include <utility>
 
     #include "libparse/ast.h"
-    class casmi_driver;
+    class Driver;
 }
 
 // The parsing context.
-%parse-param { casmi_driver& driver }
-%lex-param   { casmi_driver& driver }
+%parse-param { Driver& driver }
+%lex-param   { Driver& driver }
 
 %locations
 %initial-action
 {
   // Initialize the initial location.
-  // Error messages are printed in casmi_driver, I guess location does not 
+  // Error messages are printed in Driver, I guess location does not 
   // need to know about the filename
   //@$.begin.filename = @$.end.filename = &driver.filename_;
 };

@@ -12,9 +12,9 @@
 extern int yylex_destroy(void);
 
 // driver must be global, because it is needed for YY_INPUT
-casmi_driver *global_driver;
+Driver *global_driver;
 
-casmi_driver::casmi_driver () 
+Driver::Driver () 
     : error_(false), trace_parsing (false), trace_scanning (false) {
   file_ = nullptr;
   current_symbol_table = new SymbolTable();
@@ -25,7 +25,7 @@ casmi_driver::casmi_driver ()
   lines_.push_back("");
 }
 
-casmi_driver::~casmi_driver () {
+Driver::~Driver () {
   if (file_ != nullptr) {
     fclose(file_);
   }
@@ -34,7 +34,7 @@ casmi_driver::~casmi_driver () {
   delete current_symbol_table;
 }
 
-size_t casmi_driver::get_next_chars(char buf[], size_t max_size) {
+size_t Driver::get_next_chars(char buf[], size_t max_size) {
   if (fgets(buf, max_size, file_) == NULL) {
     if (ferror(file_)) {
       return -1;
@@ -51,7 +51,7 @@ size_t casmi_driver::get_next_chars(char buf[], size_t max_size) {
   }
 }
 
-AstNode *casmi_driver::parse (const std::string &f) {
+AstNode *Driver::parse (const std::string &f) {
   int res = -1;
 
   if (file_ != nullptr) {
@@ -84,7 +84,7 @@ AstNode *casmi_driver::parse (const std::string &f) {
   return result;
 }
 
-void casmi_driver::error (const yy::location& l, const std::string& m) {
+void Driver::error (const yy::location& l, const std::string& m) {
   // Set state to error!
   error_ = true;
 
@@ -106,11 +106,11 @@ void casmi_driver::error (const yy::location& l, const std::string& m) {
   }
 }
 
-bool casmi_driver::ok() const {
+bool Driver::ok() const {
   return !error_;
 }
 
-bool casmi_driver::add(RuleNode *rule_root) {
+bool Driver::add(RuleNode *rule_root) {
   // TODO can rules and functions have the same name?
   try {
     rules_map_.at(rule_root->name);
@@ -122,11 +122,11 @@ bool casmi_driver::add(RuleNode *rule_root) {
   }
 }
 
-RuleNode *casmi_driver::get_init_rule() const {
+RuleNode *Driver::get_init_rule() const {
   return rules_map_.at(init_name);
 }
 
-AstNode *casmi_string_driver::parse (const std::string &str) {
+AstNode *StringDriver::parse (const std::string &str) {
   char tmpname[] = "/tmp/casmi_test_XXXXXX";
   int fd = mkstemp(&tmpname[0]);
 
@@ -143,7 +143,7 @@ AstNode *casmi_string_driver::parse (const std::string &str) {
 
   fwrite(str.c_str(), str.length(), sizeof(char), file);
   fclose(file);
-  AstNode *res = casmi_driver::parse(tmpname);
+  AstNode *res = Driver::parse(tmpname);
   remove(tmpname);
 
   return res;
