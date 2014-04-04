@@ -46,7 +46,7 @@ AstNode::~AstNode() {
 }
 
 std::string AstNode::to_str() {
-    return std::string("AStNode: ")+ node_type_names[node_type_];
+    return std::string("AStNode: ") + type_to_str(node_type_);
 }
 
 bool AstNode::equals(AstNode *other) {

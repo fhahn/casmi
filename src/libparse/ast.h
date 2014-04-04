@@ -10,10 +10,27 @@
 #include "libparse/symbols.h"
 #include "libparse/location.hh" // reuse bison's location class
 
-// TODO enum class, but how to print?
-enum NodeType { UNDEF_ATOM, INT_ATOM, DUMMY_ATOM, INIT, BODY_ELEMENTS, PROVIDER, OPTION, ENUM, FUNCTION, DERIVED, RULE, SPECIFICATION, EXPRESSION, UPDATE, STATEMENT, PARBLOCK, STATEMENTS, FUNCTION_ATOM};
+enum class NodeType {
+  UNDEF_ATOM,
+  INT_ATOM,
+  DUMMY_ATOM,
+  INIT,
+  BODY_ELEMENTS,
+  PROVIDER,
+  OPTION,
+  ENUM,
+  FUNCTION,
+  DERIVED,
+  RULE,
+  SPECIFICATION,
+  EXPRESSION,
+  UPDATE,
+  STATEMENT,
+  PARBLOCK,
+  STATEMENTS,
+  FUNCTION_ATOM
+};
 
-static const char* node_type_names[] = { "UNDEF_ATOM", "INT_ATOM", "DUMMY_ATOM", "INIT", "BODY_ELEMENTS", "PROVIDER",  "OPTION", "ENUM", "FUNCTION", "DERIVED", "RULE", "SPECIFICATION", "EXPRESSION", "UPDATE", "STATEMENT", "PARBLOCK", "STATEMENTS"};
 const std::string& type_to_str(NodeType t);
 
 class AstVisitor;
