@@ -95,13 +95,33 @@ class FunctionAtom : public AtomNode {
 };
 
 
-
 class Expression : public AstNode {
   public:
+    enum class Operation {
+      ADD,
+      SUB,
+      NEQ,
+      EQ,
+      LESSER,
+      GREATER,
+      LESSEREQ,
+      GREATEREQ,
+      MUL,
+      DIV,
+      MOD,
+      RAT_DIV,
+      OR,
+      XOR,
+      AND,
+      NOP
+    };
+
     Expression *left_;
     AtomNode *right_;
 
-    Expression(yy::location& loc, Expression *left, AtomNode *right);
+    Operation op;
+
+    Expression(yy::location& loc, Expression *left, AtomNode *right, Expression::Operation op);
     virtual ~Expression();
     virtual bool equals(AstNode *other);
 };

@@ -147,10 +147,10 @@ bool FunctionAtom::equals(AstNode *other) {
   */
 }
 
-Expression::Expression(yy::location& loc, Expression *left, AtomNode *right) : AstNode(loc, NodeType::EXPRESSION) {
-  left_ = left;
-  right_ = right;
-
+Expression::Expression(yy::location& loc, Expression *left, AtomNode *right,
+                       Expression::Operation op)
+                       : AstNode(loc, NodeType::EXPRESSION),
+                         left_(left), right_(right), op(op) {
   // Propagate known types
   if (left_ == nullptr) {
     if(right_->type_ != Type::UNKNOWN) {
@@ -179,9 +179,14 @@ bool Expression::equals(AstNode *other) {
 
   Expression *other_cast = static_cast<Expression*>(other);
   if (left_ == nullptr || other_cast->left_ == nullptr) {
-    return left_ == nullptr && other_cast->left_ == nullptr && right_->equals(other_cast->right_);
+    return left_ == nullptr && 
+           other_cast->left_ == nullptr &&
+           right_->equals(other_cast->right_) &&
+           op == other_cast->op;
   } else {
-    return left_->equals(other_cast->left_) && right_->equals(other_cast->right_);
+    return left_->equals(other_cast->left_) &&
+           right_->equals(other_cast->right_) &&
+           op == other_cast->op;
   }
 }
 
