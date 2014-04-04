@@ -53,10 +53,6 @@ bool AstNode::equals(AstNode *other) {
   return node_type_ == other->node_type_;
 }
 
-Type AstNode::propagate_types(Type top, casmi_driver &driver) {
-  return Type::NO_TYPE;
-}
-
 std::string AstNode::location_str() const {
   if (location.begin.filename != nullptr) {
     return *location.begin.filename;
@@ -105,18 +101,6 @@ bool AstListNode::equals(AstNode *other) {
   }
 }
 
-Type AstListNode::propagate_types(Type top, casmi_driver &driver) {
-  for (auto n : nodes) {
-    n->propagate_types(top, driver);
-  }
-  return Type::NO_TYPE;
-}
-
-
-Type AtomNode::propagate_types(Type top, casmi_driver &driver) {
-  return Type::UNKNOWN;
-}
-
 IntAtom::IntAtom(yy::location& loc, INT_T val) :
         AtomNode(loc, NodeType::INT_ATOM, Type::INT) {
   val_ = val;
@@ -133,11 +117,6 @@ bool IntAtom::equals(AstNode *other) {
   return val_ == other_cast->val_;
 }
 
-
-Type IntAtom::propagate_types(Type top, casmi_driver &driver) {
-  return Type::INT;
-}
-
 UndefAtom::UndefAtom(yy::location& loc) :
         AtomNode(loc, NodeType::UNDEF_ATOM, Type::UNKNOWN) {}
 
@@ -147,10 +126,6 @@ bool UndefAtom::equals(AstNode *other) {
   } else {
     return true;
   }
-}
-
-Type UndefAtom::propagate_types(Type top, casmi_driver &driver) {
-  return top;
 }
 
 FunctionAtom::FunctionAtom(yy::location& loc, SymbolUsage *val) :
@@ -171,12 +146,6 @@ bool FunctionAtom::equals(AstNode *other) {
   return val_ == other_cast->val_;
   */
 }
-
-
-Type FunctionAtom::propagate_types(Type top, casmi_driver &driver) {
-  return driver.current_symbol_table->get(func_);
-}
-
 
 Expression::Expression(yy::location& loc, Expression *left, AtomNode *right) : AstNode(loc, NodeType::EXPRESSION) {
   left_ = left;
@@ -216,19 +185,6 @@ bool Expression::equals(AstNode *other) {
   }
 }
 
-
-Type Expression::propagate_types(Type top, casmi_driver &driver) {
-  if (left_ != nullptr) {
-    Type down_t = left_->propagate_types(top, driver);
-    if (down_t != right_->propagate_types(top, driver)) {
-      driver.error(location, "type of expressions did not match");
-    }
-    return down_t;
-  } else {
-    return right_->propagate_types(top, driver);
-  }
-}
-
 UpdateNode::UpdateNode(yy::location& loc, SymbolUsage *sym, Expression *expr) : AstNode(loc, NodeType::UPDATE),
                                            sym_(sym), expr_(expr) {
 }
@@ -247,18 +203,6 @@ bool UpdateNode::equals(AstNode *other) {
   return expr_->equals(other_cast->expr_) && sym_->equals(other_cast->sym_);
 }
 
-Type UpdateNode::propagate_types(Type top, casmi_driver &driver) {
-  Type sym_type = driver.current_symbol_table->get(sym_);
-  if (sym_type == Type::INVALID) {
-    driver.error(sym_->location, "use of undefined function `"+sym_->name_+"`");
-  }
-  if (sym_type != expr_->propagate_types(sym_type, driver)) {
-    driver.error(location, "type of `"+sym_->name_+
-                            "` does not match type of expression");
-  }
-  return sym_type;
-}
-
 UnaryNode::UnaryNode(yy::location& loc, NodeType node_type, AstNode *child) : AstNode(loc, node_type) {
   child_ = child;
 }
@@ -274,10 +218,6 @@ bool UnaryNode::equals(AstNode *other) {
 
   UnaryNode *other_cast = static_cast<UnaryNode*>(other);
   return child_->equals(other_cast->child_);
-}
-
-Type UnaryNode::propagate_types(Type top, casmi_driver &driver) {
-  return child_->propagate_types(top, driver);
 }
 
 RuleNode::RuleNode(yy::location& loc, AstNode *child, const std::string& n)

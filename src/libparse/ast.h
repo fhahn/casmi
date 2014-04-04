@@ -34,7 +34,6 @@ class AstNode {
         virtual ~AstNode();
         virtual std::string to_str();
         virtual bool equals(AstNode *other);
-        virtual Type propagate_types(Type top, casmi_driver &driver);
         std::string location_str() const;
 };
 
@@ -46,14 +45,12 @@ class AstListNode: public AstNode {
         virtual ~AstListNode();
         void add(AstNode* n);
         virtual bool equals(AstNode *other);
-        virtual Type propagate_types(Type top, casmi_driver &driver);
 };
 
 class AtomNode: public AstNode {
   public:
     AtomNode() : AstNode(NodeType::DUMMY_ATOM) {}
     AtomNode(yy::location& loc, NodeType node_type, Type type) : AstNode(loc, node_type, type) {}
-    virtual Type propagate_types(Type top, casmi_driver &driver);
 };
 
 class IntAtom : public AtomNode {
@@ -63,14 +60,12 @@ class IntAtom : public AtomNode {
     IntAtom(yy::location& loc, INT_T val);
     virtual ~IntAtom();
     bool equals(AstNode *other);
-    virtual Type propagate_types(Type top, casmi_driver &driver);
 };
 
 class UndefAtom : public AtomNode {
   public:
     UndefAtom(yy::location& loc);
     bool equals(AstNode *other);
-    virtual Type propagate_types(Type top, casmi_driver &driver);
 };
 
 
@@ -82,7 +77,6 @@ class FunctionAtom : public AtomNode {
     FunctionAtom(yy::location& loc, SymbolUsage *val);
     virtual ~FunctionAtom();
     bool equals(AstNode *other);
-    virtual Type propagate_types(Type top, casmi_driver &driver);
 };
 
 
@@ -95,7 +89,6 @@ class Expression : public AstNode {
     Expression(yy::location& loc, Expression *left, AtomNode *right);
     virtual ~Expression();
     virtual bool equals(AstNode *other);
-    virtual Type propagate_types(Type top, casmi_driver &driver);
 };
 
 class UnaryNode: public AstNode {
@@ -105,7 +98,6 @@ class UnaryNode: public AstNode {
     UnaryNode(yy::location& loc, NodeType node_type, AstNode *child);
     virtual ~UnaryNode();
     virtual bool equals(AstNode *other);
-    virtual Type propagate_types(Type top, casmi_driver &driver);
 };
 
 class RuleNode: public UnaryNode {
@@ -122,7 +114,6 @@ class UpdateNode: public AstNode {
     UpdateNode(yy::location& loc, SymbolUsage *sym, Expression *expr);
     virtual ~UpdateNode();
     virtual bool equals(AstNode *other);
-    virtual Type propagate_types(Type top, casmi_driver &driver);
 };
 
 
