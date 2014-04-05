@@ -2,35 +2,47 @@
 
 #include "libinterpreter/execution_visitor.h"
 
-/*
-ExecutionVisitor::ExecutionVisitor() { }
+ExecutionVisitor::ExecutionVisitor(ExecutionContext &ctxt) : context_(ctxt) {}
 
-std::string ExecutionVisitor::get_dump() {
-  
-  return std::string("digraph \"main\" {\n") + dump_stream_.str() + std::string("}");
-}
+void ExecutionVisitor::visit_update(UpdateNode *update, Value& val) {
 
-void ExecutionVisitor::add_node(uint64_t key, const std::string& name) {
-  dump_stream_ << "    " << key << " [label=\"" << name << "\"];" << std::endl;
-}
+  casm_update* u = (casm_update*) pp_mem_alloc(&(context_.pp_stack), sizeof(casm_update));
 
-void ExecutionVisitor::visit_body_elements(AstListNode *body_elements) {
-  add_node((uint64_t) body_elements, "Body Elements");
+  // TODO initialize other fields
+  u->value = (void*) val.value.ival;
 
-  for (AstNode *s : body_elements->nodes) {
-    dump_stream_ << "    " << (uint64_t) body_elements << " -> " << (uint64_t) s << ";" << std::endl;
+  casm_update* v = (casm_update*)casm_updateset_add(&(context_.updateset),
+                                                    update->sym_->symbol,
+                                                    (void*) u);
+
+  int64_t ps = 0;
+
+  uint64_t key = (uint64_t) update->sym_->symbol << 16 | (uint64_t)ps;
+  casm_update* us;
+
+
+  CASM_RT("S %lx", key);
+  us = (casm_update*) pp_hashmap_get( context_.updateset.set, key );
+
+  std::cout << "asd " << us << "\n";
+  if( us != NULL )
+  { 
+    std::cout << "Got value: " << (uint64_t) us->value << "\n";
   }
 }
 
-bool ExecutionVisitor::visit_update(UpdateNode *update, bool) {
-  return true;
+Value&& ExecutionVisitor::visit_expression(Expression *expr, Value &left_val, Value &right_val) {
+  switch (left_val.type) {
+    case Type::INT: {
+      left_val.value.ival += right_val.value.ival;
+      return std::move(left_val);
+    }
+    default: {
+      throw std::string("KABOOM");
+    }
+  }
 }
 
-bool ExecutionVisitor::visit_expression(Expression *expr, bool, bool) {
-  return true;
+Value&& ExecutionVisitor::visit_expression_single(Expression *expr, Value &val) {
+  return std::move(val);
 }
-
-bool ExecutionVisitor::visit_expression_single(Expression *expr, bool) {
-  return true;
-}
-*/

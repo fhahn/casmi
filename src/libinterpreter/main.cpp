@@ -7,6 +7,7 @@
 #include "libsyntax/types.h"
 #include "libsyntax/ast_dump_visitor.h"
 #include "libsyntax/parser.tab.h"
+#include "libsyntax/ast_dump_visitor.h"
 
 #include "libmiddle/typecheck_visitor.h"
 
