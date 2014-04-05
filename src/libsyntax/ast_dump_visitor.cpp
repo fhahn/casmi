@@ -31,6 +31,10 @@ void AstDumpVisitor::visit_body_elements(AstListNode *body_elements) {
   }
 }
 
+void AstDumpVisitor::visit_init(AstNode *init) {
+  add_node((uint64_t) init, "Init");
+}
+
 void AstDumpVisitor::visit_rule(RuleNode *rule) {
   add_node((uint64_t) rule, "Rule "+rule->name);
   dump_link((uint64_t) rule, (uint64_t) rule->child_);

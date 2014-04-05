@@ -27,6 +27,7 @@ class AstDumpVisitor {
 
     std::string get_dump();
     void visit_specification(AstNode *spec) {}
+    void visit_init(AstNode *init);
     void visit_body_elements(AstListNode *body_elements);
     void visit_rule(RuleNode *rule);
     void visit_statements(AstListNode *stmts);

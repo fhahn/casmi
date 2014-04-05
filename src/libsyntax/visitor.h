@@ -32,7 +32,10 @@ template<class T, class V> class AstWalker {
             walk_rule(reinterpret_cast<RuleNode*>(e));
             break; 
           } 
-          case NodeType::INIT: {break;} // TODO implement
+          case NodeType::INIT: {
+            visitor.visit_init(e);
+            break;
+          }
           default: {
             throw RuntimeException(
               std::string("Invalid node type: ")+
