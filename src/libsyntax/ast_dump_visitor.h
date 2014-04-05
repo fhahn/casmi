@@ -15,7 +15,8 @@ class AstDumpVisitor {
   private:
     std::stringstream dump_stream_;
 
-    void add_node(uint64_t key, const std::string& name);
+    void dump_node(uint64_t key, const std::string& name);
+    void dump_node(AstNode *n, const std::string& name);
     void dump_symbol_usage(const SymbolUsage* sym);
     void dump_link(uint64_t from, uint64_t to);
     void dump_link(AstNode *from, AstNode *to);
