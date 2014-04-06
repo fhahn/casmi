@@ -22,6 +22,22 @@ const std::string& Symbol::name() const {
   return name_;
 }
 
+const std::string Symbol::to_str() const {
+  std::string res = name_;
+
+  if (arguments_ == nullptr) {
+    res += ": ()";
+  } else {
+    res = ": (";
+    for (Type t : *arguments_) {
+      res += type_to_str(t) + ", ";
+    }
+    res += ")";
+  }
+  res += "-> "+type_to_str(return_type_);
+  return res;
+}
+
 bool Symbol::equals(Symbol *other) const {
   if (name_ != other->name_) {
     return false;

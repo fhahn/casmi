@@ -26,7 +26,10 @@ template<class T, class V> class AstWalker {
           case NodeType::PROVIDER: {break;} // TODO implement
           case NodeType::OPTION: {break;} // TODO implement
           case NodeType::ENUM: {break;} // TODO implement
-          case NodeType::FUNCTION: {break;} // TODO implement
+          case NodeType::FUNCTION: {
+            visitor.visit_function_def(reinterpret_cast<FunctionDefNode*>(e));
+            break;
+          }
           case NodeType::DERIVED: {break;} // TODO implement
           case NodeType::RULE: {
             walk_rule(reinterpret_cast<RuleNode*>(e));

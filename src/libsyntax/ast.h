@@ -35,6 +35,7 @@ const std::string& type_to_str(NodeType t);
 
 class AstVisitor;
 class SymbolUsage;
+class Symbol;
 
 class AstNode {
     public:
@@ -62,6 +63,13 @@ class AstListNode: public AstNode {
         virtual bool equals(AstNode *other);
 };
 
+class FunctionDefNode: public AstNode {
+  public:
+    Symbol *sym;
+    FunctionDefNode(yy::location& loc, Symbol *sym);
+    ~FunctionDefNode();
+};
+
 class AtomNode: public AstNode {
   public:
     AtomNode() : AstNode(NodeType::DUMMY_ATOM) {}
@@ -82,8 +90,6 @@ class UndefAtom : public AtomNode {
     UndefAtom(yy::location& loc);
     bool equals(AstNode *other);
 };
-
-
 
 class FunctionAtom : public AtomNode {
   public:

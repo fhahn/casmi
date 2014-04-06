@@ -12,7 +12,6 @@
 #include "libinterpreter/value.h"
 
 class ExecutionVisitor {
-
   private:
     ExecutionContext& context_;
 
@@ -22,6 +21,7 @@ class ExecutionVisitor {
     void visit_specification(AstNode *spec) { UNUSED(spec); }
     void visit_init(AstNode *init) { UNUSED(init); }
     void visit_body_elements(AstListNode *body_elements) { UNUSED(body_elements); }
+    void visit_function_def(FunctionDefNode *def) { UNUSED(def); }
     void visit_rule(RuleNode *rule) { UNUSED(rule); }
     void visit_statement(AstNode *stmt) { UNUSED(stmt); }
     void visit_parblock(UnaryNode *parblock) { UNUSED(parblock); }

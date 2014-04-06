@@ -34,6 +34,10 @@ void AstDumpVisitor::visit_body_elements(AstListNode *body_elements) {
   }
 }
 
+void AstDumpVisitor::visit_function_def(FunctionDefNode *def) {
+  dump_node(def, "Function Definition: "+def->sym->to_str());
+}
+
 void AstDumpVisitor::visit_init(AstNode *init) {
   dump_node(init, "Init");
 }

@@ -26,6 +26,7 @@ class Symbol {
 
     const std::string& name() const;
     bool equals(Symbol *other) const;
+    const std::string to_str() const;
 };
 
 class SymbolUsage {

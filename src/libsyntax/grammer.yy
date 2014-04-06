@@ -120,13 +120,13 @@ BODY_ELEMENT: PROVIDER_SYNTAX { $$ = new AstNode(NodeType::PROVIDER); }
            | OPTION_SYNTAX { $$ = new AstNode(NodeType::OPTION); }
            | ENUM_SYNTAX { $$ = new AstNode(NodeType::ENUM); }
            | FUNCTION_DEFINITION {
-                $$ = new AstNode(NodeType::FUNCTION);
+                $$ = new FunctionDefNode(@$, $1);
                 if (!driver.current_symbol_table->add($1)) {
                     driver.error(@$, "redefinition of symbol");
                     // if another symbol with same name exists we need to delete
                     // the symbol here, because it is not inserted in the symbol table
                     delete $1;
-                } 
+                }
             }
            | DERIVED_SYNTAX { $$ = new AstNode(NodeType::DERIVED); }
            | INIT_SYNTAX { $$ = $1; }

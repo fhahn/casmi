@@ -59,7 +59,6 @@ std::string AstNode::location_str() const {
   } else {
     return "NO FILE";
   }
-
 }
 
 AstListNode::AstListNode(yy::location& loc, NodeType node_type) :
@@ -100,6 +99,14 @@ bool AstListNode::equals(AstNode *other) {
     return false;
   }
 }
+
+FunctionDefNode::FunctionDefNode(yy::location& loc, Symbol* sym) 
+    : AstNode(loc, NodeType::FUNCTION), sym(sym) {}
+
+FunctionDefNode::~FunctionDefNode() {
+  // sym is deleted in the symbol table
+}
+
 
 IntAtom::IntAtom(yy::location& loc, INT_T val) :
         AtomNode(loc, NodeType::INT_ATOM, Type::INT) {
