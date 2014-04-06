@@ -8,8 +8,8 @@ test_exe = os.path.join(os.path.dirname(os.path.abspath(__file__)),
 RUN_PASS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                         '../../tests/integration/run-pass/')
 
-COMPILE_FAIL_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                        '../../tests/integration/compile-fail/')
+RUN_FAIL_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                        '../../tests/integration/run-fail/')
 
 
 HR_LEN = 65
@@ -35,13 +35,13 @@ def test_run_pass(filename):
                                     err.decode(encoding='UTF-8'),
                                     HR))
 
-COMPILE_FAIL_TEMPLATE = ("{}\n"
-                         "failed test {}\n"
-                         "output: {}\n"
-                         "{}\n"
+RUN_FAIL_TEMPLATE = ("{}\n"
+                     "failed test {}\n"
+                     "output: {}\n"
+                     "{}\n"
 )
 
-def test_compile_fail(filename):
+def test_run_fail(filename):
 
     expected_errors = {}
 
@@ -63,12 +63,12 @@ def test_compile_fail(filename):
     p1 = subprocess.Popen([test_exe, filename], stderr=subprocess.PIPE)
     err = p1.communicate()[1]
     err = err.decode(encoding='UTF-8')
-    short_filename = filename.replace(COMPILE_FAIL_PATH, '')
+    short_filename = filename.replace(RUN_FAIL_PATH, '')
     if p1.returncode == 0:
-        print('\t[compile-fail] '+short_filename+' ... fail')
-        return (False, COMPILE_FAIL_TEMPLATE.format(HR,
+        print('\t[run-fail] '+short_filename+' ... fail')
+        return (False, RUN_FAIL_TEMPLATE.format(HR,
                                                     filename,
-                                                    'Test did compile, but should fail',
+                                                    'Test did run, but should fail',
                                                     HR
             ))
     else:
@@ -77,8 +77,8 @@ def test_compile_fail(filename):
             if "error: " in l:
                 m = re.search(error_re, l)
                 if int(m.groupdict()['line']) not in expected_errors:
-                    print('  [compile-fail] '+short_filename+' ... fail')
-                    return (False, COMPILE_FAIL_TEMPLATE.format(HR,
+                    print('  [run-fail] '+short_filename+' ... fail')
+                    return (False, RUN_FAIL_TEMPLATE.format(HR,
                                     filename,
                                     'unexpected error message: '+l,
                                     HR))
@@ -88,14 +88,14 @@ def test_compile_fail(filename):
                         found = True
 
                 if not found:
-                    print('  [compile-fail] '+short_filename+' ... fail')
-                    return (False, COMPILE_FAIL_TEMPLATE.format(HR,
+                    print('  [run-fail] '+short_filename+' ... fail')
+                    return (False, RUN_FAIL_TEMPLATE.format(HR,
                                                 filename,
                                                 ('expected error message not thrown; expected: '+expected_error,
                                                 '\ngot error messages: '+m.groupdict()['msg']),
                                                 HR))
 
-        print('\t[compile-fail] '+short_filename+' ... ok')
+        print('\t[run-fail] '+short_filename+' ... ok')
         return (True, '')
 
 
@@ -128,7 +128,7 @@ if __name__ == '__main__':
     ok_count_sum += ok_count
     fail_count_sum += fail_count
 
-    ok_count, fail_count = run_tests(COMPILE_FAIL_PATH, test_compile_fail)
+    ok_count, fail_count = run_tests(RUN_FAIL_PATH, test_run_fail)
     ok_count_sum += ok_count
     fail_count_sum += fail_count
     
