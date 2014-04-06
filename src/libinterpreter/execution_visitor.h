@@ -7,6 +7,7 @@
 
 #include "libsyntax/ast.h"
 #include "libsyntax/visitor.h"
+#include "libsyntax/driver.h"
 
 #include "libinterpreter/execution_context.h"
 #include "libinterpreter/value.h"
@@ -14,11 +15,12 @@
 class ExecutionVisitor {
   private:
     ExecutionContext& context_;
+    Driver& driver_;
 
   public:
     RuleNode *top_rule;
 
-    ExecutionVisitor(ExecutionContext& context, RuleNode *init);
+    ExecutionVisitor(ExecutionContext& context, RuleNode *init, Driver& driver);
 
     void visit_specification(AstNode *spec) { UNUSED(spec); }
     void visit_init(AstNode *init) { UNUSED(init); }

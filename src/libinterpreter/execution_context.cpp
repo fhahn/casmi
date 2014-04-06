@@ -11,4 +11,6 @@ ExecutionContext::ExecutionContext(SymbolTable *st) : current_st_(st) {
 
   // use 10 MB for stack
   pp_mem_new(&pp_stack, 1024 * 1024 * 10, "mem for stack stuff");
+
+  pseudostate = 0;
 }

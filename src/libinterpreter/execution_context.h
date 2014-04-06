@@ -17,9 +17,11 @@ class ExecutionContext {
     pp_mem updateset_data_;
 
   public:
-    ExecutionContext(SymbolTable *st);
     casm_updateset updateset;
     pp_mem pp_stack;
+    uint64_t pseudostate;
+
+    ExecutionContext(SymbolTable *st);
 };
 
 #endif //CASMI_LIBINTERPRETER_EXEC_CONTEXT

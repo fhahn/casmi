@@ -70,7 +70,7 @@ int main (int argc, char *argv[]) {
       res = 1;
     } else {
       ExecutionContext ctx(driver.current_symbol_table);
-      ExecutionVisitor visitor(ctx, driver.get_init_rule());
+      ExecutionVisitor visitor(ctx, driver.get_init_rule(), driver);
       ExecutionWalker walker(visitor);
       walker.run();
     }
