@@ -1,4 +1,5 @@
 #include "macros.h"
+#include "libutil/exceptions.h"
 
 #include "libinterpreter/execution_visitor.h"
 
@@ -22,7 +23,8 @@ void ExecutionVisitor::visit_update(UpdateNode *update, Value& val) {
     // TODO implement seq semantic
     if (v != nullptr) {
       driver_.error(update->sym_->location,
-                    "Conflict in block for function `"+update->sym_->name_+"`");
+                    "Conflict in current block for function `"+update->sym_->name_+"`");
+      throw RuntimeException("Conflict in updateset");
     }
     /*
     CASM_RT("S %lx", key);
