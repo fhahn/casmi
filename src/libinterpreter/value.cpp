@@ -2,7 +2,7 @@
 
 #include "libinterpreter/value.h"
 
-Value::Value() : type(Type::NO_TYPE) {}
+Value::Value() : type(Type::UNDEF) {}
 Value::Value(INT_T ival) : type(Type::INT) {
   value.ival = ival;
 }

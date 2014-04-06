@@ -121,6 +121,10 @@ template<class T, class V> class AstWalker {
           return visitor.visit_int_atom(reinterpret_cast<IntAtom*>(atom));
           break;
         }
+        case NodeType::UNDEF_ATOM: { 
+          return visitor.visit_undef_atom(reinterpret_cast<UndefAtom*>(atom));
+          break;
+        }
         default: {
           throw RuntimeException("Invalid atom type");
         }

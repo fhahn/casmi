@@ -8,7 +8,7 @@
 #define INT_T int32_t
 #define FLOAT_T double
 
-enum class Type { RULE, INT, FLOAT, UNKNOWN, INVALID, NO_TYPE };
+enum class Type { RULE, INT, FLOAT, UNKNOWN, INVALID, NO_TYPE, UNDEF };
 
 
 Type str_to_type(const std::string& type_name);

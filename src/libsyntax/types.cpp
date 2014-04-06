@@ -13,9 +13,9 @@ Type str_to_type(const std::string& type_name) {
 const std::string type_to_str(Type t) {
   if (t == Type::INT) return "Int";
   if (t == Type::FLOAT) return "Float";
+  if (t == Type::UNDEF) return "Undef";
   return "Invalid";
 }
-
 
 FunctionInfo::FunctionInfo(std::vector<Type> *args, Type return_type) :
     arguments_(args), return_type_(return_type) {}

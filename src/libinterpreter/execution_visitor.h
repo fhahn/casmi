@@ -16,7 +16,9 @@ class ExecutionVisitor {
     ExecutionContext& context_;
 
   public:
-    ExecutionVisitor(ExecutionContext& context);
+    RuleNode *top_rule;
+
+    ExecutionVisitor(ExecutionContext& context, RuleNode *init);
 
     void visit_specification(AstNode *spec) { UNUSED(spec); }
     void visit_init(AstNode *init) { UNUSED(init); }
@@ -30,6 +32,12 @@ class ExecutionVisitor {
     Value&& visit_expression(Expression *expr, Value& left_val, Value& right_val);
     Value&& visit_expression_single(Expression *expr, Value& val);
     Value&& visit_int_atom(IntAtom *atom) { return std::move(Value(atom->val_)); }
+    Value&& visit_undef_atom(UndefAtom *atom) { return std::move(Value()); }
 };
 
+class ExecutionWalker : public AstWalker<ExecutionVisitor, Value> {
+  public:
+    ExecutionWalker(ExecutionVisitor& v) : AstWalker<ExecutionVisitor, Value>(v) {}
+    void run();
+};
 #endif //CASMI_LIBINTERPRETER_EXEC_VISITOR

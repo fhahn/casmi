@@ -11,7 +11,7 @@
 
 #include "libmiddle/typecheck_visitor.h"
 
-//#include "libinterpreter/execution_visitor.h"
+#include "libinterpreter/execution_visitor.h"
 #include "libinterpreter/execution_context.h"
 #include "libinterpreter/value.h"
 
@@ -69,12 +69,10 @@ int main (int argc, char *argv[]) {
     if (!driver.ok()) {
       res = 1;
     } else {
-      /*
       ExecutionContext ctx(driver.current_symbol_table);
-      ExecutionVisitor visitor(ctx);
-      AstWalker<ExecutionVisitor, Value> walker(visitor);
-      walker.walk_rule(driver.get_init_rule());
-      */
+      ExecutionVisitor visitor(ctx, driver.get_init_rule());
+      ExecutionWalker walker(visitor);
+      walker.run();
     }
   } else {
     res = 1;
