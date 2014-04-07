@@ -1,7 +1,7 @@
-function x : -> List(Int)
+function x : -> Float
 
 init main
 
 rule main = { 
-    x := 1 //~ type of `x` does not match type of expression
+    x := 1 //~ type `Float` of `x` does not match type `Int` of expression
 }

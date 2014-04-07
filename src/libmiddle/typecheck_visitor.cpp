@@ -9,8 +9,8 @@ void TypecheckVisitor::visit_update(UpdateNode *update, Type val) {
     driver_.error(update->sym_->location, "use of undefined function `"+update->sym_->name_+"`");
   }
   if (val != Type::UNDEF && sym->return_type_ != val) {
-    driver_.error(update->location, "type of `"+update->sym_->name_+"("+type_to_str(sym->return_type_)+")"
-                            "` does not match type of expression ("+type_to_str(val)+")");
+    driver_.error(update->location, "type `"+type_to_str(sym->return_type_)+"` of `"+update->sym_->name_+
+                            "` does not match type `"+type_to_str(val)+"` of expression");
   }
   update->sym_->symbol = sym;
 }
