@@ -1,5 +1,9 @@
 #include <iostream>
 #include <string>
+#include <cstdlib>
+
+#include <stdio.h>
+#include <getopt.h>
 
 #include "boost/program_options.hpp"
 
@@ -21,75 +25,117 @@
 // defined in src/libsyntax/driver.cpp
 extern Driver *global_driver;
 
-namespace po = boost::program_options;
+enum OptionValues {  
+  NO_OPTIONS = 0,
+  HELP = 1,
+  DUMP_AST = (1 << 1),
+  ERROR = (1 << 2)
+};
+
+struct arguments {
+  int flags;
+  std::string filename;
+};
+
+struct arguments parse_cmd_args(int argc, char *argv[]) {
+  int dump_ast;
+  struct option long_options[] = {
+       {"help", no_argument, 0, 'h'},
+       {"dump-ast", no_argument, &dump_ast, 1},
+       {0, 0, 0, 0}
+  };
+
+  int option_index = 0;
+  int opt;
+  int flags = 0;
+
+  while ((opt = getopt_long(argc, argv, "h",
+                            long_options, &option_index)) != -1) {
+    switch(opt) {
+      case 0:
+        if (option_index == 1) {
+          flags |= OptionValues::DUMP_AST;
+        } else {
+          flags |= OptionValues::ERROR;
+        }
+        break;
+      case 'h':
+        flags |= OptionValues::HELP;
+        break;
+      case '?':
+        flags |= OptionValues::ERROR;
+        /* getopt_long already printed an error message. */
+        break;
+      default:
+        flags |= OptionValues::ERROR;
+        break;
+    }
+  }
+  struct arguments opts;
+  opts.flags = flags;
+
+  if (optind == argc-1) {
+    opts.filename = std::string(argv[optind]);
+  }
+  return opts;
+}
 
 int main (int argc, char *argv[]) {
   int res = 0;
+  struct arguments opts = parse_cmd_args(argc, argv);
 
-  po::options_description desc("Allowed options");
-  desc.add_options()
-    ("help", "produce help message")
-    ("compression", po::value<int>(), "set compression level")
-    ("input-file", po::value< std::string >(), "input file")
-    ("dump-ast", po::value<bool>(), "dump AST as dot graph")
-  ;
-
-  po::positional_options_description p;
-  p.add("input-file", -1);
-
-  po::variables_map vm;
-  po::store(po::command_line_parser(argc, argv).
-                options(desc).positional(p).run(), vm);
-  po::notify(vm);
-
-  if (vm.count("help")) {
-    std::cout << desc << "\n";
-    return 1;
+  if ((opts.flags & OptionValues::ERROR) != 0) {
+    std::cerr << "There has been an error" << std::endl;
+    std::exit(EXIT_FAILURE);
   }
 
-  if (!vm.count("input-file")) {
-    std::cout << "No filename provided" << std::endl;
-    std::cout << desc << "\n";
+  if (opts.filename.size() == 0) {
+    std::cerr << "No filename provided" << std::endl;
+    return EXIT_FAILURE;
   }
-
+  //
   // Setup the driver
-  Driver driver = Driver();
+  Driver driver;
   global_driver = &driver;
 
-  if (driver.parse(vm["input-file"].as<std::string>()) != nullptr) {
+  switch (opts.flags) {
+    case OptionValues::DUMP_AST: {
+      if (driver.parse(opts.filename) == nullptr) {
+        std::cerr << "Error parsing file" << std::endl;
+        delete driver.result;
+        return EXIT_FAILURE;
+      }
 
-    if (vm.count("dump-ast")) {
       AstDumpVisitor dump_visitor;
       AstWalker<AstDumpVisitor, bool> dump_walker(dump_visitor);
       dump_walker.walk_specification(driver.result);
       std::cout << dump_visitor.get_dump();
-      return 0;
     }
-    TypecheckVisitor typecheck_visitor(driver);
-    AstWalker<TypecheckVisitor, Type> typecheck_walker(typecheck_visitor);
-    typecheck_walker.walk_specification(driver.result);
-    if (!driver.ok()) {
-      res = 1;
-    } else {
-      ExecutionContext ctx(driver.current_symbol_table);
-      ExecutionVisitor visitor(ctx, driver.get_init_rule(), driver);
-      ExecutionWalker walker(visitor);
-      try {
-        walker.run();
-      } catch (const RuntimeException& ex) {
-        return 1;
+    case OptionValues::NO_OPTIONS: {
+      if (driver.parse(opts.filename) == nullptr) {
+        std::cerr << "Error parsing file " << driver.result << std::endl;
+        delete driver.result;
+        return EXIT_FAILURE;
+      }
+
+      TypecheckVisitor typecheck_visitor(driver);
+      AstWalker<TypecheckVisitor, Type> typecheck_walker(typecheck_visitor);
+      typecheck_walker.walk_specification(driver.result);
+      if (!driver.ok()) {
+        res = 1;
+      } else {
+        ExecutionContext ctx(driver.current_symbol_table);
+        ExecutionVisitor visitor(ctx, driver.get_init_rule(), driver);
+        ExecutionWalker walker(visitor);
+        try {
+          walker.run();
+        } catch (const RuntimeException& ex) {
+          res = EXIT_FAILURE;
+        }
       }
     }
-  } else {
-    res = 1;
   }
-
   delete driver.result;
+
   return res;
-  /*
-        if (argv[i] == std::string ("-p"))
-            driver.trace_parsing = true;
-        else if (argv[i] == std::string ("-s"))
-            driver.trace_scanning = true;
-  */
 }
