@@ -71,6 +71,7 @@
 
 %type <AstNode*> INIT_SYNTAX BODY_ELEMENT SPECIFICATION PARBLOCK_SYNTAX KW_PARBLOCK_SYNTAX
 %type <AstNode*> RULE_SYNTAX STATEMENT
+%type <UnaryNode*> ASSERT_SYNTAX
 %type <AstListNode*> BODY_ELEMENTS STATEMENTS
 %type <AtomNode*> ATOM
 %type <Expression*> EXPRESSION
@@ -365,7 +366,7 @@ DUMPSPEC_LIST: DUMPSPEC_LIST "," DUMPSPEC
 DUMPSPEC: "(" IDENTIFIER_LIST ")" ARROW IDENTIFIER
         ;
 
-STATEMENT: ASSERT_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
+STATEMENT: ASSERT_SYNTAX { $$ = $1; }
          | ASSURE_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
          | DIEDIE_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
          | IMPOSSIBLE_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
@@ -390,7 +391,7 @@ STATEMENT: ASSERT_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
          | OBJDUMP "(" IDENTIFIER ")"   { $$ = new AstNode(NodeType::STATEMENT);}
          ;
 
-ASSERT_SYNTAX: ASSERT EXPRESSION
+ASSERT_SYNTAX: ASSERT EXPRESSION { $$ = new UnaryNode(@$, NodeType::ASSERT, $2); }
              ;
 ASSURE_SYNTAX: ASSURE EXPRESSION
              ;

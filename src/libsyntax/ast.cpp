@@ -5,6 +5,7 @@
 
 
 static std::map<NodeType, const std::string> node_type_names_ = {
+    {NodeType::ASSERT, std::string("ASSERT")},
     {NodeType::UNDEF_ATOM, std::string("UNDEF ATOM")},
     {NodeType::INT_ATOM, std::string("INT ATOM")},
     {NodeType::DUMMY_ATOM, std::string("DUMMY ATOM")},

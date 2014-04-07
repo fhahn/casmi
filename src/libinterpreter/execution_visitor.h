@@ -29,6 +29,7 @@ class ExecutionVisitor {
     void visit_rule(RuleNode *rule) { UNUSED(rule); }
     void visit_statement(AstNode *stmt) { UNUSED(stmt); }
     void visit_parblock(UnaryNode *parblock) { UNUSED(parblock); }
+    void visit_assert(UnaryNode* assert, Value& val);
     void visit_statements(AstListNode *stmts) { UNUSED(stmts); }
     void visit_update(UpdateNode *update, Value& val);
     Value&& visit_expression(Expression *expr, Value& left_val, Value& right_val);

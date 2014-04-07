@@ -3,6 +3,13 @@
 
 TypecheckVisitor::TypecheckVisitor(Driver& driver) : driver_(driver) {}
 
+void TypecheckVisitor::visit_assert(UnaryNode *assert, Type val) {
+  if (val != Type::BOOL) {
+    driver_.error(assert->child_->location,
+                  "type of expression should be `Bool` but was `" +type_to_str(val)+"`");
+  }
+}
+
 void TypecheckVisitor::visit_update(UpdateNode *update, Type val) {
   Symbol *sym = driver_.current_symbol_table->get(update->sym_->name_);
   if (sym == nullptr) {
@@ -19,7 +26,11 @@ Type TypecheckVisitor::visit_expression(Expression *expr, Type left_val, Type ri
   if (left_val != right_val) {
       driver_.error(expr->location, "type of expressions did not match");
   }
-  return left_val;
+  switch (expr->op) {
+    case Expression::Operation::ADD: return left_val;
+    case Expression::Operation::EQ: return Type::BOOL;
+    default: assert(0);
+  }
 }
 
 Type TypecheckVisitor::visit_expression_single(Expression *expr, Type val) {

@@ -25,6 +25,7 @@ class TypecheckVisitor {
     void visit_statement(AstNode *stmt) { UNUSED(stmt); }
     void visit_parblock(UnaryNode *parblock) { UNUSED(parblock); }
     void visit_statements(AstListNode *stmts) { UNUSED(stmts); }
+    void visit_assert(UnaryNode *assert, Type t);
     void visit_update(UpdateNode *update, Type t);
     Type visit_expression(Expression *expr, Type left_val, Type right_val);
     Type visit_expression_single(Expression *expr, Type val);

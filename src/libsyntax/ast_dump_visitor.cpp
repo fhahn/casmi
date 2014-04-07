@@ -60,6 +60,13 @@ void AstDumpVisitor::visit_statement(AstNode *stmt) {
   //dump_link((uint64_t) rule, (uint64_t) rule->child_);
 }
 
+bool AstDumpVisitor::visit_assert(UnaryNode *assert, bool) {
+  dump_node(assert, "Assert");
+
+  dump_link((uint64_t) assert, (uint64_t) assert->child_);
+  return true;
+}
+
 void AstDumpVisitor::visit_parblock(UnaryNode *parblock) {
   dump_node(parblock, "Parblock");
   dump_link(parblock, parblock->child_);

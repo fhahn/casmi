@@ -9,11 +9,13 @@ class Value {
     union {
       INT_T ival;
       FLOAT_T fval;
+      bool bval;
     } value;
 
     Value();
     Value(INT_T ival);
     Value(FLOAT_T fval);
+    Value(bool bval);
     Value(Value&& other);
 };
 

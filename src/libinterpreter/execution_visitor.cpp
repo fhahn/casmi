@@ -1,3 +1,5 @@
+#include <assert.h>
+
 #include "macros.h"
 #include "libutil/exceptions.h"
 
@@ -5,6 +7,14 @@
 
 ExecutionVisitor::ExecutionVisitor(ExecutionContext &ctxt, RuleNode *init, Driver& driver)
     : context_(ctxt), driver_(driver), top_rule(init) {}
+
+void ExecutionVisitor::visit_assert(UnaryNode* assert, Value& val) {
+  if (val.value.bval != true) {
+    driver_.error(assert->location,
+                  "Assertion failed");
+    throw RuntimeException("Assertion failed");
+  }
+}
 
 void ExecutionVisitor::visit_update(UpdateNode *update, Value& val) {
 
@@ -34,14 +44,31 @@ void ExecutionVisitor::visit_update(UpdateNode *update, Value& val) {
 }
 
 Value&& ExecutionVisitor::visit_expression(Expression *expr, Value &left_val, Value &right_val) {
-  switch (left_val.type) {
-    case Type::INT: {
-      left_val.value.ival += right_val.value.ival;
-      return std::move(left_val);
+  switch (expr->op) {
+    case Expression::Operation::ADD: {
+      switch (left_val.type) {
+        case Type::INT: {
+          left_val.value.ival += right_val.value.ival;
+          return std::move(left_val);
+        }
+        default: assert(0);
+      }
+      break;
     }
-    default: {
-      throw std::string("KABOOM");
+    case Expression::Operation::EQ: {
+      switch (left_val.type) {
+        case Type::INT: {
+          left_val.value.bval = left_val.value.ival == right_val.value.ival;
+          return std::move(left_val);
+        }
+        case Type::BOOL: {
+          left_val.value.bval = left_val.value.bval == right_val.value.bval;
+          return std::move(left_val);
+        }
+        default: assert(0);
+      }
     }
+    default: assert(0);
   }
 }
 

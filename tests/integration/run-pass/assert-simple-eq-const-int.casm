@@ -1,0 +1,6 @@
+init main
+
+rule main = { 
+    assert 1 = 1
+    program( self ) := undef
+}

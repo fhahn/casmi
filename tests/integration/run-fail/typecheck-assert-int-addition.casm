@@ -1,0 +1,5 @@
+init main
+
+rule main = { 
+    assert 1 + 1 //~ type of expression should be `Bool` but was `Int`
+}

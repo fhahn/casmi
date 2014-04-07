@@ -11,6 +11,7 @@
 #include "libsyntax/location.hh" // reuse bison's location class
 
 enum class NodeType {
+  ASSERT,
   UNDEF_ATOM,
   INT_ATOM,
   DUMMY_ATOM,

@@ -66,6 +66,12 @@ template<class T, class V> class AstWalker {
           walk_update(reinterpret_cast<UpdateNode*>(stmt));
           break;
         }
+        case NodeType::ASSERT: {
+          UnaryNode *assert = reinterpret_cast<UnaryNode*>(stmt);
+          V v = walk_expression(reinterpret_cast<Expression*>(assert->child_));
+          visitor.visit_assert(assert, v);
+          break;
+        }
         default: {
             throw RuntimeException(
               std::string("Invalid node type: ")+
