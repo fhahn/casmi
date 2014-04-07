@@ -19,3 +19,6 @@
 
 # Cmake out of source build
 build
+
+# ignore runtime for now
+src/librt
