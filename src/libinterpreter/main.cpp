@@ -2,10 +2,7 @@
 #include <string>
 #include <cstdlib>
 
-#include <stdio.h>
 #include <getopt.h>
-
-#include "boost/program_options.hpp"
 
 #include "libutil/exceptions.h"
 
@@ -80,15 +77,27 @@ struct arguments parse_cmd_args(int argc, char *argv[]) {
   return opts;
 }
 
+void print_help() {
+  std::cout << "USAGE: casmi [OPTIONS] <filename>" << std::endl;
+  std::cout << std::endl;
+  std::cout << "OPTIONS:" << std::endl;
+  std::cout << "  -h, --help" << "\t\t" << "shows command line options" << std::endl;
+  std::cout << "  --dump-ast" << "\t\t" << "dumps the AST as dot graph" << std::endl;
+}
+
 int main (int argc, char *argv[]) {
   int res = 0;
   struct arguments opts = parse_cmd_args(argc, argv);
 
   if ((opts.flags & OptionValues::ERROR) != 0) {
     std::cerr << "There has been an error" << std::endl;
-    std::exit(EXIT_FAILURE);
+    return EXIT_FAILURE;
   }
 
+  if (opts.flags == OptionValues::HELP) {
+    print_help();
+    return EXIT_SUCCESS;
+  }
   if (opts.filename.size() == 0) {
     std::cerr << "No filename provided" << std::endl;
     return EXIT_FAILURE;
@@ -102,37 +111,41 @@ int main (int argc, char *argv[]) {
     case OptionValues::DUMP_AST: {
       if (driver.parse(opts.filename) == nullptr) {
         std::cerr << "Error parsing file" << std::endl;
-        delete driver.result;
-        return EXIT_FAILURE;
+        res = EXIT_FAILURE;
+        break;
       }
 
       AstDumpVisitor dump_visitor;
       AstWalker<AstDumpVisitor, bool> dump_walker(dump_visitor);
       dump_walker.walk_specification(driver.result);
       std::cout << dump_visitor.get_dump();
+      res = EXIT_SUCCESS;
+      break;
     }
     case OptionValues::NO_OPTIONS: {
       if (driver.parse(opts.filename) == nullptr) {
         std::cerr << "Error parsing file " << driver.result << std::endl;
-        delete driver.result;
-        return EXIT_FAILURE;
+        res = EXIT_FAILURE;
+        break;
       }
 
       TypecheckVisitor typecheck_visitor(driver);
       AstWalker<TypecheckVisitor, Type> typecheck_walker(typecheck_visitor);
       typecheck_walker.walk_specification(driver.result);
       if (!driver.ok()) {
-        res = 1;
+        res = EXIT_FAILURE;
       } else {
         ExecutionContext ctx(driver.current_symbol_table);
         ExecutionVisitor visitor(ctx, driver.get_init_rule(), driver);
         ExecutionWalker walker(visitor);
         try {
           walker.run();
+          res = EXIT_SUCCESS;
         } catch (const RuntimeException& ex) {
           res = EXIT_FAILURE;
         }
       }
+      break;
     }
   }
   delete driver.result;
