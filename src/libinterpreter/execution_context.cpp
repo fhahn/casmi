@@ -2,7 +2,6 @@
 
 #include "libinterpreter/execution_context.h"
 
-
 ExecutionContext::ExecutionContext(SymbolTable *st) : current_st_(st) {
   // use 10 MB for updateset data
   pp_mem_new(&updateset_data_, 1024 * 1024 * 10, "mem for main updateset");
@@ -13,4 +12,8 @@ ExecutionContext::ExecutionContext(SymbolTable *st) : current_st_(st) {
   pp_mem_new(&pp_stack, 1024 * 1024 * 10, "mem for stack stuff");
 
   pseudostate = 0;
+
+  for (auto pair: st->table_) {
+    functions_no_arg.push_back(Value());
+  }
 }
