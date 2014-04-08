@@ -14,11 +14,13 @@ class Expression;
 // Only used for functions at the moment
 class Symbol {
   private:
+    static int counter;
     const std::string name_;
     std::vector<Type> *arguments_;
 
   public:
     Type return_type_;
+    const int id;
 
     Symbol(const std::string name, std::vector<Type> *args, Type return_type);
     Symbol(const std::string name);
@@ -46,10 +48,11 @@ class SymbolUsage {
 
 class SymbolTable {
   private:
-    std::map<std::string, Symbol*> table_;
     SymbolTable *outer_scope_;
 
   public:
+    std::map<std::string, Symbol*> table_;
+
     SymbolTable();
     SymbolTable(SymbolTable *outer);
     ~SymbolTable();

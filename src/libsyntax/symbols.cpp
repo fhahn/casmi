@@ -7,12 +7,19 @@
 // Implementation of Symbol
 // -------------------------------------------------------------------------
 
+int Symbol::counter = 0;
+
 Symbol::Symbol(const std::string name, std::vector<Type> *args,
               Type return_type) : name_(name), arguments_(args),
-                                  return_type_(return_type) {}
+                                  return_type_(return_type), id(counter) {
+  counter += 1;
+}
 
 Symbol::Symbol(const std::string name) :
-        name_(name), arguments_(nullptr), return_type_(Type::UNKNOWN) {}
+        name_(name), arguments_(nullptr), return_type_(Type::UNKNOWN), id(counter) {
+  counter += 1;
+}
+
 
 Symbol::~Symbol() {
   delete arguments_;
