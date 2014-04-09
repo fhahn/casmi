@@ -14,6 +14,6 @@ ExecutionContext::ExecutionContext(SymbolTable *st) : current_st_(st) {
   pseudostate = 0;
 
   for (auto pair: st->table_) {
-    functions_no_arg.push_back(Value());
+    functions.push_back(std::unordered_map<ArgumentsKey, casm_update*>());
   }
 }

@@ -1,1 +1,8 @@
-add_subdirectory( libparse )
+add_executable(unittest_runner
+    libsyntax/test_lexer_helpers.cpp
+    libsyntax/test_parser.cpp
+    libsyntax/test_ast.cpp
+    libinterpreter/test_execution_context.cpp
+)
+
+target_link_libraries(unittest_runner gtest_main parser)
