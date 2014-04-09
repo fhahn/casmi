@@ -246,32 +246,32 @@ INITIALIZER: ATOM
            | ATOM ARROW ATOM 
            ;
 
-ATOM: FUNCTION_SYNTAX { $$ = create_atom(@$, $1); }
+ATOM: FUNCTION_SYNTAX { $$ = new FunctionAtom(@$, $1); }
     | VALUE { $$ = $1; }
     | BRACKET_EXPRESSION { $$ = new AtomNode(); }
     ;
 
-VALUE: RULEREF { $$ = create_atom(@$, 0); }
+VALUE: RULEREF { $$ = new IntAtom(@$, 0); }
      | NUMBER { $$ = $1; }
-     | STRCONST { $$ = create_atom(@$, 0); }
-     | LISTCONST { $$ = create_atom(@$, 0); }
-     | NUMBER_RANGE { $$ = create_atom(@$, 0); }
-     | SYMBOL { $$ = create_atom(@$, 0); }
-     | SELF { $$ = create_atom(@$, 0); }
-     | UNDEF { $$ = create_atom(@$); }
-     | TRUE { $$ = create_atom(@$, 0); }
-     | FALSE { $$ = create_atom(@$, 0); }
+     | STRCONST { $$ = new IntAtom(@$, 0); }
+     | LISTCONST { $$ = new IntAtom(@$, 0); }
+     | NUMBER_RANGE { $$ = new IntAtom(@$, 0); }
+     | SYMBOL { $$ = new IntAtom(@$, 0); }
+     | SELF { $$ = new IntAtom(@$, 0); }
+     | UNDEF { $$ = new UndefAtom(@$); }
+     | TRUE { $$ = new IntAtom(@$, 0); }
+     | FALSE { $$ = new IntAtom(@$, 0); }
      ;
 
-NUMBER: "+" INTCONST %prec UPLUS { $$ = create_atom(@$, $2); }
-      | "-" INTCONST %prec UMINUS { $$ = create_atom(@$, $2); }
-      | INTCONST { $$ = create_atom(@$, $1); }
-      | "+" FLOATCONST %prec UPLUS { $$ = create_atom(@$, 0); }
-      | "-" FLOATCONST %prec UMINUS { $$ = create_atom(@$, 0); }
-      | FLOATCONST { $$ = create_atom(@$, 0); }
-      | "+" RATIONALCONST %prec UPLUS { $$ = create_atom(@$, 0); }
-      | "-" RATIONALCONST %prec UMINUS { $$ = create_atom(@$, 0); }
-      | RATIONALCONST { $$ = create_atom(@$, 0); }
+NUMBER: "+" INTCONST %prec UPLUS { $$ = new IntAtom(@$, $2); }
+      | "-" INTCONST %prec UMINUS { $$ = new IntAtom(@$, $2); }
+      | INTCONST { $$ = new IntAtom(@$, $1); }
+      | "+" FLOATCONST %prec UPLUS { $$ = new IntAtom(@$, 0); }
+      | "-" FLOATCONST %prec UMINUS { $$ = new IntAtom(@$, 0); }
+      | FLOATCONST { $$ = new IntAtom(@$, 0); }
+      | "+" RATIONALCONST %prec UPLUS { $$ = new IntAtom(@$, 0); }
+      | "-" RATIONALCONST %prec UMINUS { $$ = new IntAtom(@$, 0); }
+      | RATIONALCONST { $$ = new IntAtom(@$, 0); }
       ;
 
 RULEREF: "@" IDENTIFIER 

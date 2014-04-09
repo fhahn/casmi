@@ -64,11 +64,11 @@ bool Symbol::equals(Symbol *other) const {
 }
 
 SymbolUsage::SymbolUsage(yy::location& loc, const std::string name) :
-        name_(name), arguments_(nullptr), location(loc) {}
+        arguments_(nullptr), name_(name), location(loc) {}
 
 SymbolUsage::SymbolUsage(yy::location& loc, const std::string name,
                          std::vector<Expression*> *args) :
-        name_(name), arguments_(args), location(loc) {}
+        arguments_(args), name_(name), location(loc) {}
 
 
 SymbolUsage::~SymbolUsage() {
@@ -96,9 +96,9 @@ bool SymbolUsage::equals(SymbolUsage *other) const {
 // -------------------------------------------------------------------------
 // Implementation of SymbolTable
 // -------------------------------------------------------------------------
-SymbolTable::SymbolTable() : outer_scope_(nullptr) {}
+SymbolTable::SymbolTable() {}
 
-SymbolTable::SymbolTable(SymbolTable *outer) : outer_scope_(outer) {}
+//SymbolTable::SymbolTable(SymbolTable *outer) : outer_scope_(outer) {}
 
 SymbolTable::~SymbolTable() {
   // cleanup symbol table

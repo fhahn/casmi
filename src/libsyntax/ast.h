@@ -158,8 +158,4 @@ class UpdateNode: public AstNode {
     virtual bool equals(AstNode *other);
 };
 
-
-AtomNode* create_atom(yy::location& loc, INT_T val);
-AtomNode* create_atom(yy::location& loc, SymbolUsage *val);
-AtomNode* create_atom(yy::location& loc);
 #endif

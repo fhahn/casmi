@@ -63,14 +63,14 @@ TEST(EqualsTest, test_list_length_unequal) {
 
 TEST(EqualsTest, test_expression) {
   Expression *ast1 = new Expression(loc, 
-      new Expression(loc, nullptr, create_atom(loc, 10), Expression::Operation::NOP),
-      create_atom(loc, 50),
+      new Expression(loc, nullptr, new IntAtom(loc, 10), Expression::Operation::NOP),
+      new IntAtom(loc, 50),
       Expression::Operation::ADD
   );
 
   Expression *ast2 = new Expression(loc, 
-      new Expression(loc, nullptr, create_atom(loc, 10), Expression::Operation::NOP),
-      create_atom(loc, 50),
+      new Expression(loc, nullptr, new IntAtom(loc, 10), Expression::Operation::NOP),
+      new IntAtom(loc, 50),
       Expression::Operation::ADD
   );
 
@@ -84,14 +84,14 @@ TEST(EqualsTest, test_expression) {
 
 TEST(EqualsTest, test_expression_not_equal) {
   Expression *ast1 = new Expression(loc, 
-      new Expression(loc, nullptr, create_atom(loc, 10), Expression::Operation::NOP),
-      create_atom(loc, 10), // this values differs from ast2
+      new Expression(loc, nullptr, new IntAtom(loc, 10), Expression::Operation::NOP),
+      new IntAtom(loc, 10), // this values differs from ast2
       Expression::Operation::ADD
   );
 
   Expression *ast2 = new Expression(loc, 
-      new Expression(loc, nullptr, create_atom(loc, 10), Expression::Operation::NOP),
-      create_atom(loc, 50),
+      new Expression(loc, nullptr, new IntAtom(loc, 10), Expression::Operation::NOP),
+      new IntAtom(loc, 50),
       Expression::Operation::ADD
   );
 
@@ -104,18 +104,18 @@ TEST(EqualsTest, test_expression_not_equal) {
 
 TEST(EqualsTest, test_expression_wrong_balance) {
   Expression *ast1 = new Expression(loc, 
-      new Expression(loc, nullptr, create_atom(loc, 10), Expression::Operation::NOP),
-      create_atom(loc, 10),
+      new Expression(loc, nullptr, new IntAtom(loc, 10), Expression::Operation::NOP),
+      new IntAtom(loc, 10),
       Expression::Operation::ADD
   );
 
   Expression *ast2 = new Expression(loc, 
       new Expression(loc, 
-          new Expression(loc, nullptr, create_atom(loc, 10), Expression::Operation::NOP),
-          create_atom(loc, 10),
+          new Expression(loc, nullptr, new IntAtom(loc, 10), Expression::Operation::NOP),
+          new IntAtom(loc, 10),
           Expression::Operation::ADD
       ),
-      create_atom(loc, 50),
+      new IntAtom(loc, 50),
       Expression::Operation::ADD
   );
 
@@ -130,8 +130,8 @@ TEST(EqualsTest, test_update_node) {
   UpdateNode *ast1 = new UpdateNode(loc, 
       new SymbolUsage(loc, "x"),
       new Expression(loc, 
-          new Expression(loc, nullptr, create_atom(loc, 10), Expression::Operation::NOP),
-          create_atom(loc, 50),
+          new Expression(loc, nullptr, new IntAtom(loc, 10), Expression::Operation::NOP),
+          new IntAtom(loc, 50),
           Expression::Operation::SUB
         )
   );
@@ -139,8 +139,8 @@ TEST(EqualsTest, test_update_node) {
   UpdateNode *ast2 = new UpdateNode(loc, 
       new SymbolUsage(loc, "x"),
       new Expression(loc, 
-          new Expression(loc, nullptr, create_atom(loc, 10), Expression::Operation::NOP),
-          create_atom(loc, 50),
+          new Expression(loc, nullptr, new IntAtom(loc, 10), Expression::Operation::NOP),
+          new IntAtom(loc, 50),
           Expression::Operation::SUB
         )
   );
@@ -156,8 +156,8 @@ TEST(EqualsTest, test_update_node_not_equal) {
   UpdateNode *ast1 = new UpdateNode(loc, 
       new SymbolUsage(loc, "x"),
       new Expression(loc, 
-          new Expression(loc, nullptr, create_atom(loc, 10), Expression::Operation::NOP),
-          create_atom(loc, 50),
+          new Expression(loc, nullptr, new IntAtom(loc, 10), Expression::Operation::NOP),
+          new IntAtom(loc, 50),
           Expression::Operation::SUB
         )
   );
@@ -166,7 +166,7 @@ TEST(EqualsTest, test_update_node_not_equal) {
       new SymbolUsage(loc, "x"),
       new Expression(loc, 
           nullptr,
-          create_atom(loc, 50),
+          new IntAtom(loc, 50),
           Expression::Operation::SUB
       )
   );
@@ -180,11 +180,11 @@ TEST(EqualsTest, test_update_node_not_equal) {
 
 TEST(EqualsTest, test_unary_node) {
   UnaryNode *ast1 = new UnaryNode(loc, NodeType::ENUM,
-      new Expression(loc, nullptr, create_atom(loc, 10), Expression::Operation::NOP)
+      new Expression(loc, nullptr, new IntAtom(loc, 10), Expression::Operation::NOP)
   );
 
   UnaryNode *ast2 = new UnaryNode(loc, NodeType::ENUM,
-      new Expression(loc, nullptr, create_atom(loc, 10), Expression::Operation::NOP)
+      new Expression(loc, nullptr, new IntAtom(loc, 10), Expression::Operation::NOP)
   );
 
   EXPECT_EQ(true, ast1->equals(ast2));
@@ -196,11 +196,11 @@ TEST(EqualsTest, test_unary_node) {
 
 TEST(EqualsTest, test_unary_node_wrong_type) {
   UnaryNode *ast1 = new UnaryNode(loc, NodeType::ENUM,
-      new Expression(loc, nullptr, create_atom(loc, 10), Expression::Operation::NOP)
+      new Expression(loc, nullptr, new IntAtom(loc, 10), Expression::Operation::NOP)
   );
 
   UnaryNode *ast2 = new UnaryNode(loc, NodeType::FUNCTION,
-      new Expression(loc, nullptr, create_atom(loc, 10), Expression::Operation::NOP)
+      new Expression(loc, nullptr, new IntAtom(loc, 10), Expression::Operation::NOP)
   );
 
   EXPECT_EQ(false, ast1->equals(ast2));

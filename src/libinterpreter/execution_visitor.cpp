@@ -6,7 +6,7 @@
 #include "libinterpreter/execution_visitor.h"
 
 ExecutionVisitor::ExecutionVisitor(ExecutionContext &ctxt, RuleNode *init, Driver& driver)
-    : context_(ctxt), driver_(driver), top_rule(init) {}
+    : driver_(driver), top_rule(init), context_(ctxt) {}
 
 void ExecutionVisitor::visit_assert(UnaryNode* assert, Value& val) {
   if (val.value.bval != true) {
@@ -72,6 +72,7 @@ Value&& ExecutionVisitor::visit_expression(Expression *expr, Value &left_val, Va
 }
 
 Value&& ExecutionVisitor::visit_expression_single(Expression *expr, Value &val) {
+  UNUSED(expr);
   return std::move(val);
 }
 

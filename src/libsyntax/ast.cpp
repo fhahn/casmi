@@ -144,6 +144,7 @@ FunctionAtom::~FunctionAtom() {
 }
 
 bool FunctionAtom::equals(AstNode *other) {
+  UNUSED(other);
   throw "not implemented";
     /*
   if (!AstNode::equals(other)) {
@@ -235,16 +236,3 @@ bool UnaryNode::equals(AstNode *other) {
 
 RuleNode::RuleNode(yy::location& loc, AstNode *child, const std::string& n)
   : UnaryNode(loc, NodeType::RULE, child), name(n) {}
-
-
-AtomNode* create_atom(yy::location& loc, SymbolUsage *val) {
-    return new FunctionAtom(loc, val);
-}
-
-AtomNode* create_atom(yy::location& loc, INT_T val) {
-    return new IntAtom(loc, val);
-}
-
-AtomNode* create_atom(yy::location& loc) {
-    return new UndefAtom(loc);
-}

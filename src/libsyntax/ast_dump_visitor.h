@@ -26,7 +26,7 @@ class AstDumpVisitor {
     AstDumpVisitor();
     std::string get_dump();
 
-    void visit_specification(AstNode *spec) {}
+    void visit_specification(AstNode *spec) { UNUSED(spec); }
     void visit_init(AstNode *init);
     void visit_body_elements(AstListNode *body_elements);
     void visit_function_def(FunctionDefNode *def);

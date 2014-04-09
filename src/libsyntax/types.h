@@ -5,7 +5,7 @@
 #include <vector>
 #include <string>
 
-#define INT_T int32_t
+#define INT_T int64_t
 #define FLOAT_T double
 
 enum class Type { RULE, INT, FLOAT, BOOL, UNKNOWN, INVALID, NO_TYPE, UNDEF };

@@ -32,16 +32,16 @@ TEST_F(ParserTest, parse_simple) {
   stmts->add(new UpdateNode(loc,
         new SymbolUsage(loc, "x"),
         new Expression(loc,
-            new Expression(loc, nullptr, create_atom(loc, 1), Expression::Operation::NOP),
-            create_atom(loc, 2),
+            new Expression(loc, nullptr, new IntAtom(loc, 1), Expression::Operation::NOP),
+            new IntAtom(loc, 2),
             Expression::Operation::SUB)
   ));
 
   stmts->add(new UpdateNode(loc,
         new SymbolUsage(loc, "y"),
         new Expression(loc,
-            new Expression(loc, nullptr, create_atom(loc, 5), Expression::Operation::NOP),
-            create_atom(loc, 10),
+            new Expression(loc, nullptr, new IntAtom(loc, 5), Expression::Operation::NOP),
+            new IntAtom(loc, 10),
             Expression::Operation::SUB)
   ));
 

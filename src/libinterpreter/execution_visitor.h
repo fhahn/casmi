@@ -35,7 +35,7 @@ class ExecutionVisitor {
     Value&& visit_expression(Expression *expr, Value& left_val, Value& right_val);
     Value&& visit_expression_single(Expression *expr, Value& val);
     Value&& visit_int_atom(IntAtom *atom) { return std::move(Value(atom->val_)); }
-    Value&& visit_undef_atom(UndefAtom *atom) { return std::move(Value()); }
+    Value&& visit_undef_atom(UndefAtom *atom) { UNUSED(atom); return std::move(Value()); }
 };
 
 class ExecutionWalker : public AstWalker<ExecutionVisitor, Value> {

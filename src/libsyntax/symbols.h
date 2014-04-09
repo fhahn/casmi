@@ -20,7 +20,7 @@ class Symbol {
 
   public:
     Type return_type_;
-    const int id;
+    const uint64_t id;
 
     Symbol(const std::string name, std::vector<Type> *args, Type return_type);
     Symbol(const std::string name);
@@ -52,13 +52,13 @@ class SymbolUsage {
 
 class SymbolTable {
   private:
-    SymbolTable *outer_scope_;
+    //SymbolTable *outer_scope_;
 
   public:
     std::map<std::string, Symbol*> table_;
 
     SymbolTable();
-    SymbolTable(SymbolTable *outer);
+    //SymbolTable(SymbolTable *outer);
     ~SymbolTable();
 
     size_t size() const;

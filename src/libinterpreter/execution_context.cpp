@@ -2,7 +2,7 @@
 
 #include "libinterpreter/execution_context.h"
 
-ExecutionContext::ExecutionContext(SymbolTable *st) : current_st_(st) {
+ExecutionContext::ExecutionContext(SymbolTable *st) {
   // use 10 MB for updateset data
   pp_mem_new(&updateset_data_, 1024 * 1024 * 10, "mem for main updateset");
   updateset.set =  pp_hashmap_new(&updateset_data_, 1024, "main updateset");
@@ -27,7 +27,7 @@ void ExecutionContext::apply_updates() {
   while( i != updateset.set->head ) {
     u = (casm_update*)i->value;
 
-    CASM_RT("update function %u, %p = %p, %u", u->func, u, (void*)u->value, u->defined);
+    CASM_RT("update function %lu, %p = %p, %u", u->func, u, (void*)u->value, u->defined);
 
     auto function_map = functions[u->func];
     

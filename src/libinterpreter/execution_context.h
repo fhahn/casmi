@@ -52,7 +52,6 @@ namespace std {
 
 class ExecutionContext {
   private:
-    SymbolTable *current_st_;
     pp_mem updateset_data_;
     std::vector<std::unordered_map<ArgumentsKey, casm_update*> > functions;
     std::vector<Symbol*> syms_to_apply;

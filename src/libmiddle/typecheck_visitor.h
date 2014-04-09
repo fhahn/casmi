@@ -30,7 +30,7 @@ class TypecheckVisitor {
     Type visit_expression(Expression *expr, Type left_val, Type right_val);
     Type visit_expression_single(Expression *expr, Type val);
     Type visit_int_atom(IntAtom *atom) { UNUSED(atom); return Type::INT; }
-    Type visit_undef_atom(UndefAtom *atom) { return Type::UNDEF; }
+    Type visit_undef_atom(UndefAtom *atom) { UNUSED(atom); return Type::UNDEF; }
 };
 
 #endif //CASMI_LIBINTERPRETER_EXEC_VISITOR

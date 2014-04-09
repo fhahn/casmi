@@ -32,6 +32,6 @@ TEST_F(ExecutionContextTest, test_argumentskey_with_unordered_map) {
   ASSERT_THROW(map.at(k), std::out_of_range);
 
   uint64_t data3[3] = {1,2,3};
-  k = {&data2[0], 3};
-  EXPECT_EQ(55, val);
+  k = {&data3[0], 3};
+  EXPECT_EQ(55, map.at(k));
 }
