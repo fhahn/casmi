@@ -96,7 +96,7 @@ def test_run_fail(filename):
                                                     'Test did run, but should fail',
                                                     HR
             ))
-    else:
+    elif p1.returncode == 1:
         error_re = re.compile(filename+":(?P<line>\d+)\..+error: \\x1b\[0m\\x1b\[1m(?P<msg>.+)\\x1b\[0m$")
         for l in err.split("\n"):
             if "error: " in l:
@@ -122,7 +122,13 @@ def test_run_fail(filename):
 
         print('\t[run-fail] '+short_filename+' ... ok')
         return (True, '')
-
+    else:
+        print('\t[run-fail] '+short_filename+' ... fail')
+        return (False, RUN_FAIL_TEMPLATE.format(HR,
+                                                    filename,
+                                                    'Test did fail with error code != 1',
+                                                    HR
+            ))
 
 
 def run_tests(directory, test_fn, verbose=False):
