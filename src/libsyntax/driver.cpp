@@ -20,7 +20,7 @@ Driver::Driver ()
   current_symbol_table = new SymbolTable();
 
   // TODO: Handle self
-  current_symbol_table->add(new Symbol("program", nullptr, Type::RULE));
+  current_symbol_table->add(new Symbol("program", nullptr, Type::RULE, nullptr));
 
   lines_.push_back("");
 }

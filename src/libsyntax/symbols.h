@@ -10,6 +10,7 @@
 #include "libsyntax/location.hh" // reuse bison's location class
 
 class Expression;
+class AtomNode;
 
 // Only used for functions at the moment
 class Symbol {
@@ -17,12 +18,13 @@ class Symbol {
     static int counter;
     const std::string name_;
     std::vector<Type> *arguments_;
+    std::vector<AtomNode*> *intitializers_;
 
   public:
     Type return_type_;
     const uint64_t id;
 
-    Symbol(const std::string name, std::vector<Type> *args, Type return_type);
+    Symbol(const std::string name, std::vector<Type> *args, Type return_type, std::vector<AtomNode*> *init);
     Symbol(const std::string name);
     ~Symbol();
 

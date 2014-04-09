@@ -73,12 +73,11 @@
 %type <AstNode*> RULE_SYNTAX STATEMENT
 %type <UnaryNode*> ASSERT_SYNTAX
 %type <AstListNode*> BODY_ELEMENTS STATEMENTS
-%type <AtomNode*> ATOM
+%type <AtomNode*> ATOM NUMBER VALUE INITIALIZER
+%type <std::vector<AtomNode*>*> INITIALIZER_LIST INITIALIZERS
 %type <Expression*> EXPRESSION
 %type <std::vector<Expression*>*> EXPRESSION_LIST EXPRESSION_LIST_NO_COMMA
 %type <UpdateNode*> UPDATE_SYNTAX
-%type <AtomNode*> NUMBER
-%type <AtomNode*> VALUE
 %type <uint64_t> INTCONST
 %type <Symbol*> FUNCTION_DEFINITION
 %type <SymbolUsage*> FUNCTION_SYNTAX 
@@ -162,13 +161,13 @@ DERIVED_SYNTAX: DERIVED IDENTIFIER "(" PARAM_LIST ")" "=" EXPRESSION
               ;
 
 FUNCTION_DEFINITION: FUNCTION "(" IDENTIFIER_LIST ")" IDENTIFIER FUNCTION_SIGNATURE INITIALIZERS
-                   { $$ = new Symbol($5, $6.first, $6.second); }
+                   { $$ = new Symbol($5, $6.first, $6.second, $7); }
            | FUNCTION "(" IDENTIFIER_LIST ")" IDENTIFIER FUNCTION_SIGNATURE
-                   { $$ = new Symbol($5, $6.first, $6.second); }
+                   { $$ = new Symbol($5, $6.first, $6.second, nullptr); }
            | FUNCTION IDENTIFIER FUNCTION_SIGNATURE INITIALIZERS
-                   { $$ = new Symbol($2, $3.first, $3.second); }
+                   { $$ = new Symbol($2, $3.first, $3.second, $4); }
            | FUNCTION IDENTIFIER FUNCTION_SIGNATURE
-                   { $$ = new Symbol($2, $3.first, $3.second); }
+                   { $$ = new Symbol($2, $3.first, $3.second, nullptr); }
            ;
 
 
@@ -233,17 +232,18 @@ TUPLE_LIST: IDENTIFIER "," TUPLE_LIST
          | IDENTIFIER 
          ;
 
-INITIALIZERS: INITIALLY "{" INITIALIZER_LIST "}"
-            | INITIALLY "{" "}"
+INITIALIZERS: INITIALLY "{" INITIALIZER_LIST "}" { $$ = $3; }
+            | INITIALLY "{" "}" { $$ = nullptr; }
             ;
 
-INITIALIZER_LIST: INITIALIZER_LIST "," INITIALIZER
-                | INITIALIZER_LIST "," 
-                | INITIALIZER 
+INITIALIZER_LIST: INITIALIZER_LIST "," INITIALIZER { $$ = $1; $1->push_back($3); }
+                | INITIALIZER_LIST "," { $$ = $1; }
+                | INITIALIZER { $$ = new std::vector<AtomNode*>(); $$->push_back($1); }
                 ;
 
-INITIALIZER: ATOM 
-           | ATOM ARROW ATOM 
+
+INITIALIZER: ATOM { $$ = $1; }
+           | ATOM ARROW ATOM { $$ = $1; /* TODO: handle arrows here */ }
            ;
 
 ATOM: FUNCTION_SYNTAX { $$ = new FunctionAtom(@$, $1); }

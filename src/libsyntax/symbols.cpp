@@ -10,19 +10,26 @@
 int Symbol::counter = 0;
 
 Symbol::Symbol(const std::string name, std::vector<Type> *args,
-              Type return_type) : name_(name), arguments_(args),
-                                  return_type_(return_type), id(counter) {
+              Type return_type, std::vector<AtomNode*> *init) :
+                name_(name), arguments_(args), intitializers_(init),
+                return_type_(return_type), id(counter) {
   counter += 1;
 }
 
 Symbol::Symbol(const std::string name) :
-        name_(name), arguments_(nullptr), return_type_(Type::UNKNOWN), id(counter) {
+        name_(name), arguments_(nullptr), intitializers_(nullptr),
+        return_type_(Type::UNKNOWN), id(counter) {
   counter += 1;
 }
 
-
 Symbol::~Symbol() {
   delete arguments_;
+  if (intitializers_ != nullptr) {
+    for (AtomNode* e : *intitializers_) {
+      delete e;
+    }
+    delete intitializers_;
+  }
 }
 
 const std::string& Symbol::name() const {
