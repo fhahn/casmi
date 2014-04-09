@@ -54,13 +54,16 @@ class ExecutionContext {
   private:
     SymbolTable *current_st_;
     pp_mem updateset_data_;
+    std::vector<std::unordered_map<ArgumentsKey, casm_update*> > functions;
+    std::vector<Symbol*> syms_to_apply;
 
   public:
     casm_updateset updateset;
     pp_mem pp_stack;
     uint64_t pseudostate;
 
-    std::vector<std::unordered_map<ArgumentsKey, casm_update*> > functions;
+    void apply_updates();
+    void set_function(Symbol *sym, casm_update *update);
     ExecutionContext(SymbolTable *st);
 };
 

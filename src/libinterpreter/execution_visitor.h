@@ -14,11 +14,11 @@
 
 class ExecutionVisitor {
   private:
-    ExecutionContext& context_;
     Driver& driver_;
 
   public:
     RuleNode *top_rule;
+    ExecutionContext& context_;
 
     ExecutionVisitor(ExecutionContext& context, RuleNode *init, Driver& driver);
 

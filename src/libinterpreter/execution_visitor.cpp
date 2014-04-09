@@ -22,13 +22,12 @@ void ExecutionVisitor::visit_update(UpdateNode *update, Value& val) {
     // TODO handle in a more efficient way
     top_rule = nullptr;
   } else {
-    uint64_t key = (uint64_t) update->sym_->symbol << 16 | (uint64_t)context_.pseudostate;
     casm_update* up = (casm_update*) pp_mem_alloc(&(context_.pp_stack), sizeof(casm_update));
 
     // TODO initialize other fields
     up->value = (void*) val.value.ival;
     casm_update* v = (casm_update*)casm_updateset_add(&(context_.updateset),
-                                                      update->sym_->symbol,
+                                                      (void*) update->sym_->symbol->id,
                                                       (void*) up);
     // TODO implement seq semantic
     if (v != nullptr) {
@@ -79,5 +78,6 @@ Value&& ExecutionVisitor::visit_expression_single(Expression *expr, Value &val) 
 void ExecutionWalker::run() {
   while (visitor.top_rule != nullptr) {
     walk_rule(visitor.top_rule);
+    visitor.context_.apply_updates();
   }
 }

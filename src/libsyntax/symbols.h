@@ -29,6 +29,10 @@ class Symbol {
     const std::string& name() const;
     bool equals(Symbol *other) const;
     const std::string to_str() const;
+    inline size_t argument_count() const {
+      if (arguments_ == nullptr) return 0;
+      return arguments_->size();
+    }
 };
 
 class SymbolUsage {
