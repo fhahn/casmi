@@ -40,6 +40,7 @@ class AstDumpVisitor {
     bool visit_expression_single(Expression *expr, bool);
     bool visit_int_atom(IntAtom *atom);
     bool visit_undef_atom(UndefAtom *atom) { UNUSED(atom); return true; }
+    bool visit_function_atom(FunctionAtom *atom) { UNUSED(atom); return true; }
 };
 
 #endif //CASMI_LIBINTERPRETER_EXEC_VISITOR

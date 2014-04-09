@@ -1,0 +1,10 @@
+function x : -> Int initially { 1 }
+function y : -> Int initially { 2 }
+
+init main
+
+rule main = { 
+    assert x = 1
+    assert y = 2
+    program(self) := undef
+}

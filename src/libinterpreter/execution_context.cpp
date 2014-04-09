@@ -14,7 +14,24 @@ ExecutionContext::ExecutionContext(SymbolTable *st) {
   pseudostate = 0;
 
   for (auto pair: st->table_) {
-    functions.push_back(std::unordered_map<ArgumentsKey, casm_update*>());
+    auto function_map = std::unordered_map<ArgumentsKey, casm_update*>();
+
+    if (pair.second->intitializers_ != nullptr) {
+      for (AtomNode *init : *pair.second->intitializers_) {
+        casm_update* up = (casm_update*) pp_mem_alloc(&pp_stack, sizeof(casm_update));
+        switch (init->node_type_) {
+          case NodeType::INT_ATOM:
+            up->value = (void*) reinterpret_cast<IntAtom*>(init)->val_;
+            std::cout << "set init value" << up->value << std::endl;
+            break;
+          default: throw "KABOOM";
+        }
+        up->func = pair.second->id;
+        // TODO implement for functions with arguments
+        function_map[{&up->args[0], 0}] = up;
+      }
+    }
+    functions.push_back(std::move(function_map));
   }
 }
 
@@ -50,4 +67,13 @@ void ExecutionContext::apply_updates() {
 void ExecutionContext::set_function(Symbol *sym, casm_update *update) {
   auto function_map = functions[sym->id];
   function_map[{&update->args[0], sym->argument_count()}] = update;
+}
+
+casm_update* ExecutionContext::get_function_value(Symbol *sym) {
+  auto function_map = functions[sym->id];
+  try {
+    return function_map.at({nullptr, 0});
+  } catch (const std::out_of_range &e) {
+    return nullptr;
+  }
 }

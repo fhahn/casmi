@@ -18,9 +18,9 @@ class Symbol {
     static int counter;
     const std::string name_;
     std::vector<Type> *arguments_;
-    std::vector<AtomNode*> *intitializers_;
 
   public:
+    std::vector<AtomNode*> *intitializers_;
     Type return_type_;
     const uint64_t id;
 

@@ -37,7 +37,6 @@ void ExecutionVisitor::visit_update(UpdateNode *update, Value& val) {
     }
     /*
     CASM_RT("S %lx", key);
-    up = (casm_update*) pp_hashmap_get( context_.updateset.set, key );
     */
   }
 }
@@ -55,6 +54,7 @@ Value&& ExecutionVisitor::visit_expression(Expression *expr, Value &left_val, Va
       break;
     }
     case Expression::Operation::EQ: {
+      DEBUG ("got "<< left_val.value.ival << " and "<<right_val.value.ival);
       switch (left_val.type) {
         case Type::INT: {
           left_val.value.bval = left_val.value.ival == right_val.value.ival;
@@ -64,6 +64,13 @@ Value&& ExecutionVisitor::visit_expression(Expression *expr, Value &left_val, Va
           left_val.value.bval = left_val.value.bval == right_val.value.bval;
           return std::move(left_val);
         }
+        case Type::UNDEF:
+          if (right_val.type == Type::UNDEF) {
+            left_val.value.bval = true;
+          } else {
+            left_val.value.bval = false;
+          }
+          return std::move(left_val);
         default: assert(0);
       }
     }
@@ -74,6 +81,19 @@ Value&& ExecutionVisitor::visit_expression(Expression *expr, Value &left_val, Va
 Value&& ExecutionVisitor::visit_expression_single(Expression *expr, Value &val) {
   UNUSED(expr);
   return std::move(val);
+}
+
+Value&& ExecutionVisitor::visit_function_atom(FunctionAtom *atom) {
+  casm_update *data = context_.get_function_value(atom->func_->symbol);
+  if (data == nullptr) {
+    return std::move(Value());
+  }
+
+  switch (atom->func_->symbol->return_type_) {
+    case Type::INT: return std::move(Value((int64_t)data->value));
+    default: throw "invalid type in function";
+  }
+
 }
 
 void ExecutionWalker::run() {

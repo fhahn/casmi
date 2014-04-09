@@ -1,0 +1,7 @@
+function x : -> Int initially { }
+
+init main
+
+rule main = { 
+    assert 1 = x //~ Assertion failed
+}

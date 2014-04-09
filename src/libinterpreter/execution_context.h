@@ -38,12 +38,12 @@ struct ArgumentsKey {
 namespace std {
   template <> struct hash<ArgumentsKey> {
 
-    size_t operator()(const ArgumentsKey &dr) const
-    {
+    size_t operator()(const ArgumentsKey &key) const {
         size_t h = 0;
         hash<uint64_t> hasher;
-        for (uint64_t* p = dr.p; p != dr.p + dr.size; ++p)
-            h ^= hasher(*p);
+        for(size_t i = 0; i < key.size; i++) {
+          h ^= hasher(key.p[i]);
+        }
         return h;
     }
   };
@@ -63,6 +63,7 @@ class ExecutionContext {
 
     void apply_updates();
     void set_function(Symbol *sym, casm_update *update);
+    casm_update* get_function_value(Symbol *sym);
     ExecutionContext(SymbolTable *st);
 };
 

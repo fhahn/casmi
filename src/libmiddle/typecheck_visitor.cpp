@@ -38,3 +38,9 @@ Type TypecheckVisitor::visit_expression_single(Expression *expr, Type val) {
   UNUSED(expr);
   return val;
 }
+
+Type TypecheckVisitor::visit_function_atom(FunctionAtom *atom) {
+  Symbol *sym = driver_.current_symbol_table->get(atom->func_->name_);
+  atom->func_->symbol = sym;
+  return sym->return_type_;
+}
