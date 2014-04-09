@@ -26,7 +26,8 @@ enum OptionValues {
   NO_OPTIONS = 0,
   HELP = 1,
   DUMP_AST = (1 << 1),
-  ERROR = (1 << 2)
+  PARSE_ONLY = (1 << 2),
+  ERROR = (1 << 9)
 };
 
 struct arguments {
@@ -35,10 +36,12 @@ struct arguments {
 };
 
 struct arguments parse_cmd_args(int argc, char *argv[]) {
-  int dump_ast;
+  int dump_ast = 0;
+  int parse_only = 0;
   struct option long_options[] = {
        {"help", no_argument, 0, 'h'},
        {"dump-ast", no_argument, &dump_ast, 1},
+       {"parse-only", no_argument, &parse_only, 1},
        {0, 0, 0, 0}
   };
 
@@ -50,10 +53,10 @@ struct arguments parse_cmd_args(int argc, char *argv[]) {
                             long_options, &option_index)) != -1) {
     switch(opt) {
       case 0:
-        if (option_index == 1) {
-          flags |= OptionValues::DUMP_AST;
-        } else {
-          flags |= OptionValues::ERROR;
+        switch (option_index) {
+          case 1: flags |= OptionValues::DUMP_AST; break;
+          case 2: flags |= OptionValues::PARSE_ONLY; break;
+          default: flags |= OptionValues::ERROR;
         }
         break;
       case 'h':
@@ -83,6 +86,7 @@ void print_help() {
   std::cout << "OPTIONS:" << std::endl;
   std::cout << "  -h, --help" << "\t\t" << "shows command line options" << std::endl;
   std::cout << "  --dump-ast" << "\t\t" << "dumps the AST as dot graph" << std::endl;
+  std::cout << "  --parse-only" << "\t\t" << "only parse the input, does not run typechecking" << std::endl;
 }
 
 int main (int argc, char *argv[]) {
@@ -108,6 +112,15 @@ int main (int argc, char *argv[]) {
   global_driver = &driver;
 
   switch (opts.flags) {
+    case OptionValues::PARSE_ONLY: {
+      if (driver.parse(opts.filename) == nullptr) {
+        std::cerr << "Error parsing file" << std::endl;
+        res = EXIT_FAILURE;
+      } else {
+        res = EXIT_SUCCESS;
+      }
+      break;
+    }
     case OptionValues::DUMP_AST: {
       if (driver.parse(opts.filename) == nullptr) {
         std::cerr << "Error parsing file" << std::endl;

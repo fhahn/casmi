@@ -11,9 +11,34 @@ RUN_PASS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
 RUN_FAIL_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                         '../../tests/integration/run-fail/')
 
+EXISTING_PARSE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                        '../../tests/integration/existing-tests/')
+
+
 
 HR_LEN = 65
 HR = '-' * 65
+
+def test_existing_parse(filename):
+    p1 = subprocess.Popen([test_exe, '--parse-only', filename], stderr=subprocess.PIPE)
+    err = p1.communicate()[1]
+
+    short_filename = filename.replace(EXISTING_PARSE_PATH, '')
+    if p1.returncode == 0:
+        print('\t[existing-parse] '+short_filename+' ... ok')
+        return (True, '')
+    else:
+        print('\t[existing-parse] '+short_filename+' ... fail')
+        error = ("{}\n"
+                 "failed test {}\n"
+                 "output: {}\n"
+                 "{}\n"
+                )
+        return (False, error.format(HR,
+                                    filename,
+                                    err.decode(encoding='UTF-8'),
+                                    HR))
+
 
 def test_run_pass(filename):
     p1 = subprocess.Popen([test_exe, filename], stderr=subprocess.PIPE)
@@ -124,6 +149,10 @@ if __name__ == '__main__':
     ok_count_sum = 0
     fail_count_sum = 0
 
+    ok_count, fail_count = run_tests(EXISTING_PARSE_PATH, test_existing_parse)
+    ok_count_sum += ok_count
+    fail_count_sum += fail_count
+ 
     ok_count, fail_count = run_tests(RUN_PASS_PATH, test_run_pass)
     ok_count_sum += ok_count
     fail_count_sum += fail_count
