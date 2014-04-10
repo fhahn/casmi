@@ -20,8 +20,9 @@ Driver::Driver ()
   result = nullptr;
   current_symbol_table = new SymbolTable();
 
-  // TODO: Handle self
-  current_symbol_table->add(new Symbol("program", nullptr, Type::RULE, nullptr));
+  std::vector<Type> *args = new std::vector<Type>();
+  args->push_back(Type::SELF);
+  current_symbol_table->add(new Symbol("program", args, Type::RULE, nullptr));
 
   lines_.push_back("");
 }

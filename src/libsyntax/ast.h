@@ -16,6 +16,7 @@ enum class NodeType {
   INT_ATOM,
   FLOAT_ATOM,
   DUMMY_ATOM,
+  SELF_ATOM,
   INIT,
   BODY_ELEMENTS,
   PROVIDER,
@@ -102,6 +103,14 @@ class UndefAtom : public AtomNode {
     UndefAtom(yy::location& loc);
     bool equals(AstNode *other);
 };
+
+
+class SelfAtom : public AtomNode {
+  public:
+    SelfAtom(yy::location& loc);
+    bool equals(AstNode *other);
+};
+
 
 class FunctionAtom : public AtomNode {
   public:

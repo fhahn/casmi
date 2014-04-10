@@ -34,6 +34,7 @@ class TypecheckVisitor {
     Type visit_undef_atom(UndefAtom *atom) { UNUSED(atom); return Type::UNDEF; }
     Type visit_function_atom(FunctionAtom *atom,
                              const std::vector<Type> &expr_results);
+    Type visit_self_atom(SelfAtom *atom) { UNUSED(atom); return Type::SELF; }
 };
 
 #endif //CASMI_LIBINTERPRETER_EXEC_VISITOR

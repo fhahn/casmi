@@ -109,3 +109,8 @@ bool AstDumpVisitor::visit_function_atom(FunctionAtom *atom,
   dump_node((uint64_t) atom, std::string("FunctionAtom:"+atom->name));
   return true;
 }
+
+bool AstDumpVisitor::visit_self_atom(SelfAtom *atom) {
+  dump_node((uint64_t) atom, std::string("SelfAtom:"));
+  return true;
+}

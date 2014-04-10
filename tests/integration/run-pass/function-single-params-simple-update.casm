@@ -1,4 +1,4 @@
-function x : Int -> Int
+function x : -> Int
 
 init main
 

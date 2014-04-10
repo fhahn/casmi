@@ -9,6 +9,7 @@ static std::map<NodeType, const std::string> node_type_names_ = {
     {NodeType::UNDEF_ATOM, std::string("UNDEF ATOM")},
     {NodeType::INT_ATOM, std::string("INT ATOM")},
     {NodeType::FLOAT_ATOM, std::string("FLOAT ATOM")},
+    {NodeType::SELF_ATOM, std::string("SELF ATOM")},
     {NodeType::DUMMY_ATOM, std::string("DUMMY ATOM")},
     {NodeType::INIT, std::string("INIT")},
     {NodeType::BODY_ELEMENTS, std::string("BODY ELEMENTS")},
@@ -153,6 +154,19 @@ bool UndefAtom::equals(AstNode *other) {
     return true;
   }
 }
+
+
+SelfAtom::SelfAtom(yy::location& loc) :
+        AtomNode(loc, NodeType::SELF_ATOM, Type::SELF) {}
+
+bool SelfAtom::equals(AstNode *other) {
+  if (!AstNode::equals(other)) {
+    return false;
+  } else {
+    return true;
+  }
+}
+
 
 FunctionAtom::FunctionAtom(yy::location& loc, const std::string name) 
     : FunctionAtom(loc, name, nullptr) {
