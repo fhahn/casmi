@@ -11,6 +11,7 @@
 
 class Expression;
 class AtomNode;
+class FunctionAtom;
 
 // Only used for functions at the moment
 class Symbol {
@@ -37,21 +38,6 @@ class Symbol {
     }
 };
 
-class SymbolUsage {
-  private:
-    std::vector<Expression*> *arguments_;
-
-  public:
-    const std::string name_;
-    yy::location location;
-    Symbol *symbol;
-
-    SymbolUsage(yy::location& loc, const std::string name);
-    SymbolUsage(yy::location& loc, const std::string name, std::vector<Expression*> *args);
-    ~SymbolUsage();
-    bool equals(SymbolUsage *other) const;
-};
-
 class SymbolTable {
   private:
     //SymbolTable *outer_scope_;
@@ -66,7 +52,7 @@ class SymbolTable {
     size_t size() const;
     bool add(Symbol *s);
     Symbol *get(const std::string& name) const;
-    Type get(const SymbolUsage *sym) const;
+    Type get(const FunctionAtom *func) const;
 };
 
 #endif

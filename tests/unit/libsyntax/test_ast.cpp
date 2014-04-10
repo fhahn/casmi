@@ -128,7 +128,7 @@ TEST(EqualsTest, test_expression_wrong_balance) {
 
 TEST(EqualsTest, test_update_node) {
   UpdateNode *ast1 = new UpdateNode(loc, 
-      new SymbolUsage(loc, "x"),
+      new FunctionAtom(loc, "x"),
       new Expression(loc, 
           new Expression(loc, nullptr, new IntAtom(loc, 10), Expression::Operation::NOP),
           new IntAtom(loc, 50),
@@ -137,7 +137,7 @@ TEST(EqualsTest, test_update_node) {
   );
 
   UpdateNode *ast2 = new UpdateNode(loc, 
-      new SymbolUsage(loc, "x"),
+      new FunctionAtom(loc, "x"),
       new Expression(loc, 
           new Expression(loc, nullptr, new IntAtom(loc, 10), Expression::Operation::NOP),
           new IntAtom(loc, 50),
@@ -154,7 +154,7 @@ TEST(EqualsTest, test_update_node) {
 
 TEST(EqualsTest, test_update_node_not_equal) {
   UpdateNode *ast1 = new UpdateNode(loc, 
-      new SymbolUsage(loc, "x"),
+      new FunctionAtom(loc, "x"),
       new Expression(loc, 
           new Expression(loc, nullptr, new IntAtom(loc, 10), Expression::Operation::NOP),
           new IntAtom(loc, 50),
@@ -163,7 +163,7 @@ TEST(EqualsTest, test_update_node_not_equal) {
   );
 
   UpdateNode *ast2 = new UpdateNode(loc, 
-      new SymbolUsage(loc, "x"),
+      new FunctionAtom(loc, "x"),
       new Expression(loc, 
           nullptr,
           new IntAtom(loc, 50),

@@ -10,15 +10,12 @@ void TypecheckVisitor::visit_assert(UnaryNode *assert, Type val) {
   }
 }
 
-void TypecheckVisitor::visit_update(UpdateNode *update, Type val) {
-  Symbol *sym = driver_.current_symbol_table->get(update->sym_->name_);
-  if (!sym) {
-    driver_.error(update->sym_->location, "use of undefined function `"+update->sym_->name_+"`");
-  } else if (val != Type::UNDEF && sym->return_type_ != val) {
-    driver_.error(update->location, "type `"+type_to_str(sym->return_type_)+"` of `"+update->sym_->name_+
-                            "` does not match type `"+type_to_str(val)+"` of expression");
+void TypecheckVisitor::visit_update(UpdateNode *update, Type func_t, Type expr_t) {
+  if (expr_t != Type::UNDEF && func_t != expr_t) {
+    driver_.error(update->location, "type `"+type_to_str(func_t)+"` of `"+
+                                    update->func->name+"` does not match type `"+
+                                    type_to_str(expr_t)+"` of expression");
   }
-  update->sym_->symbol = sym;
 }
 
 Type TypecheckVisitor::visit_expression(Expression *expr, Type left_val, Type right_val) {
@@ -38,8 +35,14 @@ Type TypecheckVisitor::visit_expression_single(Expression *expr, Type val) {
   return val;
 }
 
-Type TypecheckVisitor::visit_function_atom(FunctionAtom *atom) {
-  Symbol *sym = driver_.current_symbol_table->get(atom->func_->name_);
-  atom->func_->symbol = sym;
+Type TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
+                                           const std::vector<Type> &expr_results) {
+  Symbol *sym = driver_.current_symbol_table->get(atom->name);
+  if (!sym) {
+    driver_.error(atom->location, "use of undefined function `"+atom->name+"`");
+    return Type::INVALID;
+  }
+
+  atom->symbol = sym;
   return sym->return_type_;
 }

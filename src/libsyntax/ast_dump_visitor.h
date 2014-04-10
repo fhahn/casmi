@@ -17,7 +17,6 @@ class AstDumpVisitor {
 
     void dump_node(uint64_t key, const std::string& name);
     void dump_node(AstNode *n, const std::string& name);
-    void dump_symbol_usage(const SymbolUsage* sym);
     void dump_link(uint64_t from, uint64_t to);
     void dump_link(AstNode *from, AstNode *to);
 
@@ -35,12 +34,13 @@ class AstDumpVisitor {
     void visit_statement(AstNode *stmt);
     bool visit_assert(UnaryNode *assert, bool);
     void visit_parblock(UnaryNode *parblock);
-    bool visit_update(UpdateNode *update, bool);
+    bool visit_update(UpdateNode *update, bool, bool);
     bool visit_expression(Expression *expr, bool, bool);
     bool visit_expression_single(Expression *expr, bool);
     bool visit_int_atom(IntAtom *atom);
     bool visit_undef_atom(UndefAtom *atom) { UNUSED(atom); return true; }
-    bool visit_function_atom(FunctionAtom *atom) { UNUSED(atom); return true; }
+    bool visit_function_atom(FunctionAtom *atom,
+                             const std::vector<bool> &expr_results);
 };
 
 #endif //CASMI_LIBINTERPRETER_EXEC_VISITOR

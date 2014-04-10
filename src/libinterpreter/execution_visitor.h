@@ -31,12 +31,12 @@ class ExecutionVisitor {
     void visit_parblock(UnaryNode *parblock) { UNUSED(parblock); }
     void visit_assert(UnaryNode* assert, Value& val);
     void visit_statements(AstListNode *stmts) { UNUSED(stmts); }
-    void visit_update(UpdateNode *update, Value& val);
+    void visit_update(UpdateNode *update, Value& func_val, Value& expr_v);
     Value&& visit_expression(Expression *expr, Value& left_val, Value& right_val);
     Value&& visit_expression_single(Expression *expr, Value& val);
     Value&& visit_int_atom(IntAtom *atom) { return std::move(Value(atom->val_)); }
     Value&& visit_undef_atom(UndefAtom *atom) { UNUSED(atom); return std::move(Value()); }
-    Value&& visit_function_atom(FunctionAtom *atom);
+    Value&& visit_function_atom(FunctionAtom *atom, const std::vector<Value> &expr_results);
 };
 
 class ExecutionWalker : public AstWalker<ExecutionVisitor, Value> {

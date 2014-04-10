@@ -136,11 +136,18 @@ bool UndefAtom::equals(AstNode *other) {
   }
 }
 
-FunctionAtom::FunctionAtom(yy::location& loc, SymbolUsage *val) :
-        AtomNode(loc, NodeType::FUNCTION_ATOM, Type::UNKNOWN), func_(val) {}
+FunctionAtom::FunctionAtom(yy::location& loc, const std::string name) 
+    : FunctionAtom(loc, name, nullptr) {
+}
+
+FunctionAtom::FunctionAtom(yy::location& loc, const std::string name,
+                           std::vector<Expression*> *args) 
+    : AtomNode(loc, NodeType::FUNCTION_ATOM, Type::UNKNOWN), symbol(nullptr),
+      name(name), arguments(args) {
+      
+}
 
 FunctionAtom::~FunctionAtom() {
-  delete func_;
 }
 
 bool FunctionAtom::equals(AstNode *other) {
@@ -199,12 +206,12 @@ bool Expression::equals(AstNode *other) {
   }
 }
 
-UpdateNode::UpdateNode(yy::location& loc, SymbolUsage *sym, Expression *expr) : AstNode(loc, NodeType::UPDATE),
-                                           sym_(sym), expr_(expr) {
+UpdateNode::UpdateNode(yy::location& loc, FunctionAtom *func, Expression *expr)
+    : AstNode(loc, NodeType::UPDATE), func(func), expr_(expr) {
 }
 
 UpdateNode::~UpdateNode() {
-  delete sym_;
+  delete func;
   delete expr_;
 }
 
@@ -214,7 +221,7 @@ bool UpdateNode::equals(AstNode *other) {
   }
 
   UpdateNode *other_cast = static_cast<UpdateNode*>(other);
-  return expr_->equals(other_cast->expr_) && sym_->equals(other_cast->sym_);
+  return expr_->equals(other_cast->expr_) && func->equals(other_cast->func);
 }
 
 UnaryNode::UnaryNode(yy::location& loc, NodeType node_type, AstNode *child) : AstNode(loc, node_type) {

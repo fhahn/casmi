@@ -16,23 +16,25 @@ void ExecutionVisitor::visit_assert(UnaryNode* assert, Value& val) {
   }
 }
 
-void ExecutionVisitor::visit_update(UpdateNode *update, Value& val) {
+void ExecutionVisitor::visit_update(UpdateNode *update, Value& func_val, Value& expr_v) {
 
-  if (update->sym_->symbol->name() == "program") {
+  UNUSED(func_val);
+
+  if (update->func->name == "program") {
     // TODO handle in a more efficient way
     top_rule = nullptr;
   } else {
     casm_update* up = (casm_update*) pp_mem_alloc(&(context_.pp_stack), sizeof(casm_update));
 
     // TODO initialize other fields
-    up->value = (void*) val.value.ival;
+    up->value = (void*) expr_v.value.ival;
     casm_update* v = (casm_update*)casm_updateset_add(&(context_.updateset),
-                                                      (void*) update->sym_->symbol->id,
+                                                      (void*) update->func->symbol->id,
                                                       (void*) up);
     // TODO implement seq semantic
     if (v != nullptr) {
-      driver_.error(update->sym_->location,
-                    "Conflict in current block for function `"+update->sym_->name_+"`");
+      driver_.error(update->func->location,
+                    "Conflict in current block for function `"+update->func->name+"`");
       throw RuntimeException("Conflict in updateset");
     }
     /*
@@ -83,13 +85,13 @@ Value&& ExecutionVisitor::visit_expression_single(Expression *expr, Value &val) 
   return std::move(val);
 }
 
-Value&& ExecutionVisitor::visit_function_atom(FunctionAtom *atom) {
-  casm_update *data = context_.get_function_value(atom->func_->symbol);
+Value&& ExecutionVisitor::visit_function_atom(FunctionAtom *atom, const std::vector<Value> &expr_results) {
+  casm_update *data = context_.get_function_value(atom->symbol);
   if (data == nullptr) {
     return std::move(Value());
   }
 
-  switch (atom->func_->symbol->return_type_) {
+  switch (atom->symbol->return_type_) {
     case Type::INT: return std::move(Value((int64_t)data->value));
     default: throw "invalid type in function";
   }

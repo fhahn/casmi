@@ -6,5 +6,7 @@ init main
 rule main = { 
     assert x = 1
     assert y = 2
+    assert y+2 = 4
+    assert 2+y = 4
     program(self) := undef
 }

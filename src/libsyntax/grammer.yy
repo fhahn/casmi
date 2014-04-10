@@ -80,7 +80,7 @@
 %type <UpdateNode*> UPDATE_SYNTAX
 %type <uint64_t> INTCONST
 %type <Symbol*> FUNCTION_DEFINITION
-%type <SymbolUsage*> FUNCTION_SYNTAX 
+%type <FunctionAtom*> FUNCTION_SYNTAX 
 %type <std::pair<std::vector<Type>*, Type>> FUNCTION_SIGNATURE
 %type <Type> NEW_TYPE_SYNTAX
 %type <std::vector<Type>*> TYPE_IDENTIFIER_STARLIST
@@ -246,7 +246,7 @@ INITIALIZER: ATOM { $$ = $1; }
            | ATOM ARROW ATOM { $$ = $1; /* TODO: handle arrows here */ }
            ;
 
-ATOM: FUNCTION_SYNTAX { $$ = new FunctionAtom(@$, $1); }
+ATOM: FUNCTION_SYNTAX { $$ = $1; }
     | VALUE { $$ = $1; }
     | BRACKET_EXPRESSION { $$ = new AtomNode(); }
     ;
@@ -340,9 +340,9 @@ EXPRESSION: EXPRESSION "+" ATOM
 BRACKET_EXPRESSION: "(" EXPRESSION ")" 
                   ;
 
-FUNCTION_SYNTAX: IDENTIFIER { $$ = new SymbolUsage(@$, $1); }
-               | IDENTIFIER "(" ")" { $$ = new SymbolUsage(@$, $1); }
-               | IDENTIFIER "(" EXPRESSION_LIST ")" { $$ = new SymbolUsage(@$, $1, $3); }
+FUNCTION_SYNTAX: IDENTIFIER { $$ = new FunctionAtom(@$, $1); }
+               | IDENTIFIER "(" ")" { $$ = new FunctionAtom(@$, $1); }
+               | IDENTIFIER "(" EXPRESSION_LIST ")" { $$ = new FunctionAtom(@$, $1, $3); }
                ;
 
 RULE_SYNTAX: RULE IDENTIFIER "=" STATEMENT { $$ = new RuleNode(@$, $4, $2); }

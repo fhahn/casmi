@@ -14,9 +14,6 @@ void AstDumpVisitor::dump_node(AstNode *n, const std::string& name) {
   dump_node((uint64_t) n, name);
 }
 
-void AstDumpVisitor::dump_symbol_usage(const SymbolUsage* sym) {
-  dump_node((uint64_t) sym, std::string("SymbolUsage "+sym->name_));
-}
 
 void AstDumpVisitor::dump_link(uint64_t from, uint64_t to) {
   dump_stream_ << "    " << from << " -> " << to << ";" << std::endl;
@@ -72,11 +69,10 @@ void AstDumpVisitor::visit_parblock(UnaryNode *parblock) {
   dump_link(parblock, parblock->child_);
 }
 
-bool AstDumpVisitor::visit_update(UpdateNode *update, bool) {
+bool AstDumpVisitor::visit_update(UpdateNode *update, bool, bool) {
   dump_node(update, "Update");
-  dump_symbol_usage(update->sym_);
 
-  dump_link((uint64_t) update, (uint64_t) update->sym_);
+  dump_link((uint64_t) update, (uint64_t) update->func);
   dump_link(update, update->expr_);
   return true;
 }
@@ -100,5 +96,11 @@ bool AstDumpVisitor::visit_expression_single(Expression *expr, bool) {
 
 bool AstDumpVisitor::visit_int_atom(IntAtom *atom) {
   dump_node(atom, std::string("IntAtom: ")+std::to_string(atom->val_));
+  return true;
+}
+
+bool AstDumpVisitor::visit_function_atom(FunctionAtom *atom,
+    const std::vector<bool> &expr_results) {
+  dump_node((uint64_t) atom, std::string("FunctionAtom:"+atom->name));
   return true;
 }

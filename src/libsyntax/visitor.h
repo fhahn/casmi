@@ -95,8 +95,9 @@ template<class T, class V> class AstWalker {
     }
 
     void walk_update(UpdateNode *update) {
-      V v = walk_expression(update->expr_);
-      visitor.visit_update(update, v);
+      V func_t = walk_function_atom(update->func);
+      V expr_t = walk_expression(update->expr_);
+      visitor.visit_update(update, func_t, expr_t);
     }
 
     V walk_expression(Expression *expr) {
@@ -121,27 +122,32 @@ template<class T, class V> class AstWalker {
       throw RuntimeException("Invalid expression structure");
     }
 
+    V walk_function_atom(FunctionAtom *func) {
+      std::vector<V> expr_results;
+      if (func->arguments) {
+        for (Expression* e : *func->arguments) {
+          expr_results.push_back(walk_expression(e));
+        }
+      }
+      return visitor.visit_function_atom(func, expr_results);
+    }
+
     V walk_atom(AtomNode *atom) {
       switch(atom->node_type_) {
         case NodeType::INT_ATOM: {
           return visitor.visit_int_atom(reinterpret_cast<IntAtom*>(atom));
-          break;
         }
         case NodeType::UNDEF_ATOM: { 
           return visitor.visit_undef_atom(reinterpret_cast<UndefAtom*>(atom));
-          break;
         }
         case NodeType::FUNCTION_ATOM: { 
-          return visitor.visit_function_atom(reinterpret_cast<FunctionAtom*>(atom));
-          break;
+          return walk_function_atom(reinterpret_cast<FunctionAtom*>(atom));
         }
         default: {
-          throw RuntimeException("Invalid atom type");
+          throw RuntimeException("Invalid atom type:"+type_to_str(atom->node_type_));
         }
       }
     }
-
-
 };
 
 #endif

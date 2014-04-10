@@ -35,8 +35,8 @@ enum class NodeType {
 const std::string& type_to_str(NodeType t);
 
 class AstVisitor;
-class SymbolUsage;
 class Symbol;
+class Expression;
 
 class AstNode {
     public:
@@ -94,9 +94,14 @@ class UndefAtom : public AtomNode {
 
 class FunctionAtom : public AtomNode {
   public:
-    SymbolUsage *func_;
+    Symbol *symbol;
+    const std::string name;
+    std::vector<Expression*> *arguments;
 
-    FunctionAtom(yy::location& loc, SymbolUsage *val);
+    FunctionAtom(yy::location& loc, const std::string name);
+    FunctionAtom(yy::location& loc, const std::string name,
+                 std::vector<Expression*> *args);
+ 
     virtual ~FunctionAtom();
     bool equals(AstNode *other);
 };
@@ -150,10 +155,10 @@ class RuleNode: public UnaryNode {
 
 class UpdateNode: public AstNode {
   public:
-    SymbolUsage *sym_;
+    FunctionAtom *func;
     Expression *expr_;
 
-    UpdateNode(yy::location& loc, SymbolUsage *sym, Expression *expr);
+    UpdateNode(yy::location& loc, FunctionAtom *func, Expression *expr);
     virtual ~UpdateNode();
     virtual bool equals(AstNode *other);
 };

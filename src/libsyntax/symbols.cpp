@@ -70,36 +70,6 @@ bool Symbol::equals(Symbol *other) const {
   return return_type_ == other->return_type_;
 }
 
-SymbolUsage::SymbolUsage(yy::location& loc, const std::string name) :
-        arguments_(nullptr), name_(name), location(loc) {}
-
-SymbolUsage::SymbolUsage(yy::location& loc, const std::string name,
-                         std::vector<Expression*> *args) :
-        arguments_(args), name_(name), location(loc) {}
-
-
-SymbolUsage::~SymbolUsage() {
-  if (arguments_ != nullptr) {
-    for (auto a : *arguments_) {
-      delete a;
-    }
-    delete arguments_;
-  }
-}
-
-bool SymbolUsage::equals(SymbolUsage *other) const {
-  if (arguments_ != nullptr && other->arguments_ != nullptr) {
-    if (arguments_->size() != other->arguments_->size()) {
-      return false;
-    }
-    for (size_t i=0; i < arguments_->size(); i++) {
-      if ((*arguments_)[i] != (*other->arguments_)[i]) {
-        return false;
-      }
-    }
-  }
-  return arguments_ == other->arguments_ && name_ == other->name_;
-}
 // -------------------------------------------------------------------------
 // Implementation of SymbolTable
 // -------------------------------------------------------------------------
@@ -130,17 +100,6 @@ Symbol *SymbolTable::get(const std::string& name) const {
     return table_.at(name);
   } catch (const std::out_of_range& e) {
     return nullptr;
-  }
-}
-
-Type SymbolTable::get(const SymbolUsage *usage) const {
-  Symbol *sym = get(usage->name_);
-  if (sym == nullptr) {
-    DEBUG("did not find symbol with name "+usage->name_);
-    return Type::INVALID;
-  } else {
-    DEBUG("found symbol with name "+usage->name_);
-    return sym->return_type_;
   }
 }
 
