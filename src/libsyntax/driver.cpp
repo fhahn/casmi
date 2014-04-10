@@ -17,6 +17,7 @@ Driver *global_driver;
 Driver::Driver () 
     : error_(false), trace_parsing (false), trace_scanning (false) {
   file_ = nullptr;
+  result = nullptr;
   current_symbol_table = new SymbolTable();
 
   // TODO: Handle self

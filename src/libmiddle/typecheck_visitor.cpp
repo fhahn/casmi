@@ -12,10 +12,9 @@ void TypecheckVisitor::visit_assert(UnaryNode *assert, Type val) {
 
 void TypecheckVisitor::visit_update(UpdateNode *update, Type val) {
   Symbol *sym = driver_.current_symbol_table->get(update->sym_->name_);
-  if (sym == nullptr) {
+  if (!sym) {
     driver_.error(update->sym_->location, "use of undefined function `"+update->sym_->name_+"`");
-  }
-  if (val != Type::UNDEF && sym->return_type_ != val) {
+  } else if (val != Type::UNDEF && sym->return_type_ != val) {
     driver_.error(update->location, "type `"+type_to_str(sym->return_type_)+"` of `"+update->sym_->name_+
                             "` does not match type `"+type_to_str(val)+"` of expression");
   }

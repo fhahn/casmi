@@ -161,7 +161,9 @@ int main (int argc, char *argv[]) {
       break;
     }
   }
-  delete driver.result;
+  if (driver.result) {
+    delete driver.result;
+  }
 
   return res;
 }
