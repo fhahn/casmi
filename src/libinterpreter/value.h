@@ -17,6 +17,8 @@ class Value {
     Value(FLOAT_T fval);
     Value(bool bval);
     Value(Value&& other);
+
+    uint64_t to_uint64_t() const;
 };
 
 #endif

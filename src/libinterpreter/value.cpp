@@ -1,6 +1,7 @@
 #include <utility>
 
 #include "libinterpreter/value.h"
+#include "libutil/exceptions.h"
 
 Value::Value() : type(Type::UNDEF) {}
 
@@ -17,3 +18,15 @@ Value::Value(bool bval) : type(Type::BOOL) {
 }
 
 Value::Value(Value&& other) : type(std::move(other.type)), value(other.value) {}
+
+
+uint64_t Value::to_uint64_t() const {
+  switch (type) {
+    case Type::INT:
+      return value.ival;
+    case Type::SELF:
+    case Type::UNDEF: // are UNDEF and SELF the same here?
+      return 0;
+    default: throw RuntimeException("Unsupported type in update");
+  }
+}

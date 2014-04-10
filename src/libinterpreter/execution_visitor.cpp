@@ -1,12 +1,19 @@
 #include <assert.h>
+#include <utility>
 
 #include "macros.h"
 #include "libutil/exceptions.h"
 
 #include "libinterpreter/execution_visitor.h"
+void pack_values_in_array(const std::vector<Value> &value_list, uint64_t array[]) {
+  for (size_t i=0; i < value_list.size(); i++) {
+    array[i] = value_list[i].to_uint64_t();
+  }
+}
 
-ExecutionVisitor::ExecutionVisitor(ExecutionContext &ctxt, RuleNode *init, Driver& driver)
-    : driver_(driver), top_rule(init), context_(ctxt) {}
+
+ExecutionVisitor::ExecutionVisitor(ExecutionContext &ctxt, Driver& driver)
+    : driver_(driver), context_(ctxt) {}
 
 void ExecutionVisitor::visit_assert(UnaryNode* assert, Value& val) {
   if (val.value.bval != true) {
@@ -16,30 +23,31 @@ void ExecutionVisitor::visit_assert(UnaryNode* assert, Value& val) {
   }
 }
 
-void ExecutionVisitor::visit_update(UpdateNode *update, Value& func_val, Value& expr_v) {
+void ExecutionVisitor::visit_update(UpdateNode *update, Value &func_val, Value& expr_v) {
 
   UNUSED(func_val);
 
-  if (update->func->name == "program") {
-    // TODO handle in a more efficient way
-    top_rule = nullptr;
-  } else {
-    casm_update* up = (casm_update*) pp_mem_alloc(&(context_.pp_stack), sizeof(casm_update));
+  casm_update* up = (casm_update*) pp_mem_alloc(&(context_.pp_stack), sizeof(casm_update));
 
-    // TODO initialize other fields
-    up->value = (void*) expr_v.value.ival;
-    casm_update* v = (casm_update*)casm_updateset_add(&(context_.updateset),
-                                                      (void*) update->func->symbol->id,
-                                                      (void*) up);
-    // TODO implement seq semantic
-    if (v != nullptr) {
-      driver_.error(update->func->location,
-                    "Conflict in current block for function `"+update->func->name+"`");
-      throw RuntimeException("Conflict in updateset");
-    }
-    /*
-    CASM_RT("S %lx", key);
-    */
+  // TODO initialize other fields
+  up->value = (void*) expr_v.to_uint64_t();
+  up->func = update->func->symbol->id;
+  pack_values_in_array(value_list, up->args);
+
+  up->num_args = value_list.size();
+
+  value_list.clear();
+  if(up->func == 0) {
+    DEBUG("asd "<< value_list.size() << " asd "<<up->value);
+  }
+  casm_update* v = (casm_update*)casm_updateset_add(&(context_.updateset),
+                                                    (void*) update->func->symbol->id,
+                                                    (void*) up);
+  // TODO implement seq semantic
+  if (v != nullptr) {
+    driver_.error(update->func->location,
+                  "Conflict in current block for function `"+update->func->name+"`");
+    throw RuntimeException("Conflict in updateset");
   }
 }
 
@@ -85,8 +93,15 @@ Value&& ExecutionVisitor::visit_expression_single(Expression *expr, Value &val) 
   return std::move(val);
 }
 
-Value&& ExecutionVisitor::visit_function_atom(FunctionAtom *atom, const std::vector<Value> &expr_results) {
-  casm_update *data = context_.get_function_value(atom->symbol);
+Value&& ExecutionVisitor::visit_function_atom(FunctionAtom *atom, std::vector<Value> &expr_results) {
+  
+  uint64_t args[expr_results.size()];
+  pack_values_in_array(value_list, args);
+  casm_update *data = context_.get_function_value(atom->symbol, args);
+
+  // TODO handle function access and function write differently
+  value_list.swap(expr_results);
+
   if (data == nullptr) {
     return std::move(Value());
   }
@@ -99,8 +114,14 @@ Value&& ExecutionVisitor::visit_function_atom(FunctionAtom *atom, const std::vec
 }
 
 void ExecutionWalker::run() {
-  while (visitor.top_rule != nullptr) {
-    walk_rule(visitor.top_rule);
+  Symbol *program_sym = visitor.context_.symbol_table->get("program");
+  uint64_t args[1] = {0};
+  while(true) {
+    casm_update *program_val = visitor.context_.get_function_value(program_sym, args);
+    if (program_val->value == 0) {
+      break;
+    }
+    walk_rule(reinterpret_cast<RuleNode*>(program_val->value));
     visitor.context_.apply_updates();
   }
 }

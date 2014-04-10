@@ -148,13 +148,14 @@ int main (int argc, char *argv[]) {
       if (!driver.ok()) {
         res = EXIT_FAILURE;
       } else {
-        ExecutionContext ctx(driver.current_symbol_table);
-        ExecutionVisitor visitor(ctx, driver.get_init_rule(), driver);
+        ExecutionContext ctx(driver.current_symbol_table, driver.get_init_rule());
+        ExecutionVisitor visitor(ctx, driver);
         ExecutionWalker walker(visitor);
         try {
           walker.run();
           res = EXIT_SUCCESS;
         } catch (const RuntimeException& ex) {
+          std::cerr << "Abort after runtime exception: "<< ex.what();
           res = EXIT_FAILURE;
         }
       }

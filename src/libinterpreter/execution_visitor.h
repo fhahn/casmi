@@ -16,11 +16,12 @@ class ExecutionVisitor {
   private:
     Driver& driver_;
 
+    std::vector<Value> value_list;
+
   public:
-    RuleNode *top_rule;
     ExecutionContext& context_;
 
-    ExecutionVisitor(ExecutionContext& context, RuleNode *init, Driver& driver);
+    ExecutionVisitor(ExecutionContext& context, Driver& driver);
 
     void visit_specification(AstNode *spec) { UNUSED(spec); }
     void visit_init(AstNode *init) { UNUSED(init); }
@@ -37,7 +38,7 @@ class ExecutionVisitor {
     Value&& visit_int_atom(IntAtom *atom) { return std::move(Value(atom->val_)); }
     Value&& visit_float_atom(FloatAtom *atom) { return std::move(Value(atom->val_)); }
     Value&& visit_undef_atom(UndefAtom *atom) { UNUSED(atom); return std::move(Value()); }
-    Value&& visit_function_atom(FunctionAtom *atom, const std::vector<Value> &expr_results);
+    Value&& visit_function_atom(FunctionAtom *atom, std::vector<Value> &expr_results);
     Value&& visit_self_atom(SelfAtom *atom) { UNUSED(atom); return std::move(Value()); }
 };
 

@@ -57,14 +57,15 @@ class ExecutionContext {
     std::vector<Symbol*> syms_to_apply;
 
   public:
+    SymbolTable *symbol_table;
     casm_updateset updateset;
     pp_mem pp_stack;
     uint64_t pseudostate;
 
     void apply_updates();
     void set_function(Symbol *sym, casm_update *update);
-    casm_update* get_function_value(Symbol *sym);
-    ExecutionContext(SymbolTable *st);
+    casm_update* get_function_value(Symbol *sym, uint64_t args[]);
+    ExecutionContext(SymbolTable *st, RuleNode *init);
 };
 
 #endif //CASMI_LIBINTERPRETER_EXEC_CONTEXT
