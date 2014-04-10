@@ -14,6 +14,7 @@
     #include <utility>
 
     #include "libsyntax/ast.h"
+    #include "libsyntax/types.h"
     class Driver;
 }
 
@@ -78,7 +79,8 @@
 %type <Expression*> EXPRESSION
 %type <std::vector<Expression*>*> EXPRESSION_LIST EXPRESSION_LIST_NO_COMMA
 %type <UpdateNode*> UPDATE_SYNTAX
-%type <uint64_t> INTCONST
+%type <INT_T> INTCONST
+%type <FLOAT_T> FLOATCONST
 %type <Symbol*> FUNCTION_DEFINITION
 %type <FunctionAtom*> FUNCTION_SYNTAX 
 %type <std::pair<std::vector<Type>*, Type>> FUNCTION_SIGNATURE
@@ -264,11 +266,11 @@ VALUE: RULEREF { $$ = new IntAtom(@$, 0); }
      ;
 
 NUMBER: "+" INTCONST %prec UPLUS { $$ = new IntAtom(@$, $2); }
-      | "-" INTCONST %prec UMINUS { $$ = new IntAtom(@$, $2); }
+      | "-" INTCONST %prec UMINUS { $$ = new IntAtom(@$, (-1) * $2); }
       | INTCONST { $$ = new IntAtom(@$, $1); }
-      | "+" FLOATCONST %prec UPLUS { $$ = new IntAtom(@$, 0); }
-      | "-" FLOATCONST %prec UMINUS { $$ = new IntAtom(@$, 0); }
-      | FLOATCONST { $$ = new IntAtom(@$, 0); }
+      | "+" FLOATCONST %prec UPLUS { $$ = new FloatAtom(@$, $2); }
+      | "-" FLOATCONST %prec UMINUS { $$ = new FloatAtom(@$, (-1) * $2); }
+      | FLOATCONST { $$ = new FloatAtom(@$, 0); }
       | "+" RATIONALCONST %prec UPLUS { $$ = new IntAtom(@$, 0); }
       | "-" RATIONALCONST %prec UMINUS { $$ = new IntAtom(@$, 0); }
       | RATIONALCONST { $$ = new IntAtom(@$, 0); }

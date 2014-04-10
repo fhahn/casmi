@@ -99,6 +99,11 @@ bool AstDumpVisitor::visit_int_atom(IntAtom *atom) {
   return true;
 }
 
+bool AstDumpVisitor::visit_float_atom(FloatAtom *atom) {
+  dump_node(atom, std::string("FloatAtom: ")+std::to_string(atom->val_));
+  return true;
+}
+
 bool AstDumpVisitor::visit_function_atom(FunctionAtom *atom,
     const std::vector<bool> &expr_results) {
   dump_node((uint64_t) atom, std::string("FunctionAtom:"+atom->name));

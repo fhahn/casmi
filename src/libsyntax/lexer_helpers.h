@@ -4,9 +4,11 @@
 #include <cstdint>
 #include <iostream>
 
+#include "libsyntax/types.h"
 #include "libsyntax/driver.h"
 #include "libsyntax/parser.tab.h"
 
-uint64_t convert_to_long(const char* val, int base, Driver &driver, yy::location loc);
+INT_T convert_to_long(const char* val, int base, Driver &driver, yy::location loc);
+FLOAT_T convert_to_float(const char* val, Driver &driver, yy::location loc);
 
 #endif

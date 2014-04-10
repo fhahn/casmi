@@ -14,6 +14,7 @@ enum class NodeType {
   ASSERT,
   UNDEF_ATOM,
   INT_ATOM,
+  FLOAT_ATOM,
   DUMMY_ATOM,
   INIT,
   BODY_ELEMENTS,
@@ -85,6 +86,16 @@ class IntAtom : public AtomNode {
     virtual ~IntAtom();
     bool equals(AstNode *other);
 };
+
+class FloatAtom : public AtomNode {
+  public:
+    FLOAT_T val_;
+
+    FloatAtom(yy::location& loc, FLOAT_T val);
+    virtual ~FloatAtom();
+    bool equals(AstNode *other);
+};
+
 
 class UndefAtom : public AtomNode {
   public:

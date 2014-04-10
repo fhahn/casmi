@@ -8,6 +8,7 @@ static std::map<NodeType, const std::string> node_type_names_ = {
     {NodeType::ASSERT, std::string("ASSERT")},
     {NodeType::UNDEF_ATOM, std::string("UNDEF ATOM")},
     {NodeType::INT_ATOM, std::string("INT ATOM")},
+    {NodeType::FLOAT_ATOM, std::string("FLOAT ATOM")},
     {NodeType::DUMMY_ATOM, std::string("DUMMY ATOM")},
     {NodeType::INIT, std::string("INIT")},
     {NodeType::BODY_ELEMENTS, std::string("BODY ELEMENTS")},
@@ -124,6 +125,23 @@ bool IntAtom::equals(AstNode *other) {
   IntAtom *other_cast = static_cast<IntAtom*>(other);
   return val_ == other_cast->val_;
 }
+
+FloatAtom::FloatAtom(yy::location& loc, FLOAT_T val) :
+        AtomNode(loc, NodeType::FLOAT_ATOM, Type::FLOAT) {
+  val_ = val;
+}
+
+FloatAtom::~FloatAtom() {}
+
+bool FloatAtom::equals(AstNode *other) {
+  if (!AstNode::equals(other)) {
+    return false;
+  }
+
+  FloatAtom *other_cast = static_cast<FloatAtom*>(other);
+  return val_ == other_cast->val_;
+}
+
 
 UndefAtom::UndefAtom(yy::location& loc) :
         AtomNode(loc, NodeType::UNDEF_ATOM, Type::UNKNOWN) {}

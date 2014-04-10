@@ -4,6 +4,7 @@
 #include <string.h>
 #include <cstdint>
 
+#include "libsyntax/types.h"
 #include "libsyntax/driver.h"
 #include "libsyntax/lexer_helpers.h"
 
@@ -139,15 +140,18 @@ objdump { return yy::casmi_parser::make_OBJDUMP(loc); }
 [a-zA-Z_][a-zA-Z0-9\_]* { return yy::casmi_parser::make_IDENTIFIER(yytext, loc); }
 
 0x[0-9a-fA-F]+ { 
-            uint64_t val = convert_to_long(yytext+2, 16, driver, loc);
+            INT_T val = convert_to_long(yytext+2, 16, driver, loc);
             return yy::casmi_parser::make_INTCONST(val, loc);
             }
 [0-9]+ {
-            uint64_t val = convert_to_long(yytext, 10, driver, loc);
-            return yy::casmi_parser::make_INTCONST(val, loc);
+          INT_T val = convert_to_long(yytext, 10, driver, loc);
+          return yy::casmi_parser::make_INTCONST(val, loc);
        }
 
-[0-9]+\.[0-9]+([eE][+-]?[0-9]+)? { return yy::casmi_parser::make_FLOATCONST(loc); }
+[0-9]+\.[0-9]+([eE][+-]?[0-9]+)? { 
+            FLOAT_T val = convert_to_float(yytext, driver, loc);
+            return yy::casmi_parser::make_FLOATCONST(val, loc);
+          }
 [0-9]+[/][0-9]+ { return yy::casmi_parser::make_RATIONALCONST(loc); }
 [0-9]+r { return yy::casmi_parser::make_RATIONALCONST(loc); }
 

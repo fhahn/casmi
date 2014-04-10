@@ -137,6 +137,9 @@ template<class T, class V> class AstWalker {
         case NodeType::INT_ATOM: {
           return visitor.visit_int_atom(reinterpret_cast<IntAtom*>(atom));
         }
+        case NodeType::FLOAT_ATOM: {
+          return visitor.visit_float_atom(reinterpret_cast<FloatAtom*>(atom));
+        }
         case NodeType::UNDEF_ATOM: { 
           return visitor.visit_undef_atom(reinterpret_cast<UndefAtom*>(atom));
         }
