@@ -1,0 +1,8 @@
+function x : -> Int
+
+init main
+
+rule main = { 
+    x(1) := 1 + 1 //~ number of provided arguments does not match definition of `x`
+
+}

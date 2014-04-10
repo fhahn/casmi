@@ -1,0 +1,7 @@
+function x : Int * Int -> Int
+
+init main
+
+rule main = { 
+    x(1, 1.0) := 1 //~ type of 2 argument of `x` is Float but should be Int
+}

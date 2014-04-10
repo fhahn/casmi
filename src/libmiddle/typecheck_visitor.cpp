@@ -44,5 +44,30 @@ Type TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
   }
 
   atom->symbol = sym;
+
+  // check for function definitions with arguments
+  if (atom->symbol->arguments_) {
+    if(atom->symbol->arguments_->size() != expr_results.size()) {
+      driver_.error(atom->location,
+                    "number of provided arguments does not match definition of `"+
+                    atom->name+"`");
+    } else {
+      for (size_t i=0; i < atom->symbol->arguments_->size(); i++) {
+        if (atom->symbol->arguments_->at(i) != expr_results[i]) {
+          driver_.error(atom->arguments->at(i)->location,
+                        "type of "+std::to_string(i+1)+" argument of `"+atom->name+
+                        "` is "+type_to_str(expr_results[i])+" but should be "+
+                        type_to_str(atom->symbol->arguments_->at(i)));
+        }
+      }
+    }
+  }
+
+  // check for function definitions without arguments
+  if (!atom->symbol->arguments_ && expr_results.size() > 0 ) {
+    driver_.error(atom->location, "number of provided arguments does not match definition of `"+atom->name+"`");
+  }
+
+
   return sym->return_type_;
 }
