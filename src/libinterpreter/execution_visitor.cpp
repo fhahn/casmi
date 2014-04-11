@@ -106,7 +106,7 @@ Value&& ExecutionVisitor::visit_function_atom(FunctionAtom *atom, std::vector<Va
 
   pack_values_in_array(value_list, args);
   casm_update *data = context_.get_function_value(atom->symbol, args);
-  DEBUG("foo "<< value_list.size() << " asd "<<args[0] << " func " << atom->symbol->id<< " geto " << data->value);
+  DEBUG("foo "<< value_list.size() << " asd "<<args[0] << " func " << atom->symbol->id);
 
   // TODO handle function access and function write differently
   value_list.swap(expr_results);
