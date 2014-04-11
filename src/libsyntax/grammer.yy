@@ -255,7 +255,7 @@ ATOM: FUNCTION_SYNTAX { $$ = $1; }
     | BRACKET_EXPRESSION { $$ = new AtomNode(); }
     ;
 
-VALUE: RULEREF { $$ = new RuleAtom(@$, 0); }
+VALUE: RULEREF { $$ = new RuleAtom(@$, $1); }
      | NUMBER { $$ = $1; }
      | STRCONST { $$ = new IntAtom(@$, 0); }
      | LISTCONST { $$ = new IntAtom(@$, 0); }

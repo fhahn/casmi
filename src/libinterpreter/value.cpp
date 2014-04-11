@@ -17,6 +17,10 @@ Value::Value(bool bval) : type(Type::BOOL) {
   value.bval = bval;
 }
 
+Value::Value(RuleNode *rule) : type(Type::RULEREF) {
+  value.rule = rule;
+}
+
 Value::Value(Value&& other) : type(std::move(other.type)), value(other.value) {}
 
 
@@ -27,6 +31,7 @@ uint64_t Value::to_uint64_t() const {
     case Type::SELF:
     case Type::UNDEF: // are UNDEF and SELF the same here?
       return 0;
+    case Type::RULEREF: return (uint64_t) value.rule;
     default: throw RuntimeException("Unsupported type in update");
   }
 }

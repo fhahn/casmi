@@ -18,12 +18,12 @@ class Driver {
     FILE *file_;
     std::vector<std::string> lines_;
     bool error_;
-    std::map<std::string, RuleNode*> rules_map_;
 
   public:
     Driver ();
     virtual ~Driver ();
 
+    std::map<std::string, RuleNode*> rules_map_;
     AstNode *result;
 
     std::string init_name;

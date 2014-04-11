@@ -43,6 +43,7 @@ class AstDumpVisitor {
     bool visit_function_atom(FunctionAtom *atom,
                              const std::vector<bool> &expr_results);
     bool visit_self_atom(SelfAtom *atom);
+    bool visit_rule_atom(RuleAtom *atom);
 };
 
 #endif //CASMI_LIBINTERPRETER_EXEC_VISITOR

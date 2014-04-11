@@ -40,6 +40,7 @@ class ExecutionVisitor {
     Value&& visit_undef_atom(UndefAtom *atom) { UNUSED(atom); return std::move(Value()); }
     Value&& visit_function_atom(FunctionAtom *atom, std::vector<Value> &expr_results);
     Value&& visit_self_atom(SelfAtom *atom) { UNUSED(atom); return std::move(Value()); }
+    Value&& visit_rule_atom(RuleAtom *atom) { UNUSED(atom); return std::move(Value(atom)); }
 };
 
 class ExecutionWalker : public AstWalker<ExecutionVisitor, Value> {

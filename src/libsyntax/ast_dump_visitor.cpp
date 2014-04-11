@@ -106,11 +106,16 @@ bool AstDumpVisitor::visit_float_atom(FloatAtom *atom) {
 
 bool AstDumpVisitor::visit_function_atom(FunctionAtom *atom,
     const std::vector<bool> &expr_results) {
-  dump_node((uint64_t) atom, std::string("FunctionAtom:"+atom->name));
+  dump_node(atom, std::string("FunctionAtom:"+atom->name));
   return true;
 }
 
 bool AstDumpVisitor::visit_self_atom(SelfAtom *atom) {
-  dump_node((uint64_t) atom, std::string("SelfAtom:"));
+  dump_node(atom, std::string("SelfAtom"));
+  return true;
+}
+
+bool AstDumpVisitor::visit_rule_atom(RuleAtom *atom) {
+  dump_node(atom, std::string("RuleAtom: "+atom->name));
   return true;
 }

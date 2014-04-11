@@ -149,6 +149,9 @@ template<class T, class V> class AstWalker {
         case NodeType::SELF_ATOM: {
           return visitor.visit_self_atom(reinterpret_cast<SelfAtom*>(atom));
         }
+        case NodeType::RULE_ATOM: {
+          return visitor.visit_rule_atom(reinterpret_cast<RuleAtom*>(atom));
+        }
         default: {
           throw RuntimeException("Invalid atom type:"+type_to_str(atom->node_type_));
         }
