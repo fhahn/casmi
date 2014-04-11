@@ -75,7 +75,7 @@ Type TypecheckVisitor::visit_rule_atom(RuleAtom *atom) {
   if (driver_.rules_map_.count(atom->name) == 1) {
     atom->rule = driver_.rules_map_[atom->name];
   } else {
-    driver_.error(atom->location, "No rule with name `"+atom->name+"` found");
+    driver_.error(atom->location, "no rule with name `"+atom->name+"` found");
   }
   return Type::RULEREF;
 }

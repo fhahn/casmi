@@ -66,6 +66,7 @@ Value&& ExecutionVisitor::visit_expression(Expression *expr, Value &left_val, Va
       break;
     }
     case Expression::Operation::EQ: {
+      DEBUG(type_to_str(left_val.type) << " 2 " <<type_to_str(right_val.type));
       DEBUG ("got "<< left_val.value.ival << " and "<<right_val.value.ival);
       switch (left_val.type) {
         case Type::INT: {
@@ -104,9 +105,8 @@ Value&& ExecutionVisitor::visit_function_atom(FunctionAtom *atom, std::vector<Va
   uint64_t args[num_args];
   args[0] = 0;
 
-  pack_values_in_array(value_list, args);
+  pack_values_in_array(expr_results, args);
   casm_update *data = context_.get_function_value(atom->symbol, args);
-  DEBUG("foo "<< value_list.size() << " asd "<<args[0] << " func " << atom->symbol->id);
 
   // TODO handle function access and function write differently
   value_list.swap(expr_results);
@@ -137,12 +137,12 @@ void ExecutionWalker::run() {
           ident.push_back(walk_atom(init.first));
           pack_values_in_array(ident, &up->args[0]);
           num_args = ident.size();
+        } else {
+          up->args[0] = 0;
         }
 
         up->func = pair.second->id;
         up->value = (void*) walk_atom(init.second).to_uint64_t();
-        DEBUG("init value" << up->value << " func " << up->func << " num arg "<<num_args);
-        up->args[0] = 0;
         // TODO implement for functions with arguments
         function_map[{&up->args[0], num_args}] = up;
       }
