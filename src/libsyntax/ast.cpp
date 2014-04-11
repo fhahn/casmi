@@ -10,6 +10,7 @@ static std::map<NodeType, const std::string> node_type_names_ = {
     {NodeType::INT_ATOM, std::string("INT ATOM")},
     {NodeType::FLOAT_ATOM, std::string("FLOAT ATOM")},
     {NodeType::SELF_ATOM, std::string("SELF ATOM")},
+    {NodeType::RULE_ATOM, std::string("RULE ATOM")},
     {NodeType::DUMMY_ATOM, std::string("DUMMY ATOM")},
     {NodeType::INIT, std::string("INIT")},
     {NodeType::BODY_ELEMENTS, std::string("BODY ELEMENTS")},
@@ -165,6 +166,16 @@ bool SelfAtom::equals(AstNode *other) {
   } else {
     return true;
   }
+}
+
+
+RuleAtom::RuleAtom(yy::location& loc, const std::string& name) :
+        AtomNode(loc, NodeType::SELF_ATOM, Type::SELF) {}
+
+RuleAtom::~RuleAtom() {}
+
+bool RuleAtom::equals(AstNode *other) {
+  throw "NOT IMPLEMENTED";
 }
 
 

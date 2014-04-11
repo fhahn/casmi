@@ -21,11 +21,12 @@ class Symbol {
 
   public:
     std::vector<Type> *arguments_;
-    std::vector<AtomNode*> *intitializers_;
+    std::vector<std::pair<AtomNode*, AtomNode*>> *intitializers_;
     Type return_type_;
     const uint64_t id;
 
-    Symbol(const std::string name, std::vector<Type> *args, Type return_type, std::vector<AtomNode*> *init);
+    Symbol(const std::string name, std::vector<Type> *args, Type return_type,
+           std::vector<std::pair<AtomNode*, AtomNode*>> *init);
     Symbol(const std::string name);
     ~Symbol();
 

@@ -5,6 +5,8 @@
 #include "libutil/exceptions.h"
 
 #include "libinterpreter/execution_visitor.h"
+
+
 void pack_values_in_array(const std::vector<Value> &value_list, uint64_t array[]) {
   for (size_t i=0; i < value_list.size(); i++) {
     array[i] = value_list[i].to_uint64_t();
@@ -94,10 +96,17 @@ Value&& ExecutionVisitor::visit_expression_single(Expression *expr, Value &val) 
 }
 
 Value&& ExecutionVisitor::visit_function_atom(FunctionAtom *atom, std::vector<Value> &expr_results) {
+  size_t num_args = 1;
+  if (expr_results.size() > 0) {
+    num_args = expr_results.size();
   
-  uint64_t args[expr_results.size()];
+  }
+  uint64_t args[num_args];
+  args[0] = 0;
+
   pack_values_in_array(value_list, args);
   casm_update *data = context_.get_function_value(atom->symbol, args);
+  DEBUG("foo "<< value_list.size() << " asd "<<args[0] << " func " << atom->symbol->id<< " geto " << data->value);
 
   // TODO handle function access and function write differently
   value_list.swap(expr_results);
@@ -114,6 +123,33 @@ Value&& ExecutionVisitor::visit_function_atom(FunctionAtom *atom, std::vector<Va
 }
 
 void ExecutionWalker::run() {
+  for (auto pair: visitor.context_.symbol_table->table_) {
+    auto function_map = std::unordered_map<ArgumentsKey, casm_update*>();
+
+    if (pair.second->intitializers_ != nullptr) {
+      for (std::pair<AtomNode*, AtomNode*> init : *pair.second->intitializers_) {
+        casm_update* up = (casm_update*) pp_mem_alloc(&visitor.context_.pp_stack, sizeof(casm_update));
+
+        size_t num_args = 0; 
+        if (init.first != nullptr) {
+          std::vector<Value> ident;
+          ident.push_back(walk_atom(init.first));
+          pack_values_in_array(ident, &up->args[0]);
+          num_args = ident.size();
+        }
+
+        up->func = pair.second->id;
+        up->value = (void*) walk_atom(init.second).to_uint64_t();
+        DEBUG("init value" << up->value << " func " << up->func << " num arg "<<num_args);
+        up->args[0] = 0;
+        // TODO implement for functions with arguments
+        function_map[{&up->args[0], num_args}] = up;
+      }
+    }
+    visitor.context_.functions.push_back(std::move(function_map));
+  }
+
+
   Symbol *program_sym = visitor.context_.symbol_table->get("program");
   uint64_t args[1] = {0};
   while(true) {

@@ -74,8 +74,9 @@
 %type <AstNode*> RULE_SYNTAX STATEMENT
 %type <UnaryNode*> ASSERT_SYNTAX
 %type <AstListNode*> BODY_ELEMENTS STATEMENTS
-%type <AtomNode*> ATOM NUMBER VALUE INITIALIZER
-%type <std::vector<AtomNode*>*> INITIALIZER_LIST INITIALIZERS
+%type <AtomNode*> ATOM NUMBER VALUE
+%type <std::pair<AtomNode*, AtomNode*>> INITIALIZER
+%type <std::vector<std::pair<AtomNode*, AtomNode*>>*> INITIALIZER_LIST INITIALIZERS
 %type <Expression*> EXPRESSION
 %type <std::vector<Expression*>*> EXPRESSION_LIST EXPRESSION_LIST_NO_COMMA
 %type <UpdateNode*> UPDATE_SYNTAX
@@ -86,6 +87,7 @@
 %type <std::pair<std::vector<Type>*, Type>> FUNCTION_SIGNATURE
 %type <Type> NEW_TYPE_SYNTAX
 %type <std::vector<Type>*> TYPE_IDENTIFIER_STARLIST
+%type <std::string> RULEREF
 
 %start SPECIFICATION
 
@@ -240,12 +242,12 @@ INITIALIZERS: INITIALLY "{" INITIALIZER_LIST "}" { $$ = $3; }
 
 INITIALIZER_LIST: INITIALIZER_LIST "," INITIALIZER { $$ = $1; $1->push_back($3); }
                 | INITIALIZER_LIST "," { $$ = $1; }
-                | INITIALIZER { $$ = new std::vector<AtomNode*>(); $$->push_back($1); }
+                | INITIALIZER { $$ = new std::vector<std::pair<AtomNode*, AtomNode*>>(); $$->push_back($1); }
                 ;
 
 
-INITIALIZER: ATOM { $$ = $1; }
-           | ATOM ARROW ATOM { $$ = $1; /* TODO: handle arrows here */ }
+INITIALIZER: ATOM { $$ = std::pair<AtomNode*, AtomNode*>(nullptr, $1); }
+           | ATOM ARROW ATOM { $$ = std::pair<AtomNode*, AtomNode*>($1, $3); }
            ;
 
 ATOM: FUNCTION_SYNTAX { $$ = $1; }
@@ -253,7 +255,7 @@ ATOM: FUNCTION_SYNTAX { $$ = $1; }
     | BRACKET_EXPRESSION { $$ = new AtomNode(); }
     ;
 
-VALUE: RULEREF { $$ = new IntAtom(@$, 0); }
+VALUE: RULEREF { $$ = new RuleAtom(@$, 0); }
      | NUMBER { $$ = $1; }
      | STRCONST { $$ = new IntAtom(@$, 0); }
      | LISTCONST { $$ = new IntAtom(@$, 0); }
@@ -276,7 +278,7 @@ NUMBER: "+" INTCONST %prec UPLUS { $$ = new IntAtom(@$, $2); }
       | RATIONALCONST { $$ = new IntAtom(@$, 0); }
       ;
 
-RULEREF: "@" IDENTIFIER 
+RULEREF: "@" IDENTIFIER { $$ = $2; }
        ;
 
 NUMBER_RANGE: "[" NUMBER DOTDOT NUMBER "]" 

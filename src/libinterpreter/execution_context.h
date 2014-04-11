@@ -53,10 +53,10 @@ namespace std {
 class ExecutionContext {
   private:
     pp_mem updateset_data_;
-    std::vector<std::unordered_map<ArgumentsKey, casm_update*> > functions;
     std::vector<Symbol*> syms_to_apply;
 
   public:
+    std::vector<std::unordered_map<ArgumentsKey, casm_update*> > functions;
     SymbolTable *symbol_table;
     casm_updateset updateset;
     pp_mem pp_stack;

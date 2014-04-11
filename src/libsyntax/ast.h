@@ -15,8 +15,9 @@ enum class NodeType {
   UNDEF_ATOM,
   INT_ATOM,
   FLOAT_ATOM,
-  DUMMY_ATOM,
   SELF_ATOM,
+  RULE_ATOM,
+  DUMMY_ATOM,
   INIT,
   BODY_ELEMENTS,
   PROVIDER,
@@ -65,6 +66,24 @@ class AstListNode: public AstNode {
         void add(AstNode* n);
         virtual bool equals(AstNode *other);
 };
+
+
+class UnaryNode: public AstNode {
+  public:
+    AstNode *child_;
+
+    UnaryNode(yy::location& loc, NodeType node_type, AstNode *child);
+    virtual ~UnaryNode();
+    virtual bool equals(AstNode *other);
+};
+
+
+class RuleNode: public UnaryNode {
+  public:
+    RuleNode(yy::location& loc, AstNode *child, const std::string &name);
+    const std::string name;
+};
+
 
 class FunctionDefNode: public AstNode {
   public:
@@ -127,6 +146,18 @@ class FunctionAtom : public AtomNode {
 };
 
 
+class RuleAtom : public AtomNode {
+  public:
+    RuleNode *rule;
+    const std::string name;
+
+    RuleAtom(yy::location& loc, const std::string& name);
+ 
+    virtual ~RuleAtom();
+    bool equals(AstNode *other);
+};
+
+
 class Expression : public AstNode {
   public:
     enum class Operation {
@@ -158,20 +189,6 @@ class Expression : public AstNode {
     virtual bool equals(AstNode *other);
 };
 
-class UnaryNode: public AstNode {
-  public:
-    AstNode *child_;
-
-    UnaryNode(yy::location& loc, NodeType node_type, AstNode *child);
-    virtual ~UnaryNode();
-    virtual bool equals(AstNode *other);
-};
-
-class RuleNode: public UnaryNode {
-  public:
-    RuleNode(yy::location& loc, AstNode *child, const std::string &name);
-    const std::string name;
-};
 
 class UpdateNode: public AstNode {
   public:
