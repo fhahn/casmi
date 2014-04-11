@@ -8,6 +8,7 @@ Type str_to_type(const std::string& type_name) {
   if (type_name == "Float") return Type::FLOAT;
   if (type_name == "Undef") return Type::UNDEF;
   if (type_name == "Bool") return Type::BOOL;
+  if (type_name == "RuleRef") return Type::RULEREF;
   return Type::INVALID;
 }
 
@@ -17,6 +18,7 @@ const std::string type_to_str(Type t) {
   if (t == Type::FLOAT) return "Float";
   if (t == Type::UNDEF) return "Undef";
   if (t == Type::BOOL) return "Bool";
+  if (t == Type::RULEREF) return "RuleRef";
   return "Invalid";
 }
 

@@ -22,7 +22,7 @@ Driver::Driver ()
 
   std::vector<Type> *args = new std::vector<Type>();
   args->push_back(Type::SELF);
-  current_symbol_table->add(new Symbol("program", args, Type::RULE, nullptr));
+  current_symbol_table->add(new Symbol("program", args, Type::RULEREF, nullptr));
 
   lines_.push_back("");
 }
