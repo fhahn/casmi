@@ -1,0 +1,10 @@
+function x : Int -> Int initially { 1 -> 1, 2 -> 4, 3 -> 8 }
+
+init main
+
+rule main = { 
+    assert x(1) = 1
+    assert x(2) = 4
+    assert x(3) = 8
+    program(self) := undef
+}
