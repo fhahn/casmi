@@ -170,7 +170,7 @@ bool SelfAtom::equals(AstNode *other) {
 
 
 RuleAtom::RuleAtom(yy::location& loc, const std::string& name) :
-        AtomNode(loc, NodeType::SELF_ATOM, Type::SELF) {}
+        AtomNode(loc, NodeType::RULE_ATOM, Type::RULEREF) {}
 
 RuleAtom::~RuleAtom() {}
 

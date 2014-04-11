@@ -32,6 +32,6 @@ uint64_t Value::to_uint64_t() const {
     case Type::UNDEF: // are UNDEF and SELF the same here?
       return 0;
     case Type::RULEREF: return (uint64_t) value.rule;
-    default: throw RuntimeException("Unsupported type in update");
+    default: throw RuntimeException("Unsupported type in Value.to_uint64_t");
   }
 }

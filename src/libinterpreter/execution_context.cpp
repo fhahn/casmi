@@ -14,12 +14,11 @@ ExecutionContext::ExecutionContext(SymbolTable *st, RuleNode *init) : symbol_tab
   pseudostate = 0;
 
   Symbol *program_sym = st->get("program");
-  auto program_map = functions[program_sym->id];
-  casm_update* up = (casm_update*) pp_mem_alloc(&pp_stack, sizeof(casm_update));
-  up->value = (void*) init;
-  up->args[0] = 0;
-  program_map[{&up->args[0], 1}] = up;
-  functions[program_sym->id] = program_map;
+  // TODO location is wrong here
+  program_sym->intitializers_ = new std::vector<std::pair<AtomNode*, AtomNode*>>();
+  RuleAtom *init_atom = new RuleAtom(init->location, init->name);
+  init_atom->rule = init;
+  program_sym->intitializers_->push_back(std::pair<AtomNode*, AtomNode*>(new SelfAtom(init->location), init_atom));
 }
 
 void ExecutionContext::apply_updates() {
