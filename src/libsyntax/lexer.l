@@ -161,7 +161,7 @@ objdump { return yy::casmi_parser::make_OBJDUMP(loc); }
 
 \n+ {loc.lines(yyleng); loc.step(); } /* ignore newlines too, but reset yycolumn */
 
-"//" { BEGIN(LCOMMENT); }
+"//" { BEGIN(LCOMMENT); loc.lines(1); loc.step(); }
 <LCOMMENT>.
 <LCOMMENT>\n { BEGIN( INITIAL ); }
 <LCOMMENT><<EOF>> { BEGIN( INITIAL ); }
