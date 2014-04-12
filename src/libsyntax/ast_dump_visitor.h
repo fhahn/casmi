@@ -32,6 +32,7 @@ class AstDumpVisitor {
     void visit_rule(RuleNode *rule);
     void visit_statements(AstListNode *stmts);
     void visit_statement(AstNode *stmt);
+    void visit_ifthenelse(IfThenElseNode *node, bool);
     bool visit_assert(UnaryNode *assert, bool);
     void visit_parblock(UnaryNode *parblock);
     bool visit_update(UpdateNode *update, bool, bool);

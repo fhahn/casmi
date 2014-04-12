@@ -17,6 +17,13 @@ void TypecheckVisitor::visit_function_def(FunctionDefNode *def,
   }
 }
 
+void TypecheckVisitor::visit_ifthenelse(IfThenElseNode *node, Type cond) {
+  if (cond != Type::BOOL) {
+    driver_.error(node->condition_->location,
+                  "type of expression should be `Bool` but was `" +type_to_str(cond)+"`");
+  }
+}
+
 void TypecheckVisitor::visit_assert(UnaryNode *assert, Type val) {
   if (val != Type::BOOL) {
     driver_.error(assert->child_->location,

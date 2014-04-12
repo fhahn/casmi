@@ -58,6 +58,15 @@ void AstDumpVisitor::visit_statement(AstNode *stmt) {
   //dump_link((uint64_t) rule, (uint64_t) rule->child_);
 }
 
+void AstDumpVisitor::visit_ifthenelse(IfThenElseNode *node, bool) {
+  dump_node(node, "IfThenElse");
+  dump_link(node, node->condition_);
+  dump_link(node, node->then_);
+  if (node->else_) {
+    dump_link(node, node->else_);
+  }
+}
+
 bool AstDumpVisitor::visit_assert(UnaryNode *assert, bool) {
   dump_node(assert, "Assert");
 

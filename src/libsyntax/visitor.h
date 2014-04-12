@@ -142,7 +142,8 @@ template<class T, class V> class AstWalker {
     }
 
     void walk_ifthenelse(IfThenElseNode *n) {
-      walk_expression(n->condition_);
+      V cond = walk_expression(n->condition_);
+      visitor.visit_ifthenelse(n, cond);
       walk_statement(n->then_);
       if (n->else_) {
         walk_statement(n->else_);

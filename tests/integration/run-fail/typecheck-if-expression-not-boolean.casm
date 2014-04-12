@@ -1,0 +1,6 @@
+CASM test
+
+init main
+
+rule main = if 1 + 1 then skip
+//~^ type of expression should be `Bool` but was `Int`
