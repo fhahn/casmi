@@ -311,6 +311,14 @@ EXPRESSION: EXPRESSION "+" ATOM
             { $$ = new Expression(@$, $1, $3, Expression::Operation::ADD); }
           | EXPRESSION "-" ATOM
             { $$ = new Expression(@$, $1, $3, Expression::Operation::SUB); }
+          | EXPRESSION "*" ATOM
+            { $$ = new Expression(@$, $1, $3, Expression::Operation::MUL); }
+          | EXPRESSION "/" ATOM
+            { $$ = new Expression(@$, $1, $3, Expression::Operation::DIV); }
+          | EXPRESSION "%" ATOM
+            { $$ = new Expression(@$, $1, $3, Expression::Operation::MOD); }
+          | EXPRESSION RATIONAL_DIV ATOM
+            { $$ = new Expression(@$, $1, $3, Expression::Operation::RAT_DIV); }
           | EXPRESSION NEQUAL ATOM
             { $$ = new Expression(@$, $1, $3, Expression::Operation::NEQ); }
           | EXPRESSION "=" ATOM

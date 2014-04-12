@@ -1,0 +1,23 @@
+CASM test
+
+init main
+
+rule main = {
+    assert true + true
+    //~^ operands of operator `+` must be `Int` or `Float` but were `Boolean`
+
+    assert true - true
+    //~^ operands of operator `-` must be `Int` or `Float` but were `Boolean`
+
+    assert true * true
+    //~^ operands of operator `*` must be `Int` or `Float` but were `Boolean`
+
+    assert true / true
+    //~^ operands of operator `/` must be `Int` or `Float` but were `Boolean`
+
+    assert true % true
+    //~^ operands of operator `%` must be `Int` or `Float` but were `Boolean`
+
+    assert true div true
+    //~^ operands of operator `div` must be `Int` or `Float` but were `Boolean`
+}

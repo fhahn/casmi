@@ -39,17 +39,43 @@ void TypecheckVisitor::visit_update(UpdateNode *update, Type func_t, Type expr_t
   }
 }
 
+void TypecheckVisitor::check_numeric_operator(const yy::location& loc, 
+                                              const Type type,
+                                              const std::string& op) {
+  if (type != Type::INT && type != Type::FLOAT) {
+    driver_.error(loc,
+                  "operands of operator `"+op+"` must be `Int` or `Float` but were `"+
+                  type_to_str(type)+"`");
+  }
+}
+
 Type TypecheckVisitor::visit_expression(Expression *expr, Type left_val, Type right_val) {
   if (left_val != right_val) {
       driver_.error(expr->location, "type of expressions did not match");
   }
   switch (expr->op) {
     case Expression::Operation::ADD: {
-      if (left_val != Type::INT && left_val != Type::FLOAT) {
-        driver_.error(expr->location,
-                      "operands of operator `+` must be `Int` or `Float` but were `"+
-                      type_to_str(left_val)+"´");
-      }
+      check_numeric_operator(expr->location, left_val, "+");
+      return left_val;
+    }
+    case Expression::Operation::SUB: {
+      check_numeric_operator(expr->location, left_val, "-");
+      return left_val;
+    }
+    case Expression::Operation::MUL: {
+      check_numeric_operator(expr->location, left_val, "*");
+      return left_val;
+    }
+    case Expression::Operation::DIV: {
+      check_numeric_operator(expr->location, left_val, "/");
+      return left_val;
+    }
+    case Expression::Operation::MOD: {
+      check_numeric_operator(expr->location, left_val, "%");
+      return left_val;
+    }
+    case Expression::Operation::RAT_DIV: {
+      check_numeric_operator(expr->location, left_val, "div");
       return left_val;
     }
     case Expression::Operation::EQ: return Type::BOOLEAN;
