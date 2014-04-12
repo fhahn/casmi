@@ -1,0 +1,10 @@
+function x : -> Int initially { 1 }
+
+init main
+
+rule main = { 
+    if x = 10 then
+        program(self) := undef
+    else
+        x := x + 1
+}
