@@ -11,6 +11,7 @@ static std::map<NodeType, const std::string> node_type_names_ = {
     {NodeType::FLOAT_ATOM, std::string("FLOAT ATOM")},
     {NodeType::SELF_ATOM, std::string("SELF ATOM")},
     {NodeType::RULE_ATOM, std::string("RULE ATOM")},
+    {NodeType::BOOLEAN_ATOM, std::string("BOOLEAN ATOM")},
     {NodeType::DUMMY_ATOM, std::string("DUMMY ATOM")},
     {NodeType::INIT, std::string("INIT")},
     {NodeType::IFTHENELSE, std::string("IFTHENELSE")},
@@ -164,7 +165,7 @@ bool UndefAtom::equals(AstNode *other) {
 
 
 SelfAtom::SelfAtom(yy::location& loc) :
-        AtomNode(loc, NodeType::SELF_ATOM, Type::SELF) {}
+        AtomNode(loc, NodeType::SELF_ATOM, Type::SELF) { DEBUG("TRUE");}
 
 bool SelfAtom::equals(AstNode *other) {
   if (!AstNode::equals(other)) {
@@ -173,6 +174,20 @@ bool SelfAtom::equals(AstNode *other) {
     return true;
   }
 }
+
+
+BooleanAtom::BooleanAtom(yy::location& loc, bool value) :
+        AtomNode(loc, NodeType::BOOLEAN_ATOM, Type::BOOLEAN), value(value) {}
+
+bool BooleanAtom::equals(AstNode *other) {
+  if (!AstNode::equals(other)) {
+    return false;
+  }
+
+  BooleanAtom *other_b = reinterpret_cast<BooleanAtom*>(other);
+  return value == other_b->value;
+}
+
 
 
 RuleAtom::RuleAtom(yy::location& loc, const std::string& name) :

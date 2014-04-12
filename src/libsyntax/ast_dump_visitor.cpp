@@ -129,3 +129,8 @@ bool AstDumpVisitor::visit_rule_atom(RuleAtom *atom) {
   dump_node(atom, std::string("RuleAtom: "+atom->name));
   return true;
 }
+
+bool AstDumpVisitor::visit_boolean_atom(BooleanAtom *atom) {
+  dump_node(atom, std::string("BooleanAtom: "+atom->value));
+  return true;
+}

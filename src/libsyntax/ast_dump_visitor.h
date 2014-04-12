@@ -45,6 +45,7 @@ class AstDumpVisitor {
                              const std::vector<bool> &expr_results);
     bool visit_self_atom(SelfAtom *atom);
     bool visit_rule_atom(RuleAtom *atom);
+    bool visit_boolean_atom(BooleanAtom *atom);
 };
 
 #endif //CASMI_LIBINTERPRETER_EXEC_VISITOR

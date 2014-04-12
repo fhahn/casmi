@@ -264,8 +264,8 @@ VALUE: RULEREF { $$ = new RuleAtom(@$, $1); }
      | SYMBOL { $$ = new IntAtom(@$, 0); }
      | SELF { $$ = new SelfAtom(@$); }
      | UNDEF { $$ = new UndefAtom(@$); }
-     | TRUE { $$ = new IntAtom(@$, 0); }
-     | FALSE { $$ = new IntAtom(@$, 0); }
+     | TRUE { $$ = new BooleanAtom(@$, true); }
+     | FALSE { $$ = new BooleanAtom(@$, false); }
      ;
 
 NUMBER: "+" INTCONST %prec UPLUS { $$ = new IntAtom(@$, $2); }
@@ -345,7 +345,7 @@ EXPRESSION: EXPRESSION "+" ATOM
 BRACKET_EXPRESSION: "(" EXPRESSION ")" 
                   ;
 
-FUNCTION_SYNTAX: IDENTIFIER { $$ = new FunctionAtom(@$, $1); }
+FUNCTION_SYNTAX: IDENTIFIER { DEBUG("FUNC "<<$1); $$ = new FunctionAtom(@$, $1); }
                | IDENTIFIER "(" ")" { $$ = new FunctionAtom(@$, $1); }
                | IDENTIFIER "(" EXPRESSION_LIST ")" { $$ = new FunctionAtom(@$, $1, $3); }
                ;

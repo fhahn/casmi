@@ -18,14 +18,14 @@ void TypecheckVisitor::visit_function_def(FunctionDefNode *def,
 }
 
 void TypecheckVisitor::visit_ifthenelse(IfThenElseNode *node, Type cond) {
-  if (cond != Type::BOOL) {
+  if (cond != Type::BOOLEAN) {
     driver_.error(node->condition_->location,
                   "type of expression should be `Bool` but was `" +type_to_str(cond)+"`");
   }
 }
 
 void TypecheckVisitor::visit_assert(UnaryNode *assert, Type val) {
-  if (val != Type::BOOL) {
+  if (val != Type::BOOLEAN) {
     driver_.error(assert->child_->location,
                   "type of expression should be `Bool` but was `" +type_to_str(val)+"`");
   }
@@ -44,8 +44,15 @@ Type TypecheckVisitor::visit_expression(Expression *expr, Type left_val, Type ri
       driver_.error(expr->location, "type of expressions did not match");
   }
   switch (expr->op) {
-    case Expression::Operation::ADD: return left_val;
-    case Expression::Operation::EQ: return Type::BOOL;
+    case Expression::Operation::ADD: {
+      if (left_val != Type::INT && left_val != Type::FLOAT) {
+        driver_.error(expr->location,
+                      "operands of operator `+` must be `Int` or `Float` but were `"+
+                      type_to_str(left_val)+"´");
+      }
+      return left_val;
+    }
+    case Expression::Operation::EQ: return Type::BOOLEAN;
     default: assert(0);
   }
 }

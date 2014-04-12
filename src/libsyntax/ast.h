@@ -18,6 +18,7 @@ enum class NodeType {
   SELF_ATOM,
   RULE_ATOM,
   DUMMY_ATOM,
+  BOOLEAN_ATOM,
   INIT,
   IFTHENELSE,
   BODY_ELEMENTS,
@@ -141,6 +142,14 @@ class UndefAtom : public AtomNode {
 class SelfAtom : public AtomNode {
   public:
     SelfAtom(yy::location& loc);
+    bool equals(AstNode *other);
+};
+
+
+class BooleanAtom : public AtomNode {
+  public:
+    bool value;
+    BooleanAtom(yy::location& loc, bool value);
     bool equals(AstNode *other);
 };
 

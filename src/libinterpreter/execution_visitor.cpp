@@ -72,7 +72,7 @@ Value&& ExecutionVisitor::visit_expression(Expression *expr, Value &left_val, Va
           left_val.value.bval = left_val.value.ival == right_val.value.ival;
           return std::move(left_val);
         }
-        case Type::BOOL: {
+        case Type::BOOLEAN: {
           left_val.value.bval = left_val.value.bval == right_val.value.bval;
           return std::move(left_val);
         }

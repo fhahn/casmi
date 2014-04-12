@@ -38,6 +38,7 @@ class TypecheckVisitor {
                              const std::vector<Type> &expr_results);
     Type visit_self_atom(SelfAtom *atom) { UNUSED(atom); return Type::SELF; }
     Type visit_rule_atom(RuleAtom *atom);
+    Type visit_boolean_atom(BooleanAtom *atom) { UNUSED(atom); return Type::BOOLEAN; }
 };
 
 #endif //CASMI_LIBINTERPRETER_EXEC_VISITOR

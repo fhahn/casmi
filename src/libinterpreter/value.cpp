@@ -13,7 +13,7 @@ Value::Value(FLOAT_T fval) : type(Type::FLOAT) {
   value.fval = fval;
 }
 
-Value::Value(bool bval) : type(Type::BOOL) {
+Value::Value(bool bval) : type(Type::BOOLEAN) {
   value.bval = bval;
 }
 
