@@ -19,6 +19,7 @@ enum class NodeType {
   RULE_ATOM,
   DUMMY_ATOM,
   INIT,
+  IFTHENELSE,
   BODY_ELEMENTS,
   PROVIDER,
   OPTION,
@@ -92,6 +93,18 @@ class FunctionDefNode: public AstNode {
     FunctionDefNode(yy::location& loc, Symbol *sym);
     ~FunctionDefNode();
 };
+
+
+class IfThenElseNode : public AstNode {
+  public:
+    Expression *condition_;
+    AstNode *then_; // should always be a statement
+    AstNode *else_; // should always be a statement
+
+    IfThenElseNode(yy::location& loc, Expression *condition, AstNode *then,
+                   AstNode *els);
+};
+
 
 class AtomNode: public AstNode {
   public:

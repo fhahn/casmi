@@ -13,6 +13,7 @@ static std::map<NodeType, const std::string> node_type_names_ = {
     {NodeType::RULE_ATOM, std::string("RULE ATOM")},
     {NodeType::DUMMY_ATOM, std::string("DUMMY ATOM")},
     {NodeType::INIT, std::string("INIT")},
+    {NodeType::IFTHENELSE, std::string("IFTHENELSE")},
     {NodeType::BODY_ELEMENTS, std::string("BODY ELEMENTS")},
     {NodeType::PROVIDER, std::string("PROVIDER")},
     {NodeType::OPTION, std::string("OPTION")},
@@ -111,6 +112,10 @@ FunctionDefNode::FunctionDefNode(yy::location& loc, Symbol* sym)
 FunctionDefNode::~FunctionDefNode() {
   // sym is deleted in the symbol table
 }
+
+
+IfThenElseNode::IfThenElseNode(yy::location& loc, Expression *condition, AstNode *then, AstNode *els)
+    : AstNode(loc, NodeType::IFTHENELSE), condition_(condition), then_(then), else_(els) {}
 
 
 IntAtom::IntAtom(yy::location& loc, INT_T val) :

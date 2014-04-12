@@ -88,6 +88,7 @@
 %type <Type> NEW_TYPE_SYNTAX
 %type <std::vector<Type>*> TYPE_IDENTIFIER_STARLIST
 %type <std::string> RULEREF
+%type <IfThenElseNode*> IFTHENELSE
 
 %start SPECIFICATION
 
@@ -383,7 +384,7 @@ STATEMENT: ASSERT_SYNTAX { $$ = $1; }
          | SEQBLOCK_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
          | KW_PARBLOCK_SYNTAX { $$ = $1; }
          | PARBLOCK_SYNTAX { $$ = $1; }
-         | IFTHENELSE { $$ = new AstNode(NodeType::STATEMENT); }
+         | IFTHENELSE { $$ = $1; }
          | LET_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
          | PUSH_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
          | POP_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
@@ -473,8 +474,12 @@ STATEMENTS: STATEMENTS STATEMENT { $1->add($2); $$ = $1; }
           | STATEMENT { $$ = new AstListNode(@$, NodeType::STATEMENTS); $$->add($1); }
           ;
 
-IFTHENELSE: IF EXPRESSION THEN STATEMENT %prec XIF 
-          | IF EXPRESSION THEN STATEMENT ELSE STATEMENT
+IFTHENELSE: IF EXPRESSION THEN STATEMENT %prec XIF {
+                $$ = new IfThenElseNode(@$, $2, $4, nullptr); 
+          }
+          | IF EXPRESSION THEN STATEMENT ELSE STATEMENT {
+                $$ = new IfThenElseNode(@$, $2, $4, $6); 
+          }
           ;
 
 LET_SYNTAX: LET IDENTIFIER "=" EXPRESSION IN STATEMENT
