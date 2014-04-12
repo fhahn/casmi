@@ -1,9 +1,0 @@
-// error interpreter @5
-CASM double
-
-function bar : Int -> Int initially { 1 -> 1, 2 -> 2 }
-function foo : Int -> Int initially { 1 -> 1, 1 -> 2 }
-
-init initR
-
-rule initR = skip

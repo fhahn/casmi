@@ -1,0 +1,9 @@
+CASM double
+
+function bar : Int -> Int initially { 1 -> 1, 2 -> 2 }
+function foo : Int -> Int initially { 1 -> 1, 1 -> 2 } 
+    //~^ function `foo(1)` already initialized
+
+init initR
+
+rule initR = skip
