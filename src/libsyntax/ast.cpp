@@ -20,12 +20,13 @@ static std::map<NodeType, const std::string> node_type_names_ = {
     {NodeType::FUNCTION, std::string("FUNCTION")},
     {NodeType::DERIVED, std::string("DERIVED")},
     {NodeType::RULE, std::string("RULE")},
-    {NodeType::SPECIFICATION, std::string("SPECIFICATION")},
     {NodeType::EXPRESSION, std::string("EXPRESSION")},
     {NodeType::UPDATE, std::string("UPDATE")},
+    {NodeType::SPECIFICATION, std::string("SPECIFICATION")},
     {NodeType::STATEMENT, std::string("STATEMENT")},
-    {NodeType::PARBLOCK, std::string("PARBLOCK")},
     {NodeType::STATEMENTS, std::string("STATEMENTS")},
+    {NodeType::STATEMENTS, std::string("SKIP")},
+    {NodeType::PARBLOCK, std::string("PARBLOCK")},
     {NodeType::FUNCTION_ATOM, std::string("FUNCTION ATOM")},
 };
 

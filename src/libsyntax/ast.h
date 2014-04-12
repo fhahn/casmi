@@ -30,8 +30,9 @@ enum class NodeType {
   EXPRESSION,
   UPDATE,
   STATEMENT,
-  PARBLOCK,
   STATEMENTS,
+  SKIP,
+  PARBLOCK,
   FUNCTION_ATOM
 };
 

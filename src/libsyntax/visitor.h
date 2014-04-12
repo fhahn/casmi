@@ -27,7 +27,24 @@ template<class T, class V> class AstWalker {
           case NodeType::OPTION: {break;} // TODO implement
           case NodeType::ENUM: {break;} // TODO implement
           case NodeType::FUNCTION: {
-            visitor.visit_function_def(reinterpret_cast<FunctionDefNode*>(e));
+            FunctionDefNode *func = reinterpret_cast<FunctionDefNode*>(e);
+            std::vector<std::pair<V, V>> initializer_results;
+            if (func->sym->intitializers_) {
+              for (std::pair<AtomNode*, AtomNode*> p : *func->sym->intitializers_) {
+                V first;
+                if (p.first) {
+                  first = walk_atom(p.first);
+                } else {
+                  UndefAtom foo = {p.second->location};
+                  first = walk_atom(&foo);
+                }
+                initializer_results.push_back(
+                    std::pair<V, V>(first, walk_atom(p.second))
+                );
+              }
+            }
+
+            visitor.visit_function_def(func, initializer_results);
             break;
           }
           case NodeType::DERIVED: {break;} // TODO implement
@@ -58,27 +75,25 @@ template<class T, class V> class AstWalker {
 
     void walk_statement(AstNode *stmt) {
       switch(stmt->node_type_) {
-        case NodeType::PARBLOCK: {
+        case NodeType::PARBLOCK:
           walk_parblock(reinterpret_cast<UnaryNode*>(stmt));
           break;
-        }
-        case NodeType::UPDATE: {
+        case NodeType::UPDATE:
           walk_update(reinterpret_cast<UpdateNode*>(stmt));
           break;
-        }
         case NodeType::ASSERT: {
           UnaryNode *assert = reinterpret_cast<UnaryNode*>(stmt);
           V v = walk_expression(reinterpret_cast<Expression*>(assert->child_));
           visitor.visit_assert(assert, v);
           break;
         }
-        default: {
+        case NodeType::SKIP: break; // skip does nothing
+        default:
             throw RuntimeException(
               std::string("Invalid node type: ")+
               type_to_str(stmt->node_type_)+
               std::string(" at ")+
               stmt->location_str());
-        }
       }
     }
 

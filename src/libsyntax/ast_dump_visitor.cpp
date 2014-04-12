@@ -31,8 +31,9 @@ void AstDumpVisitor::visit_body_elements(AstListNode *body_elements) {
   }
 }
 
-void AstDumpVisitor::visit_function_def(FunctionDefNode *def) {
+void AstDumpVisitor::visit_function_def(FunctionDefNode *def, const std::vector<std::pair<bool, bool>>&) {
   dump_node(def, "Function Definition: "+def->sym->to_str());
+  throw "TODO: implement initializers";
 }
 
 void AstDumpVisitor::visit_init(AstNode *init) {

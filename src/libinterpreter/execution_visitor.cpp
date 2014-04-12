@@ -123,6 +123,19 @@ Value&& ExecutionVisitor::visit_function_atom(FunctionAtom *atom, std::vector<Va
 
 }
 
+std::string args_to_str(uint64_t args[], size_t size) {
+  std::string res = "";
+  size_t i = 0;
+
+  if (size > 0) {
+    for (; i < size-1; i++) {
+      res += std::to_string(args[i]) + ",";
+    }
+    res += std::to_string(args[i]);
+  }
+  return res;
+}
+
 void ExecutionWalker::run() {
   for (auto pair: visitor.context_.symbol_table->table_) {
     auto function_map = std::unordered_map<ArgumentsKey, casm_update*>();
@@ -143,11 +156,17 @@ void ExecutionWalker::run() {
 
         up->func = pair.second->id;
         up->value = (void*) walk_atom(init.second).to_uint64_t();
-        // TODO implement for functions with arguments
+        DEBUG("INIT "<<pair.first << " value: "<<up->value << " num_args: " << num_args);
+
+        if (function_map[{&up->args[0], num_args}] != nullptr) {
+          yy::location loc = init.first ? init.first->location+init.second->location : init.second->location;
+          visitor.driver_.error(loc, "function `"+pair.first+"("+args_to_str(up->args, num_args)+")` already initialized");
+          throw RuntimeException("function already initialized");
+        }
         function_map[{&up->args[0], num_args}] = up;
       }
     }
-    visitor.context_.functions.push_back(std::move(function_map));
+    visitor.context_.functions[pair.second->id] = std::move(function_map);
   }
 
 
@@ -155,6 +174,7 @@ void ExecutionWalker::run() {
   uint64_t args[1] = {0};
   while(true) {
     casm_update *program_val = visitor.context_.get_function_value(program_sym, args);
+    DEBUG("program:= "<<program_val);
     if (program_val->value == 0) {
       break;
     }

@@ -3,6 +3,20 @@
 
 TypecheckVisitor::TypecheckVisitor(Driver& driver) : driver_(driver) {}
 
+void TypecheckVisitor::visit_function_def(FunctionDefNode *def,
+                                          const std::vector<std::pair<Type, Type>>& initializers) {
+  for (size_t i = 0; i < initializers.size(); i++) {
+    const std::pair<Type, Type>& p = initializers[i];
+
+    if (!def->sym->arguments_ && p.first == Type::UNDEF && p.second != def->sym->return_type_) {
+      driver_.error(def->sym->intitializers_->at(i).second->location,
+                  "type of initializer of function `" +def->sym->name()+
+                  "` is `"+type_to_str(p.second)+"` but should be `"+
+                  type_to_str(def->sym->return_type_)+"´");
+    }
+  }
+}
+
 void TypecheckVisitor::visit_assert(UnaryNode *assert, Type val) {
   if (val != Type::BOOL) {
     driver_.error(assert->child_->location,

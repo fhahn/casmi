@@ -14,11 +14,11 @@
 
 class ExecutionVisitor {
   private:
-    Driver& driver_;
 
     std::vector<Value> value_list;
 
   public:
+    Driver& driver_;
     ExecutionContext& context_;
 
     ExecutionVisitor(ExecutionContext& context, Driver& driver);

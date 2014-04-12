@@ -28,7 +28,7 @@ class AstDumpVisitor {
     void visit_specification(AstNode *spec) { UNUSED(spec); }
     void visit_init(AstNode *init);
     void visit_body_elements(AstListNode *body_elements);
-    void visit_function_def(FunctionDefNode *def);
+    void visit_function_def(FunctionDefNode *def, const std::vector<std::pair<bool, bool>>&);
     void visit_rule(RuleNode *rule);
     void visit_statements(AstListNode *stmts);
     void visit_statement(AstNode *stmt);
