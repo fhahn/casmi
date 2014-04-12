@@ -26,7 +26,6 @@ void ExecutionVisitor::visit_assert(UnaryNode* assert, Value& val) {
 }
 
 void ExecutionVisitor::visit_update(UpdateNode *update, Value &func_val, Value& expr_v) {
-
   UNUSED(func_val);
 
   casm_update* up = (casm_update*) pp_mem_alloc(&(context_.pp_stack), sizeof(casm_update));
@@ -100,8 +99,8 @@ Value&& ExecutionVisitor::visit_function_atom(FunctionAtom *atom, std::vector<Va
   size_t num_args = 1;
   if (expr_results.size() > 0) {
     num_args = expr_results.size();
-  
   }
+
   uint64_t args[num_args];
   args[0] = 0;
 
@@ -135,6 +134,18 @@ std::string args_to_str(uint64_t args[], size_t size) {
   }
   return res;
 }
+
+template <>
+void AstWalker<ExecutionVisitor, Value>::walk_ifthenelse(IfThenElseNode* node) {
+  Value cond = walk_expression(node->condition_);
+
+  if (cond.value.bval) {
+    walk_statement(node->then_);
+  } else if (node->else_) {
+    walk_statement(node->else_);
+  }
+}
+
 
 void ExecutionWalker::run() {
   for (auto pair: visitor.context_.symbol_table->table_) {

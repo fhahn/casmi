@@ -88,6 +88,10 @@ template<class T, class V> class AstWalker {
           break;
         }
         case NodeType::SKIP: break; // skip does nothing
+        case NodeType::IFTHENELSE: {
+          walk_ifthenelse(reinterpret_cast<IfThenElseNode*>(stmt));
+          break;
+        }
         default:
             throw RuntimeException(
               std::string("Invalid node type: ")+
@@ -137,6 +141,14 @@ template<class T, class V> class AstWalker {
       throw RuntimeException("Invalid expression structure");
     }
 
+    void walk_ifthenelse(IfThenElseNode *n) {
+      walk_expression(n->condition_);
+      walk_statement(n->then_);
+      if (n->else_) {
+        walk_statement(n->else_);
+      }
+    }
+
     V walk_function_atom(FunctionAtom *func) {
       std::vector<V> expr_results;
       if (func->arguments) {
@@ -173,5 +185,6 @@ template<class T, class V> class AstWalker {
       }
     }
 };
+
 
 #endif

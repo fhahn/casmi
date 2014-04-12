@@ -43,6 +43,12 @@ class ExecutionVisitor {
     Value&& visit_rule_atom(RuleAtom *atom) { return std::move(Value(atom->rule)); }
 };
 
+// Specialize if then else for ExecutionVisitor
+template <>
+void AstWalker<ExecutionVisitor, Value>::walk_ifthenelse(IfThenElseNode* node);
+
+
+
 class ExecutionWalker : public AstWalker<ExecutionVisitor, Value> {
   public:
     ExecutionWalker(ExecutionVisitor& v) : AstWalker<ExecutionVisitor, Value>(v) {}
