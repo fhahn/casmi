@@ -30,16 +30,16 @@ template<class T, class V> class AstWalker {
             FunctionDefNode *func = reinterpret_cast<FunctionDefNode*>(e);
             std::vector<std::pair<V, V>> initializer_results;
             if (func->sym->intitializers_) {
-              for (std::pair<AtomNode*, AtomNode*> p : *func->sym->intitializers_) {
+              for (std::pair<ExpressionBase*, ExpressionBase*> p : *func->sym->intitializers_) {
                 V first;
                 if (p.first) {
-                  first = walk_atom(p.first);
+                  first = walk_expression_base(p.first);
                 } else {
                   UndefAtom foo = {p.second->location};
                   first = walk_atom(&foo);
                 }
                 initializer_results.push_back(
-                    std::pair<V, V>(first, walk_atom(p.second))
+                    std::pair<V, V>(first, walk_expression_base(p.second))
                 );
               }
             }

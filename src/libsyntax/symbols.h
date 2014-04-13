@@ -9,8 +9,8 @@
 #include "libsyntax/types.h"
 #include "libsyntax/location.hh" // reuse bison's location class
 
+class ExpressionBase;
 class Expression;
-class AtomNode;
 class FunctionAtom;
 
 // Only used for functions at the moment
@@ -21,12 +21,12 @@ class Symbol {
 
   public:
     std::vector<Type> *arguments_;
-    std::vector<std::pair<AtomNode*, AtomNode*>> *intitializers_;
+    std::vector<std::pair<ExpressionBase*, ExpressionBase*>> *intitializers_;
     Type return_type_;
     const uint64_t id;
 
     Symbol(const std::string name, std::vector<Type> *args, Type return_type,
-           std::vector<std::pair<AtomNode*, AtomNode*>> *init);
+           std::vector<std::pair<ExpressionBase*, ExpressionBase*>> *init);
     Symbol(const std::string name);
     ~Symbol();
 

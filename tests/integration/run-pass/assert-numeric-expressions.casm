@@ -13,5 +13,13 @@ rule main = {
     assert 15 = 30 / 2
     assert 0 = 100 % 10
 
+    assert 19 = 5 * 2 + 9
+    assert 19 = 9 + 5 * 2
+
+    assert 4 * 4 + 3 * 10 + 5 * 2 = 56
+
+    assert (4+4) * 3 = 24
+    assert 3 * (5+4) = 27
+
     program( self ) := undef
 }

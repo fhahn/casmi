@@ -16,10 +16,10 @@ ExecutionContext::ExecutionContext(SymbolTable *st, RuleNode *init) : symbol_tab
   functions = std::vector<std::unordered_map<ArgumentsKey, casm_update*>>(st->size());
   Symbol *program_sym = st->get("program");
   // TODO location is wrong here
-  program_sym->intitializers_ = new std::vector<std::pair<AtomNode*, AtomNode*>>();
+  program_sym->intitializers_ = new std::vector<std::pair<ExpressionBase*, ExpressionBase*>>();
   RuleAtom *init_atom = new RuleAtom(init->location, init->name);
   init_atom->rule = init;
-  program_sym->intitializers_->push_back(std::pair<AtomNode*, AtomNode*>(new SelfAtom(init->location), init_atom));
+  program_sym->intitializers_->push_back(std::pair<ExpressionBase*, ExpressionBase*>(new SelfAtom(init->location), init_atom));
 }
 
 void ExecutionContext::apply_updates() {

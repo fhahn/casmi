@@ -10,7 +10,7 @@
 int Symbol::counter = 0;
 
 Symbol::Symbol(const std::string name, std::vector<Type> *args,
-              Type return_type, std::vector<std::pair<AtomNode*, AtomNode*>> *init) :
+              Type return_type, std::vector<std::pair<ExpressionBase*, ExpressionBase*>> *init) :
                 name_(name), arguments_(args), intitializers_(init),
                 return_type_(return_type), id(counter) {
   counter += 1;
@@ -25,7 +25,7 @@ Symbol::Symbol(const std::string name) :
 Symbol::~Symbol() {
   delete arguments_;
   if (intitializers_ != nullptr) {
-    for (std::pair<AtomNode*, AtomNode*> e : *intitializers_) {
+    for (std::pair<ExpressionBase*, ExpressionBase*> e : *intitializers_) {
       delete e.first;
       delete e.second;
     }

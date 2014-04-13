@@ -74,10 +74,10 @@
 %type <AstNode*> RULE_SYNTAX STATEMENT
 %type <UnaryNode*> ASSERT_SYNTAX
 %type <AstListNode*> BODY_ELEMENTS STATEMENTS
-%type <AtomNode*> ATOM NUMBER VALUE
-%type <std::pair<AtomNode*, AtomNode*>> INITIALIZER
-%type <std::vector<std::pair<AtomNode*, AtomNode*>>*> INITIALIZER_LIST INITIALIZERS
-%type <ExpressionBase*> EXPRESSION
+%type <AtomNode*> NUMBER VALUE
+%type <std::pair<ExpressionBase*, ExpressionBase*>> INITIALIZER
+%type <std::vector<std::pair<ExpressionBase*, ExpressionBase*>>*> INITIALIZER_LIST INITIALIZERS
+%type <ExpressionBase*> EXPRESSION BRACKET_EXPRESSION ATOM
 %type <std::vector<ExpressionBase*>*> EXPRESSION_LIST EXPRESSION_LIST_NO_COMMA
 %type <UpdateNode*> UPDATE_SYNTAX
 %type <INT_T> INTCONST
@@ -244,17 +244,17 @@ INITIALIZERS: INITIALLY "{" INITIALIZER_LIST "}" { $$ = $3; }
 
 INITIALIZER_LIST: INITIALIZER_LIST "," INITIALIZER { $$ = $1; $1->push_back($3); }
                 | INITIALIZER_LIST "," { $$ = $1; }
-                | INITIALIZER { $$ = new std::vector<std::pair<AtomNode*, AtomNode*>>(); $$->push_back($1); }
+                | INITIALIZER { $$ = new std::vector<std::pair<ExpressionBase*, ExpressionBase*>>(); $$->push_back($1); }
                 ;
 
 
-INITIALIZER: ATOM { $$ = std::pair<AtomNode*, AtomNode*>(nullptr, $1); }
-           | ATOM ARROW ATOM { $$ = std::pair<AtomNode*, AtomNode*>($1, $3); }
+INITIALIZER: ATOM { $$ = std::pair<ExpressionBase*, ExpressionBase*>(nullptr, $1); }
+           | ATOM ARROW ATOM { $$ = std::pair<ExpressionBase*, ExpressionBase*>($1, $3); }
            ;
 
 ATOM: FUNCTION_SYNTAX { $$ = $1; }
     | VALUE { $$ = $1; }
-    | BRACKET_EXPRESSION { $$ = new AtomNode(@$, NodeType::DUMMY_ATOM, Type::UNKNOWN); }
+    | BRACKET_EXPRESSION { $$ = $1; }
     ;
 
 VALUE: RULEREF { $$ = new RuleAtom(@$, $1); }
@@ -351,7 +351,7 @@ EXPRESSION: EXPRESSION "+" EXPRESSION
           | ATOM  { $$ = $1; }
           ;
 
-BRACKET_EXPRESSION: "(" EXPRESSION ")" 
+BRACKET_EXPRESSION: "(" EXPRESSION ")"  { $$ = $2; }
                   ;
 
 FUNCTION_SYNTAX: IDENTIFIER { DEBUG("FUNC "<<$1); $$ = new FunctionAtom(@$, $1); }

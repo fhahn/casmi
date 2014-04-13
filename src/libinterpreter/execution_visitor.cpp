@@ -162,13 +162,13 @@ void ExecutionWalker::run() {
     auto function_map = std::unordered_map<ArgumentsKey, casm_update*>();
 
     if (pair.second->intitializers_ != nullptr) {
-      for (std::pair<AtomNode*, AtomNode*> init : *pair.second->intitializers_) {
+      for (std::pair<ExpressionBase*, ExpressionBase*> init : *pair.second->intitializers_) {
         casm_update* up = (casm_update*) pp_mem_alloc(&visitor.context_.pp_stack, sizeof(casm_update));
 
         size_t num_args = 0; 
         if (init.first != nullptr) {
           std::vector<Value> ident;
-          ident.push_back(walk_atom(init.first));
+          ident.push_back(walk_expression_base(init.first));
           pack_values_in_array(ident, &up->args[0]);
           num_args = ident.size();
         } else {
@@ -176,7 +176,7 @@ void ExecutionWalker::run() {
         }
 
         up->func = pair.second->id;
-        up->value = (void*) walk_atom(init.second).to_uint64_t();
+        up->value = (void*) walk_expression_base(init.second).to_uint64_t();
         DEBUG("INIT "<<pair.first << " value: "<<up->value << " num_args: " << num_args);
 
         if (function_map[{&up->args[0], num_args}] != nullptr) {
