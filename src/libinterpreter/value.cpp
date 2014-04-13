@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <utility>
 
 #include "libinterpreter/value.h"
@@ -23,7 +24,55 @@ Value::Value(RuleNode *rule) : type(Type::RULEREF) {
 
 Value::Value(Value&& other) : type(std::move(other.type)), value(other.value) {}
 
+void Value::add(Value& other) {
+  switch (type) {
+    case Type::INT: {
+      value.ival += other.value.ival;
+      break;
+    }
+    default: assert(0);
+  }
+}
 
+void Value::sub(Value& other) {
+  switch (type) {
+    case Type::INT: {
+      value.ival -= other.value.ival;
+      break;
+    }
+    default: assert(0);
+  }
+}
+
+void Value::mul(Value& other) {
+  switch (type) {
+    case Type::INT: {
+      value.ival *= other.value.ival;
+      break;
+    }
+    default: assert(0);
+  }
+}
+
+void Value::div(Value& other) {
+  switch (type) {
+    case Type::INT: {
+      value.ival /= other.value.ival;
+      break;
+    }
+    default: assert(0);
+  }
+}
+
+void Value::mod(Value& other) {
+  switch (type) {
+    case Type::INT: {
+      value.ival %= other.value.ival;
+      break;
+    }
+    default: assert(0);
+  }
+}
 uint64_t Value::to_uint64_t() const {
   switch (type) {
     case Type::INT:

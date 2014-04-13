@@ -55,14 +55,24 @@ void ExecutionVisitor::visit_update(UpdateNode *update, Value &func_val, Value& 
 Value&& ExecutionVisitor::visit_expression(Expression *expr, Value &left_val, Value &right_val) {
   switch (expr->op) {
     case Expression::Operation::ADD: {
-      switch (left_val.type) {
-        case Type::INT: {
-          left_val.value.ival += right_val.value.ival;
-          return std::move(left_val);
-        }
-        default: assert(0);
-      }
-      break;
+      left_val.add(right_val);
+      return std::move(left_val);
+    }
+    case Expression::Operation::SUB: {
+      left_val.sub(right_val);
+      return std::move(left_val);
+    }
+    case Expression::Operation::MUL: {
+      left_val.mul(right_val);
+      return std::move(left_val);
+    }
+    case Expression::Operation::DIV: {
+      left_val.div(right_val);
+      return std::move(left_val);
+    }
+    case Expression::Operation::MOD: {
+      left_val.mod(right_val);
+      return std::move(left_val);
     }
     case Expression::Operation::EQ: {
       DEBUG(type_to_str(left_val.type) << " 2 " <<type_to_str(right_val.type));
@@ -137,7 +147,7 @@ std::string args_to_str(uint64_t args[], size_t size) {
 
 template <>
 void AstWalker<ExecutionVisitor, Value>::walk_ifthenelse(IfThenElseNode* node) {
-  Value cond = walk_expression(node->condition_);
+  Value cond = walk_expression_base(node->condition_);
 
   if (cond.value.bval) {
     walk_statement(node->then_);

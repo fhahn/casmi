@@ -1,0 +1,17 @@
+init main
+
+rule main = { 
+    assert 1 + 4 = 5
+    assert 4 - 3 = 1
+    assert 4 * 5 = 20
+    assert 30 / 2 = 15
+    assert 100 % 10 = 0
+
+    assert 5 = 1 + 4
+    assert 1 = 4 - 3
+    assert 20 = 4 * 5
+    assert 15 = 30 / 2
+    assert 0 = 100 % 10
+
+    program( self ) := undef
+}
