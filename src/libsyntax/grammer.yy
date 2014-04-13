@@ -77,8 +77,8 @@
 %type <AtomNode*> ATOM NUMBER VALUE
 %type <std::pair<AtomNode*, AtomNode*>> INITIALIZER
 %type <std::vector<std::pair<AtomNode*, AtomNode*>>*> INITIALIZER_LIST INITIALIZERS
-%type <Expression*> EXPRESSION
-%type <std::vector<Expression*>*> EXPRESSION_LIST EXPRESSION_LIST_NO_COMMA
+%type <ExpressionBase*> EXPRESSION
+%type <std::vector<ExpressionBase*>*> EXPRESSION_LIST EXPRESSION_LIST_NO_COMMA
 %type <UpdateNode*> UPDATE_SYNTAX
 %type <INT_T> INTCONST
 %type <FLOAT_T> FLOATCONST
@@ -101,11 +101,12 @@
 
 %precedence UPDATE PRINT ASSURE ASSERT DIEDIE NOT
 
-%precedence ","
-%precedence FLOATCONST INTCONST STRCONST RATIONALCONST IDENTIFIER
-%precedence AND OR XOR
-%precedence RATIONAL_DIV  NEQUAL LESSEQ GREATEREQ "=" "<" ">" "*"  "/" "%"
-%precedence "-" "+"
+%nonassoc ","
+%nonassoc FLOATCONST INTCONST STRCONST RATIONALCONST IDENTIFIER
+%nonassoc AND OR
+%nonassoc "=" "<" ">"  NEQUAL LESSEQ GREATEREQ
+%left "-" "+" XOR
+%left RATIONAL_DIV "*" "/" "%"
 
 %%
 
@@ -253,7 +254,7 @@ INITIALIZER: ATOM { $$ = std::pair<AtomNode*, AtomNode*>(nullptr, $1); }
 
 ATOM: FUNCTION_SYNTAX { $$ = $1; }
     | VALUE { $$ = $1; }
-    | BRACKET_EXPRESSION { $$ = new AtomNode(); }
+    | BRACKET_EXPRESSION { $$ = new AtomNode(@$, NodeType::DUMMY_ATOM, Type::UNKNOWN); }
     ;
 
 VALUE: RULEREF { $$ = new RuleAtom(@$, $1); }
@@ -301,53 +302,53 @@ EXPRESSION_LIST_NO_COMMA: EXPRESSION_LIST_NO_COMMA"," EXPRESSION
                         }
                         | EXPRESSION
                         {
-                          $$ = new std::vector<Expression*>;
+                          $$ = new std::vector<ExpressionBase*>;
                           $$->push_back($1);
                         }
                         ;
 
 
-EXPRESSION: EXPRESSION "+" ATOM
+EXPRESSION: EXPRESSION "+" EXPRESSION
             { $$ = new Expression(@$, $1, $3, Expression::Operation::ADD); }
-          | EXPRESSION "-" ATOM
+          | EXPRESSION "-" EXPRESSION
             { $$ = new Expression(@$, $1, $3, Expression::Operation::SUB); }
-          | EXPRESSION "*" ATOM
+          | EXPRESSION "*" EXPRESSION
             { $$ = new Expression(@$, $1, $3, Expression::Operation::MUL); }
-          | EXPRESSION "/" ATOM
+          | EXPRESSION "/" EXPRESSION
             { $$ = new Expression(@$, $1, $3, Expression::Operation::DIV); }
-          | EXPRESSION "%" ATOM
+          | EXPRESSION "%" EXPRESSION
             { $$ = new Expression(@$, $1, $3, Expression::Operation::MOD); }
-          | EXPRESSION RATIONAL_DIV ATOM
+          | EXPRESSION RATIONAL_DIV EXPRESSION
             { $$ = new Expression(@$, $1, $3, Expression::Operation::RAT_DIV); }
-          | EXPRESSION NEQUAL ATOM
+          | EXPRESSION NEQUAL EXPRESSION
             { $$ = new Expression(@$, $1, $3, Expression::Operation::NEQ); }
-          | EXPRESSION "=" ATOM
+          | EXPRESSION "=" EXPRESSION
             { $$ = new Expression(@$, $1, $3, Expression::Operation::EQ); }
-          | EXPRESSION "<" ATOM
+          | EXPRESSION "<" EXPRESSION
             { $$ = new Expression(@$, $1, $3, Expression::Operation::LESSER); }
-          | EXPRESSION ">" ATOM
+          | EXPRESSION ">" EXPRESSION
             { $$ = new Expression(@$, $1, $3, Expression::Operation::GREATER); }
-          | EXPRESSION LESSEQ ATOM
+          | EXPRESSION LESSEQ EXPRESSION
             { $$ = new Expression(@$, $1, $3, Expression::Operation::LESSEREQ); }
-          | EXPRESSION GREATEREQ ATOM
+          | EXPRESSION GREATEREQ EXPRESSION
             { $$ = new Expression(@$, $1, $3, Expression::Operation::GREATEREQ); }
-          | EXPRESSION "*" ATOM
+          | EXPRESSION "*" EXPRESSION
             { $$ = new Expression(@$, $1, $3, Expression::Operation::MUL); }
-          | EXPRESSION "/" ATOM
+          | EXPRESSION "/" EXPRESSION
             { $$ = new Expression(@$, $1, $3, Expression::Operation::DIV); }
-          | EXPRESSION "%" ATOM
+          | EXPRESSION "%" EXPRESSION
             { $$ = new Expression(@$, $1, $3, Expression::Operation::MOD); }
-          | EXPRESSION RATIONAL_DIV ATOM
+          | EXPRESSION RATIONAL_DIV EXPRESSION
             { $$ = new Expression(@$, $1, $3, Expression::Operation::RAT_DIV); }
-          | EXPRESSION OR ATOM
+          | EXPRESSION OR EXPRESSION
             { $$ = new Expression(@$, $1, $3, Expression::Operation::OR); }
-          | EXPRESSION XOR ATOM
+          | EXPRESSION XOR EXPRESSION
             { $$ = new Expression(@$, $1, $3, Expression::Operation::XOR); }
-          | EXPRESSION AND ATOM
+          | EXPRESSION AND EXPRESSION
             { $$ = new Expression(@$, $1, $3, Expression::Operation::AND); }
           | NOT EXPRESSION
             { $$ = new Expression(@$, $2, nullptr, Expression::Operation::NOP);}
-          | ATOM  { $$ = new Expression(@$, nullptr, $1, Expression::Operation::NOP); }
+          | ATOM  { $$ = $1; }
           ;
 
 BRACKET_EXPRESSION: "(" EXPRESSION ")" 

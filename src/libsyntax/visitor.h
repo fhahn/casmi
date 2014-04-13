@@ -83,7 +83,7 @@ template<class T, class V> class AstWalker {
           break;
         case NodeType::ASSERT: {
           UnaryNode *assert = reinterpret_cast<UnaryNode*>(stmt);
-          V v = walk_expression(reinterpret_cast<Expression*>(assert->child_));
+          V v = walk_expression_base(reinterpret_cast<ExpressionBase*>(assert->child_));
           visitor.visit_assert(assert, v);
           break;
         }
@@ -115,34 +115,25 @@ template<class T, class V> class AstWalker {
 
     void walk_update(UpdateNode *update) {
       V func_t = walk_function_atom(update->func);
-      V expr_t = walk_expression(update->expr_);
+      V expr_t = walk_expression_base(update->expr_);
       visitor.visit_update(update, func_t, expr_t);
     }
 
-    V walk_expression(Expression *expr) {
-      if (expr->left_ != nullptr && expr->right_ != nullptr) {
-        V v1 = walk_expression(expr->left_);
-        V v2 = walk_atom(expr->right_);
-        return visitor.visit_expression(expr, v1, v2);
-      }
-
-      if (expr->left_ != nullptr) {
-        V v = walk_expression(expr->left_);
-
-        return visitor.visit_expression_single(expr, v);
-      }
-
-      if (expr->right_ != nullptr) {
-        V v = walk_atom(expr->right_);
-
-        return visitor.visit_expression_single(expr, v);
+    V walk_expression_base(ExpressionBase *expr) {
+      if (expr->node_type_ == NodeType::EXPRESSION) {
+        Expression *e = reinterpret_cast<Expression*>(expr);
+        V v1 = walk_expression_base(e->left_);
+        V v2 = walk_expression_base(e->right_);
+        return visitor.visit_expression(e, v1, v2);
+      } else {
+        return walk_atom(reinterpret_cast<AtomNode*>(expr));
       }
 
       throw RuntimeException("Invalid expression structure");
     }
 
     void walk_ifthenelse(IfThenElseNode *n) {
-      V cond = walk_expression(n->condition_);
+      V cond = walk_expression_base(n->condition_);
       visitor.visit_ifthenelse(n, cond);
       walk_statement(n->then_);
       if (n->else_) {
@@ -153,8 +144,8 @@ template<class T, class V> class AstWalker {
     V walk_function_atom(FunctionAtom *func) {
       std::vector<V> expr_results;
       if (func->arguments) {
-        for (Expression* e : *func->arguments) {
-          expr_results.push_back(walk_expression(e));
+        for (ExpressionBase* e : *func->arguments) {
+          expr_results.push_back(walk_expression_base(e));
         }
       }
       return visitor.visit_function_atom(func, expr_results);

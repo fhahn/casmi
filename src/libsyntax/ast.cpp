@@ -115,7 +115,7 @@ FunctionDefNode::~FunctionDefNode() {
 }
 
 
-IfThenElseNode::IfThenElseNode(yy::location& loc, Expression *condition, AstNode *then, AstNode *els)
+IfThenElseNode::IfThenElseNode(yy::location& loc, ExpressionBase *condition, AstNode *then, AstNode *els)
     : AstNode(loc, NodeType::IFTHENELSE), condition_(condition), then_(then), else_(els) {}
 
 
@@ -205,7 +205,7 @@ FunctionAtom::FunctionAtom(yy::location& loc, const std::string name)
 }
 
 FunctionAtom::FunctionAtom(yy::location& loc, const std::string name,
-                           std::vector<Expression*> *args) 
+                           std::vector<ExpressionBase*> *args) 
     : AtomNode(loc, NodeType::FUNCTION_ATOM, Type::UNKNOWN), symbol(nullptr),
       name(name), arguments(args) {
       
@@ -227,11 +227,12 @@ bool FunctionAtom::equals(AstNode *other) {
   */
 }
 
-Expression::Expression(yy::location& loc, Expression *left, AtomNode *right,
+Expression::Expression(yy::location& loc, ExpressionBase *left, ExpressionBase *right,
                        Expression::Operation op)
-                       : AstNode(loc, NodeType::EXPRESSION),
+                       : ExpressionBase(loc, NodeType::EXPRESSION, Type::UNKNOWN),
                          left_(left), right_(right), op(op) {
   // Propagate known types
+  /*
   if (left_ == nullptr) {
     if(right_->type_ != Type::UNKNOWN) {
       type_ = right_->type_;
@@ -245,6 +246,7 @@ Expression::Expression(yy::location& loc, Expression *left, AtomNode *right,
       type_ = right_->type_;
     }
   }
+  */
 }
 
 Expression::~Expression() {
@@ -270,7 +272,15 @@ bool Expression::equals(AstNode *other) {
   }
 }
 
-UpdateNode::UpdateNode(yy::location& loc, FunctionAtom *func, Expression *expr)
+std::string Expression::operator_to_str() const {
+  switch(op) {
+    case Operation::ADD: return "+";
+    case Operation::EQ: return "=";
+    default: return "unknown";
+  }
+}
+
+UpdateNode::UpdateNode(yy::location& loc, FunctionAtom *func, ExpressionBase *expr)
     : AstNode(loc, NodeType::UPDATE), func(func), expr_(expr) {
 }
 

@@ -43,6 +43,7 @@ const std::string& type_to_str(NodeType t);
 class AstVisitor;
 class Symbol;
 class Expression;
+class ExpressionBase;
 
 class AstNode {
     public:
@@ -98,19 +99,23 @@ class FunctionDefNode: public AstNode {
 
 class IfThenElseNode : public AstNode {
   public:
-    Expression *condition_;
+    ExpressionBase *condition_;
     AstNode *then_; // should always be a statement
     AstNode *else_; // should always be a statement
 
-    IfThenElseNode(yy::location& loc, Expression *condition, AstNode *then,
+    IfThenElseNode(yy::location& loc, ExpressionBase *condition, AstNode *then,
                    AstNode *els);
 };
 
-
-class AtomNode: public AstNode {
+class ExpressionBase : public AstNode {
   public:
-    AtomNode() : AstNode(NodeType::DUMMY_ATOM) {}
-    AtomNode(yy::location& loc, NodeType node_type, Type type) : AstNode(loc, node_type, type) {}
+    ExpressionBase(yy::location& loc, NodeType node_type, Type type) : AstNode(loc, node_type, type) {}
+
+};
+
+class AtomNode: public ExpressionBase {
+  public:
+    AtomNode(yy::location& loc, NodeType node_type, Type type) : ExpressionBase(loc, node_type, type) {}
 };
 
 class IntAtom : public AtomNode {
@@ -158,11 +163,11 @@ class FunctionAtom : public AtomNode {
   public:
     Symbol *symbol;
     const std::string name;
-    std::vector<Expression*> *arguments;
+    std::vector<ExpressionBase*> *arguments;
 
     FunctionAtom(yy::location& loc, const std::string name);
     FunctionAtom(yy::location& loc, const std::string name,
-                 std::vector<Expression*> *args);
+                 std::vector<ExpressionBase*> *args);
  
     virtual ~FunctionAtom();
     bool equals(AstNode *other);
@@ -181,7 +186,7 @@ class RuleAtom : public AtomNode {
 };
 
 
-class Expression : public AstNode {
+class Expression : public ExpressionBase {
   public:
     enum class Operation {
       ADD,
@@ -202,23 +207,24 @@ class Expression : public AstNode {
       NOP
     };
 
-    Expression *left_;
-    AtomNode *right_;
+    ExpressionBase *left_;
+    ExpressionBase *right_;
 
     Operation op;
 
-    Expression(yy::location& loc, Expression *left, AtomNode *right, Expression::Operation op);
+    Expression(yy::location& loc, ExpressionBase *left, ExpressionBase *right, Expression::Operation op);
     virtual ~Expression();
     virtual bool equals(AstNode *other);
+    std::string operator_to_str() const;
 };
 
 
 class UpdateNode: public AstNode {
   public:
     FunctionAtom *func;
-    Expression *expr_;
+    ExpressionBase *expr_;
 
-    UpdateNode(yy::location& loc, FunctionAtom *func, Expression *expr);
+    UpdateNode(yy::location& loc, FunctionAtom *func, ExpressionBase *expr);
     virtual ~UpdateNode();
     virtual bool equals(AstNode *other);
 };
