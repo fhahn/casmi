@@ -33,11 +33,10 @@ void ExecutionContext::apply_updates() {
 
     CASM_RT("update function %lu, %p = %p, %u", u->func, u, (void*)u->value, u->defined);
 
-    auto function_map = functions[u->func];
+    auto& function_map = functions[u->func];
 
     DEBUG("APPLY args "<<u->num_args << " argi "<<u->args[0]<<" func ");
     function_map[{u->args, u->num_args}] = u;
-    functions[u->func] = function_map;
 
     i->used  = FALSE;
     i = i->previous;
