@@ -74,6 +74,7 @@ Value&& ExecutionVisitor::visit_expression(Expression *expr, Value &left_val, Va
       left_val.mod(right_val);
       return std::move(left_val);
     }
+
     case Expression::Operation::EQ: {
       left_val.eq(right_val);
       return std::move(left_val);
@@ -83,6 +84,22 @@ Value&& ExecutionVisitor::visit_expression(Expression *expr, Value &left_val, Va
       left_val.value.bval = !left_val.value.bval;
       return std::move(left_val);
     }
+
+    case Expression::Operation::LESSER:
+      left_val.lesser(right_val);
+      return std::move(left_val);
+    case Expression::Operation::GREATER:
+      left_val.greater(right_val);
+      return std::move(left_val);
+    case Expression::Operation::LESSEREQ:
+      left_val.lessereq(right_val);
+      return std::move(left_val);
+    case Expression::Operation::GREATEREQ:
+      left_val.greatereq(right_val);
+      return std::move(left_val);
+
+
+
     default: assert(0);
   }
 }

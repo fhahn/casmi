@@ -95,6 +95,42 @@ void Value::eq(const Value& other) {
   }
 }
 
+void Value::lesser(const Value& other) {
+  switch (type) {
+    case Type::INT:
+      value.bval = value.ival < other.value.ival;
+      break;
+    default: assert(0);
+  }
+}
+
+void Value::greater(const Value& other) {
+  switch (type) {
+    case Type::INT:
+      value.bval = value.ival > other.value.ival;
+      break;
+    default: assert(0);
+  }
+}
+
+void Value::lessereq(const Value& other) {
+  switch (type) {
+    case Type::INT:
+      value.bval = value.ival <= other.value.ival;
+      break;
+    default: assert(0);
+  }
+}
+
+void Value::greatereq(const Value& other) {
+  switch (type) {
+    case Type::INT:
+      value.bval = value.ival >= other.value.ival;
+      break;
+    default: assert(0);
+  }
+}
+
 uint64_t Value::to_uint64_t() const {
   switch (type) {
     case Type::INT:

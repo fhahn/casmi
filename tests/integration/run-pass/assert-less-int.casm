@@ -1,0 +1,12 @@
+CASM foo
+
+init main
+
+rule main = { 
+    assert 1 < 2
+    assert 3 * 3 < 3 * 4
+    assert 3  < 3 * 4
+    assert 3 * 4  < 15
+
+    program( self ) := undef
+}

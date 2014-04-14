@@ -1,3 +1,5 @@
+CASM foo
+
 init main
 
 rule main = { 
@@ -20,8 +22,6 @@ rule main = {
 
     assert (4+4) * 3 = 24
     assert 3 * (5+4) = 27
-
-    assert 3 * (5+4) != 4 * (5+4)
 
     program( self ) := undef
 }

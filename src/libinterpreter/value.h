@@ -30,6 +30,11 @@ class Value {
 
     void eq(const Value& other);
 
+    void lesser(const Value& other);
+    void greater(const Value& other);
+    void lessereq(const Value& other);
+    void greatereq(const Value& other);
+
     uint64_t to_uint64_t() const;
 };
 
