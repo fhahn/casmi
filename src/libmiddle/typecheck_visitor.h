@@ -14,7 +14,7 @@ class TypecheckVisitor {
   private:
     Driver& driver_;
     void check_numeric_operator(const yy::location& loc,  const Type type,
-                                const std::string& op);
+                                const Expression::Operation op);
 
   public:
     TypecheckVisitor(Driver& driver);

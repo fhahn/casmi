@@ -186,21 +186,22 @@ class RuleAtom : public AtomNode {
 };
 
 
+
 class Expression : public ExpressionBase {
   public:
     enum class Operation {
       ADD,
       SUB,
-      NEQ,
-      EQ,
-      LESSER,
-      GREATER,
-      LESSEREQ,
-      GREATEREQ,
       MUL,
       DIV,
       MOD,
       RAT_DIV,
+      EQ,
+      NEQ,
+      LESSER,
+      GREATER,
+      LESSEREQ,
+      GREATEREQ,
       OR,
       XOR,
       AND,
@@ -215,9 +216,9 @@ class Expression : public ExpressionBase {
     Expression(yy::location& loc, ExpressionBase *left, ExpressionBase *right, Expression::Operation op);
     virtual ~Expression();
     virtual bool equals(AstNode *other);
-    std::string operator_to_str() const;
 };
 
+std::string operator_to_str(const Expression::Operation op);
 
 class UpdateNode: public AstNode {
   public:

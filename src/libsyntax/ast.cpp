@@ -272,10 +272,22 @@ bool Expression::equals(AstNode *other) {
   }
 }
 
-std::string Expression::operator_to_str() const {
+std::string operator_to_str(const Expression::Operation op) {
   switch(op) {
-    case Operation::ADD: return "+";
-    case Operation::EQ: return "=";
+    case Expression::Operation::ADD: return "+";
+    case Expression::Operation::SUB: return "-";
+    case Expression::Operation::MUL: return "*";
+    case Expression::Operation::DIV: return "/";
+    case Expression::Operation::MOD: return "%";
+    case Expression::Operation::RAT_DIV: return "div";
+
+    case Expression::Operation::EQ: return "=";
+    case Expression::Operation::NEQ: return "!=";
+
+    case Expression::Operation::LESSER: return "<";
+    case Expression::Operation::GREATER: return ">";
+    case Expression::Operation::LESSEREQ: return "<=";
+    case Expression::Operation::GREATEREQ: return ">=";
     default: return "unknown";
   }
 }
