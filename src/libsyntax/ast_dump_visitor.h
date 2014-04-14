@@ -37,6 +37,7 @@ class AstDumpVisitor {
     void visit_parblock(UnaryNode *parblock);
     bool visit_update(UpdateNode *update, bool, bool);
     bool visit_call_pre(CallNode *call);
+    bool visit_call_pre(CallNode *call, bool);
     bool visit_call(CallNode *call, std::vector<bool>& argument_results);
     bool visit_expression(Expression *expr, bool, bool);
     bool visit_expression_single(Expression *expr, bool);

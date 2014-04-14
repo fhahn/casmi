@@ -1,0 +1,14 @@
+CASM foo
+
+function rr: -> RuleRef initially { @bar }
+
+init main
+
+rule main = {
+    rr := @foo
+    call (rr)
+}
+
+rule bar = skip
+
+rule foo = program(self) := undef

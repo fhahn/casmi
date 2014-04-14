@@ -473,10 +473,10 @@ CASE_LABEL_IDENT: IDENTIFIER ":" STATEMENT
 CASE_LABEL_STRING: STRCONST ":" STATEMENT 
                  ;
 
-CALL_SYNTAX: CALL "(" EXPRESSION ")" "(" EXPRESSION_LIST ")" { $$ = new CallNode(@$, "no", false); }
-           | CALL "(" EXPRESSION ")" { $$ = new CallNode(@$, "no", false); }
-           | CALL IDENTIFIER "(" EXPRESSION_LIST ")" { $$ = new CallNode(@$, $2, true, $4); }
-           | CALL IDENTIFIER { $$ = new CallNode(@$, $2, true); }
+CALL_SYNTAX: CALL "(" EXPRESSION ")" "(" EXPRESSION_LIST ")" { $$ = new CallNode(@$, "", $3, $6); }
+           | CALL "(" EXPRESSION ")" { $$ = new CallNode(@$, "", $3); }
+           | CALL IDENTIFIER "(" EXPRESSION_LIST ")" { $$ = new CallNode(@$, $2, nullptr, $4); }
+           | CALL IDENTIFIER { $$ = new CallNode(@$, $2, nullptr); }
            ;
 
 

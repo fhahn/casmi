@@ -47,6 +47,14 @@ void TypecheckVisitor::visit_call_pre(CallNode *call) {
   }
 }
 
+void TypecheckVisitor::visit_call_pre(CallNode *call, Type expr) {
+  if (expr != Type::RULEREF) {
+    driver_.error(call->ruleref->location, "Indirect target must be a `Ruleref` but was `"+
+                                            type_to_str(expr)+"`");
+  }
+}
+
+
 void TypecheckVisitor::visit_call(CallNode *call, std::vector<Type> argument_results) {
   size_t args_defined = (call->rule->arguments) ? call->rule->arguments->size() : 0;
   size_t args_provided = argument_results.size();

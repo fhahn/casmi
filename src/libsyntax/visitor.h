@@ -124,7 +124,13 @@ template<class T, class V> class AstWalker {
     }
 
     void walk_call(CallNode *call) {
-      visitor.visit_call_pre(call);
+      if (call->ruleref == nullptr) {
+        visitor.visit_call_pre(call);
+      } else {
+        V v = walk_expression_base(call->ruleref);
+        visitor.visit_call_pre(call, v);
+      }
+
       if (call->rule != nullptr) {
         std::vector<V> argument_results;
         if (call->arguments != nullptr) {

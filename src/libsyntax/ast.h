@@ -241,9 +241,10 @@ class CallNode: public AstNode {
     const bool direct;
     RuleNode *rule;
     std::vector<ExpressionBase*> *arguments;
+    ExpressionBase *ruleref;
 
-    CallNode(yy::location& loc, const std::string& rule_name, const bool direct);
-    CallNode(yy::location& loc, const std::string& rule_name, const bool direct,
+    CallNode(yy::location& loc, const std::string& rule_name, ExpressionBase *ruleref);
+    CallNode(yy::location& loc, const std::string& rule_name, ExpressionBase *ruleref,
              std::vector<ExpressionBase*> *args);
 };
 

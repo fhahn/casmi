@@ -88,7 +88,13 @@ bool AstDumpVisitor::visit_update(UpdateNode *update, bool, bool) {
 }
 
 bool AstDumpVisitor::visit_call_pre(CallNode *call) {
-  dump_node(call, "Call: "+call->rule_name);
+  dump_node(call, "Direct Call: "+call->rule_name);
+  // TODO we need to populate the rule here!!!
+  assert(0);
+}
+
+bool AstDumpVisitor::visit_call_pre(CallNode *call, bool) {
+  dump_node(call, "Indirect Call");
   // TODO we need to populate the rule here!!!
   assert(0);
 }

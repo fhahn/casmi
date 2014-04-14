@@ -34,6 +34,7 @@ class ExecutionVisitor {
     void visit_statements(AstListNode *stmts) { UNUSED(stmts); }
     void visit_update(UpdateNode *update, Value& func_val, Value& expr_v);
     void visit_call_pre(CallNode *call);
+    void visit_call_pre(CallNode *call, Value& expr);
     void visit_call(CallNode *call, std::vector<Value> &arguments);
     Value&& visit_expression(Expression *expr, Value& left_val, Value& right_val);
     Value&& visit_expression_single(Expression *expr, Value& val);

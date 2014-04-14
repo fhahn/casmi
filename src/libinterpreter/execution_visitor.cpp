@@ -54,6 +54,14 @@ void ExecutionVisitor::visit_update(UpdateNode *update, Value &func_val, Value& 
 
 void ExecutionVisitor::visit_call_pre(CallNode *call) { UNUSED(call); }
 
+void ExecutionVisitor::visit_call_pre(CallNode *call, Value& expr) {
+  if (expr.type != Type::UNDEF) {
+    call->rule = expr.value.rule;
+  } else {
+    throw RuntimeException("Cannot call UNDEF");
+  }
+}
+
 void ExecutionVisitor::visit_call(CallNode *call, std::vector<Value> &argument_results) {
   UNUSED(call);
   UNUSED(argument_results);
