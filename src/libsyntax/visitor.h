@@ -92,6 +92,10 @@ template<class T, class V> class AstWalker {
           walk_ifthenelse(reinterpret_cast<IfThenElseNode*>(stmt));
           break;
         }
+        case NodeType::CALL: {
+          walk_call(reinterpret_cast<CallNode*>(stmt));
+          break;
+        }
         default:
             throw RuntimeException(
               std::string("Invalid node type: ")+
@@ -117,6 +121,15 @@ template<class T, class V> class AstWalker {
       V func_t = walk_function_atom(update->func);
       V expr_t = walk_expression_base(update->expr_);
       visitor.visit_update(update, func_t, expr_t);
+    }
+
+    void walk_call(CallNode *call) {
+      visitor.visit_call(call);
+      if (call->rule != nullptr) {
+        walk_rule(call->rule);
+      } else {
+        DEBUG("rule not set!");
+      }
     }
 
     V walk_expression_base(ExpressionBase *expr) {

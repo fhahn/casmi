@@ -1,0 +1,10 @@
+CASM double
+
+init initR
+
+
+rule initR = {
+    call foo
+}
+
+rule foo = program(self) := undef

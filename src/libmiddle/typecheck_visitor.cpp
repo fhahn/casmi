@@ -39,6 +39,14 @@ void TypecheckVisitor::visit_update(UpdateNode *update, Type func_t, Type expr_t
   }
 }
 
+void TypecheckVisitor::visit_call(CallNode *call) {
+  if (driver_.rules_map_.count(call->rule_name) == 1) {
+    call->rule = driver_.rules_map_[call->rule_name];
+  } else {
+    driver_.error(call->location, "no rule with name `"+call->rule_name+"` found");
+  }
+ 
+}
 void TypecheckVisitor::check_numeric_operator(const yy::location& loc, 
                                               const Type type,
                                               const Expression::Operation op) {

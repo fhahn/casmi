@@ -36,6 +36,7 @@ class AstDumpVisitor {
     bool visit_assert(UnaryNode *assert, bool);
     void visit_parblock(UnaryNode *parblock);
     bool visit_update(UpdateNode *update, bool, bool);
+    bool visit_call(CallNode *call);
     bool visit_expression(Expression *expr, bool, bool);
     bool visit_expression_single(Expression *expr, bool);
     bool visit_int_atom(IntAtom *atom);

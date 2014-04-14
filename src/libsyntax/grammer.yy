@@ -89,6 +89,7 @@
 %type <std::vector<Type>*> TYPE_IDENTIFIER_STARLIST
 %type <std::string> RULEREF
 %type <IfThenElseNode*> IFTHENELSE
+%type <CallNode*> CALL_SYNTAX
 
 %start SPECIFICATION
 
@@ -388,7 +389,7 @@ STATEMENT: ASSERT_SYNTAX { $$ = $1; }
          | PRINT_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
          | UPDATE_SYNTAX { $$ = $1; }
          | CASE_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
-         | CALL_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
+         | CALL_SYNTAX { $$ = $1; }
          | KW_SEQBLOCK_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
          | SEQBLOCK_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
          | KW_PARBLOCK_SYNTAX { $$ = $1; }
@@ -461,10 +462,10 @@ CASE_LABEL_IDENT: IDENTIFIER ":" STATEMENT
 CASE_LABEL_STRING: STRCONST ":" STATEMENT 
                  ;
 
-CALL_SYNTAX: CALL "(" EXPRESSION ")" "(" EXPRESSION_LIST ")"
-           | CALL "(" EXPRESSION ")"
-           | CALL IDENTIFIER "(" EXPRESSION_LIST ")"
-           | CALL IDENTIFIER
+CALL_SYNTAX: CALL "(" EXPRESSION ")" "(" EXPRESSION_LIST ")" { $$ = new CallNode(@$, "no", false); }
+           | CALL "(" EXPRESSION ")" { $$ = new CallNode(@$, "no", false); }
+           | CALL IDENTIFIER "(" EXPRESSION_LIST ")" { $$ = new CallNode(@$, $2, true); }
+           | CALL IDENTIFIER { $$ = new CallNode(@$, $2, true); }
            ;
 
 

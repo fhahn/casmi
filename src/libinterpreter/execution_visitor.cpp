@@ -52,6 +52,8 @@ void ExecutionVisitor::visit_update(UpdateNode *update, Value &func_val, Value& 
   }
 }
 
+void ExecutionVisitor::visit_call(CallNode *call) {}
+
 Value&& ExecutionVisitor::visit_expression(Expression *expr, Value &left_val, Value &right_val) {
   switch (expr->op) {
     case Expression::Operation::ADD: {

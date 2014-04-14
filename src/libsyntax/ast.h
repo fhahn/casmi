@@ -35,7 +35,8 @@ enum class NodeType {
   STATEMENTS,
   SKIP,
   PARBLOCK,
-  FUNCTION_ATOM
+  FUNCTION_ATOM,
+  CALL,
 };
 
 const std::string& type_to_str(NodeType t);
@@ -228,6 +229,15 @@ class UpdateNode: public AstNode {
     UpdateNode(yy::location& loc, FunctionAtom *func, ExpressionBase *expr);
     virtual ~UpdateNode();
     virtual bool equals(AstNode *other);
+};
+
+class CallNode: public AstNode {
+  public:
+    const std::string rule_name;
+    const bool direct;
+    RuleNode *rule;
+
+    CallNode(yy::location& loc, const std::string& rule_name, const bool direct);
 };
 
 #endif

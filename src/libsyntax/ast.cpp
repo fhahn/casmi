@@ -30,10 +30,17 @@ static std::map<NodeType, const std::string> node_type_names_ = {
     {NodeType::STATEMENTS, std::string("SKIP")},
     {NodeType::PARBLOCK, std::string("PARBLOCK")},
     {NodeType::FUNCTION_ATOM, std::string("FUNCTION ATOM")},
+    {NodeType::CALL, std::string("CALL NODE")},
 };
 
+std::string unknown_type = "unknown node type";
+
 const std::string& type_to_str(NodeType t) {
+  try {
     return node_type_names_.at(t);
+  } catch (const std::out_of_range& e) {
+    return unknown_type;
+  }
 }
 
 AstNode::AstNode(NodeType node_type) {
@@ -329,3 +336,8 @@ bool UnaryNode::equals(AstNode *other) {
 
 RuleNode::RuleNode(yy::location& loc, AstNode *child, const std::string& n)
   : UnaryNode(loc, NodeType::RULE, child), name(n) {}
+
+
+CallNode::CallNode(yy::location& loc, const std::string& rule_name, const bool direct)
+    : AstNode(loc, NodeType::CALL, Type::NO_TYPE), rule_name(rule_name),
+      direct(direct), rule(nullptr) {}
