@@ -7,7 +7,7 @@
 
 class Value {
   public:
-    const Type type;
+    Type type;
     union {
       INT_T ival;
       FLOAT_T fval;
@@ -27,6 +27,7 @@ class Value {
     void mul(const Value& other);
     void div(const Value& other);
     void mod(const Value& other);
+    void rat_div(const Value& other);
 
     void eq(const Value& other);
 

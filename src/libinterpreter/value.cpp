@@ -25,109 +25,159 @@ Value::Value(RuleNode *rule) : type(Type::RULEREF) {
 Value::Value(Value&& other) : type(std::move(other.type)), value(other.value) {}
 
 void Value::add(const Value& other) {
-  switch (type) {
-    case Type::INT: {
-      value.ival += other.value.ival;
-      break;
+  if (type == Type::UNDEF || other.type == Type::UNDEF) {
+    type = Type::UNDEF;
+ } else {
+   switch (type) {
+      case Type::INT: {
+        value.ival += other.value.ival;
+        break;
+      }
+      default: assert(0);
     }
-    default: assert(0);
   }
 }
 
 void Value::sub(const Value& other) {
-  switch (type) {
-    case Type::INT: {
-      value.ival -= other.value.ival;
-      break;
+  if (type == Type::UNDEF || other.type == Type::UNDEF) {
+    type = Type::UNDEF;
+  } else {
+    switch (type) {
+      case Type::INT: {
+        value.ival -= other.value.ival;
+        break;
+      }
+      default: assert(0);
     }
-    default: assert(0);
   }
 }
 
 void Value::mul(const Value& other) {
-  switch (type) {
-    case Type::INT: {
-      value.ival *= other.value.ival;
-      break;
+  if (type == Type::UNDEF || other.type == Type::UNDEF) {
+    type = Type::UNDEF;
+  } else {
+    switch (type) {
+      case Type::INT: {
+        value.ival *= other.value.ival;
+        break;
+      }
+      default: assert(0);
     }
-    default: assert(0);
   }
 }
 
 void Value::div(const Value& other) {
-  switch (type) {
-    case Type::INT: {
-      value.ival /= other.value.ival;
-      break;
+  if (type == Type::UNDEF || other.type == Type::UNDEF) {
+    type = Type::UNDEF;
+  } else {
+    switch (type) {
+      case Type::INT: {
+        value.ival /= other.value.ival;
+        break;
+      }
+      default: assert(0);
     }
-    default: assert(0);
   }
 }
 
 void Value::mod(const Value& other) {
-  switch (type) {
-    case Type::INT: {
-      value.ival %= other.value.ival;
-      break;
+  if (type == Type::UNDEF || other.type == Type::UNDEF) {
+    type = Type::UNDEF;
+  } else {
+    switch (type) {
+      case Type::INT: {
+        value.ival %= other.value.ival;
+        break;
+      }
+      default: assert(0);
     }
-    default: assert(0);
+  }
+}
+
+void Value::rat_div(const Value& other) {
+  if (type == Type::UNDEF || other.type == Type::UNDEF) {
+    type = Type::UNDEF;
+  } else {
+    assert(0);
   }
 }
 
 void Value::eq(const Value& other) {
-  switch (type) {
-    case Type::INT: {
-      value.bval = value.ival == other.value.ival;
-      break;
-    }
-    case Type::BOOLEAN: {
-      value.bval = value.bval == other.value.bval;
-      break;
-    }
-    case Type::UNDEF:
-      if (other.type == Type::UNDEF) {
-        value.bval = true;
-      } else {
-        value.bval = false;
+  if (type == Type::UNDEF || other.type == Type::UNDEF) {
+    value.bval = type == other.type;
+    type = Type::BOOLEAN;
+  } else {
+    switch (type) {
+      case Type::INT: {
+        value.bval = value.ival == other.value.ival;
+        break;
       }
-      break;
-    default: assert(0);
+      case Type::BOOLEAN: {
+        value.bval = value.bval == other.value.bval;
+        break;
+      }
+      case Type::UNDEF:
+        if (other.type == Type::UNDEF) {
+          value.bval = true;
+        } else {
+          value.bval = false;
+        }
+        type = Type::BOOLEAN;
+        break;
+      default: assert(0);
+    }
   }
 }
 
 void Value::lesser(const Value& other) {
-  switch (type) {
-    case Type::INT:
-      value.bval = value.ival < other.value.ival;
-      break;
-    default: assert(0);
+  if (type == Type::UNDEF || other.type == Type::UNDEF) {
+    type = Type::UNDEF;
+  } else {
+    switch (type) {
+      case Type::INT:
+        value.bval = value.ival < other.value.ival;
+        break;
+      default: assert(0);
+    }
   }
 }
 
 void Value::greater(const Value& other) {
-  switch (type) {
-    case Type::INT:
-      value.bval = value.ival > other.value.ival;
-      break;
-    default: assert(0);
+  if (type == Type::UNDEF || other.type == Type::UNDEF) {
+    type = Type::UNDEF;
+  } else {
+    switch (type) {
+      case Type::INT:
+        value.bval = value.ival > other.value.ival;
+        break;
+      default: assert(0);
+    }
   }
 }
 
 void Value::lessereq(const Value& other) {
-  switch (type) {
-    case Type::INT:
-      value.bval = value.ival <= other.value.ival;
-      break;
-    default: assert(0);
+  if (type == Type::UNDEF || other.type == Type::UNDEF) {
+    type = Type::UNDEF;
+  } else {
+    switch (type) {
+      case Type::INT:
+        value.bval = value.ival <= other.value.ival;
+        break;
+      default: assert(0);
+    }
   }
 }
 
 void Value::greatereq(const Value& other) {
-  switch (type) {
-    case Type::INT:
-      value.bval = value.ival >= other.value.ival;
-      break;
-    default: assert(0);
+  if (type == Type::UNDEF || other.type == Type::UNDEF) {
+    type = Type::UNDEF;
+  } else {
+    switch (type) {
+      case Type::INT:
+        value.bval = value.ival >= other.value.ival;
+        break;
+      default: assert(0);
+    }
   }
 }
 

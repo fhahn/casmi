@@ -42,7 +42,7 @@ void TypecheckVisitor::visit_update(UpdateNode *update, Type func_t, Type expr_t
 void TypecheckVisitor::check_numeric_operator(const yy::location& loc, 
                                               const Type type,
                                               const Expression::Operation op) {
-  if (type != Type::INT && type != Type::FLOAT) {
+  if (type != Type::INT && type != Type::FLOAT && type != Type::UNDEF) {
     driver_.error(loc,
                   "operands of operator `"+operator_to_str(op)+
                   "` must be `Int` or `Float` but were `"+

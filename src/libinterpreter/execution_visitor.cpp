@@ -74,6 +74,10 @@ Value&& ExecutionVisitor::visit_expression(Expression *expr, Value &left_val, Va
       left_val.mod(right_val);
       return std::move(left_val);
     }
+    case Expression::Operation::RAT_DIV: {
+      left_val.mod(right_val);
+      return std::move(left_val);
+    }
 
     case Expression::Operation::EQ: {
       left_val.eq(right_val);
