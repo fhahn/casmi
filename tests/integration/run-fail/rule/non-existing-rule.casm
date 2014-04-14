@@ -1,0 +1,8 @@
+// error annotation
+
+rule main = {
+    program( self ) := @testRule1
+    //~^ no rule with name `testRule1` found
+}
+
+init main

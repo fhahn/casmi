@@ -3,5 +3,5 @@ CASM foo
 init main
 
 rule main = {
-    call (1+1) //~ no rule with name `foo` found
+    call (1+1) //~ Indirect target must be a `Ruleref` but was `Int`
 }

@@ -1,9 +1,0 @@
-// error annotation
-
-rule main = {
-	program( self ) := @testRule1
-}
-
-
-init main
-
