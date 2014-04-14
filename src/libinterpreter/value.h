@@ -22,11 +22,13 @@ class Value {
     Value(RuleNode *rule);
     Value(Value&& other);
 
-    void add(Value& other);
-    void sub(Value& other);
-    void mul(Value& other);
-    void div(Value& other);
-    void mod(Value& other);
+    void add(const Value& other);
+    void sub(const Value& other);
+    void mul(const Value& other);
+    void div(const Value& other);
+    void mod(const Value& other);
+
+    void eq(const Value& other);
 
     uint64_t to_uint64_t() const;
 };

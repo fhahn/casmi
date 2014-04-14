@@ -88,7 +88,7 @@ bool AstDumpVisitor::visit_update(UpdateNode *update, bool, bool) {
 }
 
 bool AstDumpVisitor::visit_expression(Expression *expr, bool, bool) {
-  dump_node(expr, "Expression:"+expr->operator_to_str());
+  dump_node(expr, "Expression:"+operator_to_str(expr->op));
   if (expr->left_ != nullptr) {
     dump_link(expr, expr->left_);
   }

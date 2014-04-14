@@ -24,7 +24,7 @@ Value::Value(RuleNode *rule) : type(Type::RULEREF) {
 
 Value::Value(Value&& other) : type(std::move(other.type)), value(other.value) {}
 
-void Value::add(Value& other) {
+void Value::add(const Value& other) {
   switch (type) {
     case Type::INT: {
       value.ival += other.value.ival;
@@ -34,7 +34,7 @@ void Value::add(Value& other) {
   }
 }
 
-void Value::sub(Value& other) {
+void Value::sub(const Value& other) {
   switch (type) {
     case Type::INT: {
       value.ival -= other.value.ival;
@@ -44,7 +44,7 @@ void Value::sub(Value& other) {
   }
 }
 
-void Value::mul(Value& other) {
+void Value::mul(const Value& other) {
   switch (type) {
     case Type::INT: {
       value.ival *= other.value.ival;
@@ -54,7 +54,7 @@ void Value::mul(Value& other) {
   }
 }
 
-void Value::div(Value& other) {
+void Value::div(const Value& other) {
   switch (type) {
     case Type::INT: {
       value.ival /= other.value.ival;
@@ -64,7 +64,7 @@ void Value::div(Value& other) {
   }
 }
 
-void Value::mod(Value& other) {
+void Value::mod(const Value& other) {
   switch (type) {
     case Type::INT: {
       value.ival %= other.value.ival;
@@ -73,6 +73,28 @@ void Value::mod(Value& other) {
     default: assert(0);
   }
 }
+
+void Value::eq(const Value& other) {
+  switch (type) {
+    case Type::INT: {
+      value.bval = value.ival == other.value.ival;
+      break;
+    }
+    case Type::BOOLEAN: {
+      value.bval = value.bval == other.value.bval;
+      break;
+    }
+    case Type::UNDEF:
+      if (other.type == Type::UNDEF) {
+        value.bval = true;
+      } else {
+        value.bval = false;
+      }
+      break;
+    default: assert(0);
+  }
+}
+
 uint64_t Value::to_uint64_t() const {
   switch (type) {
     case Type::INT:

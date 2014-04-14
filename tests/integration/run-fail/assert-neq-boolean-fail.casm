@@ -1,0 +1,5 @@
+CASM foo
+
+init main
+
+rule main = assert true != true //~ Assertion failed

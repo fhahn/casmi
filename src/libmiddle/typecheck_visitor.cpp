@@ -41,44 +41,39 @@ void TypecheckVisitor::visit_update(UpdateNode *update, Type func_t, Type expr_t
 
 void TypecheckVisitor::check_numeric_operator(const yy::location& loc, 
                                               const Type type,
-                                              const std::string& op) {
+                                              const Expression::Operation op) {
   if (type != Type::INT && type != Type::FLOAT) {
     driver_.error(loc,
-                  "operands of operator `"+op+"` must be `Int` or `Float` but were `"+
+                  "operands of operator `"+operator_to_str(op)+
+                  "` must be `Int` or `Float` but were `"+
                   type_to_str(type)+"`");
   }
 }
 
 Type TypecheckVisitor::visit_expression(Expression *expr, Type left_val, Type right_val) {
-  if (left_val != right_val) {
+  if (left_val != right_val && left_val != Type::UNDEF && right_val != Type::UNDEF) {
       driver_.error(expr->location, "type of expressions did not match");
   }
   switch (expr->op) {
-    case Expression::Operation::ADD: {
-      check_numeric_operator(expr->location, left_val, "+");
+    case Expression::Operation::ADD:
+    case Expression::Operation::SUB:
+    case Expression::Operation::MUL:
+    case Expression::Operation::DIV:
+    case Expression::Operation::MOD:
+    case Expression::Operation::RAT_DIV:
+      check_numeric_operator(expr->location, left_val, expr->op);
       return left_val;
-    }
-    case Expression::Operation::SUB: {
-      check_numeric_operator(expr->location, left_val, "-");
-      return left_val;
-    }
-    case Expression::Operation::MUL: {
-      check_numeric_operator(expr->location, left_val, "*");
-      return left_val;
-    }
-    case Expression::Operation::DIV: {
-      check_numeric_operator(expr->location, left_val, "/");
-      return left_val;
-    }
-    case Expression::Operation::MOD: {
-      check_numeric_operator(expr->location, left_val, "%");
-      return left_val;
-    }
-    case Expression::Operation::RAT_DIV: {
-      check_numeric_operator(expr->location, left_val, "div");
-      return left_val;
-    }
-    case Expression::Operation::EQ: return Type::BOOLEAN;
+
+    case Expression::Operation::EQ:
+    case Expression::Operation::NEQ:
+      return Type::BOOLEAN;
+
+    case Expression::Operation::LESSER:
+    case Expression::Operation::GREATER:
+    case Expression::Operation::LESSEREQ:
+    case Expression::Operation::GREATEREQ:
+      check_numeric_operator(expr->location, left_val, expr->op);
+      return Type::BOOLEAN;
     default: assert(0);
   }
 }

@@ -75,26 +75,13 @@ Value&& ExecutionVisitor::visit_expression(Expression *expr, Value &left_val, Va
       return std::move(left_val);
     }
     case Expression::Operation::EQ: {
-      DEBUG(type_to_str(left_val.type) << " 2 " <<type_to_str(right_val.type));
-      DEBUG ("got "<< left_val.value.ival << " and "<<right_val.value.ival);
-      switch (left_val.type) {
-        case Type::INT: {
-          left_val.value.bval = left_val.value.ival == right_val.value.ival;
-          return std::move(left_val);
-        }
-        case Type::BOOLEAN: {
-          left_val.value.bval = left_val.value.bval == right_val.value.bval;
-          return std::move(left_val);
-        }
-        case Type::UNDEF:
-          if (right_val.type == Type::UNDEF) {
-            left_val.value.bval = true;
-          } else {
-            left_val.value.bval = false;
-          }
-          return std::move(left_val);
-        default: assert(0);
-      }
+      left_val.eq(right_val);
+      return std::move(left_val);
+    }
+    case Expression::Operation::NEQ: {
+      left_val.eq(right_val);
+      left_val.value.bval = !left_val.value.bval;
+      return std::move(left_val);
     }
     default: assert(0);
   }
