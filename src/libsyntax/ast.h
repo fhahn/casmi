@@ -85,8 +85,12 @@ class UnaryNode: public AstNode {
 
 class RuleNode: public UnaryNode {
   public:
-    RuleNode(yy::location& loc, AstNode *child, const std::string &name);
     const std::string name;
+    const std::vector<Type> *arguments;
+
+    RuleNode(yy::location& loc, AstNode *child, const std::string &name);
+    RuleNode(yy::location& loc, AstNode *child, const std::string &name,
+        const std::vector<Type> *args);
 };
 
 
@@ -236,8 +240,11 @@ class CallNode: public AstNode {
     const std::string rule_name;
     const bool direct;
     RuleNode *rule;
+    std::vector<ExpressionBase*> *arguments;
 
     CallNode(yy::location& loc, const std::string& rule_name, const bool direct);
+    CallNode(yy::location& loc, const std::string& rule_name, const bool direct,
+             std::vector<ExpressionBase*> *args);
 };
 
 #endif

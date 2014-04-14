@@ -39,14 +39,33 @@ void TypecheckVisitor::visit_update(UpdateNode *update, Type func_t, Type expr_t
   }
 }
 
-void TypecheckVisitor::visit_call(CallNode *call) {
+void TypecheckVisitor::visit_call_pre(CallNode *call) {
   if (driver_.rules_map_.count(call->rule_name) == 1) {
     call->rule = driver_.rules_map_[call->rule_name];
   } else {
     driver_.error(call->location, "no rule with name `"+call->rule_name+"` found");
   }
- 
 }
+
+void TypecheckVisitor::visit_call(CallNode *call, std::vector<Type> argument_results) {
+  size_t args_defined = (call->rule->arguments) ? call->rule->arguments->size() : 0;
+  size_t args_provided = argument_results.size();
+  if (args_defined != args_provided) {
+    driver_.error(call->location, "rule `"+call->rule_name+"` expects "
+                                  +std::to_string(args_defined)+" arguments but "+
+                                  std::to_string(args_provided)+" where provided");
+  } else {
+    for (size_t i=0; i < args_defined; i++) {
+      if (call->rule->arguments->at(i) != argument_results[i]) {
+        driver_.error(call->arguments->at(i)->location,
+                      "argument "+std::to_string(i+1)+" of rule `"+ call->rule_name+
+                      "` must be `"+type_to_str(call->rule->arguments->at(i))+"` but was `"+
+                      type_to_str(argument_results[i])+"`");
+      }
+    }
+  }
+}
+
 void TypecheckVisitor::check_numeric_operator(const yy::location& loc, 
                                               const Type type,
                                               const Expression::Operation op) {

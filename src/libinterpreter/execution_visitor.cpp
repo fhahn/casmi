@@ -52,7 +52,12 @@ void ExecutionVisitor::visit_update(UpdateNode *update, Value &func_val, Value& 
   }
 }
 
-void ExecutionVisitor::visit_call(CallNode *call) {}
+void ExecutionVisitor::visit_call_pre(CallNode *call) { UNUSED(call); }
+
+void ExecutionVisitor::visit_call(CallNode *call, std::vector<Value> &argument_results) {
+  UNUSED(call);
+  UNUSED(argument_results);
+}
 
 Value&& ExecutionVisitor::visit_expression(Expression *expr, Value &left_val, Value &right_val) {
   switch (expr->op) {

@@ -1,0 +1,16 @@
+CASM double
+
+init initR
+
+
+rule initR = {
+    call foo(1, true)
+    //~^ argument 2 of rule `foo` must be `Int` but was `Boolean`
+
+    call bar(1, true)
+    //~^ argument 1 of rule `bar` must be `Boolean` but was `Int`
+    //~^^ argument 2 of rule `bar` must be `Float` but was `Boolean`
+}
+
+rule foo(a:Int, b:Int) = skip
+rule bar(a:Boolean, b:Float) = skip

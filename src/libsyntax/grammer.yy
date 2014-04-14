@@ -85,8 +85,8 @@
 %type <Symbol*> FUNCTION_DEFINITION
 %type <FunctionAtom*> FUNCTION_SYNTAX 
 %type <std::pair<std::vector<Type>*, Type>> FUNCTION_SIGNATURE
-%type <Type> NEW_TYPE_SYNTAX
-%type <std::vector<Type>*> TYPE_IDENTIFIER_STARLIST
+%type <Type> NEW_TYPE_SYNTAX PARAM
+%type <std::vector<Type>*> TYPE_IDENTIFIER_STARLIST PARAM_LIST_NO_COMMA PARAM_LIST
 %type <std::string> RULEREF
 %type <IfThenElseNode*> IFTHENELSE
 %type <CallNode*> CALL_SYNTAX
@@ -190,15 +190,26 @@ FUNCTION_SIGNATURE: ":" ARROW NEW_TYPE_SYNTAX
                   { $$ = std::pair<std::vector<Type>*, Type>($2, $4); }
                   ;
 
-PARAM: IDENTIFIER OLD_TYPE_SYNTAX 
-     | IDENTIFIER ":" NEW_TYPE_SYNTAX 
-     | IDENTIFIER 
+PARAM: IDENTIFIER OLD_TYPE_SYNTAX  
+     | IDENTIFIER ":" NEW_TYPE_SYNTAX { $$ = $3; }
+     | IDENTIFIER
      ;
 
-PARAM_LIST: PARAM "," PARAM_LIST 
-          | PARAM "," 
-          | PARAM 
-          ;
+
+PARAM_LIST: PARAM_LIST_NO_COMMA { $$ = $1; }
+          | PARAM_LIST_NO_COMMA "," { $$ = $1; }
+
+PARAM_LIST_NO_COMMA: PARAM_LIST_NO_COMMA "," PARAM
+                   {
+                        $$ = $1;
+                        $$->push_back($3);
+                   }
+                   | PARAM
+                   { 
+                        $$ = new std::vector<Type>;; 
+                        $$->push_back($1);
+                   }
+                   ;
 
 /* TODO: right recursion */
 TYPE_IDENTIFIER_STARLIST: NEW_TYPE_SYNTAX "*" TYPE_IDENTIFIER_STARLIST 
@@ -364,7 +375,7 @@ RULE_SYNTAX: RULE IDENTIFIER "=" STATEMENT { $$ = new RuleNode(@$, $4, $2); }
            | RULE IDENTIFIER "(" ")" "=" STATEMENT
               { $$ = new RuleNode(@$, $6, $2); }
            | RULE IDENTIFIER "(" PARAM_LIST ")" "=" STATEMENT
-              { $$ = new RuleNode(@$, $7, $2); }
+              { $$ = new RuleNode(@$, $7, $2, $4); }
 /* again, with dump specification */
            | RULE IDENTIFIER DUMPS DUMPSPEC_LIST "=" STATEMENT
               { $$ = new RuleNode(@$, $6, $2); }
@@ -464,7 +475,7 @@ CASE_LABEL_STRING: STRCONST ":" STATEMENT
 
 CALL_SYNTAX: CALL "(" EXPRESSION ")" "(" EXPRESSION_LIST ")" { $$ = new CallNode(@$, "no", false); }
            | CALL "(" EXPRESSION ")" { $$ = new CallNode(@$, "no", false); }
-           | CALL IDENTIFIER "(" EXPRESSION_LIST ")" { $$ = new CallNode(@$, $2, true); }
+           | CALL IDENTIFIER "(" EXPRESSION_LIST ")" { $$ = new CallNode(@$, $2, true, $4); }
            | CALL IDENTIFIER { $$ = new CallNode(@$, $2, true); }
            ;
 

@@ -335,9 +335,16 @@ bool UnaryNode::equals(AstNode *other) {
 }
 
 RuleNode::RuleNode(yy::location& loc, AstNode *child, const std::string& n)
-  : UnaryNode(loc, NodeType::RULE, child), name(n) {}
+  : RuleNode(loc, child, n, nullptr) {}
 
+RuleNode::RuleNode(yy::location& loc, AstNode *child, const std::string &name,
+                   const std::vector<Type> *args) 
+  : UnaryNode(loc, NodeType::RULE, child), name(name), arguments(args) {}
 
 CallNode::CallNode(yy::location& loc, const std::string& rule_name, const bool direct)
+    : CallNode(loc, rule_name, direct, nullptr) {}
+
+CallNode::CallNode(yy::location& loc, const std::string& rule_name, const bool direct,
+                   std::vector<ExpressionBase*> *args)
     : AstNode(loc, NodeType::CALL, Type::NO_TYPE), rule_name(rule_name),
-      direct(direct), rule(nullptr) {}
+      direct(direct), rule(nullptr), arguments(args) {}

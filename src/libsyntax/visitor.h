@@ -124,8 +124,16 @@ template<class T, class V> class AstWalker {
     }
 
     void walk_call(CallNode *call) {
-      visitor.visit_call(call);
+      visitor.visit_call_pre(call);
       if (call->rule != nullptr) {
+        std::vector<V> argument_results;
+        if (call->arguments != nullptr) {
+          for (ExpressionBase *e: *call->arguments) {
+            argument_results.push_back(walk_expression_base(e));
+          }
+        }
+        visitor.visit_call(call, argument_results);
+
         walk_rule(call->rule);
       } else {
         DEBUG("rule not set!");

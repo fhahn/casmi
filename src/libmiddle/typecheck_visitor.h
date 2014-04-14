@@ -31,7 +31,8 @@ class TypecheckVisitor {
     void visit_ifthenelse(IfThenElseNode *node, Type cond);
     void visit_assert(UnaryNode *assert, Type t);
     void visit_update(UpdateNode *update, Type func, Type expr);
-    void visit_call(CallNode *call);
+    void visit_call_pre(CallNode *call);
+    void visit_call(CallNode *call, std::vector<Type> argument_results);
     Type visit_expression(Expression *expr, Type left_val, Type right_val);
     Type visit_expression_single(Expression *expr, Type val);
     Type visit_int_atom(IntAtom *atom) { UNUSED(atom); return Type::INT; }

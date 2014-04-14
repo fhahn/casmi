@@ -87,11 +87,17 @@ bool AstDumpVisitor::visit_update(UpdateNode *update, bool, bool) {
   return true;
 }
 
-bool AstDumpVisitor::visit_call(CallNode *call) {
+bool AstDumpVisitor::visit_call_pre(CallNode *call) {
   dump_node(call, "Call: "+call->rule_name);
   // TODO we need to populate the rule here!!!
   assert(0);
 }
+
+bool AstDumpVisitor::visit_call(CallNode *call, std::vector<bool>& argument_results) {
+  UNUSED(call);
+  UNUSED(argument_results);
+}
+
 bool AstDumpVisitor::visit_expression(Expression *expr, bool, bool) {
   dump_node(expr, "Expression:"+operator_to_str(expr->op));
   if (expr->left_ != nullptr) {
