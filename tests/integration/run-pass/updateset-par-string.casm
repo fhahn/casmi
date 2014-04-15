@@ -1,0 +1,10 @@
+function x : -> String
+
+init main
+
+rule main = { 
+    if x = "END" then
+        program(self) := undef
+    else
+        x := "END"
+}

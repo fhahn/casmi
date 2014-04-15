@@ -1,0 +1,9 @@
+CASM foo
+
+init main
+
+rule main = { 
+    assert "test" = "test"
+
+    program( self ) := undef
+}

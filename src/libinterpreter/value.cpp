@@ -109,7 +109,6 @@ void Value::rat_div(const Value& other) {
 void Value::eq(const Value& other) {
   if (type == Type::UNDEF || other.type == Type::UNDEF) {
     value.bval = type == other.type;
-    type = Type::BOOLEAN;
   } else {
     switch (type) {
       case Type::INT: {
@@ -126,11 +125,14 @@ void Value::eq(const Value& other) {
         } else {
           value.bval = false;
         }
-        type = Type::BOOLEAN;
+        break;
+      case Type::STRING:
+        value.bval = *value.string == *other.value.string;
         break;
       default: assert(0);
     }
   }
+  type = Type::BOOLEAN;
 }
 
 void Value::lesser(const Value& other) {

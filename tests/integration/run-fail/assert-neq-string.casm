@@ -1,0 +1,5 @@
+init main
+
+rule main = { 
+    assert "foo" != "foo" //~ Assertion failed
+}
