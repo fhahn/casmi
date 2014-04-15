@@ -9,6 +9,7 @@ Type str_to_type(const std::string& type_name) {
   if (type_name == "Undef") return Type::UNDEF;
   if (type_name == "Boolean") return Type::BOOLEAN;
   if (type_name == "RuleRef") return Type::RULEREF;
+  if (type_name == "String") return Type::STRING;
   return Type::INVALID;
 }
 
@@ -19,6 +20,7 @@ const std::string type_to_str(Type t) {
   if (t == Type::UNDEF) return "Undef";
   if (t == Type::BOOLEAN) return "Boolean";
   if (t == Type::RULEREF) return "RuleRef";
+  if (t == Type::STRING) return "String";
   return "Invalid";
 }
 

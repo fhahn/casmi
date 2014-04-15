@@ -201,6 +201,9 @@ template<class T, class V> class AstWalker {
         case NodeType::BOOLEAN_ATOM: {
           return visitor.visit_boolean_atom(reinterpret_cast<BooleanAtom*>(atom));
         }
+        case NodeType::STRING_ATOM: {
+          return visitor.visit_string_atom(reinterpret_cast<StringAtom*>(atom));
+        }
         default: {
           throw RuntimeException("Invalid atom type:"+type_to_str(atom->node_type_));
         }

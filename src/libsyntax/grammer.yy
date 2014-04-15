@@ -82,6 +82,7 @@
 %type <UpdateNode*> UPDATE_SYNTAX
 %type <INT_T> INTCONST
 %type <FLOAT_T> FLOATCONST
+%type <std::string> STRCONST
 %type <Symbol*> FUNCTION_DEFINITION
 %type <FunctionAtom*> FUNCTION_SYNTAX 
 %type <std::pair<std::vector<Type>*, Type>> FUNCTION_SIGNATURE
@@ -269,9 +270,9 @@ ATOM: FUNCTION_SYNTAX { $$ = $1; }
     | BRACKET_EXPRESSION { $$ = $1; }
     ;
 
-VALUE: RULEREF { $$ = new RuleAtom(@$, $1); }
+VALUE: RULEREF { $$ = new RuleAtom(@$, std::move($1)); }
      | NUMBER { $$ = $1; }
-     | STRCONST { $$ = new IntAtom(@$, 0); }
+     | STRCONST { $$ = new StringAtom(@$, std::move($1)); }
      | LISTCONST { $$ = new IntAtom(@$, 0); }
      | NUMBER_RANGE { $$ = new IntAtom(@$, 0); }
      | SYMBOL { $$ = new IntAtom(@$, 0); }

@@ -49,6 +49,7 @@ class AstDumpVisitor {
     bool visit_self_atom(SelfAtom *atom);
     bool visit_rule_atom(RuleAtom *atom);
     bool visit_boolean_atom(BooleanAtom *atom);
+    bool visit_string_atom(StringAtom *atom);
 };
 
 #endif //CASMI_LIBINTERPRETER_EXEC_VISITOR

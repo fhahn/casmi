@@ -33,7 +33,7 @@ void AstDumpVisitor::visit_body_elements(AstListNode *body_elements) {
 
 void AstDumpVisitor::visit_function_def(FunctionDefNode *def, const std::vector<std::pair<bool, bool>>&) {
   dump_node(def, "Function Definition: "+def->sym->to_str());
-  throw "TODO: implement initializers";
+  DEBUG("TODO: implement initializers");
 }
 
 void AstDumpVisitor::visit_init(AstNode *init) {
@@ -149,5 +149,10 @@ bool AstDumpVisitor::visit_rule_atom(RuleAtom *atom) {
 
 bool AstDumpVisitor::visit_boolean_atom(BooleanAtom *atom) {
   dump_node(atom, std::string("BooleanAtom: "+atom->value));
+  return true;
+}
+
+bool AstDumpVisitor::visit_string_atom(StringAtom *atom) {
+  dump_node(atom, std::string("StringAtom: "+atom->string));
   return true;
 }

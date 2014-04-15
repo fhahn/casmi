@@ -45,6 +45,7 @@ class ExecutionVisitor {
     Value&& visit_self_atom(SelfAtom *atom) { UNUSED(atom); return std::move(Value()); }
     Value&& visit_rule_atom(RuleAtom *atom) { return std::move(Value(atom->rule)); }
     Value&& visit_boolean_atom(BooleanAtom *atom) { return std::move(Value(atom->value)); }
+    Value&& visit_string_atom(StringAtom *atom) { return std::move(Value(&atom->string)); }
 };
 
 // Specialize if then else for ExecutionVisitor

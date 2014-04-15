@@ -22,6 +22,10 @@ Value::Value(RuleNode *rule) : type(Type::RULEREF) {
   value.rule = rule;
 }
 
+Value::Value(std::string *string) : type(Type::STRING) {
+  value.string = string;
+}
+
 Value::Value(Value&& other) : type(std::move(other.type)), value(other.value) {}
 
 void Value::add(const Value& other) {

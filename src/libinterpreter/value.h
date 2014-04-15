@@ -13,6 +13,7 @@ class Value {
       FLOAT_T fval;
       bool bval;
       RuleNode *rule;
+      std::string *string;
     } value;
 
     Value();
@@ -20,6 +21,7 @@ class Value {
     Value(FLOAT_T fval);
     Value(bool bval);
     Value(RuleNode *rule);
+    Value(std::string *string);
     Value(Value&& other);
 
     void add(const Value& other);

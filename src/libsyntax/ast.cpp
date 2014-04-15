@@ -10,6 +10,7 @@ static std::map<NodeType, const std::string> node_type_names_ = {
     {NodeType::INT_ATOM, std::string("INT ATOM")},
     {NodeType::FLOAT_ATOM, std::string("FLOAT ATOM")},
     {NodeType::SELF_ATOM, std::string("SELF ATOM")},
+    {NodeType::STRING_ATOM, std::string("STRING ATOM")},
     {NodeType::RULE_ATOM, std::string("RULE ATOM")},
     {NodeType::BOOLEAN_ATOM, std::string("BOOLEAN ATOM")},
     {NodeType::DUMMY_ATOM, std::string("DUMMY ATOM")},
@@ -197,12 +198,24 @@ bool BooleanAtom::equals(AstNode *other) {
 
 
 
-RuleAtom::RuleAtom(yy::location& loc, const std::string& name) :
+RuleAtom::RuleAtom(yy::location& loc, const std::string&& name) :
         AtomNode(loc, NodeType::RULE_ATOM, Type::RULEREF), name(name) {}
 
 RuleAtom::~RuleAtom() {}
 
 bool RuleAtom::equals(AstNode *other) {
+  throw "NOT IMPLEMENTED";
+}
+
+
+StringAtom::StringAtom(yy::location& loc, std::string&& string) :
+        AtomNode(loc, NodeType::STRING_ATOM, Type::STRING), string(string) {
+  DEBUG("StringAtom "<<string);
+}
+
+StringAtom::~StringAtom() {}
+
+bool StringAtom::equals(AstNode *other) {
   throw "NOT IMPLEMENTED";
 }
 

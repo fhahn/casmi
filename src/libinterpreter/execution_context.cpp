@@ -17,7 +17,7 @@ ExecutionContext::ExecutionContext(SymbolTable *st, RuleNode *init) : symbol_tab
   Symbol *program_sym = st->get("program");
   // TODO location is wrong here
   program_sym->intitializers_ = new std::vector<std::pair<ExpressionBase*, ExpressionBase*>>();
-  RuleAtom *init_atom = new RuleAtom(init->location, init->name);
+  RuleAtom *init_atom = new RuleAtom(init->location, std::string(init->name));
   init_atom->rule = init;
   program_sym->intitializers_->push_back(std::pair<ExpressionBase*, ExpressionBase*>(new SelfAtom(init->location), init_atom));
 }

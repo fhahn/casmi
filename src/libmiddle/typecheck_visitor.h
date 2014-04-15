@@ -44,6 +44,7 @@ class TypecheckVisitor {
     Type visit_self_atom(SelfAtom *atom) { UNUSED(atom); return Type::SELF; }
     Type visit_rule_atom(RuleAtom *atom);
     Type visit_boolean_atom(BooleanAtom *atom) { UNUSED(atom); return Type::BOOLEAN; }
+    Type visit_string_atom(StringAtom *atom) { UNUSED(atom); return Type::STRING; }
 };
 
 #endif //CASMI_LIBINTERPRETER_EXEC_VISITOR

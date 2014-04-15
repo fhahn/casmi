@@ -128,11 +128,16 @@ int main (int argc, char *argv[]) {
         break;
       }
 
-      AstDumpVisitor dump_visitor;
-      AstWalker<AstDumpVisitor, bool> dump_walker(dump_visitor);
-      dump_walker.walk_specification(driver.result);
-      std::cout << dump_visitor.get_dump();
-      res = EXIT_SUCCESS;
+      try {
+        AstDumpVisitor dump_visitor;
+        AstWalker<AstDumpVisitor, bool> dump_walker(dump_visitor);
+        dump_walker.walk_specification(driver.result);
+        std::cout << dump_visitor.get_dump();
+        res = EXIT_SUCCESS;
+      } catch (char const *e) {
+        std::cerr << "Abort after catching a string: "<< e;
+        res = EXIT_FAILURE;
+      }
       break;
     }
     case OptionValues::NO_OPTIONS: {
@@ -156,6 +161,9 @@ int main (int argc, char *argv[]) {
           res = EXIT_SUCCESS;
         } catch (const RuntimeException& ex) {
           std::cerr << "Abort after runtime exception: "<< ex.what();
+          res = EXIT_FAILURE;
+        } catch (char * e) {
+          std::cerr << "Abort after catching a string: "<< e;
           res = EXIT_FAILURE;
         }
       }

@@ -16,6 +16,7 @@ enum class NodeType {
   INT_ATOM,
   FLOAT_ATOM,
   SELF_ATOM,
+  STRING_ATOM,
   RULE_ATOM,
   DUMMY_ATOM,
   BOOLEAN_ATOM,
@@ -184,12 +185,22 @@ class RuleAtom : public AtomNode {
     RuleNode *rule;
     const std::string name;
 
-    RuleAtom(yy::location& loc, const std::string& name);
+    RuleAtom(yy::location& loc, const std::string&& name);
  
     virtual ~RuleAtom();
     bool equals(AstNode *other);
 };
 
+
+class StringAtom : public AtomNode {
+  public:
+    std::string string;
+
+    StringAtom(yy::location& loc, std::string&& name);
+ 
+    virtual ~StringAtom();
+    bool equals(AstNode *other);
+};
 
 
 class Expression : public ExpressionBase {

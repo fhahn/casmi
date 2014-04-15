@@ -180,7 +180,7 @@ objdump { return yy::casmi_parser::make_OBJDUMP(loc); }
 <STRING>\\\" { strncat( strbuf, "\"", STRBUF_LENGTH-1 ); }
 <STRING>\\' { strncat( strbuf, "\'", STRBUF_LENGTH-1 ); }
 <STRING><<EOF>> { fprintf( stderr, "unclosed string\n" ); exit( 1 ); }
-<STRING>\" { BEGIN(INITIAL); return yy::casmi_parser::make_STRCONST(loc); }
+<STRING>\" { BEGIN(INITIAL); return yy::casmi_parser::make_STRCONST(strbuf, loc); }
 
 . { fprintf( stderr, "Unrecognized character: %s (ASCII-Code: %d) on line %d.\n",
   yytext, *yytext, yylineno ); exit( 1 );
