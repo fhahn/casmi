@@ -39,6 +39,8 @@ class Value {
     void greatereq(const Value& other);
 
     uint64_t to_uint64_t() const;
+
+    std::string to_str() const;
 };
 
 #endif

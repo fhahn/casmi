@@ -55,7 +55,7 @@ void TypecheckVisitor::visit_call_pre(CallNode *call, Type expr) {
 }
 
 
-void TypecheckVisitor::visit_call(CallNode *call, std::vector<Type> argument_results) {
+void TypecheckVisitor::visit_call(CallNode *call, std::vector<Type>& argument_results) {
   size_t args_defined = (call->rule->arguments) ? call->rule->arguments->size() : 0;
   size_t args_provided = argument_results.size();
   if (args_defined != args_provided) {

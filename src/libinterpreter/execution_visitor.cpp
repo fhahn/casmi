@@ -67,6 +67,13 @@ void ExecutionVisitor::visit_call(CallNode *call, std::vector<Value> &argument_r
   UNUSED(argument_results);
 }
 
+void ExecutionVisitor::visit_print(PrintNode *node, const std::vector<Value> &arguments) {
+  for (const Value& v: arguments) {
+    std::cout << v.to_str();
+  }
+  std::cout << std::endl;
+}
+
 Value&& ExecutionVisitor::visit_expression(Expression *expr, Value &left_val, Value &right_val) {
   switch (expr->op) {
     case Expression::Operation::ADD: {

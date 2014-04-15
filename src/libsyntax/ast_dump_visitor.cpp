@@ -102,6 +102,18 @@ bool AstDumpVisitor::visit_call_pre(CallNode *call, bool) {
 bool AstDumpVisitor::visit_call(CallNode *call, std::vector<bool>& argument_results) {
   UNUSED(call);
   UNUSED(argument_results);
+  return true;
+}
+
+bool AstDumpVisitor::visit_print(PrintNode *node, std::vector<bool>& argument_results) {
+  UNUSED(argument_results);
+
+  dump_node(node, "Print");
+
+  for (ExpressionBase* a : node->atoms) {
+    dump_link(node, a);
+  }
+  return true;
 }
 
 bool AstDumpVisitor::visit_expression(Expression *expr, bool, bool) {

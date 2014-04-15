@@ -96,6 +96,10 @@ template<class T, class V> class AstWalker {
           walk_call(reinterpret_cast<CallNode*>(stmt));
           break;
         }
+        case NodeType::PRINT: {
+          walk_print(reinterpret_cast<PrintNode*>(stmt));
+          break;
+        }
         default:
             throw RuntimeException(
               std::string("Invalid node type: ")+
@@ -145,6 +149,15 @@ template<class T, class V> class AstWalker {
         DEBUG("rule not set!");
       }
     }
+
+    void walk_print(PrintNode *node) {
+      std::vector<V> argument_results;
+      for (ExpressionBase *e: node->atoms) {
+          argument_results.push_back(walk_expression_base(e));
+        }
+      visitor.visit_print(node, argument_results);
+    }
+
 
     V walk_expression_base(ExpressionBase *expr) {
       if (expr->node_type_ == NodeType::EXPRESSION) {

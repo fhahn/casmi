@@ -361,3 +361,9 @@ CallNode::CallNode(yy::location& loc, const std::string& rule_name, ExpressionBa
                    std::vector<ExpressionBase*> *args)
     : AstNode(loc, NodeType::CALL, Type::NO_TYPE), rule_name(rule_name),
       direct(direct), rule(nullptr), arguments(args), ruleref(ruleref) {}
+
+
+PrintNode::PrintNode(yy::location& loc, const std::vector<ExpressionBase*> &atoms)
+    : AstNode(loc, NodeType::PRINT, Type::NO_TYPE), atoms(std::move(atoms)){
+
+}

@@ -38,6 +38,7 @@ enum class NodeType {
   PARBLOCK,
   FUNCTION_ATOM,
   CALL,
+  PRINT,
 };
 
 const std::string& type_to_str(NodeType t);
@@ -259,4 +260,10 @@ class CallNode: public AstNode {
              std::vector<ExpressionBase*> *args);
 };
 
+class PrintNode: public AstNode {
+  public:
+    std::vector<ExpressionBase*> atoms;
+
+    PrintNode(yy::location& loc, const std::vector<ExpressionBase*> &atoms);
+};
 #endif

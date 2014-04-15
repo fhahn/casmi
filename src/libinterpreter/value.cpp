@@ -196,3 +196,20 @@ uint64_t Value::to_uint64_t() const {
     default: throw RuntimeException("Unsupported type in Value.to_uint64_t");
   }
 }
+
+
+std::string Value::to_str() const {
+  switch (type) {
+    case Type::INT:
+      return std::move(std::to_string(value.ival));
+    case Type::SELF:
+      return std::move("self");
+    case Type::UNDEF: // are UNDEF and SELF the same here?
+      return std::move("undef");
+    case Type::RULEREF: 
+      return std::move("@"+value.rule->name);
+    case Type::STRING:
+      return *value.string;
+    default: throw RuntimeException("Unsupported type in Value.to_str()");
+  }
+}

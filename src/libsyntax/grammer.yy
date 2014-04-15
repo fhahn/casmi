@@ -91,6 +91,8 @@
 %type <std::string> RULEREF
 %type <IfThenElseNode*> IFTHENELSE
 %type <CallNode*> CALL_SYNTAX
+%type <std::vector<ExpressionBase*>> DEBUG_ATOM_LIST
+%type <PrintNode*> PRINT_SYNTAX
 
 %start SPECIFICATION
 
@@ -398,7 +400,7 @@ STATEMENT: ASSERT_SYNTAX { $$ = $1; }
          | DIEDIE_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
          | IMPOSSIBLE_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
          | DEBUGINFO_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
-         | PRINT_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
+         | PRINT_SYNTAX { $$ = $1; }
          | UPDATE_SYNTAX { $$ = $1; }
          | CASE_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
          | CALL_SYNTAX { $$ = $1; }
@@ -440,10 +442,10 @@ IMPOSSIBLE_SYNTAX: IMPOSSIBLE
 DEBUGINFO_SYNTAX: DEBUGINFO IDENTIFIER DEBUG_ATOM_LIST
                 ;
 
-DEBUG_ATOM_LIST: DEBUG_ATOM_LIST "+" ATOM
-               | ATOM
+DEBUG_ATOM_LIST: DEBUG_ATOM_LIST "+" ATOM { $$ = std::move($1); $$.push_back($3); }
+               | ATOM { $$.push_back($1); }
 
-PRINT_SYNTAX: PRINT DEBUG_ATOM_LIST
+PRINT_SYNTAX: PRINT DEBUG_ATOM_LIST { $$ = new PrintNode(@$, $2); }
             ;
 
 UPDATE_SYNTAX: FUNCTION_SYNTAX UPDATE EXPRESSION { $$ = new UpdateNode(@$, $1, $3); }
