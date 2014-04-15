@@ -5,6 +5,8 @@
 #include "libsyntax/ast.h"
 #include "libsyntax/types.h"
 
+#include "librt/rt.h"
+
 class Value {
   public:
     Type type;
@@ -22,7 +24,11 @@ class Value {
     Value(bool bval);
     Value(RuleNode *rule);
     Value(std::string *string);
-    Value(Value&& other);
+
+    Value(Value& other);
+    Value(const Value& other);
+    //Value(Value&& other);
+    Value(Type type, casm_update* update);
 
     void add(const Value& other);
     void sub(const Value& other);

@@ -145,22 +145,11 @@ Value&& ExecutionVisitor::visit_function_atom(FunctionAtom *atom, std::vector<Va
   args[0] = 0;
 
   pack_values_in_array(expr_results, args);
-  casm_update *data = context_.get_function_value(atom->symbol, args);
-
+  //
   // TODO handle function access and function write differently
   value_list.swap(expr_results);
 
-  if (data == nullptr) {
-    return std::move(Value());
-  }
-
-  switch (atom->symbol->return_type_) {
-    case Type::INT: return std::move(Value((int64_t)data->value));
-    case Type::RULEREF: return std::move(Value(reinterpret_cast<RuleNode*>(data->value)));
-    case Type::STRING: return std::move(Value(reinterpret_cast<std::string*>(data->value)));
-    default: throw "invalid type in function";
-  }
-
+  return std::move(Value(context_.get_function_value(atom->symbol, args)));
 }
 
 std::string args_to_str(uint64_t args[], size_t size) {
@@ -187,50 +176,43 @@ void AstWalker<ExecutionVisitor, Value>::walk_ifthenelse(IfThenElseNode* node) {
   }
 }
 
-
 void ExecutionWalker::run() {
   for (auto pair: visitor.context_.symbol_table->table_) {
-    auto function_map = std::unordered_map<ArgumentsKey, casm_update*>();
+    auto function_map = std::unordered_map<ArgumentsKey, Value>();
 
     if (pair.second->intitializers_ != nullptr) {
       for (std::pair<ExpressionBase*, ExpressionBase*> init : *pair.second->intitializers_) {
-        casm_update* up = (casm_update*) pp_mem_alloc(&visitor.context_.pp_stack, sizeof(casm_update));
-
         size_t num_args = 0; 
+        uint64_t args[10];
         if (init.first != nullptr) {
           std::vector<Value> ident;
           ident.push_back(walk_expression_base(init.first));
-          pack_values_in_array(ident, &up->args[0]);
+          pack_values_in_array(ident, &args[0]);
           num_args = ident.size();
         } else {
-          up->args[0] = 0;
+          args[0] = 0;
         }
 
-        up->func = pair.second->id;
-        up->value = (void*) walk_expression_base(init.second).to_uint64_t();
-        DEBUG("INIT "<<pair.first << " value: "<<up->value << " num_args: " << num_args);
-
-        if (function_map[{&up->args[0], num_args}] != nullptr) {
+        if (function_map.count({&args[0], num_args}) != 0) {
           yy::location loc = init.first ? init.first->location+init.second->location : init.second->location;
-          visitor.driver_.error(loc, "function `"+pair.first+"("+args_to_str(up->args, num_args)+")` already initialized");
+          visitor.driver_.error(loc, "function `"+pair.first+"("+args_to_str(args, num_args)+")` already initialized");
           throw RuntimeException("function already initialized");
         }
-        function_map[{&up->args[0], num_args}] = up;
+        function_map.emplace(std::pair<ArgumentsKey, Value>({&args[0], num_args}, walk_expression_base(init.second)));
       }
     }
-    visitor.context_.functions[pair.second->id] = std::move(function_map);
+    visitor.context_.functions[pair.second->id] = std::pair<Symbol*, std::unordered_map<ArgumentsKey, Value>>(pair.second, function_map);
   }
 
-
   Symbol *program_sym = visitor.context_.symbol_table->get("program");
-  uint64_t args[1] = {0};
+  uint64_t args[10] = {0};
   while(true) {
-    casm_update *program_val = visitor.context_.get_function_value(program_sym, args);
-    DEBUG("program:= "<<program_val);
-    if (program_val->value == 0) {
+    Value program_val = visitor.context_.get_function_value(program_sym, args);
+    DEBUG(program_val.to_str());
+    if (program_val.type == Type::UNDEF) {
       break;
     }
-    walk_rule(reinterpret_cast<RuleNode*>(program_val->value));
+    walk_rule(program_val.value.rule);
     visitor.context_.apply_updates();
   }
 }

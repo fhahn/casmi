@@ -1,3 +1,5 @@
+#include "libutil/exceptions.h"
+
 #include "librt/pp_hashmap.h"
 
 #include "libinterpreter/execution_context.h"
@@ -13,7 +15,7 @@ ExecutionContext::ExecutionContext(SymbolTable *st, RuleNode *init) : symbol_tab
 
   pseudostate = 0;
 
-  functions = std::vector<std::unordered_map<ArgumentsKey, casm_update*>>(st->size());
+  functions = std::vector<std::pair<Symbol*, std::unordered_map<ArgumentsKey, Value>>>(st->size());
   Symbol *program_sym = st->get("program");
   // TODO location is wrong here
   program_sym->intitializers_ = new std::vector<std::pair<ExpressionBase*, ExpressionBase*>>();
@@ -35,10 +37,17 @@ void ExecutionContext::apply_updates() {
 
     auto& function_map = functions[u->func];
 
-    DEBUG("APPLY args "<<u->num_args << " argi "<<u->args[0]<<" func ");
-    function_map[{u->args, u->num_args}] = u;
+    DEBUG("APPLY args "<<u->num_args << " arg "<<u->args[0] << " " << u->args[1]<<" func "<<u->func);
 
-    i->used  = FALSE;
+    DEBUG("app type "<<type_to_str(function_map.first->return_type_));
+    Value v(function_map.first->return_type_, u);
+    if (v.type == Type::UNDEF) {
+      function_map.second.erase({u->args, u->num_args});
+    } else {
+      function_map.second[{u->args, u->num_args}] = v;
+    }
+
+    i->used = FALSE;
     i = i->previous;
   }
 
@@ -52,20 +61,24 @@ void ExecutionContext::apply_updates() {
 }
 
 
-void ExecutionContext::set_function(Symbol *sym, casm_update *update) {
+void ExecutionContext::set_function(Symbol *sym, uint64_t args[], Value& val) {
   auto function_map = functions[sym->id];
-  function_map[{&update->args[0], sym->argument_count()}] = update;
+  function_map.second.insert(std::pair<ArgumentsKey, Value>({&args[0], sym->argument_count()}, val));
 }
 
-casm_update* ExecutionContext::get_function_value(Symbol *sym, uint64_t args[]) {
-  auto function_map = functions[sym->id];
+static Value undef = Value();
+
+Value& ExecutionContext::get_function_value(Symbol *sym, uint64_t args[]) {
+  auto& function_map = functions[sym->id];
   try {
     if (sym->arguments_) {
-      return function_map.at({&args[0], sym->arguments_->size()});
+      DEBUG("get "<<sym->id << " " << sym->name()<<" size:"<<sym->arguments_->size() << " args "<<args[0]);
+      return function_map.second.at({&args[0], sym->arguments_->size()});
     } else {
-      return function_map.at({&args[0], 0});
+      return function_map.second.at({&args[0], 0});
     }
   } catch (const std::out_of_range &e) {
-    return nullptr;
+    undef.type = Type::UNDEF;
+    return undef;
   }
 }

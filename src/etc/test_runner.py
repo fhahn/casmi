@@ -41,15 +41,16 @@ def test_existing_parse(filename):
 
 
 def test_run_pass(filename):
+    short_filename = filename.replace(RUN_PASS_PATH, '')
+    sys.stdout.write('\t[run-pass] '+short_filename)
+
     p1 = subprocess.Popen([test_exe, filename], stderr=subprocess.PIPE)
     err = p1.communicate()[1]
-
-    short_filename = filename.replace(RUN_PASS_PATH, '')
     if p1.returncode == 0:
-        print('\t[run-pass] '+short_filename+' ... ok')
+        sys.stdout.write(' ... ok\n')
         return (True, '')
     else:
-        print('\t[run-pass] '+short_filename+' ... fail')
+        sys.stdout.write(' ... fail\n')
         error = ("{}\n"
                  "failed test {}\n"
                  "output: {}\n"

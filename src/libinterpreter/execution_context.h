@@ -8,13 +8,10 @@
 
 #include "libinterpreter/value.h"
 
-#include "librt/pp_hashmap.h"
-#include "librt/pp_casm_updateset_linkedhash.h"
+#include "librt/rt.h"
 
 #define UPDATESET_SIZE 65535
 
-
-CASM_UPDATE_TYPE(4);
 
 struct ArgumentsKey {
   uint64_t* p;
@@ -56,15 +53,15 @@ class ExecutionContext {
     std::vector<Symbol*> syms_to_apply;
 
   public:
-    std::vector<std::unordered_map<ArgumentsKey, casm_update*> > functions;
+    std::vector<std::pair<Symbol*, std::unordered_map<ArgumentsKey, Value> >> functions;
     SymbolTable *symbol_table;
     casm_updateset updateset;
     pp_mem pp_stack;
     uint64_t pseudostate;
 
     void apply_updates();
-    void set_function(Symbol *sym, casm_update *update);
-    casm_update* get_function_value(Symbol *sym, uint64_t args[]);
+    void set_function(Symbol *sym, uint64_t args[], Value& val);
+    Value& get_function_value(Symbol *sym, uint64_t args[]);
     ExecutionContext(SymbolTable *st, RuleNode *init);
 };
 

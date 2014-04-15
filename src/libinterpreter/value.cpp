@@ -26,7 +26,40 @@ Value::Value(std::string *string) : type(Type::STRING) {
   value.string = string;
 }
 
-Value::Value(Value&& other) : type(std::move(other.type)), value(other.value) {}
+Value::Value(Value& other) : type(other.type), value(other.value) {}
+
+Value::Value(const Value& other) : type(other.type), value(other.value) {}
+
+//Value::Value(Value&& other) : type(std::move(other.type)), value(other.value) {}
+
+Value::Value(Type t, casm_update* u) {
+  switch (t) {
+    case Type::UNDEF:
+      type = Type::UNDEF;
+      break;
+    case Type::RULEREF:
+      if (u->value != 0) {
+        type = Type::RULEREF; 
+        value.rule = reinterpret_cast<RuleNode*>(u->value);
+      } else {
+        type = Type::UNDEF; 
+      }
+      break;
+    case Type::INT:
+      type = Type::INT;
+      value.ival = (int64_t)u->value;
+      break;
+    case Type::STRING:
+      if (u->value != 0) {
+        type = Type::STRING;
+        value.string = reinterpret_cast<std::string*>(u->value);
+      } else {
+        type = Type::UNDEF;
+      }
+      break;
+    default: throw RuntimeException("Unsupported tye in apply");
+  }
+}
 
 void Value::add(const Value& other) {
   if (type == Type::UNDEF || other.type == Type::UNDEF) {
@@ -215,6 +248,6 @@ std::string Value::to_str() const {
       return std::move("@"+value.rule->name);
     case Type::STRING:
       return *value.string;
-    default: throw RuntimeException("Unsupported type in Value.to_str()");
+    default: throw RuntimeException("Unsupported type in Value.to_str() "+type_to_str(type));
   }
 }
