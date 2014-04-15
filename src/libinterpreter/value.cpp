@@ -192,7 +192,10 @@ uint64_t Value::to_uint64_t() const {
     case Type::SELF:
     case Type::UNDEF: // are UNDEF and SELF the same here?
       return 0;
-    case Type::RULEREF: return (uint64_t) value.rule;
+    case Type::RULEREF:
+      return (uint64_t) value.rule;
+    case Type::STRING: 
+      return (uint64_t) value.string;
     default: throw RuntimeException("Unsupported type in Value.to_uint64_t");
   }
 }

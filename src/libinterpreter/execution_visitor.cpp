@@ -157,6 +157,7 @@ Value&& ExecutionVisitor::visit_function_atom(FunctionAtom *atom, std::vector<Va
   switch (atom->symbol->return_type_) {
     case Type::INT: return std::move(Value((int64_t)data->value));
     case Type::RULEREF: return std::move(Value(reinterpret_cast<RuleNode*>(data->value)));
+    case Type::STRING: return std::move(Value(reinterpret_cast<std::string*>(data->value)));
     default: throw "invalid type in function";
   }
 
