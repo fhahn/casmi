@@ -4,7 +4,7 @@
 
 #include "libinterpreter/execution_context.h"
 
-ExecutionContext::ExecutionContext(const FunctionTable& st, RuleNode *init) : symbol_table(std::move(st)) {
+ExecutionContext::ExecutionContext(const SymbolTable<Function*>& st, RuleNode *init) : symbol_table(std::move(st)) {
   // use 10 MB for updateset data
   pp_mem_new(&updateset_data_, 1024 * 1024 * 10, "mem for main updateset");
   updateset.set =  pp_hashmap_new(&updateset_data_, 1024, "main updateset");

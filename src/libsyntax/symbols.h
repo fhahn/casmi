@@ -38,16 +38,46 @@ class Function {
     }
 };
 
-class FunctionTable {
+template<typename T>
+class SymbolTable {
   public:
-    std::map<std::string, Function*> table_;
+    std::map<std::string, T> table_;
 
-    FunctionTable();
-    ~FunctionTable();
+    SymbolTable() {}
 
-    size_t size() const;
-    bool add(Function *s);
-    Function *get(const std::string& name) const;
+    ~SymbolTable() {
+
+      // cleanup symbol table
+      /* TODO: check if element wise cleanup is needed
+      for (auto entry : table_) {
+        delete entry.second;
+      }
+      */
+    }
+
+    size_t size() const {
+      return table_.size();
+    }
+
+    bool add(T sym) {
+      try {
+        table_.at(sym->name());
+        return false;
+      } catch (const std::out_of_range& e) {
+        DEBUG("Add symbol "+sym->name());
+        table_[sym->name()] = sym;
+        return true;
+      }
+    }
+
+    T get(const std::string& name) const {
+      try {
+        return table_.at(name);
+      } catch (const std::out_of_range& e) {
+        return nullptr;
+      }
+    }
+
     Type get(const FunctionAtom *func) const;
 };
 
