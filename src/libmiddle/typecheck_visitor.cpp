@@ -56,7 +56,7 @@ void TypecheckVisitor::visit_call_pre(CallNode *call, Type expr) {
 
 
 void TypecheckVisitor::visit_call(CallNode *call, std::vector<Type>& argument_results) {
-  size_t args_defined = (call->rule->arguments) ? call->rule->arguments->size() : 0;
+  size_t args_defined = call->rule->arguments.size();
   size_t args_provided = argument_results.size();
   if (args_defined != args_provided) {
     driver_.error(call->location, "rule `"+call->rule_name+"` expects "
@@ -64,10 +64,10 @@ void TypecheckVisitor::visit_call(CallNode *call, std::vector<Type>& argument_re
                                   std::to_string(args_provided)+" where provided");
   } else {
     for (size_t i=0; i < args_defined; i++) {
-      if (call->rule->arguments->at(i) != argument_results[i]) {
+      if (call->rule->arguments[i]->type != argument_results[i]) {
         driver_.error(call->arguments->at(i)->location,
                       "argument "+std::to_string(i+1)+" of rule `"+ call->rule_name+
-                      "` must be `"+type_to_str(call->rule->arguments->at(i))+"` but was `"+
+                      "` must be `"+type_to_str(call->rule->arguments[i]->type)+"` but was `"+
                       type_to_str(argument_results[i])+"`");
       }
     }

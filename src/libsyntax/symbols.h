@@ -15,7 +15,7 @@ class FunctionAtom;
 
 class Function {
   private:
-    static int counter;
+    static uint64_t counter;
     const std::string name_;
 
   public:
@@ -36,6 +36,19 @@ class Function {
       if (arguments_ == nullptr) return 0;
       return arguments_->size();
     }
+};
+
+class Binding {
+  private:
+    static uint64_t counter;
+
+  public:
+    const uint64_t id;
+    const std::string name;
+    Type type;
+
+    Binding(const std::string& name);
+    Binding(const std::string& name, Type t);
 };
 
 template<typename T>

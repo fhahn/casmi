@@ -44,7 +44,12 @@ enum class NodeType {
 const std::string& type_to_str(NodeType t);
 
 class AstVisitor;
+
+// Forward declarations for libsyntax/symbols.h
 class Function;
+class Binding;
+
+// Forward delclarations for this file
 class Expression;
 class ExpressionBase;
 
@@ -88,11 +93,11 @@ class UnaryNode: public AstNode {
 class RuleNode: public UnaryNode {
   public:
     const std::string name;
-    const std::vector<Type> *arguments;
+    const std::vector<Binding*> arguments;
 
     RuleNode(yy::location& loc, AstNode *child, const std::string &name);
     RuleNode(yy::location& loc, AstNode *child, const std::string &name,
-        const std::vector<Type> *args);
+        const std::vector<Binding*>& args);
 };
 
 

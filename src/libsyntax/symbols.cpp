@@ -7,7 +7,7 @@
 // Implementation of Function
 // -------------------------------------------------------------------------
 
-int Function::counter = 0;
+uint64_t Function::counter = 0;
 
 Function::Function(const std::string name, std::vector<Type> *args,
               Type return_type, std::vector<std::pair<ExpressionBase*, ExpressionBase*>> *init) :
@@ -69,4 +69,15 @@ bool Function::equals(Function *other) const {
     }
   }
   return return_type_ == other->return_type_;
+}
+
+
+uint64_t Binding::counter = 0;
+
+Binding::Binding(const std::string& name) : Binding(name, Type::UNKNOWN) {}
+
+Binding::Binding(const std::string& name, Type t) : id(counter), name(name),
+    type(t)
+{
+  counter += 1;
 }
