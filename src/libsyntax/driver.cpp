@@ -18,11 +18,11 @@ Driver::Driver ()
     : error_(false), trace_parsing (false), trace_scanning (false) {
   file_ = nullptr;
   result = nullptr;
-  current_symbol_table = new SymbolTable();
+  current_symbol_table = new FunctionTable();
 
   std::vector<Type> *args = new std::vector<Type>();
   args->push_back(Type::SELF);
-  current_symbol_table->add(new Symbol("program", args, Type::RULEREF, nullptr));
+  current_symbol_table->add(new Function("program", args, Type::RULEREF, nullptr));
 
   lines_.push_back("");
 }

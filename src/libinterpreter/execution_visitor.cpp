@@ -201,10 +201,10 @@ void ExecutionWalker::run() {
         function_map.emplace(std::pair<ArgumentsKey, Value>({&args[0], num_args}, walk_expression_base(init.second)));
       }
     }
-    visitor.context_.functions[pair.second->id] = std::pair<Symbol*, std::unordered_map<ArgumentsKey, Value>>(pair.second, function_map);
+    visitor.context_.functions[pair.second->id] = std::pair<Function*, std::unordered_map<ArgumentsKey, Value>>(pair.second, function_map);
   }
 
-  Symbol *program_sym = visitor.context_.symbol_table->get("program");
+  Function *program_sym = visitor.context_.symbol_table->get("program");
   uint64_t args[10] = {0};
   while(true) {
     Value program_val = visitor.context_.get_function_value(program_sym, args);

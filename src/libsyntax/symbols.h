@@ -13,8 +13,7 @@ class ExpressionBase;
 class Expression;
 class FunctionAtom;
 
-// Only used for functions at the moment
-class Symbol {
+class Function {
   private:
     static int counter;
     const std::string name_;
@@ -25,13 +24,13 @@ class Symbol {
     Type return_type_;
     const uint64_t id;
 
-    Symbol(const std::string name, std::vector<Type> *args, Type return_type,
+    Function(const std::string name, std::vector<Type> *args, Type return_type,
            std::vector<std::pair<ExpressionBase*, ExpressionBase*>> *init);
-    Symbol(const std::string name);
-    ~Symbol();
+    Function(const std::string name);
+    ~Function();
 
     const std::string& name() const;
-    bool equals(Symbol *other) const;
+    bool equals(Function *other) const;
     const std::string to_str() const;
     inline size_t argument_count() const {
       if (arguments_ == nullptr) return 0;
@@ -39,20 +38,20 @@ class Symbol {
     }
 };
 
-class SymbolTable {
+class FunctionTable {
   private:
-    //SymbolTable *outer_scope_;
+    //FunctionTable *outer_scope_;
 
   public:
-    std::map<std::string, Symbol*> table_;
+    std::map<std::string, Function*> table_;
 
-    SymbolTable();
-    //SymbolTable(SymbolTable *outer);
-    ~SymbolTable();
+    FunctionTable();
+    //FunctionTable(FunctionTable *outer);
+    ~FunctionTable();
 
     size_t size() const;
-    bool add(Symbol *s);
-    Symbol *get(const std::string& name) const;
+    bool add(Function *s);
+    Function *get(const std::string& name) const;
     Type get(const FunctionAtom *func) const;
 };
 

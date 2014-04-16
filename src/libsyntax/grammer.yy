@@ -83,7 +83,7 @@
 %type <INT_T> INTCONST
 %type <FLOAT_T> FLOATCONST
 %type <std::string> STRCONST
-%type <Symbol*> FUNCTION_DEFINITION
+%type <Function*> FUNCTION_DEFINITION
 %type <FunctionAtom*> FUNCTION_SYNTAX 
 %type <std::pair<std::vector<Type>*, Type>> FUNCTION_SIGNATURE
 %type <Type> NEW_TYPE_SYNTAX PARAM
@@ -171,13 +171,13 @@ DERIVED_SYNTAX: DERIVED IDENTIFIER "(" PARAM_LIST ")" "=" EXPRESSION
               ;
 
 FUNCTION_DEFINITION: FUNCTION "(" IDENTIFIER_LIST ")" IDENTIFIER FUNCTION_SIGNATURE INITIALIZERS
-                   { $$ = new Symbol($5, $6.first, $6.second, $7); }
+                   { $$ = new Function($5, $6.first, $6.second, $7); }
            | FUNCTION "(" IDENTIFIER_LIST ")" IDENTIFIER FUNCTION_SIGNATURE
-                   { $$ = new Symbol($5, $6.first, $6.second, nullptr); }
+                   { $$ = new Function($5, $6.first, $6.second, nullptr); }
            | FUNCTION IDENTIFIER FUNCTION_SIGNATURE INITIALIZERS
-                   { $$ = new Symbol($2, $3.first, $3.second, $4); }
+                   { $$ = new Function($2, $3.first, $3.second, $4); }
            | FUNCTION IDENTIFIER FUNCTION_SIGNATURE
-                   { $$ = new Symbol($2, $3.first, $3.second, nullptr); }
+                   { $$ = new Function($2, $3.first, $3.second, nullptr); }
            ;
 
 

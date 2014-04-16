@@ -115,7 +115,7 @@ bool AstListNode::equals(AstNode *other) {
   }
 }
 
-FunctionDefNode::FunctionDefNode(yy::location& loc, Symbol* sym) 
+FunctionDefNode::FunctionDefNode(yy::location& loc, Function* sym) 
     : AstNode(loc, NodeType::FUNCTION), sym(sym) {}
 
 FunctionDefNode::~FunctionDefNode() {

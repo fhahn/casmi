@@ -4,7 +4,7 @@
 
 #include "libinterpreter/execution_context.h"
 
-ExecutionContext::ExecutionContext(SymbolTable *st, RuleNode *init) : symbol_table(st) {
+ExecutionContext::ExecutionContext(FunctionTable *st, RuleNode *init) : symbol_table(st) {
   // use 10 MB for updateset data
   pp_mem_new(&updateset_data_, 1024 * 1024 * 10, "mem for main updateset");
   updateset.set =  pp_hashmap_new(&updateset_data_, 1024, "main updateset");
@@ -15,8 +15,8 @@ ExecutionContext::ExecutionContext(SymbolTable *st, RuleNode *init) : symbol_tab
 
   pseudostate = 0;
 
-  functions = std::vector<std::pair<Symbol*, std::unordered_map<ArgumentsKey, Value>>>(st->size());
-  Symbol *program_sym = st->get("program");
+  functions = std::vector<std::pair<Function*, std::unordered_map<ArgumentsKey, Value>>>(st->size());
+  Function *program_sym = st->get("program");
   // TODO location is wrong here
   program_sym->intitializers_ = new std::vector<std::pair<ExpressionBase*, ExpressionBase*>>();
   RuleAtom *init_atom = new RuleAtom(init->location, std::string(init->name));
@@ -39,7 +39,6 @@ void ExecutionContext::apply_updates() {
 
     DEBUG("APPLY args "<<u->num_args << " arg "<<u->args[0] << " " << u->args[1]<<" func "<<u->func);
 
-    DEBUG("app type "<<type_to_str(function_map.first->return_type_));
     Value v(function_map.first->return_type_, u);
     if (v.type == Type::UNDEF) {
       function_map.second.erase({u->args, u->num_args});
@@ -61,14 +60,14 @@ void ExecutionContext::apply_updates() {
 }
 
 
-void ExecutionContext::set_function(Symbol *sym, uint64_t args[], Value& val) {
+void ExecutionContext::set_function(Function *sym, uint64_t args[], Value& val) {
   auto function_map = functions[sym->id];
   function_map.second.insert(std::pair<ArgumentsKey, Value>({&args[0], sym->argument_count()}, val));
 }
 
 static Value undef = Value();
 
-Value& ExecutionContext::get_function_value(Symbol *sym, uint64_t args[]) {
+Value& ExecutionContext::get_function_value(Function *sym, uint64_t args[]) {
   auto& function_map = functions[sym->id];
   try {
     if (sym->arguments_) {

@@ -4,25 +4,25 @@
 
 
 // -------------------------------------------------------------------------
-// Implementation of Symbol
+// Implementation of Function
 // -------------------------------------------------------------------------
 
-int Symbol::counter = 0;
+int Function::counter = 0;
 
-Symbol::Symbol(const std::string name, std::vector<Type> *args,
+Function::Function(const std::string name, std::vector<Type> *args,
               Type return_type, std::vector<std::pair<ExpressionBase*, ExpressionBase*>> *init) :
                 name_(name), arguments_(args), intitializers_(init),
                 return_type_(return_type), id(counter) {
   counter += 1;
 }
 
-Symbol::Symbol(const std::string name) :
+Function::Function(const std::string name) :
         name_(name), arguments_(nullptr), intitializers_(nullptr),
         return_type_(Type::UNKNOWN), id(counter) {
   counter += 1;
 }
 
-Symbol::~Symbol() {
+Function::~Function() {
   delete arguments_;
   if (intitializers_ != nullptr) {
     for (std::pair<ExpressionBase*, ExpressionBase*> e : *intitializers_) {
@@ -33,11 +33,11 @@ Symbol::~Symbol() {
   }
 }
 
-const std::string& Symbol::name() const {
+const std::string& Function::name() const {
   return name_;
 }
 
-const std::string Symbol::to_str() const {
+const std::string Function::to_str() const {
   std::string res = name_;
 
   if (arguments_ == nullptr) {
@@ -53,7 +53,7 @@ const std::string Symbol::to_str() const {
   return res;
 }
 
-bool Symbol::equals(Symbol *other) const {
+bool Function::equals(Function *other) const {
   if (name_ != other->name_) {
     return false;
   }
@@ -72,20 +72,20 @@ bool Symbol::equals(Symbol *other) const {
 }
 
 // -------------------------------------------------------------------------
-// Implementation of SymbolTable
+// Implementation of FunctionTable
 // -------------------------------------------------------------------------
-SymbolTable::SymbolTable() {}
+FunctionTable::FunctionTable() {}
 
-//SymbolTable::SymbolTable(SymbolTable *outer) : outer_scope_(outer) {}
+//FunctionTable::FunctionTable(FunctionTable *outer) : outer_scope_(outer) {}
 
-SymbolTable::~SymbolTable() {
+FunctionTable::~FunctionTable() {
   // cleanup symbol table
   for (auto entry : table_) {
     delete entry.second;
   }
 }
 
-bool SymbolTable::add(Symbol *sym) {
+bool FunctionTable::add(Function *sym) {
   try {
     table_.at(sym->name());
     return false;
@@ -96,7 +96,7 @@ bool SymbolTable::add(Symbol *sym) {
   }
 }
 
-Symbol *SymbolTable::get(const std::string& name) const {
+Function *FunctionTable::get(const std::string& name) const {
   try {
     return table_.at(name);
   } catch (const std::out_of_range& e) {
@@ -104,6 +104,6 @@ Symbol *SymbolTable::get(const std::string& name) const {
   }
 }
 
-size_t SymbolTable::size() const {
+size_t FunctionTable::size() const {
   return table_.size();
 }

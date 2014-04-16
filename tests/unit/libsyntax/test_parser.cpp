@@ -86,7 +86,7 @@ TEST_F(ParserTest, parser_test_function_symbol_with_multiple_params) {
   std::vector<Type> *types = new std::vector<Type>;
   types->push_back(Type::INT);
   types->push_back(Type::INT);
-  Symbol x("x", types, Type::INT, nullptr);
+  Function x("x", types, Type::INT, nullptr);
 
   EXPECT_EQ(true, x.equals(driver_.current_symbol_table->get("x")));
 

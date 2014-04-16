@@ -50,19 +50,19 @@ namespace std {
 class ExecutionContext {
   private:
     pp_mem updateset_data_;
-    std::vector<Symbol*> syms_to_apply;
+    std::vector<Function*> syms_to_apply;
 
   public:
-    std::vector<std::pair<Symbol*, std::unordered_map<ArgumentsKey, Value> >> functions;
-    SymbolTable *symbol_table;
+    std::vector<std::pair<Function*, std::unordered_map<ArgumentsKey, Value> >> functions;
+    FunctionTable *symbol_table;
     casm_updateset updateset;
     pp_mem pp_stack;
     uint64_t pseudostate;
 
     void apply_updates();
-    void set_function(Symbol *sym, uint64_t args[], Value& val);
-    Value& get_function_value(Symbol *sym, uint64_t args[]);
-    ExecutionContext(SymbolTable *st, RuleNode *init);
+    void set_function(Function *sym, uint64_t args[], Value& val);
+    Value& get_function_value(Function *sym, uint64_t args[]);
+    ExecutionContext(FunctionTable *st, RuleNode *init);
 };
 
 #endif //CASMI_LIBINTERPRETER_EXEC_CONTEXT

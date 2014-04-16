@@ -44,7 +44,7 @@ enum class NodeType {
 const std::string& type_to_str(NodeType t);
 
 class AstVisitor;
-class Symbol;
+class Function;
 class Expression;
 class ExpressionBase;
 
@@ -98,8 +98,8 @@ class RuleNode: public UnaryNode {
 
 class FunctionDefNode: public AstNode {
   public:
-    Symbol *sym;
-    FunctionDefNode(yy::location& loc, Symbol *sym);
+    Function *sym;
+    FunctionDefNode(yy::location& loc, Function *sym);
     ~FunctionDefNode();
 };
 
@@ -168,7 +168,7 @@ class BooleanAtom : public AtomNode {
 
 class FunctionAtom : public AtomNode {
   public:
-    Symbol *symbol;
+    Function *symbol;
     const std::string name;
     std::vector<ExpressionBase*> *arguments;
 

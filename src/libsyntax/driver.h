@@ -47,7 +47,7 @@ class Driver {
     RuleNode *get_init_rule() const;
 
     // symbol table stuff
-    SymbolTable *current_symbol_table;
+    FunctionTable *current_symbol_table;
 };
 
 class StringDriver: public Driver {
