@@ -419,7 +419,7 @@ STATEMENT: ASSERT_SYNTAX { $$ = $1; }
          | FORALL_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
          | ITERATE_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
          | SKIP  { $$ = new AstNode(NodeType::SKIP); }
-         | IDENTIFIER  { $$ = new AstNode(NodeType::STATEMENT); }
+         | IDENTIFIER  { $$ = new CallNode(@$, $1, nullptr); }
          | INTERN EXPRESSION_LIST  { $$ = new AstNode(NodeType::STATEMENT); }
          | OBJDUMP "(" IDENTIFIER ")"   { $$ = new AstNode(NodeType::STATEMENT);}
          ;

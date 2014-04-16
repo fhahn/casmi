@@ -1,0 +1,11 @@
+rule main = {
+  call (@a) ( 1, "test" )
+  //~^ argument 2 of indirectly called rule `a` must be `Int` but was `String`
+
+  program( self ) := undef
+}
+
+rule a( b : Int, c : Int ) = {
+  skip
+}
+init main

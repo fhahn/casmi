@@ -1,0 +1,8 @@
+// error annotation
+
+rule main = {
+    program( self ) := 30
+    //~^  type `RuleRef` of `program` does not match type `Int` of expression
+}
+
+init main

@@ -1,7 +1,9 @@
 // error annotation @4
 
 rule main = {
-  call (bar)(3)
+  call (@bar)(3)
+  //~^ indirectly called rule `bar` expects 0 arguments but 1 where provided
+
   program( self ) := undef
 }
 

@@ -257,7 +257,6 @@ class UpdateNode: public AstNode {
 class CallNode: public AstNode {
   public:
     const std::string rule_name;
-    const bool direct;
     RuleNode *rule;
     std::vector<ExpressionBase*> *arguments;
     ExpressionBase *ruleref;

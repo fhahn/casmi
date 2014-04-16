@@ -1,0 +1,9 @@
+// error annotation @4
+
+rule main = {
+  call (@bar)(3,"Hallo")
+  //~^ argument 2 of indirectly called rule `bar` must be `Int` but was `String`
+}
+
+rule bar( p1 : Int, p2 : Int ) = skip
+init main

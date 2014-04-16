@@ -155,8 +155,6 @@ objdump { return yy::casmi_parser::make_OBJDUMP(loc); }
 [0-9]+[/][0-9]+ { return yy::casmi_parser::make_RATIONALCONST(loc); }
 [0-9]+r { return yy::casmi_parser::make_RATIONALCONST(loc); }
 
-
-
 [ \t\r]+ loc.step();/* ignore spaces */
 
 \n+ {loc.lines(yyleng); loc.step(); } /* ignore newlines too, but reset yycolumn */

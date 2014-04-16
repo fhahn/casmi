@@ -1,9 +1,0 @@
-// error annotation
-
-rule main = {
-	program( self ) := 30
-}
-
-
-init main
-

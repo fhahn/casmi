@@ -27,7 +27,7 @@ class TypecheckVisitor {
     void visit_body_elements(AstListNode *body_elements) { UNUSED(body_elements); }
     void visit_function_def(FunctionDefNode *def,
                             const std::vector<std::pair<Type, Type>>& initializers);
-    void visit_rule(RuleNode *rule) { UNUSED(rule); }
+    void visit_rule(RuleNode *rule);
     void visit_statement(AstNode *stmt) { UNUSED(stmt); }
     void visit_parblock(UnaryNode *parblock) { UNUSED(parblock); }
     void visit_statements(AstListNode *stmts) { UNUSED(stmts); }

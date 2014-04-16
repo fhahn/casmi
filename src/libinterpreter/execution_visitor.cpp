@@ -64,6 +64,31 @@ void ExecutionVisitor::visit_call_pre(CallNode *call, Value& expr) {
 
 void ExecutionVisitor::visit_call(CallNode *call, std::vector<Value> &argument_results) {
   UNUSED(call);
+
+  DEBUG("CALL");
+  if (call->ruleref) {
+    size_t args_defined = call->rule->arguments.size();
+    size_t args_provided = argument_results.size();
+    DEBUG(args_defined << " INDIREC "<<args_provided);
+    if (args_defined != args_provided) {
+      driver_.error(call->location, "indirectly called rule `"+call->rule->name+
+                    "` expects "+std::to_string(args_defined)+" arguments but "+
+                    std::to_string(args_provided)+" where provided");
+      throw RuntimeException("Invalid indirect call");
+    } else {
+      for (size_t i=0; i < args_defined; i++) {
+        if (call->rule->arguments[i] != argument_results[i].type) {
+          driver_.error(call->arguments->at(i)->location,
+                        "argument "+std::to_string(i+1)+" of indirectly called rule `"+
+                        call->rule->name+"` must be `"+
+                        type_to_str(call->rule->arguments[i])+"` but was `"+
+                        type_to_str(argument_results[i].type)+"`");
+          throw RuntimeException("Invalid indirect call");
+        }
+      }
+    }
+  }
+ 
   current_rule_bindings = &argument_results;
 }
 

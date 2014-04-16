@@ -17,6 +17,11 @@ void TypecheckVisitor::visit_function_def(FunctionDefNode *def,
   }
 }
 
+void TypecheckVisitor::visit_rule(RuleNode *rule) {
+  current_rule_binding_types = &rule->arguments;
+  current_rule_binding_offsets = &rule->binding_offsets;
+}
+
 void TypecheckVisitor::visit_ifthenelse(IfThenElseNode *node, Type cond) {
   if (cond != Type::BOOLEAN) {
     driver_.error(node->condition_->location,
@@ -56,6 +61,11 @@ void TypecheckVisitor::visit_call_pre(CallNode *call, Type expr) {
 
 
 void TypecheckVisitor::visit_call(CallNode *call, std::vector<Type>& argument_results) {
+  // typecheck for indirect calls happens during execution
+  if (call->ruleref) {
+    return;
+  }
+
   size_t args_defined = call->rule->arguments.size();
   size_t args_provided = argument_results.size();
   if (args_defined != args_provided) {
@@ -72,8 +82,6 @@ void TypecheckVisitor::visit_call(CallNode *call, std::vector<Type>& argument_re
       }
     }
   }
-  current_rule_binding_types = &call->rule->arguments;
-  current_rule_binding_offsets = &call->rule->binding_offsets;
 }
 
 void TypecheckVisitor::visit_call_post(CallNode *call) {
@@ -135,8 +143,8 @@ Type TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
     if (current_rule_binding_offsets &&
         current_rule_binding_offsets->count(atom->name) &&
         !atom->arguments) {
-      size_t binding_offset = current_rule_binding_offsets->at(atom->name);
-      return current_rule_binding_types->at(binding_offset);
+      atom->binding_offset = current_rule_binding_offsets->at(atom->name);
+      return current_rule_binding_types->at(atom->binding_offset);
     }
 
     driver_.error(atom->location, "use of undefined function `"+atom->name+"`");

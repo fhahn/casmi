@@ -1,0 +1,11 @@
+// error annotation @4
+// TODO: better error message: only calls with 0 args allowed by this syntax
+
+rule main = {
+    x
+    //~^ rule `x` expects 2 arguments but 0 where provided
+}
+
+rule x( a:Int, b:Boolean ) = skip
+
+init main

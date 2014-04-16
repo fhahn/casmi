@@ -4,9 +4,9 @@ function a: -> RuleRef initially { @bar }
 
 rule main = {
   call (a)(3,"Hallo")
-  program( self ) := undef
+  //~^ argument 2 of indirectly called rule `bar` must be `Int` but was `String`
+
 }
 
 rule bar( p1 : Int, p2 : Int ) = skip
 init main
-

@@ -2,7 +2,7 @@
 
 rule main = {
   call (1) ( "hallo", "welt" )
-  program( self ) := undef
+  //~^ Indirect target must be a `Ruleref` but was `Int`
 }
 
 rule a( b : String, c : String) = {

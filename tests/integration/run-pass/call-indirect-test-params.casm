@@ -1,0 +1,13 @@
+rule main = {
+    call (@ruleWithParams)( 2, 3 )
+
+}
+
+rule ruleWithParams( a : Int, b : Int ) = {
+    assert a=2
+    assert b=3
+
+    program( self ) := undef
+}
+
+init main

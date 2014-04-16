@@ -1,0 +1,10 @@
+// error annotation @4
+
+rule main = {
+    y
+    //~^ no rule with name `y` found
+}
+
+rule x( a:Int, b:Boolean ) = skip
+
+init main
