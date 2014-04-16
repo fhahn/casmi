@@ -121,7 +121,7 @@ Type TypecheckVisitor::visit_expression_single(Expression *expr, Type val) {
 
 Type TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
                                            const std::vector<Type> &expr_results) {
-  Function *sym = driver_.current_symbol_table->get(atom->name);
+  Function *sym = driver_.function_table.get(atom->name);
   if (!sym) {
     driver_.error(atom->location, "use of undefined function `"+atom->name+"`");
     return Type::INVALID;

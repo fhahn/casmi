@@ -153,7 +153,7 @@ int main (int argc, char *argv[]) {
       if (!driver.ok()) {
         res = EXIT_FAILURE;
       } else {
-        ExecutionContext ctx(driver.current_symbol_table, driver.get_init_rule());
+        ExecutionContext ctx(driver.function_table, driver.get_init_rule());
         ExecutionVisitor visitor(ctx, driver);
         ExecutionWalker walker(visitor);
         try {

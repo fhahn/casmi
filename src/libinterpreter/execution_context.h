@@ -54,15 +54,16 @@ class ExecutionContext {
 
   public:
     std::vector<std::pair<Function*, std::unordered_map<ArgumentsKey, Value> >> functions;
-    FunctionTable *symbol_table;
+    const FunctionTable symbol_table;
     casm_updateset updateset;
     pp_mem pp_stack;
     uint64_t pseudostate;
 
+    ExecutionContext(const FunctionTable& st, RuleNode *init);
+
     void apply_updates();
     void set_function(Function *sym, uint64_t args[], Value& val);
     Value& get_function_value(Function *sym, uint64_t args[]);
-    ExecutionContext(FunctionTable *st, RuleNode *init);
 };
 
 #endif //CASMI_LIBINTERPRETER_EXEC_CONTEXT

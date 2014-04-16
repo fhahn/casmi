@@ -76,13 +76,13 @@ bool Function::equals(Function *other) const {
 // -------------------------------------------------------------------------
 FunctionTable::FunctionTable() {}
 
-//FunctionTable::FunctionTable(FunctionTable *outer) : outer_scope_(outer) {}
-
 FunctionTable::~FunctionTable() {
-  // cleanup symbol table
+  // TODO: check if cleanup is necessary
+  /*
   for (auto entry : table_) {
     delete entry.second;
   }
+  */
 }
 
 bool FunctionTable::add(Function *sym) {

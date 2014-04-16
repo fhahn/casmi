@@ -131,7 +131,7 @@ BODY_ELEMENT: PROVIDER_SYNTAX { $$ = new AstNode(NodeType::PROVIDER); }
            | ENUM_SYNTAX { $$ = new AstNode(NodeType::ENUM); }
            | FUNCTION_DEFINITION {
                 $$ = new FunctionDefNode(@$, $1);
-                if (!driver.current_symbol_table->add($1)) {
+                if (!driver.function_table.add($1)) {
                     driver.error(@$, "redefinition of symbol");
                     // if another symbol with same name exists we need to delete
                     // the symbol here, because it is not inserted in the symbol table

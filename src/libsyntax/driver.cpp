@@ -15,14 +15,13 @@ extern int yylex_destroy(void);
 Driver *global_driver;
 
 Driver::Driver () 
-    : error_(false), trace_parsing (false), trace_scanning (false) {
+    : error_(false), trace_parsing (false), trace_scanning (false), function_table() {
   file_ = nullptr;
   result = nullptr;
-  current_symbol_table = new FunctionTable();
 
   std::vector<Type> *args = new std::vector<Type>();
   args->push_back(Type::SELF);
-  current_symbol_table->add(new Function("program", args, Type::RULEREF, nullptr));
+  function_table.add(new Function("program", args, Type::RULEREF, nullptr));
 
   lines_.push_back("");
 }
@@ -32,8 +31,6 @@ Driver::~Driver () {
     fclose(file_);
   }
   yylex_destroy();
-
-  delete current_symbol_table;
 }
 
 size_t Driver::get_next_chars(char buf[], size_t max_size) {

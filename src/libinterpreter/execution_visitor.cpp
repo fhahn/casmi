@@ -177,7 +177,7 @@ void AstWalker<ExecutionVisitor, Value>::walk_ifthenelse(IfThenElseNode* node) {
 }
 
 void ExecutionWalker::run() {
-  for (auto pair: visitor.context_.symbol_table->table_) {
+  for (auto pair: visitor.context_.symbol_table.table_) {
     auto function_map = std::unordered_map<ArgumentsKey, Value>();
 
     if (pair.second->intitializers_ != nullptr) {
@@ -204,7 +204,7 @@ void ExecutionWalker::run() {
     visitor.context_.functions[pair.second->id] = std::pair<Function*, std::unordered_map<ArgumentsKey, Value>>(pair.second, function_map);
   }
 
-  Function *program_sym = visitor.context_.symbol_table->get("program");
+  Function *program_sym = visitor.context_.symbol_table.get("program");
   uint64_t args[10] = {0};
   while(true) {
     Value program_val = visitor.context_.get_function_value(program_sym, args);

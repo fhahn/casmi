@@ -70,9 +70,9 @@ TEST_F(ParserTest, parse_simple_symbols) {
   AstNode *root = driver_.parse(test);
 
   // TODO: Check why size of symbol table is 3
-  // EXPECT_EQ(2, driver_.current_symbol_table->size());
-  EXPECT_EQ("x", driver_.current_symbol_table->get("x")->name());
-  EXPECT_EQ("y", driver_.current_symbol_table->get("y")->name());
+  // EXPECT_EQ(2, driver_.function_table.size());
+  EXPECT_EQ("x", driver_.function_table.get("x")->name());
+  EXPECT_EQ("y", driver_.function_table.get("y")->name());
 
   delete root;
 }
@@ -88,7 +88,7 @@ TEST_F(ParserTest, parser_test_function_symbol_with_multiple_params) {
   types->push_back(Type::INT);
   Function x("x", types, Type::INT, nullptr);
 
-  EXPECT_EQ(true, x.equals(driver_.current_symbol_table->get("x")));
+  EXPECT_EQ(true, x.equals(driver_.function_table.get("x")));
 
   delete root;
 }

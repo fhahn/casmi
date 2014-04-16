@@ -39,14 +39,10 @@ class Function {
 };
 
 class FunctionTable {
-  private:
-    //FunctionTable *outer_scope_;
-
   public:
     std::map<std::string, Function*> table_;
 
     FunctionTable();
-    //FunctionTable(FunctionTable *outer);
     ~FunctionTable();
 
     size_t size() const;

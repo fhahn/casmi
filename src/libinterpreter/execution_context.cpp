@@ -4,7 +4,7 @@
 
 #include "libinterpreter/execution_context.h"
 
-ExecutionContext::ExecutionContext(FunctionTable *st, RuleNode *init) : symbol_table(st) {
+ExecutionContext::ExecutionContext(const FunctionTable& st, RuleNode *init) : symbol_table(std::move(st)) {
   // use 10 MB for updateset data
   pp_mem_new(&updateset_data_, 1024 * 1024 * 10, "mem for main updateset");
   updateset.set =  pp_hashmap_new(&updateset_data_, 1024, "main updateset");
@@ -15,8 +15,8 @@ ExecutionContext::ExecutionContext(FunctionTable *st, RuleNode *init) : symbol_t
 
   pseudostate = 0;
 
-  functions = std::vector<std::pair<Function*, std::unordered_map<ArgumentsKey, Value>>>(st->size());
-  Function *program_sym = st->get("program");
+  functions = std::vector<std::pair<Function*, std::unordered_map<ArgumentsKey, Value>>>(symbol_table.size());
+  Function *program_sym = symbol_table.get("program");
   // TODO location is wrong here
   program_sym->intitializers_ = new std::vector<std::pair<ExpressionBase*, ExpressionBase*>>();
   RuleAtom *init_atom = new RuleAtom(init->location, std::string(init->name));
