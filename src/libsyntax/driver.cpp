@@ -116,6 +116,8 @@ bool Driver::add(RuleNode *rule_root) {
     return false;
   } catch (const std::out_of_range& e) {
     DEBUG("Add symbol "+rule_root->name);
+    rule_root->binding_offsets = std::move(binding_offsets);
+    binding_offsets.clear(); // is this necessary? move should empty map
     rules_map_[rule_root->name] = rule_root;
     return true;
   }

@@ -58,7 +58,7 @@ class ExecutionContext {
     casm_updateset updateset;
     pp_mem pp_stack;
     uint64_t pseudostate;
-
+    
     ExecutionContext(const SymbolTable<Function*>& st, RuleNode *init);
 
     void apply_updates();

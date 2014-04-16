@@ -64,7 +64,12 @@ void ExecutionVisitor::visit_call_pre(CallNode *call, Value& expr) {
 
 void ExecutionVisitor::visit_call(CallNode *call, std::vector<Value> &argument_results) {
   UNUSED(call);
-  UNUSED(argument_results);
+  current_rule_bindings = &argument_results;
+}
+
+void ExecutionVisitor::visit_call_post(CallNode *call) {
+  UNUSED(call);
+  current_rule_bindings = nullptr;
 }
 
 void ExecutionVisitor::visit_print(PrintNode *node, const std::vector<Value> &arguments) {
@@ -136,6 +141,11 @@ Value&& ExecutionVisitor::visit_expression_single(Expression *expr, Value &val) 
 }
 
 Value&& ExecutionVisitor::visit_function_atom(FunctionAtom *atom, std::vector<Value> &expr_results) {
+
+  if (!atom->symbol) {
+    return std::move(Value(current_rule_bindings->at(atom->binding_offset)));
+  }
+
   size_t num_args = 1;
   if (expr_results.size() > 0) {
     num_args = expr_results.size();

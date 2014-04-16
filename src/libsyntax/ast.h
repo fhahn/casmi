@@ -93,11 +93,12 @@ class UnaryNode: public AstNode {
 class RuleNode: public UnaryNode {
   public:
     const std::string name;
-    const std::vector<Binding*> arguments;
+    const std::vector<Type> arguments;
+    std::map<std::string, size_t> binding_offsets;
 
     RuleNode(yy::location& loc, AstNode *child, const std::string &name);
     RuleNode(yy::location& loc, AstNode *child, const std::string &name,
-        const std::vector<Binding*>& args);
+        const std::vector<Type>& args);
 };
 
 
@@ -174,6 +175,7 @@ class BooleanAtom : public AtomNode {
 class FunctionAtom : public AtomNode {
   public:
     Function *symbol;
+    size_t binding_offset;
     const std::string name;
     std::vector<ExpressionBase*> *arguments;
 

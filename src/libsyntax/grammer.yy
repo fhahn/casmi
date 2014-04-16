@@ -87,8 +87,8 @@
 %type <FunctionAtom*> FUNCTION_SYNTAX 
 %type <std::pair<std::vector<Type>*, Type>> FUNCTION_SIGNATURE
 %type <Type> NEW_TYPE_SYNTAX
-%type <Binding*> PARAM
-%type <std::vector<Binding*>> PARAM_LIST_NO_COMMA PARAM_LIST
+%type <Type> PARAM
+%type <std::vector<Type>> PARAM_LIST_NO_COMMA PARAM_LIST
 %type <std::vector<Type>*> TYPE_IDENTIFIER_STARLIST
 %type <std::string> RULEREF
 %type <IfThenElseNode*> IFTHENELSE
@@ -196,7 +196,10 @@ FUNCTION_SIGNATURE: ":" ARROW NEW_TYPE_SYNTAX
                   ;
 
 PARAM: IDENTIFIER OLD_TYPE_SYNTAX  
-     | IDENTIFIER ":" NEW_TYPE_SYNTAX { $$ = new Binding($1, $3); }
+     | IDENTIFIER ":" NEW_TYPE_SYNTAX {
+        driver.binding_offsets[$1] = driver.binding_offsets.size(); 
+        $$ = $3;
+     }
      | IDENTIFIER
      ;
 

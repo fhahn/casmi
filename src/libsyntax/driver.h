@@ -48,6 +48,9 @@ class Driver {
 
     // functions
     SymbolTable<Function*> function_table;
+
+    // Bindings
+    std::map<std::string, size_t> binding_offsets;
 };
 
 class StringDriver: public Driver {

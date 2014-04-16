@@ -1,7 +1,7 @@
 #include "libmiddle/typecheck_visitor.h"
 
 
-TypecheckVisitor::TypecheckVisitor(Driver& driver) : driver_(driver) {}
+TypecheckVisitor::TypecheckVisitor(Driver& driver) : driver_(driver), current_rule_binding_types(nullptr), current_rule_binding_offsets(nullptr) {}
 
 void TypecheckVisitor::visit_function_def(FunctionDefNode *def,
                                           const std::vector<std::pair<Type, Type>>& initializers) {
@@ -64,14 +64,22 @@ void TypecheckVisitor::visit_call(CallNode *call, std::vector<Type>& argument_re
                                   std::to_string(args_provided)+" where provided");
   } else {
     for (size_t i=0; i < args_defined; i++) {
-      if (call->rule->arguments[i]->type != argument_results[i]) {
+      if (call->rule->arguments[i] != argument_results[i]) {
         driver_.error(call->arguments->at(i)->location,
                       "argument "+std::to_string(i+1)+" of rule `"+ call->rule_name+
-                      "` must be `"+type_to_str(call->rule->arguments[i]->type)+"` but was `"+
+                      "` must be `"+type_to_str(call->rule->arguments[i])+"` but was `"+
                       type_to_str(argument_results[i])+"`");
       }
     }
   }
+  current_rule_binding_types = &call->rule->arguments;
+  current_rule_binding_offsets = &call->rule->binding_offsets;
+}
+
+void TypecheckVisitor::visit_call_post(CallNode *call) {
+  UNUSED(call);
+  current_rule_binding_types = nullptr;
+  current_rule_binding_offsets = nullptr;
 }
 
 void TypecheckVisitor::check_numeric_operator(const yy::location& loc, 
@@ -123,6 +131,14 @@ Type TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
                                            const std::vector<Type> &expr_results) {
   Function *sym = driver_.function_table.get(atom->name);
   if (!sym) {
+    // check if a rule parameter with this name was defined
+    if (current_rule_binding_offsets &&
+        current_rule_binding_offsets->count(atom->name) &&
+        !atom->arguments) {
+      size_t binding_offset = current_rule_binding_offsets->at(atom->name);
+      return current_rule_binding_types->at(binding_offset);
+    }
+
     driver_.error(atom->location, "use of undefined function `"+atom->name+"`");
     return Type::INVALID;
   }

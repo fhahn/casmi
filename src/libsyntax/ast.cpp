@@ -351,9 +351,12 @@ bool UnaryNode::equals(AstNode *other) {
 RuleNode::RuleNode(yy::location& loc, AstNode *child, const std::string& name)
   :  UnaryNode(loc, NodeType::RULE, child), name(std::move(name)) {}
 
-RuleNode::RuleNode(yy::location& loc, AstNode *child, const std::string &name,
-                   const std::vector<Binding*>& args) 
-  : UnaryNode(loc, NodeType::RULE, child), name(std::move(name)), arguments(std::move(args)) {}
+RuleNode::RuleNode(yy::location& loc,
+                   AstNode *child,
+                   const std::string &name,
+                   const std::vector<Type>& args)
+  : UnaryNode(loc, NodeType::RULE, child), name(std::move(name)),
+    arguments(std::move(args)), binding_offsets(std::move(binding_offsets)) {}
 
 
 CallNode::CallNode(yy::location& loc, const std::string& rule_name, ExpressionBase *ruleref)

@@ -145,6 +145,8 @@ template<class T, class V> class AstWalker {
         visitor.visit_call(call, argument_results);
 
         walk_rule(call->rule);
+
+        visitor.visit_call_post(call);
       } else {
         DEBUG("rule not set!");
       }
