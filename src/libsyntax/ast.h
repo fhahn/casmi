@@ -36,6 +36,7 @@ enum class NodeType {
   STATEMENTS,
   SKIP,
   PARBLOCK,
+  SEQBLOCK,
   FUNCTION_ATOM,
   CALL,
   PRINT,

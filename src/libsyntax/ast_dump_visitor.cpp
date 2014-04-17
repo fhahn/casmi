@@ -74,6 +74,11 @@ bool AstDumpVisitor::visit_assert(UnaryNode *assert, bool) {
   return true;
 }
 
+void AstDumpVisitor::visit_seqblock(UnaryNode *seqblock) {
+  dump_node(seqblock, "Seqblock");
+  dump_link(seqblock, seqblock->child_);
+}
+
 void AstDumpVisitor::visit_parblock(UnaryNode *parblock) {
   dump_node(parblock, "Parblock");
   dump_link(parblock, parblock->child_);

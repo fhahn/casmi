@@ -211,6 +211,23 @@ void AstWalker<ExecutionVisitor, Value>::walk_ifthenelse(IfThenElseNode* node) {
   }
 }
 
+template <>
+void AstWalker<ExecutionVisitor, Value>::walk_seqblock(UnaryNode* seqblock) {
+  visitor.context_.updateset.pseudostate += 1;
+  visitor.visit_seqblock(seqblock);
+  walk_statements(reinterpret_cast<AstListNode*>(seqblock->child_));
+  visitor.context_.updateset.pseudostate -= 1;
+}
+
+template <>
+void AstWalker<ExecutionVisitor, Value>::walk_parblock(UnaryNode* parblock) {
+  visitor.context_.updateset.pseudostate += 1;
+  visitor.visit_seqblock(parblock);
+  walk_statements(reinterpret_cast<AstListNode*>(parblock->child_));
+  visitor.context_.updateset.pseudostate -= 1;
+}
+
+
 void ExecutionWalker::run() {
   for (auto pair: visitor.context_.symbol_table.table_) {
     auto function_map = std::unordered_map<ArgumentsKey, Value>();

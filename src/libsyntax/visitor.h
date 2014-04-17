@@ -75,6 +75,9 @@ template<class T, class V> class AstWalker {
 
     void walk_statement(AstNode *stmt) {
       switch(stmt->node_type_) {
+        case NodeType::SEQBLOCK:
+          walk_seqblock(reinterpret_cast<UnaryNode*>(stmt));
+          break;
         case NodeType::PARBLOCK:
           walk_parblock(reinterpret_cast<UnaryNode*>(stmt));
           break;
@@ -107,6 +110,11 @@ template<class T, class V> class AstWalker {
               std::string(" at ")+
               stmt->location_str());
       }
+    }
+
+    void walk_seqblock(UnaryNode *parblock) {
+      visitor.visit_seqblock(parblock);
+      walk_statements(reinterpret_cast<AstListNode*>(parblock->child_));
     }
 
     void walk_parblock(UnaryNode *parblock) {

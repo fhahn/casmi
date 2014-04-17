@@ -70,9 +70,9 @@
 %token FLOATCONST INTCONST RATIONALCONST STRCONST
 %token <std::string> IDENTIFIER "identifier"
 
-%type <AstNode*> INIT_SYNTAX BODY_ELEMENT SPECIFICATION PARBLOCK_SYNTAX KW_PARBLOCK_SYNTAX
-%type <AstNode*> RULE_SYNTAX STATEMENT
-%type <UnaryNode*> ASSERT_SYNTAX
+%type <AstNode*> INIT_SYNTAX BODY_ELEMENT SPECIFICATION RULE_SYNTAX STATEMENT
+%type <UnaryNode*> PARBLOCK_SYNTAX KW_PARBLOCK_SYNTAX SEQBLOCK_SYNTAX
+%type <UnaryNode*> ASSERT_SYNTAX KW_SEQBLOCK_SYNTAX
 %type <AstListNode*> BODY_ELEMENTS STATEMENTS
 %type <AtomNode*> NUMBER VALUE
 %type <std::pair<ExpressionBase*, ExpressionBase*>> INITIALIZER
@@ -408,8 +408,8 @@ STATEMENT: ASSERT_SYNTAX { $$ = $1; }
          | UPDATE_SYNTAX { $$ = $1; }
          | CASE_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
          | CALL_SYNTAX { $$ = $1; }
-         | KW_SEQBLOCK_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
-         | SEQBLOCK_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
+         | KW_SEQBLOCK_SYNTAX { $$ = $1 ; }
+         | SEQBLOCK_SYNTAX { $$ = $1; }
          | KW_PARBLOCK_SYNTAX { $$ = $1; }
          | PARBLOCK_SYNTAX { $$ = $1; }
          | IFTHENELSE { $$ = $1; }
@@ -487,15 +487,23 @@ CALL_SYNTAX: CALL "(" EXPRESSION ")" "(" EXPRESSION_LIST ")" { $$ = new CallNode
            ;
 
 
-KW_SEQBLOCK_SYNTAX: SEQBLOCK STATEMENTS ENDSEQBLOCK 
+KW_SEQBLOCK_SYNTAX: SEQBLOCK STATEMENTS ENDSEQBLOCK {
+                      $$ = new UnaryNode(@$, NodeType::SEQBLOCK, $2);
+                  }
                   ;
 
-SEQBLOCK_SYNTAX: SEQBLOCK_BRACKET STATEMENTS ENDSEQBLOCK_BRACKET  
-               ; 
+SEQBLOCK_SYNTAX: SEQBLOCK_BRACKET STATEMENTS ENDSEQBLOCK_BRACKET {
+                      $$ = new UnaryNode(@$, NodeType::SEQBLOCK, $2);
+               }
+               ;
 
-KW_PARBLOCK_SYNTAX: PARBLOCK STATEMENTS ENDPARBLOCK { $$ = new UnaryNode(@$, NodeType::PARBLOCK, $2); }
-          ;
-PARBLOCK_SYNTAX: "{" STATEMENTS "}" { $$ = new UnaryNode(@$, NodeType::PARBLOCK, $2); }
+KW_PARBLOCK_SYNTAX: PARBLOCK STATEMENTS ENDPARBLOCK {
+                      $$ = new UnaryNode(@$, NodeType::PARBLOCK, $2);
+                  }
+                  ;
+PARBLOCK_SYNTAX: "{" STATEMENTS "}" {
+                    $$ = new UnaryNode(@$, NodeType::PARBLOCK, $2);
+               }
                ;
 
 STATEMENTS: STATEMENTS STATEMENT { $1->add($2); $$ = $1; }

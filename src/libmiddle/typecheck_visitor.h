@@ -29,6 +29,7 @@ class TypecheckVisitor {
                             const std::vector<std::pair<Type, Type>>& initializers);
     void visit_rule(RuleNode *rule);
     void visit_statement(AstNode *stmt) { UNUSED(stmt); }
+    void visit_seqblock(UnaryNode *seqblock) { UNUSED(seqblock); }
     void visit_parblock(UnaryNode *parblock) { UNUSED(parblock); }
     void visit_statements(AstListNode *stmts) { UNUSED(stmts); }
     void visit_ifthenelse(IfThenElseNode *node, Type cond);

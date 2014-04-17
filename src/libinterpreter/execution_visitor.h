@@ -30,6 +30,7 @@ class ExecutionVisitor {
     void visit_function_def(FunctionDefNode *def) { UNUSED(def); }
     void visit_rule(RuleNode *rule) { UNUSED(rule); }
     void visit_statement(AstNode *stmt) { UNUSED(stmt); }
+    void visit_seqblock(UnaryNode *seqblock) { UNUSED(seqblock); }
     void visit_parblock(UnaryNode *parblock) { UNUSED(parblock); }
     void visit_assert(UnaryNode* assert, Value& val);
     void visit_statements(AstListNode *stmts) { UNUSED(stmts); }
@@ -51,10 +52,15 @@ class ExecutionVisitor {
     Value&& visit_string_atom(StringAtom *atom) { return std::move(Value(&atom->string)); }
 };
 
-// Specialize if then else for ExecutionVisitor
+// Specialize if-then-else for ExecutionVisitor
 template <>
 void AstWalker<ExecutionVisitor, Value>::walk_ifthenelse(IfThenElseNode* node);
 
+template <>
+void AstWalker<ExecutionVisitor, Value>::walk_seqblock(UnaryNode* seqblock);
+
+template <>
+void AstWalker<ExecutionVisitor, Value>::walk_parblock(UnaryNode* parblock);
 
 
 class ExecutionWalker : public AstWalker<ExecutionVisitor, Value> {

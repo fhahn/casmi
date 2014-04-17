@@ -8,12 +8,15 @@ ExecutionContext::ExecutionContext(const SymbolTable<Function*>& st, RuleNode *i
   // use 10 MB for updateset data
   pp_mem_new(&updateset_data_, 1024 * 1024 * 10, "mem for main updateset");
   updateset.set =  pp_hashmap_new(&updateset_data_, 1024, "main updateset");
-  updateset.pseudostate = 0;
 
   // use 10 MB for stack
   pp_mem_new(&pp_stack, 1024 * 1024 * 10, "mem for stack stuff");
 
-  pseudostate = 0;
+  if (init->child_ && init->child_->node_type_ == NodeType::PARBLOCK) {
+    updateset.pseudostate = 1;
+  } else {
+    updateset.pseudostate = 0;
+  }
 
   functions = std::vector<std::pair<Function*, std::unordered_map<ArgumentsKey, Value>>>(symbol_table.size());
   Function *program_sym = symbol_table.get("program");
@@ -22,6 +25,7 @@ ExecutionContext::ExecutionContext(const SymbolTable<Function*>& st, RuleNode *i
   RuleAtom *init_atom = new RuleAtom(init->location, std::string(init->name));
   init_atom->rule = init;
   program_sym->intitializers_->push_back(std::pair<ExpressionBase*, ExpressionBase*>(new SelfAtom(init->location), init_atom));
+
 }
 
 void ExecutionContext::apply_updates() {
