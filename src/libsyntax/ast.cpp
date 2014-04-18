@@ -227,24 +227,42 @@ FunctionAtom::FunctionAtom(yy::location& loc, const std::string name)
 FunctionAtom::FunctionAtom(yy::location& loc, const std::string name,
                            std::vector<ExpressionBase*> *args) 
     : AtomNode(loc, NodeType::FUNCTION_ATOM, Type::UNKNOWN), symbol(nullptr),
-      name(name), arguments(args) {
-      
+      binding_offset(0), name(name), arguments(args) {
 }
 
 FunctionAtom::~FunctionAtom() {
 }
 
 bool FunctionAtom::equals(AstNode *other) {
-  UNUSED(other);
-  throw "not implemented";
-    /*
   if (!AstNode::equals(other)) {
     return false;
   }
 
-  IntAtom *other_cast = static_cast<IntAtom*>(other);
-  return val_ == other_cast->val_;
-  */
+  FunctionAtom *other_func = reinterpret_cast<FunctionAtom*>(other);
+  if (arguments && other_func->arguments &&
+      arguments->size() == other_func->arguments->size()) {
+    for (size_t i=0; i < arguments->size(); i++) {
+      if (!arguments->at(i)->equals(other_func->arguments->at(i))) {
+        return false;
+      }
+    }
+  }
+
+  if (! (!arguments && !other_func->arguments)) {
+    return false;
+  }
+
+  if (symbol && other_func->symbol &&
+      symbol->name() != other_func->symbol->name()) {
+    return false;
+  }
+
+  if (! (!symbol && !other_func->symbol)) {
+    return false;
+  }
+
+  return name == other_func->name &&
+         binding_offset == other_func->binding_offset;
 }
 
 Expression::Expression(yy::location& loc, ExpressionBase *left, ExpressionBase *right,

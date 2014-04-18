@@ -9,6 +9,8 @@
 #include "libsyntax/parser.tab.h"
 #include "libsyntax/location.hh"
 
+#include "libutil/exceptions.h"
+
 extern Driver *global_driver;
 
 class ParserTest: public ::testing::Test {
@@ -32,7 +34,7 @@ TEST_F(ParserTest, parse_simple) {
   stmts->add(new UpdateNode(loc,
         new FunctionAtom(loc, "x"),
         new Expression(loc,
-            new Expression(loc, nullptr, new IntAtom(loc, 1), Expression::Operation::NOP),
+            new IntAtom(loc, 1),
             new IntAtom(loc, 2),
             Expression::Operation::SUB)
   ));
@@ -40,7 +42,7 @@ TEST_F(ParserTest, parse_simple) {
   stmts->add(new UpdateNode(loc,
         new FunctionAtom(loc, "y"),
         new Expression(loc,
-            new Expression(loc, nullptr, new IntAtom(loc, 5), Expression::Operation::NOP),
+            new IntAtom(loc, 5),
             new IntAtom(loc, 10),
             Expression::Operation::SUB)
   ));
@@ -49,7 +51,6 @@ TEST_F(ParserTest, parse_simple) {
   ast->add(new AstNode(loc, NodeType::INIT));
   ast->add(new UnaryNode(loc, NodeType::RULE, new UnaryNode(loc, NodeType::PARBLOCK, stmts)));
   EXPECT_EQ(true, root->equals(ast));
-
   delete ast;
   delete root;
 }
