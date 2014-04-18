@@ -15,4 +15,5 @@ rule main =  {|
 
   program( self ) := undef
 |}
+
 init main

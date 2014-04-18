@@ -6,6 +6,9 @@
 
 #include "libinterpreter/execution_visitor.h"
 
+DEFINE_CASM_UPDATESET_FORK_PAR
+DEFINE_CASM_UPDATESET_FORK_SEQ
+
 
 void pack_values_in_array(const std::vector<Value> &value_list, uint64_t array[]) {
   for (size_t i=0; i < value_list.size(); i++) {
@@ -33,21 +36,25 @@ void ExecutionVisitor::visit_update(UpdateNode *update, Value &func_val, Value& 
   // TODO initialize other fields
   up->value = (void*) expr_v.to_uint64_t();
   up->func = update->func->symbol->id;
+  up->line = (uint64_t) update;
   pack_values_in_array(value_list, up->args);
 
   up->num_args = value_list.size();
-
   value_list.clear();
-  if(up->func == 0) {
-    DEBUG("asd "<< value_list.size() << " asd "<<up->value);
-  }
+
   casm_update* v = (casm_update*)casm_updateset_add(&(context_.updateset),
                                                     (void*) update->func->symbol->id,
                                                     (void*) up);
-  // TODO implement seq semantic
   if (v != nullptr) {
+    // Check if values match
+    for (int i=0; i < up->num_args; i++) {
+      if (up->args[i] != v->args[i]) {
+        return;
+      }
+    }
+
     driver_.error(update->func->location,
-                  "Conflict in current block for function `"+update->func->name+"`");
+                  "update conflict in parallel block for function `"+update->func->name+"`");
     throw RuntimeException("Conflict in updateset");
   }
 }
@@ -213,18 +220,18 @@ void AstWalker<ExecutionVisitor, Value>::walk_ifthenelse(IfThenElseNode* node) {
 
 template <>
 void AstWalker<ExecutionVisitor, Value>::walk_seqblock(UnaryNode* seqblock) {
-  visitor.context_.updateset.pseudostate += 1;
+  CASM_UPDATESET_FORK_SEQ(&visitor.context_.updateset);
   visitor.visit_seqblock(seqblock);
   walk_statements(reinterpret_cast<AstListNode*>(seqblock->child_));
-  visitor.context_.updateset.pseudostate -= 1;
+  visitor.context_.merge_seq(visitor.driver_);
 }
 
 template <>
 void AstWalker<ExecutionVisitor, Value>::walk_parblock(UnaryNode* parblock) {
-  visitor.context_.updateset.pseudostate += 1;
+  CASM_UPDATESET_FORK_PAR(&visitor.context_.updateset);
   visitor.visit_seqblock(parblock);
   walk_statements(reinterpret_cast<AstListNode*>(parblock->child_));
-  visitor.context_.updateset.pseudostate -= 1;
+  visitor.context_.merge_par();
 }
 
 

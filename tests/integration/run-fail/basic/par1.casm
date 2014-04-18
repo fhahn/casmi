@@ -1,10 +1,9 @@
-// error interpreter @7
-
 function x: -> Int
 
 rule main = {
   x := 1
   x := 2
+  //~^ update conflict in parallel block for function `x`
 
   program( self ) := undef
 }

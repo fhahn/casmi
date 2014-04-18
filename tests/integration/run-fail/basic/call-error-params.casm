@@ -1,11 +1,10 @@
 // error annotation @4
 
 rule main = seqblock
-  call (a) ( "hallo", "welt" )
-  program( self ) := undef
+  call (@a) ( "hallo", "welt" )
+  //~^ argument 1 of indirectly called rule `a` must be `Int` but was `String`
 endseqblock
 
-rule a( b : Int, c : String ) = {
-  skip
-}
+rule a( b : Int, c : String ) = skip
+
 init main

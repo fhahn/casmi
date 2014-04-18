@@ -50,7 +50,7 @@ void ExecutionContext::apply_updates() {
       function_map.second[{u->args, u->num_args}] = v;
     }
 
-    i->used = FALSE;
+    i->used = 0;
     i = i->previous;
   }
 
@@ -63,6 +63,99 @@ void ExecutionContext::apply_updates() {
   updateset.set->count = 0;
 }
 
+void ExecutionContext::merge_par() {
+        /*pp_measure_start(&updateset->time_merge[CASM_MODE_PAR]);*/
+
+        //CASM_RT("updateset merge par");
+
+        /*casm_updateset_print_debug(updateset, "pre-merge");
+         */
+
+        updateset.pseudostate--;
+
+        //CASM_RT("merge-par:");
+
+        pp_hashmap_bucket* j = updateset.set->tail->previous;
+        pp_hashmap_bucket* i;
+
+        while( j != updateset.set->head ) {
+            i = j;
+            j = j->previous;
+
+            if( (uint16_t)i->key <= updateset.pseudostate ) break;
+
+            pp_hashmap_delete(updateset.set, i);
+
+            pp_hashmap_set(updateset.set, i->key-1, i->value);
+
+            // CASM_RT("%p: %p @ %lx --> %lx", i, i->value, i->key, i->key-1);
+
+            /*i = i->previous;*/
+        }
+
+        //CASM_RT("merge-END");
+
+        /* pp_measure_stop(&updateset->time_merge[CASM_MODE_PAR]); */
+
+        /*casm_updateset_print_debug(updateset, "post-merge");*/
+}
+
+void ExecutionContext::merge_seq(Driver& driver) {
+        /*pp_measure_start(&updateset->time_merge[CASM_MODE_SEQ]);*/
+
+        //CASM_RT("updateset merge seq");
+
+        /*casm_updateset_print_debug(updateset, "pre-merge");
+         */
+
+        updateset.pseudostate--;
+
+        //CASM_RT("merge-seq");
+
+        pp_hashmap_bucket* j = updateset.set->tail->previous;
+        pp_hashmap_bucket* i;
+        casm_update* u;
+        casm_update* v;
+
+        while( j != updateset.set->head ) {
+            i = j;
+            j = j->previous;
+
+            //CASM_RT("%p: %p @ %lx ...", i, i->value, i->key);
+
+            if( (uint16_t)i->key <= updateset.pseudostate ) break;
+
+            pp_hashmap_delete(updateset.set, i);
+
+            if( (v = (casm_update*) pp_hashmap_set(updateset.set, i->key-1, i->value)) != NULL ) {
+                u = (casm_update*)i->value;
+
+                UpdateNode *up = reinterpret_cast<UpdateNode*>(u->line);
+                if (up->func->arguments) {
+                  for (size_t i=0; i < up->func->arguments->size(); i++) {
+                    if (u->args[i] != v->args[i]) {
+                      return;
+                    }
+                  }
+                }
+
+                driver.error(up->location, "conflict merging updatesets");
+                throw RuntimeException("merge error");
+            }
+
+            //CASM_RT("%p: %p @ %lx --> %lx", i, i->value, i->key, i->key-1);
+
+            /*i = i->previous;*/
+        }
+
+        //CASM_RT("merge-END");
+
+        /*pp_measure_stop(&updateset->time_merge[CASM_MODE_SEQ]); */
+
+        /*casm_updateset_print_debug(updateset, "post-merge");*/
+    }
+
+
 
 void ExecutionContext::set_function(Function *sym, uint64_t args[], Value& val) {
   auto function_map = functions[sym->id];
@@ -71,7 +164,21 @@ void ExecutionContext::set_function(Function *sym, uint64_t args[], Value& val) 
 
 static Value undef = Value();
 
+static Value tmp;
+
 Value& ExecutionContext::get_function_value(Function *sym, uint64_t args[]) {
+  // TODO move should be used here
+  int64_t state = (updateset.pseudostate % 2 == 0) ? state = updateset.pseudostate-1:
+  state = updateset.pseudostate;
+  for (; state > 0; state -= 2) {
+    uint64_t key = (uint64_t) sym->id << 16 | state;
+    casm_update *update = (casm_update*) pp_hashmap_get(updateset.set, key);
+    if (update) {
+      tmp = Value(sym->return_type_, update);
+      return tmp;
+    }
+  }
+
   auto& function_map = functions[sym->id];
   try {
     if (sym->arguments_) {

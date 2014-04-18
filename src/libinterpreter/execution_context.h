@@ -5,6 +5,7 @@
 #include <unordered_map>
 
 #include "libsyntax/symbols.h"
+#include "libsyntax/driver.h"
 
 #include "libinterpreter/value.h"
 
@@ -61,6 +62,9 @@ class ExecutionContext {
     ExecutionContext(const SymbolTable<Function*>& st, RuleNode *init);
 
     void apply_updates();
+    void merge_par();
+    void merge_seq(Driver& driver);
+
     void set_function(Function *sym, uint64_t args[], Value& val);
     Value& get_function_value(Function *sym, uint64_t args[]);
 };
