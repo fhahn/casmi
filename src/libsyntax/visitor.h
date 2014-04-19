@@ -71,10 +71,10 @@ template<class T, class V> class AstWalker {
 
         visitor.visit_function_def(def, initializer_results);
       } else {
+        visitor.visit_derived_def_pre(def);
         V v = walk_expression_base(def->sym->derived);
         visitor.visit_derived_def(def, v);
       }
-
     }
 
     void walk_rule(RuleNode *rule) {
@@ -208,8 +208,9 @@ template<class T, class V> class AstWalker {
         }
       }
       if (func->symbol_type == FunctionAtom::SymbolType::DERIVED) {
+        visitor.visit_derived_function_atom_pre(func);
         V expr = walk_expression_base(func->symbol->derived);
-        return visitor.visit_derived_function_atom(func, expr);
+        return visitor.visit_derived_function_atom(func, expr_results, expr);
       } else {
          return visitor.visit_function_atom(func, expr_results);
       }
@@ -242,7 +243,7 @@ template<class T, class V> class AstWalker {
           return visitor.visit_string_atom(reinterpret_cast<StringAtom*>(atom));
         }
         default: {
-          throw RuntimeException("Invalid atom type:"+type_to_str(atom->node_type_));
+          throw RuntimeException("Invalid atom type:"+type_to_str(atom->node_type_)+std::to_string(atom->node_type_));
         }
       }
     }

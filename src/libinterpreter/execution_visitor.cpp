@@ -192,12 +192,17 @@ Value&& ExecutionVisitor::visit_function_atom(FunctionAtom *atom, std::vector<Va
       value_list.swap(expr_results);
 
       return std::move(Value(context_.get_function_value(atom->symbol, args)));
-
     }
 
     default:
       assert(0);
   }
+}
+
+Value&& ExecutionVisitor::visit_derived_function_atom(FunctionAtom *atom,
+                                                      std::vector<Value> &expr_results,
+                                                      Value& expr) {
+  return std::move(expr);
 }
 
 std::string args_to_str(uint64_t args[], size_t size) {
@@ -245,7 +250,7 @@ void ExecutionWalker::run() {
   for (auto pair: visitor.context_.symbol_table.table_) {
     auto function_map = std::unordered_map<ArgumentsKey, Value>();
 
-    if (pair.second->intitializers_ != nullptr) {
+    if (pair.second->symbol_type == Function::SType::FUNCTION && pair.second->intitializers_ != nullptr) {
       for (std::pair<ExpressionBase*, ExpressionBase*> init : *pair.second->intitializers_) {
         size_t num_args = 0; 
         uint64_t args[10];
@@ -277,6 +282,7 @@ void ExecutionWalker::run() {
     if (program_val.type == Type::UNDEF) {
       break;
     }
+    DEBUG("STARTOOO");
     walk_rule(program_val.value.rule);
     visitor.context_.apply_updates();
   }

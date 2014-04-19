@@ -28,10 +28,12 @@ static std::map<NodeType, const std::string> node_type_names_ = {
     {NodeType::SPECIFICATION, std::string("SPECIFICATION")},
     {NodeType::STATEMENT, std::string("STATEMENT")},
     {NodeType::STATEMENTS, std::string("STATEMENTS")},
-    {NodeType::STATEMENTS, std::string("SKIP")},
+    {NodeType::SKIP, std::string("SKIP")},
     {NodeType::PARBLOCK, std::string("PARBLOCK")},
+    {NodeType::SEQBLOCK, std::string("SEQBLOCK")},
     {NodeType::FUNCTION_ATOM, std::string("FUNCTION ATOM")},
     {NodeType::CALL, std::string("CALL NODE")},
+    {NodeType::PRINT, std::string("PRINT NODE")},
 };
 
 std::string unknown_type = "unknown node type";

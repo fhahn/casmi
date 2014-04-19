@@ -181,12 +181,8 @@ Value& ExecutionContext::get_function_value(Function *sym, uint64_t args[]) {
 
   auto& function_map = functions[sym->id];
   try {
-    if (sym->arguments_) {
-      DEBUG("get "<<sym->id << " " << sym->name()<<" size:"<<sym->arguments_->size() << " args "<<args[0]);
-      return function_map.second.at({&args[0], sym->arguments_->size()});
-    } else {
-      return function_map.second.at({&args[0], 0});
-    }
+      DEBUG("get "<<sym->id << " " << sym->name()<<" size:"<<sym->arguments_.size() << " args "<<args[0]);
+    return function_map.second.at({&args[0], sym->arguments_.size()});
   } catch (const std::out_of_range &e) {
     undef.type = Type::UNDEF;
     return undef;

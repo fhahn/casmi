@@ -24,7 +24,7 @@ class Function {
       DERIVED
     };
 
-    std::vector<Type> *arguments_;
+    std::vector<Type> arguments_;
 
     union {
       std::vector<std::pair<ExpressionBase*, ExpressionBase*>> *intitializers_;
@@ -36,9 +36,12 @@ class Function {
 
     SType symbol_type;
 
-    Function(const std::string name, std::vector<Type> *args, Type return_type,
+    std::map<std::string, size_t> binding_offsets;
+
+    Function(const std::string name, std::vector<Type>& args, Type return_type,
            std::vector<std::pair<ExpressionBase*, ExpressionBase*>> *init);
-    Function(const std::string name, std::vector<Type> *args, ExpressionBase *expr, Type return_type);
+    Function(const std::string name, std::vector<Type>& args, ExpressionBase *expr, Type return_type);
+    Function(const std::string name, ExpressionBase *expr, Type return_type);
     Function(const std::string name);
     ~Function();
 
@@ -46,8 +49,7 @@ class Function {
     bool equals(Function *other) const;
     const std::string to_str() const;
     inline size_t argument_count() const {
-      if (arguments_ == nullptr) return 0;
-      return arguments_->size();
+      return arguments_.size();
     }
 };
 

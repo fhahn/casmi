@@ -1,6 +1,7 @@
 // error annotation @3
 
 derived a : String = 3
+//~^ type of derived expression was `Int` but should be `String`
 
 rule main = {
   program( self ) := undef

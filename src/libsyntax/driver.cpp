@@ -19,8 +19,8 @@ Driver::Driver ()
   file_ = nullptr;
   result = nullptr;
 
-  std::vector<Type> *args = new std::vector<Type>();
-  args->push_back(Type::SELF);
+  std::vector<Type> args;
+  args.push_back(Type::SELF);
   function_table.add(new Function("program", args, Type::RULEREF, nullptr));
 
   lines_.push_back("");

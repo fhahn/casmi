@@ -36,6 +36,11 @@ void AstDumpVisitor::visit_function_def(FunctionDefNode *def, const std::vector<
   DEBUG("TODO: implement initializers");
 }
 
+void AstDumpVisitor::visit_derived_def(FunctionDefNode *def, bool) {
+  dump_node(def, "Derived Definition: "+def->sym->to_str());
+  dump_link(def, def->sym->derived);
+}
+
 void AstDumpVisitor::visit_init(AstNode *init) {
   dump_node(init, "Init");
 }

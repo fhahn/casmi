@@ -8,7 +8,7 @@ void TypecheckVisitor::visit_function_def(FunctionDefNode *def,
   for (size_t i = 0; i < initializers.size(); i++) {
     const std::pair<Type, Type>& p = initializers[i];
 
-    if (!def->sym->arguments_ && p.first == Type::UNDEF && p.second != def->sym->return_type_) {
+    if (def->sym->arguments_.size() == 0 && p.first == Type::UNDEF && p.second != def->sym->return_type_) {
       driver_.error(def->sym->intitializers_->at(i).second->location,
                   "type of initializer of function `" +def->sym->name()+
                   "` is `"+type_to_str(p.second)+"` but should be `"+
@@ -17,10 +17,23 @@ void TypecheckVisitor::visit_function_def(FunctionDefNode *def,
   }
 }
 
+void TypecheckVisitor::visit_derived_def_pre(FunctionDefNode *def) {
+  current_rule_binding_types = &def->sym->arguments_;
+  current_rule_binding_offsets = &def->sym->binding_offsets;
+}
+
 void TypecheckVisitor::visit_derived_def(FunctionDefNode *def, Type& expr) {
+  current_rule_binding_types = nullptr;
+  current_rule_binding_offsets = nullptr;
+
   if (def->sym->return_type_ == Type::UNKNOWN) {
+    if (expr == Type::UNDEF) {
+      driver_.error(def->location, std::string("type of derived expression is ")+
+                                   "unknown because type of expression is `undef`");
+   
+    }
     def->sym->return_type_ = expr;
-  } else if (def->sym->return_type_ != expr) {
+  } else if (def->sym->return_type_ != expr && expr != Type::UNDEF) {
     driver_.error(def->location, "type of derived expression was `"+
                                  type_to_str(expr)+"` but should be `"+
                                  type_to_str(def->sym->return_type_)+"`");
@@ -160,7 +173,8 @@ Type TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
         !atom->arguments) {
       atom->symbol_type = FunctionAtom::SymbolType::PARAMETER;
       atom->offset = current_rule_binding_offsets->at(atom->name);
-      return current_rule_binding_types->at(atom->offset);
+      Type t = current_rule_binding_types->at(atom->offset);
+      return t;
     }
 
     driver_.error(atom->location, "use of undefined function `"+atom->name+"`");
@@ -175,33 +189,57 @@ Type TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
   }
 
   // check for function definitions with arguments
-  if (atom->symbol->arguments_) {
-    if(atom->symbol->arguments_->size() != expr_results.size()) {
-      driver_.error(atom->location,
-                    "number of provided arguments does not match definition of `"+
-                    atom->name+"`");
-    } else {
-      for (size_t i=0; i < atom->symbol->arguments_->size(); i++) {
-        if (atom->symbol->arguments_->at(i) != expr_results[i]) {
-          driver_.error(atom->arguments->at(i)->location,
-                        "type of "+std::to_string(i+1)+" argument of `"+atom->name+
-                        "` is "+type_to_str(expr_results[i])+" but should be "+
-                        type_to_str(atom->symbol->arguments_->at(i)));
-        }
+  if(atom->symbol->arguments_.size() != expr_results.size()) {
+    driver_.error(atom->location,
+                  "number of provided arguments does not match definition of `"+
+                  atom->name+"`");
+  } else {
+    for (size_t i=0; i < atom->symbol->arguments_.size(); i++) {
+      if (atom->symbol->arguments_[i] != expr_results[i]) {
+        driver_.error(atom->arguments->at(i)->location,
+                      "type of "+std::to_string(i+1)+" argument of `"+atom->name+
+                      "` is "+type_to_str(expr_results[i])+" but should be "+
+                      type_to_str(atom->symbol->arguments_[i]));
       }
     }
   }
 
   // check for function definitions without arguments
-  if (!atom->symbol->arguments_ && expr_results.size() > 0 ) {
+  if (atom->symbol->arguments_.size() == 0 && expr_results.size() > 0 ) {
     driver_.error(atom->location, "number of provided arguments does not match definition of `"+atom->name+"`");
   }
 
   return sym->return_type_;
 }
 
-Type TypecheckVisitor::visit_derived_function_atom(FunctionAtom *atom, Type expr) {
- return expr;
+void TypecheckVisitor::visit_derived_function_atom_pre(FunctionAtom *atom) {
+  current_rule_binding_types = &atom->symbol->arguments_;
+  current_rule_binding_offsets = &atom->symbol->binding_offsets;
+}
+
+Type TypecheckVisitor::visit_derived_function_atom(FunctionAtom *atom,
+                                                  const std::vector<Type>& argument_results,
+                                                  Type expr) {
+  DEBUG("expr type "<<type_to_str(expr));
+  current_rule_binding_types = nullptr;
+  current_rule_binding_offsets = nullptr;
+
+  size_t args_defined = atom->symbol->arguments_.size();
+  size_t args_provided = argument_results.size();
+  if (args_defined != args_provided) {
+    driver_.error(atom->location, " expects "
+                                  +std::to_string(args_defined)+" arguments but "+
+                                  std::to_string(args_provided)+" where provided");
+  } else {
+    for (size_t i=0; i < args_defined; i++) {
+      if (atom->symbol->arguments_.at(i) != argument_results[i]) {
+        driver_.error(atom->arguments->at(i)->location,
+                      "argument "+std::to_string(i+1)+" of must be `"+type_to_str(atom->symbol->arguments_.at(i))+"` but was `"+
+                      type_to_str(argument_results[i])+"`");
+      }
+    }
+  }
+  return expr;
 }
 
 Type TypecheckVisitor::visit_rule_atom(RuleAtom *atom) {

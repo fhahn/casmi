@@ -85,11 +85,11 @@
 %type <std::string> STRCONST
 %type <Function*> FUNCTION_DEFINITION DERIVED_SYNTAX
 %type <FunctionAtom*> FUNCTION_SYNTAX 
-%type <std::pair<std::vector<Type>*, Type>> FUNCTION_SIGNATURE
+%type <std::pair<std::vector<Type>, Type>> FUNCTION_SIGNATURE
 %type <Type> NEW_TYPE_SYNTAX
 %type <Type> PARAM
 %type <std::vector<Type>> PARAM_LIST_NO_COMMA PARAM_LIST
-%type <std::vector<Type>*> TYPE_IDENTIFIER_STARLIST
+%type <std::vector<Type>> TYPE_IDENTIFIER_STARLIST
 %type <std::string> RULEREF
 %type <IfThenElseNode*> IFTHENELSE
 %type <CallNode*> CALL_SYNTAX
@@ -141,6 +141,9 @@ BODY_ELEMENT: PROVIDER_SYNTAX { $$ = new AstNode(NodeType::PROVIDER); }
                 }
             }
            | DERIVED_SYNTAX {
+                DEBUG("ASDA "<<driver.binding_offsets.size());
+                $1->binding_offsets = std::move(driver.binding_offsets);
+                driver.binding_offsets.clear();
                 $$ = new FunctionDefNode(@$, $1);
                 if (!driver.function_table.add($1)) {
                     driver.error(@$, "redefinition of symbol");
@@ -172,23 +175,23 @@ ENUM_SYNTAX: ENUM IDENTIFIER "=" "{" IDENTIFIER_LIST "}";
 
 DERIVED_SYNTAX: DERIVED IDENTIFIER "(" PARAM_LIST ")" "=" EXPRESSION {
                   // TODO: 2nd argument should be a reference
-                  $$ = new Function($2, &$4, $7, Type::UNKNOWN);
+                  $$ = new Function($2, $4, $7, Type::UNKNOWN);
                 }
               | DERIVED IDENTIFIER "=" EXPRESSION {
-                  $$ = new Function($2, nullptr, $4, Type::UNKNOWN);
+                  $$ = new Function($2, $4, Type::UNKNOWN);
                 }
               | DERIVED IDENTIFIER "(" ")" "=" EXPRESSION {
-                  $$ = new Function($2, nullptr, $6, Type::UNKNOWN);
+                  $$ = new Function($2, $6, Type::UNKNOWN);
                 }
               /* again with type syntax */
               | DERIVED IDENTIFIER "(" PARAM_LIST ")" ":" NEW_TYPE_SYNTAX "=" EXPRESSION {
-                  $$ = new Function($2, &$4, $9, $7);
+                  $$ = new Function($2, $4, $9, $7);
                 }
               | DERIVED IDENTIFIER ":" NEW_TYPE_SYNTAX "=" EXPRESSION {
-                  $$ = new Function($2, nullptr, $6, $4);
+                  $$ = new Function($2, $6, $4);
                 }
               | DERIVED IDENTIFIER "(" ")" ":" NEW_TYPE_SYNTAX "=" EXPRESSION {
-                  $$ = new Function($2, nullptr, $8, $6);
+                  $$ = new Function($2, $8, $6);
                 }
               ;
 
@@ -210,9 +213,11 @@ IDENTIFIER_LIST: IDENTIFIER "," IDENTIFIER_LIST
 
 FUNCTION_SIGNATURE: ":" ARROW NEW_TYPE_SYNTAX 
                   /* this constructor is implementation dependant! */
-                  { $$ = std::pair<std::vector<Type>*, Type>(nullptr, $3); }
+                  { 
+                    std::vector<Type> foo;
+                    $$ = std::pair<std::vector<Type>, Type>(foo, $3); }
                   | ":" TYPE_IDENTIFIER_STARLIST ARROW NEW_TYPE_SYNTAX
-                  { $$ = std::pair<std::vector<Type>*, Type>($2, $4); }
+                  { $$ = std::pair<std::vector<Type>, Type>($2, $4); }
                   ;
 
 PARAM: IDENTIFIER OLD_TYPE_SYNTAX  
@@ -241,18 +246,16 @@ PARAM_LIST_NO_COMMA: PARAM_LIST_NO_COMMA "," PARAM
 /* TODO: right recursion */
 TYPE_IDENTIFIER_STARLIST: NEW_TYPE_SYNTAX "*" TYPE_IDENTIFIER_STARLIST 
                         {
-                            $3->insert($3->begin(), $1);
-                            $$ = $3;
+                            $3.insert($3.begin(), $1);
+                            $$ = std::move($3);
                         }
                         | NEW_TYPE_SYNTAX "*" 
                         { // TODO: limit memory size
-                            $$ = new std::vector<Type>;
-                            $$->push_back($1);
+                            $$.push_back($1);
                         }
                         | NEW_TYPE_SYNTAX 
-                        { // TODO: limit memory size
-                            $$ = new std::vector<Type>;
-                            $$->push_back($1);
+                        { 
+                            $$.push_back($1);
                         }
                         ;
 
@@ -393,7 +396,7 @@ EXPRESSION: EXPRESSION "+" EXPRESSION
 BRACKET_EXPRESSION: "(" EXPRESSION ")"  { $$ = $2; }
                   ;
 
-FUNCTION_SYNTAX: IDENTIFIER { DEBUG("FUNC "<<$1); $$ = new FunctionAtom(@$, $1); }
+FUNCTION_SYNTAX: IDENTIFIER { $$ = new FunctionAtom(@$, $1); }
                | IDENTIFIER "(" ")" { $$ = new FunctionAtom(@$, $1); }
                | IDENTIFIER "(" EXPRESSION_LIST ")" { $$ = new FunctionAtom(@$, $1, $3); }
                ;

@@ -10,7 +10,7 @@
 #include "libsyntax/symbols.h"
 #include "libsyntax/location.hh" // reuse bison's location class
 
-enum class NodeType {
+enum NodeType {
   ASSERT,
   UNDEF_ATOM,
   INT_ATOM,

@@ -9,28 +9,36 @@
 
 uint64_t Function::counter = 0;
 
-Function::Function(const std::string name, std::vector<Type> *args,
+Function::Function(const std::string name, std::vector<Type>& args,
               Type return_type, std::vector<std::pair<ExpressionBase*, ExpressionBase*>> *init) :
-                name_(name), arguments_(args), intitializers_(init),
+                name_(name), arguments_(std::move(args)), intitializers_(init),
                 return_type_(return_type), id(counter), symbol_type(SType::FUNCTION) {
   counter += 1;
 }
 
-Function::Function(const std::string name, std::vector<Type> *args,
+Function::Function(const std::string name, std::vector<Type>& args,
                    ExpressionBase *expr, Type return_type) :
-                name_(name), arguments_(args), derived(expr),
+                name_(name), arguments_(std::move(args)), derived(expr),
                 return_type_(return_type), id(counter), symbol_type(SType::DERIVED) {
   counter += 1;
 }
 
+Function::Function(const std::string name,
+                   ExpressionBase *expr, Type return_type) :
+                name_(name), arguments_(), derived(expr),
+                return_type_(return_type), id(counter), symbol_type(SType::DERIVED) {
+  counter += 1;
+}
+
+
 Function::Function(const std::string name) :
-        name_(name), arguments_(nullptr), intitializers_(nullptr),
+        name_(name), arguments_(), intitializers_(nullptr),
         return_type_(Type::UNKNOWN), id(counter) {
   counter += 1;
 }
 
 Function::~Function() {
-  delete arguments_;
+  arguments_.clear();
   if (intitializers_ != nullptr) {
     for (std::pair<ExpressionBase*, ExpressionBase*> e : *intitializers_) {
       delete e.first;
@@ -47,15 +55,11 @@ const std::string& Function::name() const {
 const std::string Function::to_str() const {
   std::string res = name_;
 
-  if (arguments_ == nullptr) {
-    res += ": ()";
-  } else {
-    res = ": (";
-    for (Type t : *arguments_) {
-      res += type_to_str(t) + ", ";
-    }
-    res += ")";
+  res = ": (";
+  for (Type t : arguments_) {
+    res += type_to_str(t) + ", ";
   }
+  res += ")";
   res += "-> "+type_to_str(return_type_);
   return res;
 }
@@ -65,14 +69,12 @@ bool Function::equals(Function *other) const {
     return false;
   }
 
-  if (arguments_ != nullptr && other->arguments_ != nullptr) {
-    if (arguments_->size() != other->arguments_->size()) {
+  if (arguments_.size() != other->arguments_.size()) {
+    return false;
+  }
+  for (size_t i=0; i < arguments_.size(); i++) {
+    if (arguments_[i] != other->arguments_[i]) {
       return false;
-    }
-    for (size_t i=0; i < arguments_->size(); i++) {
-      if ((*arguments_)[i] != (*other->arguments_)[i]) {
-        return false;
-      }
     }
   }
   return return_type_ == other->return_type_;

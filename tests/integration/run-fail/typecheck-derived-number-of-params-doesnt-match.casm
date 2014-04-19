@@ -1,0 +1,8 @@
+CASM foo
+
+init main
+
+derived dev1(a: Int, b: Int) = a + b
+
+rule main = print dev1(1)
+//~^ number of provided arguments does not match definition of `dev1`
