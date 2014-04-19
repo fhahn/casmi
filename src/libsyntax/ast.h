@@ -180,7 +180,7 @@ class FunctionAtom : public AtomNode {
       FUNCTION,
       DERIVED,
       PARAMETER,
-      UNSET,
+      UNSET
     };
 
     SymbolType symbol_type;

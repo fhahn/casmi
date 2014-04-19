@@ -19,13 +19,26 @@ class Function {
     const std::string name_;
 
   public:
+    enum class SType {
+      FUNCTION,
+      DERIVED
+    };
+
     std::vector<Type> *arguments_;
-    std::vector<std::pair<ExpressionBase*, ExpressionBase*>> *intitializers_;
+
+    union {
+      std::vector<std::pair<ExpressionBase*, ExpressionBase*>> *intitializers_;
+      ExpressionBase *derived;
+    };
+
     Type return_type_;
     const uint64_t id;
 
+    SType symbol_type;
+
     Function(const std::string name, std::vector<Type> *args, Type return_type,
            std::vector<std::pair<ExpressionBase*, ExpressionBase*>> *init);
+    Function(const std::string name, std::vector<Type> *args, ExpressionBase *expr, Type return_type);
     Function(const std::string name);
     ~Function();
 

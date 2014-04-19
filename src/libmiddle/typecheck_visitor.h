@@ -27,6 +27,8 @@ class TypecheckVisitor {
     void visit_body_elements(AstListNode *body_elements) { UNUSED(body_elements); }
     void visit_function_def(FunctionDefNode *def,
                             const std::vector<std::pair<Type, Type>>& initializers);
+    void visit_derived_def(FunctionDefNode *def, Type& expr);
+ 
     void visit_rule(RuleNode *rule);
     void visit_statement(AstNode *stmt) { UNUSED(stmt); }
     void visit_seqblock(UnaryNode *seqblock) { UNUSED(seqblock); }
@@ -47,6 +49,7 @@ class TypecheckVisitor {
     Type visit_undef_atom(UndefAtom *atom) { UNUSED(atom); return Type::UNDEF; }
     Type visit_function_atom(FunctionAtom *atom,
                              const std::vector<Type> &expr_results);
+    Type visit_derived_function_atom(FunctionAtom *atom, Type expr);
     Type visit_self_atom(SelfAtom *atom) { UNUSED(atom); return Type::SELF; }
     Type visit_rule_atom(RuleAtom *atom);
     Type visit_boolean_atom(BooleanAtom *atom) { UNUSED(atom); return Type::BOOLEAN; }

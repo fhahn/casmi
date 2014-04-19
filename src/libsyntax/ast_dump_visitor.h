@@ -29,6 +29,7 @@ class AstDumpVisitor {
     void visit_init(AstNode *init);
     void visit_body_elements(AstListNode *body_elements);
     void visit_function_def(FunctionDefNode *def, const std::vector<std::pair<bool, bool>>&);
+    void visit_derived_def(FunctionDefNode *def, bool) {}
     void visit_rule(RuleNode *rule);
     void visit_statements(AstListNode *stmts);
     void visit_statement(AstNode *stmt);
@@ -49,6 +50,7 @@ class AstDumpVisitor {
     bool visit_undef_atom(UndefAtom *atom) { UNUSED(atom); return true; }
     bool visit_function_atom(FunctionAtom *atom,
                              const std::vector<bool> &expr_results);
+    bool visit_derived_function_atom(FunctionAtom *atom, bool) {}
     bool visit_self_atom(SelfAtom *atom);
     bool visit_rule_atom(RuleAtom *atom);
     bool visit_boolean_atom(BooleanAtom *atom);

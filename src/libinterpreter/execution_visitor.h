@@ -28,6 +28,8 @@ class ExecutionVisitor {
     void visit_init(AstNode *init) { UNUSED(init); }
     void visit_body_elements(AstListNode *body_elements) { UNUSED(body_elements); }
     void visit_function_def(FunctionDefNode *def) { UNUSED(def); }
+
+    void visit_derived_def(FunctionDefNode *def, Value&) {}
     void visit_rule(RuleNode *rule) { UNUSED(rule); }
     void visit_statement(AstNode *stmt) { UNUSED(stmt); }
     void visit_seqblock(UnaryNode *seqblock) { UNUSED(seqblock); }
@@ -46,6 +48,7 @@ class ExecutionVisitor {
     Value&& visit_float_atom(FloatAtom *atom) { return std::move(Value(atom->val_)); }
     Value&& visit_undef_atom(UndefAtom *atom) { UNUSED(atom); return std::move(Value()); }
     Value&& visit_function_atom(FunctionAtom *atom, std::vector<Value> &expr_results);
+    Value&& visit_derived_function_atom(FunctionAtom *atom, Value& expr) {}
     Value&& visit_self_atom(SelfAtom *atom) { UNUSED(atom); return std::move(Value()); }
     Value&& visit_rule_atom(RuleAtom *atom) { return std::move(Value(atom->rule)); }
     Value&& visit_boolean_atom(BooleanAtom *atom) { return std::move(Value(atom->value)); }

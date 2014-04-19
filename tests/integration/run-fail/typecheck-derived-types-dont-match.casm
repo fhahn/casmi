@@ -1,0 +1,8 @@
+CASM foo
+
+init main
+
+derived dev1: Float = 2
+//~^ type of derived expression was `Int` but should be `Float`
+
+rule main = skip

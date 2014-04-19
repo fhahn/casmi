@@ -17,6 +17,16 @@ void TypecheckVisitor::visit_function_def(FunctionDefNode *def,
   }
 }
 
+void TypecheckVisitor::visit_derived_def(FunctionDefNode *def, Type& expr) {
+  if (def->sym->return_type_ == Type::UNKNOWN) {
+    def->sym->return_type_ = expr;
+  } else if (def->sym->return_type_ != expr) {
+    driver_.error(def->location, "type of derived expression was `"+
+                                 type_to_str(expr)+"` but should be `"+
+                                 type_to_str(def->sym->return_type_)+"`");
+  }
+}
+
 void TypecheckVisitor::visit_rule(RuleNode *rule) {
   current_rule_binding_types = &rule->arguments;
   current_rule_binding_offsets = &rule->binding_offsets;
@@ -158,7 +168,11 @@ Type TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
   }
 
   atom->symbol = sym;
-  atom->symbol_type = FunctionAtom::SymbolType::FUNCTION;
+  if (atom->symbol->symbol_type == Function::SType::FUNCTION) {
+    atom->symbol_type = FunctionAtom::SymbolType::FUNCTION;
+  } else {
+    atom->symbol_type = FunctionAtom::SymbolType::DERIVED;
+  }
 
   // check for function definitions with arguments
   if (atom->symbol->arguments_) {
@@ -184,6 +198,10 @@ Type TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
   }
 
   return sym->return_type_;
+}
+
+Type TypecheckVisitor::visit_derived_function_atom(FunctionAtom *atom, Type expr) {
+ return expr;
 }
 
 Type TypecheckVisitor::visit_rule_atom(RuleAtom *atom) {

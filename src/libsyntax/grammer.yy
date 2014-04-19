@@ -83,7 +83,7 @@
 %type <INT_T> INTCONST
 %type <FLOAT_T> FLOATCONST
 %type <std::string> STRCONST
-%type <Function*> FUNCTION_DEFINITION
+%type <Function*> FUNCTION_DEFINITION DERIVED_SYNTAX
 %type <FunctionAtom*> FUNCTION_SYNTAX 
 %type <std::pair<std::vector<Type>*, Type>> FUNCTION_SIGNATURE
 %type <Type> NEW_TYPE_SYNTAX
@@ -140,7 +140,15 @@ BODY_ELEMENT: PROVIDER_SYNTAX { $$ = new AstNode(NodeType::PROVIDER); }
                     delete $1;
                 }
             }
-           | DERIVED_SYNTAX { $$ = new AstNode(NodeType::DERIVED); }
+           | DERIVED_SYNTAX {
+                $$ = new FunctionDefNode(@$, $1);
+                if (!driver.function_table.add($1)) {
+                    driver.error(@$, "redefinition of symbol");
+                    // if another symbol with same name exists we need to delete
+                    // the symbol here, because it is not inserted in the symbol table
+                    delete $1;
+                }
+            }
            | INIT_SYNTAX { $$ = $1; }
            | RULE_SYNTAX { $$ = $1;
               // TODO check, we trust bison to pass only RuleNodes up
@@ -162,14 +170,26 @@ OPTION_SYNTAX: OPTION IDENTIFIER "." IDENTIFIER IDENTIFIER;
 
 ENUM_SYNTAX: ENUM IDENTIFIER "=" "{" IDENTIFIER_LIST "}";
 
-DERIVED_SYNTAX: DERIVED IDENTIFIER "(" PARAM_LIST ")" "=" EXPRESSION
-              | DERIVED IDENTIFIER "=" EXPRESSION
-              | DERIVED IDENTIFIER "(" ")" "=" EXPRESSION
-
+DERIVED_SYNTAX: DERIVED IDENTIFIER "(" PARAM_LIST ")" "=" EXPRESSION {
+                  // TODO: 2nd argument should be a reference
+                  $$ = new Function($2, &$4, $7, Type::UNKNOWN);
+                }
+              | DERIVED IDENTIFIER "=" EXPRESSION {
+                  $$ = new Function($2, nullptr, $4, Type::UNKNOWN);
+                }
+              | DERIVED IDENTIFIER "(" ")" "=" EXPRESSION {
+                  $$ = new Function($2, nullptr, $6, Type::UNKNOWN);
+                }
               /* again with type syntax */
-              | DERIVED IDENTIFIER "(" PARAM_LIST ")" ":" NEW_TYPE_SYNTAX "=" EXPRESSION
-              | DERIVED IDENTIFIER ":" NEW_TYPE_SYNTAX "=" EXPRESSION
-              | DERIVED IDENTIFIER "(" ")" ":" NEW_TYPE_SYNTAX "=" EXPRESSION
+              | DERIVED IDENTIFIER "(" PARAM_LIST ")" ":" NEW_TYPE_SYNTAX "=" EXPRESSION {
+                  $$ = new Function($2, &$4, $9, $7);
+                }
+              | DERIVED IDENTIFIER ":" NEW_TYPE_SYNTAX "=" EXPRESSION {
+                  $$ = new Function($2, nullptr, $6, $4);
+                }
+              | DERIVED IDENTIFIER "(" ")" ":" NEW_TYPE_SYNTAX "=" EXPRESSION {
+                  $$ = new Function($2, nullptr, $8, $6);
+                }
               ;
 
 FUNCTION_DEFINITION: FUNCTION "(" IDENTIFIER_LIST ")" IDENTIFIER FUNCTION_SIGNATURE INITIALIZERS

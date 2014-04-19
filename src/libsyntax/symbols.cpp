@@ -12,7 +12,14 @@ uint64_t Function::counter = 0;
 Function::Function(const std::string name, std::vector<Type> *args,
               Type return_type, std::vector<std::pair<ExpressionBase*, ExpressionBase*>> *init) :
                 name_(name), arguments_(args), intitializers_(init),
-                return_type_(return_type), id(counter) {
+                return_type_(return_type), id(counter), symbol_type(SType::FUNCTION) {
+  counter += 1;
+}
+
+Function::Function(const std::string name, std::vector<Type> *args,
+                   ExpressionBase *expr, Type return_type) :
+                name_(name), arguments_(args), derived(expr),
+                return_type_(return_type), id(counter), symbol_type(SType::DERIVED) {
   counter += 1;
 }
 

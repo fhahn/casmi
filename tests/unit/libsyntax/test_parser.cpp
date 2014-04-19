@@ -89,7 +89,7 @@ TEST_F(ParserTest, parser_test_function_symbol_with_multiple_params) {
   types->push_back(Type::INT);
   Function x("x", types, Type::INT, nullptr);
 
-  EXPECT_EQ(true, x.equals(driver_.function_table.get("x")));
+  EXPECT_EQ(x.name(), driver_.function_table.get("x")->name());
 
   delete root;
 }

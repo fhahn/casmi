@@ -27,24 +27,7 @@ template<class T, class V> class AstWalker {
           case NodeType::OPTION: {break;} // TODO implement
           case NodeType::ENUM: {break;} // TODO implement
           case NodeType::FUNCTION: {
-            FunctionDefNode *func = reinterpret_cast<FunctionDefNode*>(e);
-            std::vector<std::pair<V, V>> initializer_results;
-            if (func->sym->intitializers_) {
-              for (std::pair<ExpressionBase*, ExpressionBase*> p : *func->sym->intitializers_) {
-                V first;
-                if (p.first) {
-                  first = walk_expression_base(p.first);
-                } else {
-                  UndefAtom foo = {p.second->location};
-                  first = walk_atom(&foo);
-                }
-                initializer_results.push_back(
-                    std::pair<V, V>(first, walk_expression_base(p.second))
-                );
-              }
-            }
-
-            visitor.visit_function_def(func, initializer_results);
+            walk_function_def(reinterpret_cast<FunctionDefNode*>(e));
             break;
           }
           case NodeType::DERIVED: {break;} // TODO implement
@@ -66,6 +49,32 @@ template<class T, class V> class AstWalker {
         }
       }
       visitor.visit_body_elements(body_elements);
+    }
+
+    void walk_function_def(FunctionDefNode *def) {
+      if (def->sym->symbol_type == Function::SType::FUNCTION) {
+        std::vector<std::pair<V, V>> initializer_results;
+        if (def->sym->intitializers_) {
+          for (std::pair<ExpressionBase*, ExpressionBase*> p : *def->sym->intitializers_) {
+            V first;
+            if (p.first) {
+              first = walk_expression_base(p.first);
+            } else {
+              UndefAtom foo = {p.second->location};
+              first = walk_atom(&foo);
+            }
+            initializer_results.push_back(
+                std::pair<V, V>(first, walk_expression_base(p.second))
+            );
+          }
+        }
+
+        visitor.visit_function_def(def, initializer_results);
+      } else {
+        V v = walk_expression_base(def->sym->derived);
+        visitor.visit_derived_def(def, v);
+      }
+
     }
 
     void walk_rule(RuleNode *rule) {
@@ -198,7 +207,12 @@ template<class T, class V> class AstWalker {
           expr_results.push_back(walk_expression_base(e));
         }
       }
-      return visitor.visit_function_atom(func, expr_results);
+      if (func->symbol_type == FunctionAtom::SymbolType::DERIVED) {
+        V expr = walk_expression_base(func->symbol->derived);
+        return visitor.visit_derived_function_atom(func, expr);
+      } else {
+         return visitor.visit_function_atom(func, expr_results);
+      }
     }
 
     V walk_atom(AtomNode *atom) {
