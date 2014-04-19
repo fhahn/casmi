@@ -226,8 +226,8 @@ FunctionAtom::FunctionAtom(yy::location& loc, const std::string name)
 
 FunctionAtom::FunctionAtom(yy::location& loc, const std::string name,
                            std::vector<ExpressionBase*> *args) 
-    : AtomNode(loc, NodeType::FUNCTION_ATOM, Type::UNKNOWN), symbol(nullptr),
-      binding_offset(0), name(name), arguments(args) {
+    : AtomNode(loc, NodeType::FUNCTION_ATOM, Type::UNKNOWN),
+       name(name), arguments(args), symbol_type(SymbolType::UNSET) {
 }
 
 FunctionAtom::~FunctionAtom() {
@@ -239,6 +239,11 @@ bool FunctionAtom::equals(AstNode *other) {
   }
 
   FunctionAtom *other_func = reinterpret_cast<FunctionAtom*>(other);
+
+  if (symbol_type == SymbolType::UNSET) {
+    return name == other_func->name;
+  }
+
   if (arguments && other_func->arguments &&
       arguments->size() == other_func->arguments->size()) {
     for (size_t i=0; i < arguments->size(); i++) {
@@ -252,17 +257,20 @@ bool FunctionAtom::equals(AstNode *other) {
     return false;
   }
 
-  if (symbol && other_func->symbol &&
-      symbol->name() != other_func->symbol->name()) {
-    return false;
-  }
+  if (symbol_type == FunctionAtom::SymbolType::FUNCTION && symbol_type == other_func->symbol_type) {
+    if (symbol && other_func->symbol &&
+        symbol->name() != other_func->symbol->name()) {
+      return false;
+    }
 
-  if (! (!symbol && !other_func->symbol)) {
-    return false;
+    if (! (!symbol && !other_func->symbol)) {
+      return false;
+    }
+    return name == other_func->name;
+  } else if (symbol_type == FunctionAtom::SymbolType::PARAMETER && symbol_type == other_func->symbol_type) {
+    return name == other_func->name && offset == other_func->offset;
   }
-
-  return name == other_func->name &&
-         binding_offset == other_func->binding_offset;
+  return false;
 }
 
 Expression::Expression(yy::location& loc, ExpressionBase *left, ExpressionBase *right,

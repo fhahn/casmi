@@ -175,8 +175,21 @@ class BooleanAtom : public AtomNode {
 
 class FunctionAtom : public AtomNode {
   public:
-    Function *symbol;
-    size_t binding_offset;
+
+    enum class SymbolType {
+      FUNCTION,
+      DERIVED,
+      PARAMETER,
+      UNSET,
+    };
+
+    SymbolType symbol_type;
+
+    union {
+      Function *symbol;
+      size_t offset;
+    };
+
     const std::string name;
     std::vector<ExpressionBase*> *arguments;
 

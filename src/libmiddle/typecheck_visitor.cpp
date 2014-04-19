@@ -143,8 +143,9 @@ Type TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
     if (current_rule_binding_offsets &&
         current_rule_binding_offsets->count(atom->name) &&
         !atom->arguments) {
-      atom->binding_offset = current_rule_binding_offsets->at(atom->name);
-      return current_rule_binding_types->at(atom->binding_offset);
+      atom->symbol_type = FunctionAtom::SymbolType::PARAMETER;
+      atom->offset = current_rule_binding_offsets->at(atom->name);
+      return current_rule_binding_types->at(atom->offset);
     }
 
     driver_.error(atom->location, "use of undefined function `"+atom->name+"`");
@@ -152,6 +153,7 @@ Type TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
   }
 
   atom->symbol = sym;
+  atom->symbol_type = FunctionAtom::SymbolType::FUNCTION;
 
   // check for function definitions with arguments
   if (atom->symbol->arguments_) {

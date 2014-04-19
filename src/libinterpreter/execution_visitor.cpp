@@ -173,25 +173,31 @@ Value&& ExecutionVisitor::visit_expression_single(Expression *expr, Value &val) 
 }
 
 Value&& ExecutionVisitor::visit_function_atom(FunctionAtom *atom, std::vector<Value> &expr_results) {
+  switch (atom->symbol_type) {
+    case FunctionAtom::SymbolType::PARAMETER:
+      return std::move(Value(current_rule_bindings->at(atom->offset)));
 
-  if (!atom->symbol) {
-    return std::move(Value(current_rule_bindings->at(atom->binding_offset)));
+    case FunctionAtom::SymbolType::FUNCTION: {
+      size_t num_args = 1;
+      if (expr_results.size() > 0) {
+        num_args = expr_results.size();
+      }
+
+      uint64_t args[num_args];
+      args[0] = 0;
+
+      pack_values_in_array(expr_results, args);
+      //
+      // TODO handle function access and function write differently
+      value_list.swap(expr_results);
+
+      return std::move(Value(context_.get_function_value(atom->symbol, args)));
+
+    }
+
+    default:
+      assert(0);
   }
-
-  size_t num_args = 1;
-  if (expr_results.size() > 0) {
-    num_args = expr_results.size();
-  }
-
-  uint64_t args[num_args];
-  args[0] = 0;
-
-  pack_values_in_array(expr_results, args);
-  //
-  // TODO handle function access and function write differently
-  value_list.swap(expr_results);
-
-  return std::move(Value(context_.get_function_value(atom->symbol, args)));
 }
 
 std::string args_to_str(uint64_t args[], size_t size) {
