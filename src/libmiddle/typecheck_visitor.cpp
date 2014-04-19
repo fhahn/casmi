@@ -42,6 +42,11 @@ void TypecheckVisitor::visit_update(UpdateNode *update, Type func_t, Type expr_t
                                     update->func->name+"` does not match type `"+
                                     type_to_str(expr_t)+"` of expression");
   }
+
+  if (update->func->symbol_type == FunctionAtom::SymbolType::PARAMETER) {
+    driver_.error(update->location, "cannot update `"+update->func->name+
+                                    "` because it is a parameter, not a function");
+  }
 }
 
 void TypecheckVisitor::visit_call_pre(CallNode *call) {

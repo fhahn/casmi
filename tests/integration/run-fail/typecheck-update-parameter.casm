@@ -1,0 +1,8 @@
+CASM foo
+
+init main
+
+rule main = skip
+
+rule bar(a: Int) = a := 1
+//~^ cannot update `a` because it is a parameter, not a function
