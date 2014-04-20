@@ -16,8 +16,8 @@ class TypecheckVisitor {
     void check_numeric_operator(const yy::location& loc,  const Type type,
                                 const Expression::Operation op);
 
-    const std::vector<Type> *current_rule_binding_types;
-    const std::map<std::string, size_t> *current_rule_binding_offsets;
+    std::vector<const std::vector<Type> *> rule_binding_types;
+    std::vector<const std::map<std::string, size_t> *> rule_binding_offsets;
 
   public:
     TypecheckVisitor(Driver& driver);

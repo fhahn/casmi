@@ -72,7 +72,6 @@ void ExecutionVisitor::visit_call_pre(CallNode *call, Value& expr) {
 void ExecutionVisitor::visit_call(CallNode *call, std::vector<Value> &argument_results) {
   UNUSED(call);
 
-  DEBUG("CALL");
   if (call->ruleref) {
     size_t args_defined = call->rule->arguments.size();
     size_t args_provided = argument_results.size();
@@ -96,12 +95,12 @@ void ExecutionVisitor::visit_call(CallNode *call, std::vector<Value> &argument_r
     }
   }
  
-  current_rule_bindings = &argument_results;
+  rule_bindings.push_back(&argument_results);
 }
 
 void ExecutionVisitor::visit_call_post(CallNode *call) {
   UNUSED(call);
-  current_rule_bindings = nullptr;
+  rule_bindings.pop_back();
 }
 
 void ExecutionVisitor::visit_print(PrintNode *node, const std::vector<Value> &arguments) {
@@ -173,6 +172,7 @@ Value&& ExecutionVisitor::visit_expression_single(Expression *expr, Value &val) 
 }
 
 Value&& ExecutionVisitor::visit_function_atom(FunctionAtom *atom, std::vector<Value> &expr_results) {
+  auto current_rule_bindings = rule_bindings.back();
   switch (atom->symbol_type) {
     case FunctionAtom::SymbolType::PARAMETER:
       return std::move(Value(current_rule_bindings->at(atom->offset)));
@@ -231,18 +231,32 @@ void AstWalker<ExecutionVisitor, Value>::walk_ifthenelse(IfThenElseNode* node) {
 
 template <>
 void AstWalker<ExecutionVisitor, Value>::walk_seqblock(UnaryNode* seqblock) {
-  CASM_UPDATESET_FORK_SEQ(&visitor.context_.updateset);
+  bool forked = false;
+  if (visitor.context_.updateset.pseudostate % 2 == 0) {
+    CASM_UPDATESET_FORK_SEQ(&visitor.context_.updateset);
+    forked = true;
+  }
   visitor.visit_seqblock(seqblock);
   walk_statements(reinterpret_cast<AstListNode*>(seqblock->child_));
-  visitor.context_.merge_seq(visitor.driver_);
+
+  if (forked) {
+    visitor.context_.merge_seq(visitor.driver_);
+  }
 }
 
 template <>
 void AstWalker<ExecutionVisitor, Value>::walk_parblock(UnaryNode* parblock) {
-  CASM_UPDATESET_FORK_PAR(&visitor.context_.updateset);
+  bool forked = false;
+  if (visitor.context_.updateset.pseudostate % 2 == 1) {
+    CASM_UPDATESET_FORK_PAR(&visitor.context_.updateset);
+    forked = true;
+  }
   visitor.visit_seqblock(parblock);
   walk_statements(reinterpret_cast<AstListNode*>(parblock->child_));
-  visitor.context_.merge_par();
+
+  if (forked) {
+    visitor.context_.merge_par();
+  }
 }
 
 

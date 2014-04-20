@@ -1,7 +1,7 @@
 #include "libmiddle/typecheck_visitor.h"
 
 
-TypecheckVisitor::TypecheckVisitor(Driver& driver) : driver_(driver), current_rule_binding_types(nullptr), current_rule_binding_offsets(nullptr) {}
+TypecheckVisitor::TypecheckVisitor(Driver& driver) : driver_(driver), rule_binding_types(), rule_binding_offsets() {}
 
 void TypecheckVisitor::visit_function_def(FunctionDefNode *def,
                                           const std::vector<std::pair<Type, Type>>& initializers) {
@@ -18,13 +18,13 @@ void TypecheckVisitor::visit_function_def(FunctionDefNode *def,
 }
 
 void TypecheckVisitor::visit_derived_def_pre(FunctionDefNode *def) {
-  current_rule_binding_types = &def->sym->arguments_;
-  current_rule_binding_offsets = &def->sym->binding_offsets;
+  rule_binding_types.push_back(&def->sym->arguments_);
+  rule_binding_offsets.push_back(&def->sym->binding_offsets);
 }
 
 void TypecheckVisitor::visit_derived_def(FunctionDefNode *def, Type& expr) {
-  current_rule_binding_types = nullptr;
-  current_rule_binding_offsets = nullptr;
+  rule_binding_types.pop_back();
+  rule_binding_offsets.pop_back();
 
   if (def->sym->return_type_ == Type::UNKNOWN) {
     if (expr == Type::UNDEF) {
@@ -41,8 +41,8 @@ void TypecheckVisitor::visit_derived_def(FunctionDefNode *def, Type& expr) {
 }
 
 void TypecheckVisitor::visit_rule(RuleNode *rule) {
-  current_rule_binding_types = &rule->arguments;
-  current_rule_binding_offsets = &rule->binding_offsets;
+  rule_binding_types.push_back(&rule->arguments);
+  rule_binding_offsets.push_back(&rule->binding_offsets);
 }
 
 void TypecheckVisitor::visit_ifthenelse(IfThenElseNode *node, Type cond) {
@@ -114,8 +114,8 @@ void TypecheckVisitor::visit_call(CallNode *call, std::vector<Type>& argument_re
 
 void TypecheckVisitor::visit_call_post(CallNode *call) {
   UNUSED(call);
-  current_rule_binding_types = nullptr;
-  current_rule_binding_offsets = nullptr;
+  rule_binding_types.pop_back();
+  rule_binding_offsets.pop_back();
 }
 
 void TypecheckVisitor::check_numeric_operator(const yy::location& loc, 
@@ -168,13 +168,17 @@ Type TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
   Function *sym = driver_.function_table.get(atom->name);
   if (!sym) {
     // check if a rule parameter with this name was defined
-    if (current_rule_binding_offsets &&
-        current_rule_binding_offsets->count(atom->name) &&
-        !atom->arguments) {
-      atom->symbol_type = FunctionAtom::SymbolType::PARAMETER;
-      atom->offset = current_rule_binding_offsets->at(atom->name);
-      Type t = current_rule_binding_types->at(atom->offset);
-      return t;
+    if (rule_binding_offsets.size() > 0){
+      auto current_rule_binding_offsets = rule_binding_offsets.back();
+      auto current_rule_binding_types = rule_binding_types.back();
+
+      if (current_rule_binding_offsets->count(atom->name) &&
+          !atom->arguments) {
+        atom->symbol_type = FunctionAtom::SymbolType::PARAMETER;
+        atom->offset = current_rule_binding_offsets->at(atom->name);
+        Type t = current_rule_binding_types->at(atom->offset);
+        return t;
+      }
     }
 
     driver_.error(atom->location, "use of undefined function `"+atom->name+"`");
@@ -213,16 +217,16 @@ Type TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
 }
 
 void TypecheckVisitor::visit_derived_function_atom_pre(FunctionAtom *atom) {
-  current_rule_binding_types = &atom->symbol->arguments_;
-  current_rule_binding_offsets = &atom->symbol->binding_offsets;
+  rule_binding_types.push_back(&atom->symbol->arguments_);
+  rule_binding_offsets.push_back(&atom->symbol->binding_offsets);
 }
 
 Type TypecheckVisitor::visit_derived_function_atom(FunctionAtom *atom,
                                                   const std::vector<Type>& argument_results,
                                                   Type expr) {
   DEBUG("expr type "<<type_to_str(expr));
-  current_rule_binding_types = nullptr;
-  current_rule_binding_offsets = nullptr;
+  rule_binding_types.pop_back();
+  rule_binding_offsets.pop_back();
 
   size_t args_defined = atom->symbol->arguments_.size();
   size_t args_provided = argument_results.size();

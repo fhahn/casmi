@@ -1,0 +1,17 @@
+CASM foo
+
+init main
+
+rule main = {
+    call foo(10)
+}
+
+rule foo(a: Int) = {
+    call bar(a)
+    assert a = 10
+}
+
+rule bar(b:Int) = {
+    assert b = 10
+    program(self) := undef
+}

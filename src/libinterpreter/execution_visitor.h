@@ -16,7 +16,7 @@ class ExecutionVisitor {
   private:
 
     std::vector<Value> value_list;
-    std::vector<Value> *current_rule_bindings;
+    std::vector<std::vector<Value> *> rule_bindings;
 
   public:
     Driver& driver_;
