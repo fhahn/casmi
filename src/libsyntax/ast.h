@@ -40,6 +40,7 @@ enum NodeType {
   FUNCTION_ATOM,
   CALL,
   PRINT,
+  LET,
 };
 
 const std::string& type_to_str(NodeType t);
@@ -94,12 +95,12 @@ class UnaryNode: public AstNode {
 class RuleNode: public UnaryNode {
   public:
     const std::string name;
-    const std::vector<Type> arguments;
+    std::vector<Type> arguments;
     std::map<std::string, size_t> binding_offsets;
 
     RuleNode(yy::location& loc, AstNode *child, const std::string &name);
     RuleNode(yy::location& loc, AstNode *child, const std::string &name,
-        const std::vector<Type>& args);
+        std::vector<Type>& args);
 };
 
 
@@ -286,4 +287,16 @@ class PrintNode: public AstNode {
 
     PrintNode(yy::location& loc, const std::vector<ExpressionBase*> &atoms);
 };
+
+class LetNode: public AstNode {
+  public:
+    const std::string identifier;
+    ExpressionBase *expr;
+    AstNode *stmt;
+
+    LetNode(yy::location& loc, Type type, const std::string& identifier,
+            ExpressionBase *expr, AstNode *stmt);
+};
+
+
 #endif

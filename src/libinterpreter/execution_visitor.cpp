@@ -18,7 +18,9 @@ void pack_values_in_array(const std::vector<Value> &value_list, uint64_t array[]
 
 
 ExecutionVisitor::ExecutionVisitor(ExecutionContext &ctxt, Driver& driver)
-    : driver_(driver), context_(ctxt) {}
+    : driver_(driver), context_(ctxt) {
+  rule_bindings.push_back(&main_bindings);
+}
 
 void ExecutionVisitor::visit_assert(UnaryNode* assert, Value& val) {
   if (val.value.bval != true) {
@@ -108,6 +110,14 @@ void ExecutionVisitor::visit_print(PrintNode *node, const std::vector<Value> &ar
     std::cout << v.to_str();
   }
   std::cout << std::endl;
+}
+
+void ExecutionVisitor::visit_let(LetNode *node, Value& v) {
+  rule_bindings.back()->push_back(v);
+}
+
+void ExecutionVisitor::visit_let_post(LetNode *node) {
+  rule_bindings.back()->pop_back();
 }
 
 Value&& ExecutionVisitor::visit_expression(Expression *expr, Value &left_val, Value &right_val) {

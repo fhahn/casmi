@@ -118,6 +118,26 @@ void TypecheckVisitor::visit_call_post(CallNode *call) {
   rule_binding_offsets.pop_back();
 }
 
+void TypecheckVisitor::visit_let(LetNode *node, Type& v) {
+  if (node->type_ != Type::UNKNOWN && node->type_ != v) {
+    driver_.error(node->location, "type of let conflicts with type of expression");
+  }
+
+  auto current_rule_binding_types = rule_binding_types.back();
+  auto current_rule_binding_offsets = rule_binding_offsets.back();
+
+  current_rule_binding_offsets->insert(
+      std::pair<std::string, size_t>(node->identifier,
+                                     current_rule_binding_types->size())
+  );
+  current_rule_binding_types->push_back(v);
+}
+
+void TypecheckVisitor::visit_let_post(LetNode *node) {
+  rule_binding_types.back()->pop_back();
+  rule_binding_offsets.back()->erase(node->identifier);
+}
+
 void TypecheckVisitor::check_numeric_operator(const yy::location& loc, 
                                               const Type type,
                                               const Expression::Operation op) {

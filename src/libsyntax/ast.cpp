@@ -377,12 +377,12 @@ bool UnaryNode::equals(AstNode *other) {
 
 
 RuleNode::RuleNode(yy::location& loc, AstNode *child, const std::string& name)
-  :  UnaryNode(loc, NodeType::RULE, child), name(std::move(name)) {}
+  :  UnaryNode(loc, NodeType::RULE, child), name(std::move(name)), arguments(), binding_offsets() {}
 
 RuleNode::RuleNode(yy::location& loc,
                    AstNode *child,
                    const std::string &name,
-                   const std::vector<Type>& args)
+                   std::vector<Type>& args)
   : UnaryNode(loc, NodeType::RULE, child), name(std::move(name)),
     arguments(std::move(args)), binding_offsets(std::move(binding_offsets)) {}
 
@@ -400,3 +400,8 @@ PrintNode::PrintNode(yy::location& loc, const std::vector<ExpressionBase*> &atom
     : AstNode(loc, NodeType::PRINT, Type::NO_TYPE), atoms(std::move(atoms)){
 
 }
+
+LetNode::LetNode(yy::location& loc, Type type, const std::string& identifier,
+            ExpressionBase *expr, AstNode *stmt) 
+    : AstNode(loc, NodeType::LET, type), identifier(identifier), expr(expr), stmt(stmt) {}
+

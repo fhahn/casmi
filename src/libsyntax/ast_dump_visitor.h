@@ -44,6 +44,10 @@ class AstDumpVisitor {
     bool visit_call(CallNode *call, std::vector<bool>& argument_results);
     void visit_call_post(CallNode *call) {UNUSED(call);}
     bool visit_print(PrintNode *node, std::vector<bool>& argument_results);
+
+    void visit_let(LetNode *node, bool v) {}
+    void visit_let_post(LetNode *node) {}
+
     bool visit_expression(Expression *expr, bool, bool);
     bool visit_expression_single(Expression *expr, bool);
     bool visit_int_atom(IntAtom *atom);

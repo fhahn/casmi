@@ -16,8 +16,8 @@ class TypecheckVisitor {
     void check_numeric_operator(const yy::location& loc,  const Type type,
                                 const Expression::Operation op);
 
-    std::vector<const std::vector<Type> *> rule_binding_types;
-    std::vector<const std::map<std::string, size_t> *> rule_binding_offsets;
+    std::vector<std::vector<Type> *> rule_binding_types;
+    std::vector<std::map<std::string, size_t> *> rule_binding_offsets;
 
   public:
     TypecheckVisitor(Driver& driver);
@@ -43,6 +43,10 @@ class TypecheckVisitor {
     void visit_call(CallNode *call, std::vector<Type>& argument_results);
     void visit_call_post(CallNode *call);
     void visit_print(PrintNode*, std::vector<Type>&) {}
+
+    void visit_let(LetNode *node, Type& v);
+    void visit_let_post(LetNode *node);
+
     Type visit_expression(Expression *expr, Type left_val, Type right_val);
     Type visit_expression_single(Expression *expr, Type val);
     Type visit_int_atom(IntAtom *atom) { UNUSED(atom); return Type::INT; }

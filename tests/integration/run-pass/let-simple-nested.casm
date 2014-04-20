@@ -1,0 +1,10 @@
+CASM foo
+
+init main
+
+rule main = {
+    let x = 10 in 
+        let y = 2 * x in
+            assert y = 20
+    program(self) := undef
+}

@@ -95,6 +95,7 @@
 %type <CallNode*> CALL_SYNTAX
 %type <std::vector<ExpressionBase*>> DEBUG_ATOM_LIST
 %type <PrintNode*> PRINT_SYNTAX
+%type <LetNode*> LET_SYNTAX
 
 %start SPECIFICATION
 
@@ -436,7 +437,7 @@ STATEMENT: ASSERT_SYNTAX { $$ = $1; }
          | KW_PARBLOCK_SYNTAX { $$ = $1; }
          | PARBLOCK_SYNTAX { $$ = $1; }
          | IFTHENELSE { $$ = $1; }
-         | LET_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
+         | LET_SYNTAX { $$ = $1; }
          | PUSH_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
          | POP_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
          | FORALL_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
@@ -541,8 +542,13 @@ IFTHENELSE: IF EXPRESSION THEN STATEMENT %prec XIF {
           }
           ;
 
-LET_SYNTAX: LET IDENTIFIER "=" EXPRESSION IN STATEMENT
-          | LET IDENTIFIER ":" NEW_TYPE_SYNTAX "=" EXPRESSION IN STATEMENT
+LET_SYNTAX: LET IDENTIFIER "=" EXPRESSION IN STATEMENT {
+            $$ = new LetNode(@$, Type::UNKNOWN, $2, $4, $6);
+          }
+          | LET IDENTIFIER ":" NEW_TYPE_SYNTAX "=" EXPRESSION IN STATEMENT {
+            $$ = new LetNode(@$, $4, $2, $6, $8);
+          }
+
           ;
 
 PUSH_SYNTAX: PUSH EXPRESSION INTO IDENTIFIER

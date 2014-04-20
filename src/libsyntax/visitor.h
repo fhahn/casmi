@@ -112,6 +112,10 @@ template<class T, class V> class AstWalker {
           walk_print(reinterpret_cast<PrintNode*>(stmt));
           break;
         }
+        case NodeType::LET: {
+          walk_let(reinterpret_cast<LetNode*>(stmt));
+          break;
+        }
         default:
             throw RuntimeException(
               std::string("Invalid node type: ")+
@@ -177,6 +181,12 @@ template<class T, class V> class AstWalker {
       visitor.visit_print(node, argument_results);
     }
 
+    void walk_let(LetNode *node) {
+      V v = walk_expression_base(node->expr);
+      visitor.visit_let(node, v);
+      walk_statement(node->stmt);
+      visitor.visit_let_post(node);
+    }
 
     V walk_expression_base(ExpressionBase *expr) {
       if (expr->node_type_ == NodeType::EXPRESSION) {

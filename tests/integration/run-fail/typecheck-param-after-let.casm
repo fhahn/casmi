@@ -1,0 +1,13 @@
+CASM foo
+
+init main
+
+rule main = {
+    let x = 10 in 
+        let y = 2 * x in
+            assert y = 20
+    assert x = 10
+    //~^ use of undefined function `x`
+    //~^^ type of expressions did not match
+    program(self) := undef
+}

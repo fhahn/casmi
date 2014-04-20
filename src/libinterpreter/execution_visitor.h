@@ -17,6 +17,7 @@ class ExecutionVisitor {
 
     std::vector<Value> value_list;
     std::vector<std::vector<Value> *> rule_bindings;
+    std::vector<Value> main_bindings;
 
   public:
     Driver& driver_;
@@ -43,6 +44,10 @@ class ExecutionVisitor {
     void visit_call(CallNode *call, std::vector<Value> &arguments);
     void visit_call_post(CallNode *call);
     void visit_print(PrintNode *node, const std::vector<Value> &arguments);
+
+    void visit_let(LetNode *node, Value& v);
+    void visit_let_post(LetNode *node);
+
     Value&& visit_expression(Expression *expr, Value& left_val, Value& right_val);
     Value&& visit_expression_single(Expression *expr, Value& val);
     Value&& visit_int_atom(IntAtom *atom) { return std::move(Value(atom->val_)); }
