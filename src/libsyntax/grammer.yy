@@ -226,7 +226,11 @@ PARAM: IDENTIFIER OLD_TYPE_SYNTAX
         driver.binding_offsets[$1] = driver.binding_offsets.size(); 
         $$ = $3;
      }
-     | IDENTIFIER
+     | IDENTIFIER {
+        driver.binding_offsets[$1] = driver.binding_offsets.size(); 
+        // TODO: fail for rules without types and print warnings
+        $$ = Type::INT;
+     }
      ;
 
 

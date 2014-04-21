@@ -219,7 +219,7 @@ Type TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
                   atom->name+"`");
   } else {
     for (size_t i=0; i < atom->symbol->arguments_.size(); i++) {
-      if (atom->symbol->arguments_[i] != expr_results[i]) {
+      if (expr_results[i] != Type::UNDEF && atom->symbol->arguments_[i] != expr_results[i]) {
         driver_.error(atom->arguments->at(i)->location,
                       "type of "+std::to_string(i+1)+" argument of `"+atom->name+
                       "` is "+type_to_str(expr_results[i])+" but should be "+
