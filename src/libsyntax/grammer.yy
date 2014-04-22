@@ -142,7 +142,6 @@ BODY_ELEMENT: PROVIDER_SYNTAX { $$ = new AstNode(NodeType::PROVIDER); }
                 }
             }
            | DERIVED_SYNTAX {
-                DEBUG("ASDA "<<driver.binding_offsets.size());
                 $1->binding_offsets = std::move(driver.binding_offsets);
                 driver.binding_offsets.clear();
                 $$ = new FunctionDefNode(@$, $1);
@@ -223,11 +222,13 @@ FUNCTION_SIGNATURE: ":" ARROW NEW_TYPE_SYNTAX
 
 PARAM: IDENTIFIER OLD_TYPE_SYNTAX  
      | IDENTIFIER ":" NEW_TYPE_SYNTAX {
-        driver.binding_offsets[$1] = driver.binding_offsets.size(); 
+        size_t size = driver.binding_offsets.size();
+        driver.binding_offsets[$1] = size;
         $$ = $3;
      }
      | IDENTIFIER {
-        driver.binding_offsets[$1] = driver.binding_offsets.size(); 
+        size_t size = driver.binding_offsets.size();
+        driver.binding_offsets[$1] = size;
         // TODO: fail for rules without types and print warnings
         $$ = Type::INT;
      }

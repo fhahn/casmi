@@ -196,8 +196,7 @@ Type TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
           !atom->arguments) {
         atom->symbol_type = FunctionAtom::SymbolType::PARAMETER;
         atom->offset = current_rule_binding_offsets->at(atom->name);
-        Type t = current_rule_binding_types->at(atom->offset);
-        return t;
+        return current_rule_binding_types->at(atom->offset);
       }
     }
 
