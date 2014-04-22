@@ -2,6 +2,7 @@
 #define CASMI_LIBPARSE_SYMBOLS_H
 
 #include <string>
+#include <stdexcept>
 #include <map>
 #include <vector>
 
