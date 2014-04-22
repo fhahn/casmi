@@ -8,11 +8,11 @@ void TypecheckVisitor::visit_function_def(FunctionDefNode *def,
   for (size_t i = 0; i < initializers.size(); i++) {
     const std::pair<Type, Type>& p = initializers[i];
 
-    if (def->sym->arguments_.size() == 0 && p.first == Type::UNDEF && p.second != def->sym->return_type_) {
+    if (def->sym->arguments_.size() == 0 && p.first == TypeType::UNDEF && p.second != def->sym->return_type_) {
       driver_.error(def->sym->intitializers_->at(i).second->location,
                   "type of initializer of function `" +def->sym->name()+
-                  "` is `"+type_to_str(p.second)+"` but should be `"+
-                  type_to_str(def->sym->return_type_)+"´");
+                  "` is `"+p.second.to_str()+"` but should be `"+
+                  def->sym->return_type_.to_str()+"´");
     }
   }
 }
@@ -26,17 +26,17 @@ void TypecheckVisitor::visit_derived_def(FunctionDefNode *def, Type& expr) {
   rule_binding_types.pop_back();
   rule_binding_offsets.pop_back();
 
-  if (def->sym->return_type_ == Type::UNKNOWN) {
-    if (expr == Type::UNDEF) {
+  if (def->sym->return_type_ == TypeType::UNKNOWN) {
+    if (expr == TypeType::UNDEF) {
       driver_.error(def->location, std::string("type of derived expression is ")+
                                    "unknown because type of expression is `undef`");
    
     }
     def->sym->return_type_ = expr;
-  } else if (def->sym->return_type_ != expr && expr != Type::UNDEF) {
+  } else if (def->sym->return_type_ != expr && expr != TypeType::UNDEF) {
     driver_.error(def->location, "type of derived expression was `"+
-                                 type_to_str(expr)+"` but should be `"+
-                                 type_to_str(def->sym->return_type_)+"`");
+                                 expr.to_str()+"` but should be `"+
+                                 def->sym->return_type_.to_str()+"`");
   }
 }
 
@@ -46,24 +46,24 @@ void TypecheckVisitor::visit_rule(RuleNode *rule) {
 }
 
 void TypecheckVisitor::visit_ifthenelse(IfThenElseNode *node, Type cond) {
-  if (cond != Type::BOOLEAN) {
+  if (cond != TypeType::BOOLEAN) {
     driver_.error(node->condition_->location,
-                  "type of expression should be `Bool` but was `" +type_to_str(cond)+"`");
+                  "type of expression should be `Bool` but was `" +cond.to_str()+"`");
   }
 }
 
 void TypecheckVisitor::visit_assert(UnaryNode *assert, Type val) {
-  if (val != Type::BOOLEAN) {
+  if (val != TypeType::BOOLEAN) {
     driver_.error(assert->child_->location,
-                  "type of expression should be `Bool` but was `" +type_to_str(val)+"`");
+                  "type of expression should be `Bool` but was `" +val.to_str()+"`");
   }
 }
 
 void TypecheckVisitor::visit_update(UpdateNode *update, Type func_t, Type expr_t) {
-  if (expr_t != Type::UNDEF && func_t != expr_t) {
-    driver_.error(update->location, "type `"+type_to_str(func_t)+"` of `"+
+  if (expr_t != TypeType::UNDEF && func_t != expr_t) {
+    driver_.error(update->location, "type `"+func_t.to_str()+"` of `"+
                                     update->func->name+"` does not match type `"+
-                                    type_to_str(expr_t)+"` of expression");
+                                    expr_t.to_str()+"` of expression");
   }
 
   if (update->func->symbol_type == FunctionAtom::SymbolType::PARAMETER) {
@@ -81,9 +81,9 @@ void TypecheckVisitor::visit_call_pre(CallNode *call) {
 }
 
 void TypecheckVisitor::visit_call_pre(CallNode *call, Type expr) {
-  if (expr != Type::RULEREF) {
+  if (expr != TypeType::RULEREF) {
     driver_.error(call->ruleref->location, "Indirect target must be a `Ruleref` but was `"+
-                                            type_to_str(expr)+"`");
+                                            expr.to_str()+"`");
   }
 }
 
@@ -105,8 +105,8 @@ void TypecheckVisitor::visit_call(CallNode *call, std::vector<Type>& argument_re
       if (call->rule->arguments[i] != argument_results[i]) {
         driver_.error(call->arguments->at(i)->location,
                       "argument "+std::to_string(i+1)+" of rule `"+ call->rule_name+
-                      "` must be `"+type_to_str(call->rule->arguments[i])+"` but was `"+
-                      type_to_str(argument_results[i])+"`");
+                      "` must be `"+call->rule->arguments[i].to_str()+"` but was `"+
+                      argument_results[i].to_str()+"`");
       }
     }
   }
@@ -119,7 +119,7 @@ void TypecheckVisitor::visit_call_post(CallNode *call) {
 }
 
 void TypecheckVisitor::visit_let(LetNode *node, Type& v) {
-  if (node->type_ != Type::UNKNOWN && node->type_ != v) {
+  if (node->type_ != TypeType::UNKNOWN && node->type_ != v) {
     driver_.error(node->location, "type of let conflicts with type of expression");
   }
 
@@ -141,16 +141,16 @@ void TypecheckVisitor::visit_let_post(LetNode *node) {
 void TypecheckVisitor::check_numeric_operator(const yy::location& loc, 
                                               const Type type,
                                               const Expression::Operation op) {
-  if (type != Type::INT && type != Type::FLOAT && type != Type::UNDEF) {
+  if (type != TypeType::INT && type != TypeType::FLOAT && type != TypeType::UNDEF) {
     driver_.error(loc,
                   "operands of operator `"+operator_to_str(op)+
                   "` must be `Int` or `Float` but were `"+
-                  type_to_str(type)+"`");
+                  type.to_str()+"`");
   }
 }
 
 Type TypecheckVisitor::visit_expression(Expression *expr, Type left_val, Type right_val) {
-  if (left_val != right_val && left_val != Type::UNDEF && right_val != Type::UNDEF) {
+  if (left_val != right_val && left_val != TypeType::UNDEF && right_val != TypeType::UNDEF) {
       driver_.error(expr->location, "type of expressions did not match");
   }
   switch (expr->op) {
@@ -165,14 +165,14 @@ Type TypecheckVisitor::visit_expression(Expression *expr, Type left_val, Type ri
 
     case Expression::Operation::EQ:
     case Expression::Operation::NEQ:
-      return Type::BOOLEAN;
+      return Type(TypeType::BOOLEAN);
 
     case Expression::Operation::LESSER:
     case Expression::Operation::GREATER:
     case Expression::Operation::LESSEREQ:
     case Expression::Operation::GREATEREQ:
       check_numeric_operator(expr->location, left_val, expr->op);
-      return Type::BOOLEAN;
+      return Type(TypeType::BOOLEAN);
     default: assert(0);
   }
 }
@@ -201,7 +201,7 @@ Type TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
     }
 
     driver_.error(atom->location, "use of undefined function `"+atom->name+"`");
-    return Type::INVALID;
+    return Type(TypeType::INVALID);
   }
 
   atom->symbol = sym;
@@ -218,11 +218,11 @@ Type TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
                   atom->name+"`");
   } else {
     for (size_t i=0; i < atom->symbol->arguments_.size(); i++) {
-      if (expr_results[i] != Type::UNDEF && atom->symbol->arguments_[i] != expr_results[i]) {
+      if (expr_results[i] != TypeType::UNDEF && atom->symbol->arguments_[i] != expr_results[i]) {
         driver_.error(atom->arguments->at(i)->location,
                       "type of "+std::to_string(i+1)+" argument of `"+atom->name+
-                      "` is "+type_to_str(expr_results[i])+" but should be "+
-                      type_to_str(atom->symbol->arguments_[i]));
+                      "` is "+expr_results[i].to_str()+" but should be "+
+                      atom->symbol->arguments_[i].to_str());
       }
     }
   }
@@ -243,7 +243,6 @@ void TypecheckVisitor::visit_derived_function_atom_pre(FunctionAtom *atom) {
 Type TypecheckVisitor::visit_derived_function_atom(FunctionAtom *atom,
                                                   const std::vector<Type>& argument_results,
                                                   Type expr) {
-  DEBUG("expr type "<<type_to_str(expr));
   rule_binding_types.pop_back();
   rule_binding_offsets.pop_back();
 
@@ -257,8 +256,8 @@ Type TypecheckVisitor::visit_derived_function_atom(FunctionAtom *atom,
     for (size_t i=0; i < args_defined; i++) {
       if (atom->symbol->arguments_.at(i) != argument_results[i]) {
         driver_.error(atom->arguments->at(i)->location,
-                      "argument "+std::to_string(i+1)+" of must be `"+type_to_str(atom->symbol->arguments_.at(i))+"` but was `"+
-                      type_to_str(argument_results[i])+"`");
+                      "argument "+std::to_string(i+1)+" of must be `"+atom->symbol->arguments_.at(i).to_str()+"` but was `"+
+                      argument_results[i].to_str()+"`");
       }
     }
   }
@@ -271,5 +270,5 @@ Type TypecheckVisitor::visit_rule_atom(RuleAtom *atom) {
   } else {
     driver_.error(atom->location, "no rule with name `"+atom->name+"` found");
   }
-  return Type::RULEREF;
+  return Type(TypeType::RULEREF);
 }

@@ -175,13 +175,13 @@ ENUM_SYNTAX: ENUM IDENTIFIER "=" "{" IDENTIFIER_LIST "}";
 
 DERIVED_SYNTAX: DERIVED IDENTIFIER "(" PARAM_LIST ")" "=" EXPRESSION {
                   // TODO: 2nd argument should be a reference
-                  $$ = new Function($2, $4, $7, Type::UNKNOWN);
+                  $$ = new Function($2, $4, $7, Type(TypeType::UNKNOWN));
                 }
               | DERIVED IDENTIFIER "=" EXPRESSION {
-                  $$ = new Function($2, $4, Type::UNKNOWN);
+                  $$ = new Function($2, $4, Type(TypeType::UNKNOWN));
                 }
               | DERIVED IDENTIFIER "(" ")" "=" EXPRESSION {
-                  $$ = new Function($2, $6, Type::UNKNOWN);
+                  $$ = new Function($2, $6, Type(TypeType::UNKNOWN));
                 }
               /* again with type syntax */
               | DERIVED IDENTIFIER "(" PARAM_LIST ")" ":" NEW_TYPE_SYNTAX "=" EXPRESSION {
@@ -230,7 +230,7 @@ PARAM: IDENTIFIER OLD_TYPE_SYNTAX
         size_t size = driver.binding_offsets.size();
         driver.binding_offsets[$1] = size;
         // TODO: fail for rules without types and print warnings
-        $$ = Type::INT;
+        $$ = Type(TypeType::INT);
      }
      ;
 
@@ -266,7 +266,7 @@ TYPE_IDENTIFIER_STARLIST: NEW_TYPE_SYNTAX "*" TYPE_IDENTIFIER_STARLIST
                         ;
 
 /* new type syntax */
-NEW_TYPE_SYNTAX: IDENTIFIER { $$ = str_to_type($1); /* TODO check invalid types */}
+NEW_TYPE_SYNTAX: IDENTIFIER { $$ = Type($1); /* TODO check invalid types */}
                | IDENTIFIER "(" NEW_TYPE_SYNTAX_LIST ")" 
                | IDENTIFIER TYPEANNOTATION IDENTIFIER ENDTYPEANNOTATION
                | IDENTIFIER TYPEANNOTATION "[" TUPLE_LIST "]" ENDTYPEANNOTATION
@@ -548,7 +548,7 @@ IFTHENELSE: IF EXPRESSION THEN STATEMENT %prec XIF {
           ;
 
 LET_SYNTAX: LET IDENTIFIER "=" EXPRESSION IN STATEMENT {
-            $$ = new LetNode(@$, Type::UNKNOWN, $2, $4, $6);
+            $$ = new LetNode(@$, Type(TypeType::UNKNOWN), $2, $4, $6);
           }
           | LET IDENTIFIER ":" NEW_TYPE_SYNTAX "=" EXPRESSION IN STATEMENT {
             $$ = new LetNode(@$, $4, $2, $6, $8);

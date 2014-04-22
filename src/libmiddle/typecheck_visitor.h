@@ -49,19 +49,19 @@ class TypecheckVisitor {
 
     Type visit_expression(Expression *expr, Type left_val, Type right_val);
     Type visit_expression_single(Expression *expr, Type val);
-    Type visit_int_atom(IntAtom *atom) { UNUSED(atom); return Type::INT; }
-    Type visit_float_atom(FloatAtom *atom) { UNUSED(atom); return Type::FLOAT; }
-    Type visit_undef_atom(UndefAtom *atom) { UNUSED(atom); return Type::UNDEF; }
+    Type visit_int_atom(IntAtom *atom) { UNUSED(atom); return Type(TypeType::INT); }
+    Type visit_float_atom(FloatAtom *atom) { UNUSED(atom); return Type(TypeType::FLOAT); }
+    Type visit_undef_atom(UndefAtom *atom) { UNUSED(atom); return Type(TypeType::UNDEF); }
     Type visit_function_atom(FunctionAtom *atom,
                              const std::vector<Type> &expr_results);
 
     void visit_derived_function_atom_pre(FunctionAtom *atom);
     Type visit_derived_function_atom(FunctionAtom *atom,
                              const std::vector<Type> &expr_results, Type expr);
-    Type visit_self_atom(SelfAtom *atom) { UNUSED(atom); return Type::SELF; }
+    Type visit_self_atom(SelfAtom *atom) { UNUSED(atom); return Type(TypeType::SELF); }
     Type visit_rule_atom(RuleAtom *atom);
-    Type visit_boolean_atom(BooleanAtom *atom) { UNUSED(atom); return Type::BOOLEAN; }
-    Type visit_string_atom(StringAtom *atom) { UNUSED(atom); return Type::STRING; }
+    Type visit_boolean_atom(BooleanAtom *atom) { UNUSED(atom); return Type(TypeType::BOOLEAN); }
+    Type visit_string_atom(StringAtom *atom) { UNUSED(atom); return Type(TypeType::STRING); }
 };
 
 #endif //CASMI_LIBINTERPRETER_EXEC_VISITOR

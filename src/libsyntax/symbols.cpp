@@ -33,7 +33,7 @@ Function::Function(const std::string name,
 
 Function::Function(const std::string name) :
         name_(name), arguments_(), intitializers_(nullptr),
-        return_type_(Type::UNKNOWN), id(counter) {
+        return_type_(Type(TypeType::UNKNOWN)), id(counter) {
   counter += 1;
 }
 
@@ -57,10 +57,10 @@ const std::string Function::to_str() const {
 
   res = ": (";
   for (Type t : arguments_) {
-    res += type_to_str(t) + ", ";
+    res += t.to_str() + ", ";
   }
   res += ")";
-  res += "-> "+type_to_str(return_type_);
+  res += "-> "+return_type_.to_str();
   return res;
 }
 
@@ -83,7 +83,7 @@ bool Function::equals(Function *other) const {
 
 uint64_t Binding::counter = 0;
 
-Binding::Binding(const std::string& name) : Binding(name, Type::UNKNOWN) {}
+Binding::Binding(const std::string& name) : Binding(name, Type(TypeType::UNKNOWN)) {}
 
 Binding::Binding(const std::string& name, Type t) : id(counter), name(name),
     type(t)

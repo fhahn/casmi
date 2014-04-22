@@ -46,14 +46,13 @@ const std::string& type_to_str(NodeType t) {
   }
 }
 
-AstNode::AstNode(NodeType node_type) {
+AstNode::AstNode(NodeType node_type) : type_(TypeType::UNKNOWN){
     node_type_ = node_type;
-    type_ = Type::UNKNOWN;
    // DEBUG(this->to_str());
 }
 
 AstNode::AstNode(yy::location& loc, NodeType nt) :
-        location(loc), node_type_(nt), type_(Type::UNKNOWN) {}
+        location(loc), node_type_(nt), type_(TypeType::UNKNOWN) {}
 
 AstNode::AstNode(yy::location& loc, NodeType nt, Type t) :
         location(loc), node_type_(nt), type_(t) {}
@@ -130,7 +129,7 @@ IfThenElseNode::IfThenElseNode(yy::location& loc, ExpressionBase *condition, Ast
 
 
 IntAtom::IntAtom(yy::location& loc, INT_T val) :
-        AtomNode(loc, NodeType::INT_ATOM, Type::INT) {
+        AtomNode(loc, NodeType::INT_ATOM, Type(TypeType::INT)) {
   val_ = val;
 }
 
@@ -146,7 +145,7 @@ bool IntAtom::equals(AstNode *other) {
 }
 
 FloatAtom::FloatAtom(yy::location& loc, FLOAT_T val) :
-        AtomNode(loc, NodeType::FLOAT_ATOM, Type::FLOAT) {
+        AtomNode(loc, NodeType::FLOAT_ATOM, Type(TypeType::FLOAT)) {
   val_ = val;
 }
 
@@ -163,7 +162,7 @@ bool FloatAtom::equals(AstNode *other) {
 
 
 UndefAtom::UndefAtom(yy::location& loc) :
-        AtomNode(loc, NodeType::UNDEF_ATOM, Type::UNKNOWN) {}
+        AtomNode(loc, NodeType::UNDEF_ATOM, Type(TypeType::UNKNOWN)) {}
 
 bool UndefAtom::equals(AstNode *other) {
   if (!AstNode::equals(other)) {
@@ -175,7 +174,7 @@ bool UndefAtom::equals(AstNode *other) {
 
 
 SelfAtom::SelfAtom(yy::location& loc) :
-        AtomNode(loc, NodeType::SELF_ATOM, Type::SELF) { DEBUG("TRUE");}
+        AtomNode(loc, NodeType::SELF_ATOM, Type(TypeType::SELF)) { DEBUG("TRUE");}
 
 bool SelfAtom::equals(AstNode *other) {
   if (!AstNode::equals(other)) {
@@ -187,7 +186,7 @@ bool SelfAtom::equals(AstNode *other) {
 
 
 BooleanAtom::BooleanAtom(yy::location& loc, bool value) :
-        AtomNode(loc, NodeType::BOOLEAN_ATOM, Type::BOOLEAN), value(value) {}
+        AtomNode(loc, NodeType::BOOLEAN_ATOM, Type(TypeType::BOOLEAN)), value(value) {}
 
 bool BooleanAtom::equals(AstNode *other) {
   if (!AstNode::equals(other)) {
@@ -201,7 +200,7 @@ bool BooleanAtom::equals(AstNode *other) {
 
 
 RuleAtom::RuleAtom(yy::location& loc, const std::string&& name) :
-        AtomNode(loc, NodeType::RULE_ATOM, Type::RULEREF), name(name) {}
+        AtomNode(loc, NodeType::RULE_ATOM, Type(TypeType::RULEREF)), name(name) {}
 
 RuleAtom::~RuleAtom() {}
 
@@ -211,7 +210,7 @@ bool RuleAtom::equals(AstNode *other) {
 
 
 StringAtom::StringAtom(yy::location& loc, std::string&& string) :
-        AtomNode(loc, NodeType::STRING_ATOM, Type::STRING), string(string) {
+        AtomNode(loc, NodeType::STRING_ATOM, Type(TypeType::STRING)), string(string) {
   DEBUG("StringAtom "<<string);
 }
 
@@ -228,7 +227,7 @@ FunctionAtom::FunctionAtom(yy::location& loc, const std::string name)
 
 FunctionAtom::FunctionAtom(yy::location& loc, const std::string name,
                            std::vector<ExpressionBase*> *args) 
-    : AtomNode(loc, NodeType::FUNCTION_ATOM, Type::UNKNOWN),
+    : AtomNode(loc, NodeType::FUNCTION_ATOM, Type(TypeType::UNKNOWN)),
        name(name), arguments(args), symbol_type(SymbolType::UNSET) {
 }
 
@@ -277,7 +276,7 @@ bool FunctionAtom::equals(AstNode *other) {
 
 Expression::Expression(yy::location& loc, ExpressionBase *left, ExpressionBase *right,
                        Expression::Operation op)
-                       : ExpressionBase(loc, NodeType::EXPRESSION, Type::UNKNOWN),
+                       : ExpressionBase(loc, NodeType::EXPRESSION, Type(TypeType::UNKNOWN)),
                          left_(left), right_(right), op(op) {
   // Propagate known types
   /*
@@ -392,12 +391,12 @@ CallNode::CallNode(yy::location& loc, const std::string& rule_name, ExpressionBa
 
 CallNode::CallNode(yy::location& loc, const std::string& rule_name, ExpressionBase *ruleref,
                    std::vector<ExpressionBase*> *args)
-    : AstNode(loc, NodeType::CALL, Type::NO_TYPE), rule_name(rule_name),
+    : AstNode(loc, NodeType::CALL, Type(TypeType::NO_TYPE)), rule_name(rule_name),
       rule(nullptr), arguments(args), ruleref(ruleref) {}
 
 
 PrintNode::PrintNode(yy::location& loc, const std::vector<ExpressionBase*> &atoms)
-    : AstNode(loc, NodeType::PRINT, Type::NO_TYPE), atoms(std::move(atoms)){
+    : AstNode(loc, NodeType::PRINT, Type(TypeType::NO_TYPE)), atoms(std::move(atoms)){
 
 }
 

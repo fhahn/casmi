@@ -44,7 +44,7 @@ void ExecutionContext::apply_updates() {
     DEBUG("APPLY args "<<u->num_args << " arg "<<u->args[0] << " " << u->args[1]<<" func "<<u->func);
 
     Value v(function_map.first->return_type_, u);
-    if (v.type == Type::UNDEF) {
+    if (v.type == TypeType::UNDEF) {
       function_map.second.erase({u->args, u->num_args});
     } else {
       function_map.second[{u->args, u->num_args}] = v;
@@ -184,7 +184,7 @@ Value& ExecutionContext::get_function_value(Function *sym, uint64_t args[]) {
       DEBUG("get "<<sym->id << " " << sym->name()<<" size:"<<sym->arguments_.size() << " args "<<args[0]);
     return function_map.second.at({&args[0], sym->arguments_.size()});
   } catch (const std::out_of_range &e) {
-    undef.type = Type::UNDEF;
+    undef.type = TypeType::UNDEF;
     return undef;
   }
 }

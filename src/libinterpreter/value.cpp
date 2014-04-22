@@ -4,25 +4,25 @@
 #include "libinterpreter/value.h"
 #include "libutil/exceptions.h"
 
-Value::Value() : type(Type::UNDEF) {}
+Value::Value() : type(TypeType::UNDEF) {}
 
-Value::Value(INT_T ival) : type(Type::INT) {
+Value::Value(INT_T ival) : type(TypeType::INT) {
   value.ival = ival;
 }
 
-Value::Value(FLOAT_T fval) : type(Type::FLOAT) {
+Value::Value(FLOAT_T fval) : type(TypeType::FLOAT) {
   value.fval = fval;
 }
 
-Value::Value(bool bval) : type(Type::BOOLEAN) {
+Value::Value(bool bval) : type(TypeType::BOOLEAN) {
   value.bval = bval;
 }
 
-Value::Value(RuleNode *rule) : type(Type::RULEREF) {
+Value::Value(RuleNode *rule) : type(TypeType::RULEREF) {
   value.rule = rule;
 }
 
-Value::Value(std::string *string) : type(Type::STRING) {
+Value::Value(std::string *string) : type(TypeType::STRING) {
   value.string = string;
 }
 
@@ -33,28 +33,28 @@ Value::Value(const Value& other) : type(other.type), value(other.value) {}
 //Value::Value(Value&& other) : type(std::move(other.type)), value(other.value) {}
 
 Value::Value(Type t, casm_update* u) {
-  switch (t) {
-    case Type::UNDEF:
-      type = Type::UNDEF;
+  switch (t.t) {
+    case TypeType::UNDEF:
+      type = TypeType::UNDEF;
       break;
-    case Type::RULEREF:
+    case TypeType::RULEREF:
       if (u->value != 0) {
-        type = Type::RULEREF; 
+        type = TypeType::RULEREF; 
         value.rule = reinterpret_cast<RuleNode*>(u->value);
       } else {
-        type = Type::UNDEF; 
+        type = TypeType::UNDEF; 
       }
       break;
-    case Type::INT:
-      type = Type::INT;
+    case TypeType::INT:
+      type = TypeType::INT;
       value.ival = (int64_t)u->value;
       break;
-    case Type::STRING:
+    case TypeType::STRING:
       if (u->value != 0) {
-        type = Type::STRING;
+        type = TypeType::STRING;
         value.string = reinterpret_cast<std::string*>(u->value);
       } else {
-        type = Type::UNDEF;
+        type = TypeType::UNDEF;
       }
       break;
     default: throw RuntimeException("Unsupported tye in apply");
@@ -62,11 +62,11 @@ Value::Value(Type t, casm_update* u) {
 }
 
 void Value::add(const Value& other) {
-  if (type == Type::UNDEF || other.type == Type::UNDEF) {
-    type = Type::UNDEF;
+  if (type == TypeType::UNDEF || other.type == TypeType::UNDEF) {
+    type = TypeType::UNDEF;
  } else {
-   switch (type) {
-      case Type::INT: {
+   switch (type.t) {
+      case TypeType::INT: {
         value.ival += other.value.ival;
         break;
       }
@@ -76,11 +76,11 @@ void Value::add(const Value& other) {
 }
 
 void Value::sub(const Value& other) {
-  if (type == Type::UNDEF || other.type == Type::UNDEF) {
-    type = Type::UNDEF;
+  if (type == TypeType::UNDEF || other.type == TypeType::UNDEF) {
+    type = TypeType::UNDEF;
   } else {
-    switch (type) {
-      case Type::INT: {
+    switch (type.t) {
+      case TypeType::INT: {
         value.ival -= other.value.ival;
         break;
       }
@@ -90,11 +90,11 @@ void Value::sub(const Value& other) {
 }
 
 void Value::mul(const Value& other) {
-  if (type == Type::UNDEF || other.type == Type::UNDEF) {
-    type = Type::UNDEF;
+  if (type == TypeType::UNDEF || other.type == TypeType::UNDEF) {
+    type = TypeType::UNDEF;
   } else {
-    switch (type) {
-      case Type::INT: {
+    switch (type.t) {
+      case TypeType::INT: {
         value.ival *= other.value.ival;
         break;
       }
@@ -104,11 +104,11 @@ void Value::mul(const Value& other) {
 }
 
 void Value::div(const Value& other) {
-  if (type == Type::UNDEF || other.type == Type::UNDEF) {
-    type = Type::UNDEF;
+  if (type == TypeType::UNDEF || other.type == TypeType::UNDEF) {
+    type = TypeType::UNDEF;
   } else {
-    switch (type) {
-      case Type::INT: {
+    switch (type.t) {
+      case TypeType::INT: {
         value.ival /= other.value.ival;
         break;
       }
@@ -118,11 +118,11 @@ void Value::div(const Value& other) {
 }
 
 void Value::mod(const Value& other) {
-  if (type == Type::UNDEF || other.type == Type::UNDEF) {
-    type = Type::UNDEF;
+  if (type == TypeType::UNDEF || other.type == TypeType::UNDEF) {
+    type = TypeType::UNDEF;
   } else {
-    switch (type) {
-      case Type::INT: {
+    switch (type.t) {
+      case TypeType::INT: {
         value.ival %= other.value.ival;
         break;
       }
@@ -132,48 +132,48 @@ void Value::mod(const Value& other) {
 }
 
 void Value::rat_div(const Value& other) {
-  if (type == Type::UNDEF || other.type == Type::UNDEF) {
-    type = Type::UNDEF;
+  if (type == TypeType::UNDEF || other.type == TypeType::UNDEF) {
+    type = TypeType::UNDEF;
   } else {
     assert(0);
   }
 }
 
 void Value::eq(const Value& other) {
-  if (type == Type::UNDEF || other.type == Type::UNDEF) {
+  if (type == TypeType::UNDEF || other.type == TypeType::UNDEF) {
     value.bval = type == other.type;
   } else {
-    switch (type) {
-      case Type::INT: {
+    switch (type.t) {
+      case TypeType::INT: {
         value.bval = value.ival == other.value.ival;
         break;
       }
-      case Type::BOOLEAN: {
+      case TypeType::BOOLEAN: {
         value.bval = value.bval == other.value.bval;
         break;
       }
-      case Type::UNDEF:
-        if (other.type == Type::UNDEF) {
+      case TypeType::UNDEF:
+        if (other.type == TypeType::UNDEF) {
           value.bval = true;
         } else {
           value.bval = false;
         }
         break;
-      case Type::STRING:
+      case TypeType::STRING:
         value.bval = *value.string == *other.value.string;
         break;
       default: assert(0);
     }
   }
-  type = Type::BOOLEAN;
+  type = TypeType::BOOLEAN;
 }
 
 void Value::lesser(const Value& other) {
-  if (type == Type::UNDEF || other.type == Type::UNDEF) {
-    type = Type::UNDEF;
+  if (type == TypeType::UNDEF || other.type == TypeType::UNDEF) {
+    type = TypeType::UNDEF;
   } else {
-    switch (type) {
-      case Type::INT:
+    switch (type.t) {
+      case TypeType::INT:
         value.bval = value.ival < other.value.ival;
         break;
       default: assert(0);
@@ -182,11 +182,11 @@ void Value::lesser(const Value& other) {
 }
 
 void Value::greater(const Value& other) {
-  if (type == Type::UNDEF || other.type == Type::UNDEF) {
-    type = Type::UNDEF;
+  if (type == TypeType::UNDEF || other.type == TypeType::UNDEF) {
+    type = TypeType::UNDEF;
   } else {
-    switch (type) {
-      case Type::INT:
+    switch (type.t) {
+      case TypeType::INT:
         value.bval = value.ival > other.value.ival;
         break;
       default: assert(0);
@@ -195,11 +195,11 @@ void Value::greater(const Value& other) {
 }
 
 void Value::lessereq(const Value& other) {
-  if (type == Type::UNDEF || other.type == Type::UNDEF) {
-    type = Type::UNDEF;
+  if (type == TypeType::UNDEF || other.type == TypeType::UNDEF) {
+    type = TypeType::UNDEF;
   } else {
-    switch (type) {
-      case Type::INT:
+    switch (type.t) {
+      case TypeType::INT:
         value.bval = value.ival <= other.value.ival;
         break;
       default: assert(0);
@@ -208,11 +208,11 @@ void Value::lessereq(const Value& other) {
 }
 
 void Value::greatereq(const Value& other) {
-  if (type == Type::UNDEF || other.type == Type::UNDEF) {
-    type = Type::UNDEF;
+  if (type == TypeType::UNDEF || other.type == TypeType::UNDEF) {
+    type = TypeType::UNDEF;
   } else {
-    switch (type) {
-      case Type::INT:
+    switch (type.t) {
+      case TypeType::INT:
         value.bval = value.ival >= other.value.ival;
         break;
       default: assert(0);
@@ -221,15 +221,15 @@ void Value::greatereq(const Value& other) {
 }
 
 uint64_t Value::to_uint64_t() const {
-  switch (type) {
-    case Type::INT:
+  switch (type.t) {
+    case TypeType::INT:
       return value.ival;
-    case Type::SELF:
-    case Type::UNDEF: // are UNDEF and SELF the same here?
+    case TypeType::SELF:
+    case TypeType::UNDEF: // are UNDEF and SELF the same here?
       return 0;
-    case Type::RULEREF:
+    case TypeType::RULEREF:
       return (uint64_t) value.rule;
-    case Type::STRING: 
+    case TypeType::STRING: 
       return (uint64_t) value.string;
     default: throw RuntimeException("Unsupported type in Value.to_uint64_t");
   }
@@ -237,17 +237,17 @@ uint64_t Value::to_uint64_t() const {
 
 
 std::string Value::to_str() const {
-  switch (type) {
-    case Type::INT:
+  switch (type.t) {
+    case TypeType::INT:
       return std::move(std::to_string(value.ival));
-    case Type::SELF:
+    case TypeType::SELF:
       return std::move("self");
-    case Type::UNDEF: // are UNDEF and SELF the same here?
+    case TypeType::UNDEF: // are UNDEF and SELF the same here?
       return std::move("undef");
-    case Type::RULEREF: 
+    case TypeType::RULEREF: 
       return std::move("@"+value.rule->name);
-    case Type::STRING:
+    case TypeType::STRING:
       return *value.string;
-    default: throw RuntimeException("Unsupported type in Value.to_str() "+type_to_str(type));
+    default: throw RuntimeException("Unsupported type in Value.to_str() "+type.to_str());
   }
 }

@@ -7,8 +7,7 @@
 
 #define INT_T int64_t
 #define FLOAT_T double
-
-enum class Type {
+enum class TypeType {
   STRING,
   RULEREF,
   INT,
@@ -22,8 +21,27 @@ enum class Type {
 };
 
 
-Type str_to_type(const std::string& type_name);
-const std::string type_to_str(Type t);
+class Type {
+  public:
+    TypeType t;
+
+    Type();
+    Type(TypeType t);
+    Type(const std::string& type_name);
+
+
+    inline bool operator==(const Type& other) const {
+      return t == other.t;
+    }
+
+    inline bool operator!=(const Type& other) const {
+      return !(t == other.t);
+    }
+
+    const std::string to_str() const;
+};
+
+
 
 
 class FunctionInfo {

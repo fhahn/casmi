@@ -85,9 +85,9 @@ TEST_F(ParserTest, parser_test_function_symbol_with_multiple_params) {
   AstNode *root = driver_.parse(test);
 
   std::vector<Type> types;
-  types.push_back(Type::INT);
-  types.push_back(Type::INT);
-  Function x("x", types, Type::INT, nullptr);
+  types.push_back(Type(TypeType::INT));
+  types.push_back(Type(TypeType::INT));
+  Function x("x", types, Type(TypeType::INT), nullptr);
 
   EXPECT_EQ(x.name(), driver_.function_table.get("x")->name());
 

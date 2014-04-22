@@ -3,25 +3,32 @@
 
 #include "libsyntax/types.h"
 
-Type str_to_type(const std::string& type_name) {
-  if (type_name == "Int") return Type::INT;
-  if (type_name == "Float") return Type::FLOAT;
-  if (type_name == "Undef") return Type::UNDEF;
-  if (type_name == "Boolean") return Type::BOOLEAN;
-  if (type_name == "RuleRef") return Type::RULEREF;
-  if (type_name == "String") return Type::STRING;
-  return Type::INVALID;
+Type::Type() : t(TypeType::INVALID) {}
+
+
+Type::Type(TypeType t) : t(t) {}
+
+Type::Type(const std::string& type_name) {
+  if (type_name == "Int") { t = TypeType::INT; }
+  else if (type_name == "Float") { t = TypeType::FLOAT; }
+  else if (type_name == "Undef") { t = TypeType::UNDEF; }
+  else if (type_name == "Boolean") { t = TypeType::BOOLEAN; }
+  else if (type_name == "RuleRef") { t = TypeType::RULEREF; }
+  else if (type_name == "String") { t = TypeType::STRING; }
+  else { t = TypeType::INVALID; }
 }
 
 
-const std::string type_to_str(Type t) {
-  if (t == Type::INT) return "Int";
-  if (t == Type::FLOAT) return "Float";
-  if (t == Type::UNDEF) return "Undef";
-  if (t == Type::BOOLEAN) return "Boolean";
-  if (t == Type::RULEREF) return "RuleRef";
-  if (t == Type::STRING) return "String";
-  return "Invalid";
+const std::string Type::to_str() const {
+  switch (t) {
+    case TypeType::INT: return "Int";
+    case TypeType::FLOAT: return "Float";
+    case TypeType::UNDEF: return "Undef";
+    case TypeType::BOOLEAN: return "Boolean";
+    case TypeType::RULEREF: return "RuleRef";
+    case TypeType::STRING: return "String";
+    default: return "Invalid";
+  }
 }
 
 FunctionInfo::FunctionInfo(std::vector<Type> *args, Type return_type) :

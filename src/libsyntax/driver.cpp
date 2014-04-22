@@ -20,8 +20,8 @@ Driver::Driver ()
   result = nullptr;
 
   std::vector<Type> args;
-  args.push_back(Type::SELF);
-  function_table.add(new Function("program", args, Type::RULEREF, nullptr));
+  args.push_back(Type(TypeType::SELF));
+  function_table.add(new Function("program", args, Type(TypeType::RULEREF), nullptr));
 
   lines_.push_back("");
 }

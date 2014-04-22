@@ -64,7 +64,7 @@ void ExecutionVisitor::visit_update(UpdateNode *update, Value &func_val, Value& 
 void ExecutionVisitor::visit_call_pre(CallNode *call) { UNUSED(call); }
 
 void ExecutionVisitor::visit_call_pre(CallNode *call, Value& expr) {
-  if (expr.type != Type::UNDEF) {
+  if (expr.type != TypeType::UNDEF) {
     call->rule = expr.value.rule;
   } else {
     throw RuntimeException("Cannot call UNDEF");
@@ -89,8 +89,8 @@ void ExecutionVisitor::visit_call(CallNode *call, std::vector<Value> &argument_r
           driver_.error(call->arguments->at(i)->location,
                         "argument "+std::to_string(i+1)+" of indirectly called rule `"+
                         call->rule->name+"` must be `"+
-                        type_to_str(call->rule->arguments[i])+"` but was `"+
-                        type_to_str(argument_results[i].type)+"`");
+                        call->rule->arguments[i].to_str()+"` but was `"+
+                        argument_results[i].type.to_str()+"`");
           throw RuntimeException("Invalid indirect call");
         }
       }
@@ -303,7 +303,7 @@ void ExecutionWalker::run() {
   while(true) {
     Value program_val = visitor.context_.get_function_value(program_sym, args);
     DEBUG(program_val.to_str());
-    if (program_val.type == Type::UNDEF) {
+    if (program_val.type == TypeType::UNDEF) {
       break;
     }
     DEBUG("STARTOOO");
