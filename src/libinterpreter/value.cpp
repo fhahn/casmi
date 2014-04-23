@@ -26,6 +26,10 @@ Value::Value(std::string *string) : type(TypeType::STRING) {
   value.string = string;
 }
 
+Value::Value(Type t, std::vector<Value>* list) : type(t) {
+  value.list = list;
+}
+
 Value::Value(Value& other) : type(other.type), value(other.value) {}
 
 Value::Value(const Value& other) : type(other.type), value(other.value) {}

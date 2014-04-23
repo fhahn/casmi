@@ -78,7 +78,7 @@
 %type <std::pair<ExpressionBase*, ExpressionBase*>> INITIALIZER
 %type <std::vector<std::pair<ExpressionBase*, ExpressionBase*>>*> INITIALIZER_LIST INITIALIZERS
 %type <ExpressionBase*> EXPRESSION BRACKET_EXPRESSION ATOM
-%type <std::vector<ExpressionBase*>*> EXPRESSION_LIST EXPRESSION_LIST_NO_COMMA
+%type <std::vector<ExpressionBase*>*> EXPRESSION_LIST EXPRESSION_LIST_NO_COMMA LISTCONST
 %type <UpdateNode*> UPDATE_SYNTAX
 %type <INT_T> INTCONST
 %type <FLOAT_T> FLOATCONST
@@ -96,6 +96,7 @@
 %type <std::vector<ExpressionBase*>> DEBUG_ATOM_LIST
 %type <PrintNode*> PRINT_SYNTAX
 %type <LetNode*> LET_SYNTAX
+%type<std::vector<Type>> NEW_TYPE_SYNTAX_LIST
 
 %start SPECIFICATION
 
@@ -267,15 +268,20 @@ TYPE_IDENTIFIER_STARLIST: NEW_TYPE_SYNTAX "*" TYPE_IDENTIFIER_STARLIST
 
 /* new type syntax */
 NEW_TYPE_SYNTAX: IDENTIFIER { $$ = Type($1); /* TODO check invalid types */}
-               | IDENTIFIER "(" NEW_TYPE_SYNTAX_LIST ")" 
+               | IDENTIFIER "(" NEW_TYPE_SYNTAX_LIST ")" {
+                $$ = Type($1, $3);
+               }
                | IDENTIFIER TYPEANNOTATION IDENTIFIER ENDTYPEANNOTATION
                | IDENTIFIER TYPEANNOTATION "[" TUPLE_LIST "]" ENDTYPEANNOTATION
                | IDENTIFIER "(" NUMBER DOTDOT NUMBER ")"
                ;
 
-NEW_TYPE_SYNTAX_LIST: NEW_TYPE_SYNTAX "," NEW_TYPE_SYNTAX_LIST
-                    | NEW_TYPE_SYNTAX ","
-                    | NEW_TYPE_SYNTAX
+NEW_TYPE_SYNTAX_LIST: NEW_TYPE_SYNTAX "," NEW_TYPE_SYNTAX_LIST {
+                      $3.push_back($1);
+                      $$ = std::move($3);
+                    }
+                    | NEW_TYPE_SYNTAX "," { $$.push_back($1); }
+                    | NEW_TYPE_SYNTAX { $$.push_back($1); }
                     ;
 
 /* old type syntax for parameters, rule main(  a /ta: Int/ ) */
@@ -308,7 +314,7 @@ ATOM: FUNCTION_SYNTAX { $$ = $1; }
 VALUE: RULEREF { $$ = new RuleAtom(@$, std::move($1)); }
      | NUMBER { $$ = $1; }
      | STRCONST { $$ = new StringAtom(@$, std::move($1)); }
-     | LISTCONST { $$ = new IntAtom(@$, 0); }
+     | LISTCONST { $$ = new ListAtom(@$, $1); }
      | NUMBER_RANGE { $$ = new IntAtom(@$, 0); }
      | SYMBOL { $$ = new IntAtom(@$, 0); }
      | SELF { $$ = new SelfAtom(@$); }
@@ -335,8 +341,8 @@ NUMBER_RANGE: "[" NUMBER DOTDOT NUMBER "]"
             | "[" IDENTIFIER DOTDOT IDENTIFIER "]" 
             ;
 
-LISTCONST: "[" EXPRESSION_LIST "]" 
-         | "[" "]" 
+LISTCONST: "[" EXPRESSION_LIST "]" { $$ = $2; }
+         | "[" "]" { $$ = new std::vector<ExpressionBase*>(); }
          ;
 
 

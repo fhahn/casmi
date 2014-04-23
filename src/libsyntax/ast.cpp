@@ -274,6 +274,11 @@ bool FunctionAtom::equals(AstNode *other) {
   return false;
 }
 
+
+ListAtom::ListAtom(yy::location& loc, std::vector<ExpressionBase*> *exprs)
+    : AtomNode(loc, NodeType::LIST_ATOM, Type(TypeType::UNKNOWN)),
+      expr_list(exprs) {}
+
 Expression::Expression(yy::location& loc, ExpressionBase *left, ExpressionBase *right,
                        Expression::Operation op)
                        : ExpressionBase(loc, NodeType::EXPRESSION, Type(TypeType::UNKNOWN)),

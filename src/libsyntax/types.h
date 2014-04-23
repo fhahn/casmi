@@ -7,6 +7,9 @@
 
 #define INT_T int64_t
 #define FLOAT_T double
+
+class CompoundType;
+
 enum class TypeType {
   STRING,
   RULEREF,
@@ -17,31 +20,36 @@ enum class TypeType {
   UNKNOWN,
   INVALID,
   NO_TYPE,
-  UNDEF
+  UNDEF,
+  LIST,
+  TUPLE,
 };
 
+class Type;
 
 class Type {
+  private:
+    bool eq(const Type& other) const;
+
   public:
     TypeType t;
+    Type *internal_type;
 
     Type();
     Type(TypeType t);
+    Type(const Type& other);
+    Type(const std::string &type_name, std::vector<Type>& internal_types);
+    Type(TypeType t, std::vector<Type>& internal_types);
+    Type(TypeType t, Type& int_typ);
     Type(const std::string& type_name);
 
 
-    inline bool operator==(const Type& other) const {
-      return t == other.t;
-    }
+    bool operator==(const Type& other) const;
 
-    inline bool operator!=(const Type& other) const {
-      return !(t == other.t);
-    }
+    bool operator!=(const Type& other) const;
 
-    const std::string to_str() const;
+    virtual const std::string to_str() const;
 };
-
-
 
 
 class FunctionInfo {

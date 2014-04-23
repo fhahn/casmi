@@ -41,6 +41,7 @@ enum NodeType {
   CALL,
   PRINT,
   LET,
+  LIST_ATOM,
 };
 
 const std::string& type_to_str(NodeType t);
@@ -223,6 +224,13 @@ class StringAtom : public AtomNode {
  
     virtual ~StringAtom();
     bool equals(AstNode *other);
+};
+
+class ListAtom : public AtomNode {
+  public:
+    std::vector<ExpressionBase*>* expr_list;
+
+    ListAtom(yy::location& loc, std::vector<ExpressionBase*> *exprs);
 };
 
 

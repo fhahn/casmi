@@ -16,6 +16,7 @@ class Value {
       bool bval;
       RuleNode *rule;
       std::string *string;
+      std::vector<Value> *list;
     } value;
 
     Value();
@@ -24,6 +25,7 @@ class Value {
     Value(bool bval);
     Value(RuleNode *rule);
     Value(std::string *string);
+    Value(Type t, std::vector<Value>* list);
 
     Value(Value& other);
     Value(const Value& other);

@@ -1,0 +1,10 @@
+CASM foo
+
+function x: -> List(Int)
+
+init main
+
+rule main = {
+    x := [1, 1.5, 2.0]
+    //~^ types in list do not match, found `Int` at first position and `Float` at 2. position
+}

@@ -272,3 +272,21 @@ Type TypecheckVisitor::visit_rule_atom(RuleAtom *atom) {
   }
   return Type(TypeType::RULEREF);
 }
+
+Type TypecheckVisitor::visit_list_atom(ListAtom *atom, std::vector<Type> &vals) {
+  if (vals.size() == 0){
+    return Type(TypeType::LIST);
+  } else {
+    Type& first = vals[0];
+    for (size_t i=1; i < vals.size(); i++) {
+      if (first != vals[i]) {
+        driver_.error(atom->location, "types in list do not match, found `"+
+                                      first.to_str()+"` at first position and `"+
+                                      vals[i].to_str()+"` at "+
+                                      std::to_string(i+1)+". position");
+        break;
+      }
+    }
+    return Type(TypeType::LIST, first);
+  }
+}

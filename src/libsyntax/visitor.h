@@ -226,6 +226,16 @@ template<class T, class V> class AstWalker {
       }
     }
 
+    V walk_list_atom(ListAtom *atom) {
+      std::vector<V> expr_results;
+      if (atom->expr_list) {
+        for (ExpressionBase* e : *atom->expr_list) {
+          expr_results.push_back(walk_expression_base(e));
+        }
+      }
+      return visitor.visit_list_atom(atom, expr_results);
+    }
+
     V walk_atom(AtomNode *atom) {
       switch(atom->node_type_) {
         case NodeType::INT_ATOM: {
@@ -251,6 +261,9 @@ template<class T, class V> class AstWalker {
         }
         case NodeType::STRING_ATOM: {
           return visitor.visit_string_atom(reinterpret_cast<StringAtom*>(atom));
+        }
+        case NodeType::LIST_ATOM: {
+          return walk_list_atom(reinterpret_cast<ListAtom*>(atom));
         }
         default: {
           throw RuntimeException("Invalid atom type:"+type_to_str(atom->node_type_)+std::to_string(atom->node_type_));
