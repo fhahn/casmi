@@ -1,0 +1,7 @@
+// error annotation @4
+
+rule main = {
+    let x : String = 1 in skip
+    //~^ type of let conflicts with type of expression
+}
+init main

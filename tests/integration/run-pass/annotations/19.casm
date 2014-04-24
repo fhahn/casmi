@@ -1,0 +1,10 @@
+function a: -> String
+
+rule main = {
+    let x = undef in
+        let y = undef in
+            let z : Int = x + y in assert z = undef
+
+    program( self ) := undef
+}
+init main
