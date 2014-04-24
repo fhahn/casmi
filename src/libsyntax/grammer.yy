@@ -374,14 +374,6 @@ EXPRESSION: EXPRESSION "+" EXPRESSION
             { $$ = new Expression(@$, $1, $3, Expression::Operation::LESSEREQ); }
           | EXPRESSION GREATEREQ EXPRESSION
             { $$ = new Expression(@$, $1, $3, Expression::Operation::GREATEREQ); }
-          | EXPRESSION "*" EXPRESSION
-            { $$ = new Expression(@$, $1, $3, Expression::Operation::MUL); }
-          | EXPRESSION "/" EXPRESSION
-            { $$ = new Expression(@$, $1, $3, Expression::Operation::DIV); }
-          | EXPRESSION "%" EXPRESSION
-            { $$ = new Expression(@$, $1, $3, Expression::Operation::MOD); }
-          | EXPRESSION RATIONAL_DIV EXPRESSION
-            { $$ = new Expression(@$, $1, $3, Expression::Operation::RAT_DIV); }
           | EXPRESSION OR EXPRESSION
             { $$ = new Expression(@$, $1, $3, Expression::Operation::OR); }
           | EXPRESSION XOR EXPRESSION
