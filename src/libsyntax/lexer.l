@@ -105,10 +105,6 @@ intern_debug { return yy::casmi_parser::make_INTERN(loc); }
 div { return yy::casmi_parser::make_RATIONAL_DIV(loc); }
 objdump { return yy::casmi_parser::make_OBJDUMP(loc); }
 
-
-"/*ta:" { return yy::casmi_parser::make_TYPEANNOTATION(loc); }
-"*/" { return yy::casmi_parser::make_ENDTYPEANNOTATION(loc); }
-
 "+" { return  yy::casmi_parser::make_PLUS(loc); }
 "-" { return yy::casmi_parser::make_MINUS(loc); }
 "=" { return yy::casmi_parser::make_EQ(loc); }

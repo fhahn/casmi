@@ -42,7 +42,7 @@
 %token PARBLOCK ENDPARBLOCK LET IN IF THEN ELSE PRINT DEBUGINFO DUMPS PUSH INTO
 %token POP FROM FORALL ITERATE DO CALL CASE DEFAULT OF ENDCASE INITIALLY FUNCTION
 %token DERIVED ENUM RULE PROVIDER INIT OPTION SELF UNDEF TRUE FALSE CASM SYMBOL
-%token INTERN RATIONAL_DIV OBJDUMP TYPEANNOTATION ENDTYPEANNOTATION
+%token INTERN RATIONAL_DIV OBJDUMP
 
 %token DOTDOT ARROW UPDATE NEQUAL LESSEQ GREATEREQ SEQBLOCK_BRACKET ENDSEQBLOCK_BRACKET
 
@@ -86,7 +86,7 @@
 %type <Function*> FUNCTION_DEFINITION DERIVED_SYNTAX
 %type <FunctionAtom*> FUNCTION_SYNTAX 
 %type <std::pair<std::vector<Type>, Type>> FUNCTION_SIGNATURE
-%type <Type> NEW_TYPE_SYNTAX
+%type <Type> TYPE_SYNTAX
 %type <Type> PARAM
 %type <std::vector<Type>> PARAM_LIST_NO_COMMA PARAM_LIST
 %type <std::vector<Type>> TYPE_IDENTIFIER_STARLIST
@@ -96,7 +96,7 @@
 %type <std::vector<ExpressionBase*>> DEBUG_ATOM_LIST
 %type <PrintNode*> PRINT_SYNTAX
 %type <LetNode*> LET_SYNTAX
-%type<std::vector<Type>> NEW_TYPE_SYNTAX_LIST
+%type<std::vector<Type>> TYPE_SYNTAX_LIST
 
 %start SPECIFICATION
 
@@ -185,13 +185,13 @@ DERIVED_SYNTAX: DERIVED IDENTIFIER "(" PARAM_LIST ")" "=" EXPRESSION {
                   $$ = new Function($2, $6, Type(TypeType::UNKNOWN));
                 }
               /* again with type syntax */
-              | DERIVED IDENTIFIER "(" PARAM_LIST ")" ":" NEW_TYPE_SYNTAX "=" EXPRESSION {
+              | DERIVED IDENTIFIER "(" PARAM_LIST ")" ":" TYPE_SYNTAX "=" EXPRESSION {
                   $$ = new Function($2, $4, $9, $7);
                 }
-              | DERIVED IDENTIFIER ":" NEW_TYPE_SYNTAX "=" EXPRESSION {
+              | DERIVED IDENTIFIER ":" TYPE_SYNTAX "=" EXPRESSION {
                   $$ = new Function($2, $6, $4);
                 }
-              | DERIVED IDENTIFIER "(" ")" ":" NEW_TYPE_SYNTAX "=" EXPRESSION {
+              | DERIVED IDENTIFIER "(" ")" ":" TYPE_SYNTAX "=" EXPRESSION {
                   $$ = new Function($2, $8, $6);
                 }
               ;
@@ -212,17 +212,16 @@ IDENTIFIER_LIST: IDENTIFIER "," IDENTIFIER_LIST
                | IDENTIFIER ","
                ;
 
-FUNCTION_SIGNATURE: ":" ARROW NEW_TYPE_SYNTAX 
+FUNCTION_SIGNATURE: ":" ARROW TYPE_SYNTAX 
                   /* this constructor is implementation dependant! */
                   { 
                     std::vector<Type> foo;
                     $$ = std::pair<std::vector<Type>, Type>(foo, $3); }
-                  | ":" TYPE_IDENTIFIER_STARLIST ARROW NEW_TYPE_SYNTAX
+                  | ":" TYPE_IDENTIFIER_STARLIST ARROW TYPE_SYNTAX
                   { $$ = std::pair<std::vector<Type>, Type>($2, $4); }
                   ;
 
-PARAM: IDENTIFIER OLD_TYPE_SYNTAX  
-     | IDENTIFIER ":" NEW_TYPE_SYNTAX {
+PARAM: IDENTIFIER ":" TYPE_SYNTAX {
         size_t size = driver.binding_offsets.size();
         driver.binding_offsets[$1] = size;
         $$ = $3;
@@ -250,47 +249,36 @@ PARAM_LIST_NO_COMMA: PARAM_LIST_NO_COMMA "," PARAM
                    }
                    ;
 
-/* TODO: right recursion */
-TYPE_IDENTIFIER_STARLIST: NEW_TYPE_SYNTAX "*" TYPE_IDENTIFIER_STARLIST 
+
+TYPE_IDENTIFIER_STARLIST: TYPE_SYNTAX "*" TYPE_IDENTIFIER_STARLIST 
                         {
                             $3.insert($3.begin(), $1);
                             $$ = std::move($3);
                         }
-                        | NEW_TYPE_SYNTAX "*" 
+                        | TYPE_SYNTAX "*" 
                         { // TODO: limit memory size
                             $$.push_back($1);
                         }
-                        | NEW_TYPE_SYNTAX 
+                        | TYPE_SYNTAX 
                         { 
                             $$.push_back($1);
                         }
                         ;
 
-/* new type syntax */
-NEW_TYPE_SYNTAX: IDENTIFIER { $$ = Type($1); /* TODO check invalid types */}
-               | IDENTIFIER "(" NEW_TYPE_SYNTAX_LIST ")" {
+TYPE_SYNTAX: IDENTIFIER { $$ = Type($1); /* TODO check invalid types */}
+               | IDENTIFIER "(" TYPE_SYNTAX_LIST ")" {
                 $$ = Type($1, $3);
                }
-               | IDENTIFIER TYPEANNOTATION IDENTIFIER ENDTYPEANNOTATION
-               | IDENTIFIER TYPEANNOTATION "[" TUPLE_LIST "]" ENDTYPEANNOTATION
                | IDENTIFIER "(" NUMBER DOTDOT NUMBER ")"
                ;
 
-NEW_TYPE_SYNTAX_LIST: NEW_TYPE_SYNTAX "," NEW_TYPE_SYNTAX_LIST {
+TYPE_SYNTAX_LIST: TYPE_SYNTAX "," TYPE_SYNTAX_LIST {
                       $3.push_back($1);
                       $$ = std::move($3);
                     }
-                    | NEW_TYPE_SYNTAX "," { $$.push_back($1); }
-                    | NEW_TYPE_SYNTAX { $$.push_back($1); }
+                    | TYPE_SYNTAX "," { $$.push_back($1); }
+                    | TYPE_SYNTAX { $$.push_back($1); }
                     ;
-
-/* old type syntax for parameters, rule main(  a /ta: Int/ ) */
-OLD_TYPE_SYNTAX: TYPEANNOTATION IDENTIFIER ENDTYPEANNOTATION
-
-TUPLE_LIST: IDENTIFIER "," TUPLE_LIST 
-         | IDENTIFIER "," 
-         | IDENTIFIER 
-         ;
 
 INITIALIZERS: INITIALLY "{" INITIALIZER_LIST "}" { $$ = $3; }
             | INITIALLY "{" "}" { $$ = nullptr; }
@@ -556,7 +544,7 @@ IFTHENELSE: IF EXPRESSION THEN STATEMENT %prec XIF {
 LET_SYNTAX: LET IDENTIFIER "=" EXPRESSION IN STATEMENT {
             $$ = new LetNode(@$, Type(TypeType::UNKNOWN), $2, $4, $6);
           }
-          | LET IDENTIFIER ":" NEW_TYPE_SYNTAX "=" EXPRESSION IN STATEMENT {
+          | LET IDENTIFIER ":" TYPE_SYNTAX "=" EXPRESSION IN STATEMENT {
             $$ = new LetNode(@$, $4, $2, $6, $8);
           }
 
