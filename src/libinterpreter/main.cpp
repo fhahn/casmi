@@ -148,7 +148,7 @@ int main (int argc, char *argv[]) {
       }
 
       TypecheckVisitor typecheck_visitor(driver);
-      AstWalker<TypecheckVisitor, Type> typecheck_walker(typecheck_visitor);
+      AstWalker<TypecheckVisitor, Type*> typecheck_walker(typecheck_visitor);
       typecheck_walker.walk_specification(driver.result);
       if (!driver.ok()) {
         res = EXIT_FAILURE;

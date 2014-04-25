@@ -4,72 +4,86 @@
 TypecheckVisitor::TypecheckVisitor(Driver& driver) : driver_(driver), rule_binding_types(), rule_binding_offsets() {}
 
 void TypecheckVisitor::visit_function_def(FunctionDefNode *def,
-                                          const std::vector<std::pair<Type, Type>>& initializers) {
+                                          const std::vector<std::pair<Type*, Type*>>& initializers) {
   for (size_t i = 0; i < initializers.size(); i++) {
-    const std::pair<Type, Type>& p = initializers[i];
+    const std::pair<Type*, Type*>& p = initializers[i];
 
-    if (def->sym->arguments_.size() == 0 && p.first == TypeType::UNDEF && p.second != def->sym->return_type_) {
+    if (def->sym->arguments_.size() == 0 && *p.first == TypeType::UNDEF && *p.second != def->sym->return_type_) {
       driver_.error(def->sym->intitializers_->at(i).second->location,
                   "type of initializer of function `" +def->sym->name()+
-                  "` is `"+p.second.to_str()+"` but should be `"+
+                  "` is `"+p.second->to_str()+"` but should be `"+
                   def->sym->return_type_.to_str()+"´");
     }
   }
 }
 
 void TypecheckVisitor::visit_derived_def_pre(FunctionDefNode *def) {
-  rule_binding_types.push_back(&def->sym->arguments_);
+  auto foo = new std::vector<Type*>();
+  for (Type &arg : def->sym->arguments_) {
+    foo->push_back(&arg);
+  }
+  rule_binding_types.push_back(foo);
   rule_binding_offsets.push_back(&def->sym->binding_offsets);
 }
 
-void TypecheckVisitor::visit_derived_def(FunctionDefNode *def, Type& expr) {
+void TypecheckVisitor::visit_derived_def(FunctionDefNode *def, Type* expr) {
   rule_binding_types.pop_back();
   rule_binding_offsets.pop_back();
 
   if (def->sym->return_type_ == TypeType::UNKNOWN) {
-    if (expr == TypeType::UNDEF) {
+    if (*expr == TypeType::UNKNOWN) {
       driver_.error(def->location, std::string("type of derived expression is ")+
                                    "unknown because type of expression is `undef`");
    
     }
-    def->sym->return_type_ = expr;
-  } else if (def->sym->return_type_ != expr && expr != TypeType::UNDEF) {
+    // TODO unify
+    def->sym->return_type_ = *expr;
+  } else if (def->sym->return_type_ != *expr && *expr != TypeType::UNDEF) {
     driver_.error(def->location, "type of derived expression was `"+
-                                 expr.to_str()+"` but should be `"+
+                                 expr->to_str()+"` but should be `"+
                                  def->sym->return_type_.to_str()+"`");
   }
 }
 
 void TypecheckVisitor::visit_rule(RuleNode *rule) {
-  rule_binding_types.push_back(&rule->arguments);
+  auto foo = new std::vector<Type*>();
+  for (Type &arg : rule->arguments) {
+    foo->push_back(&arg);
+  }
+  rule_binding_types.push_back(foo);
   rule_binding_offsets.push_back(&rule->binding_offsets);
 }
 
-void TypecheckVisitor::visit_ifthenelse(IfThenElseNode *node, Type cond) {
-  if (cond != TypeType::BOOLEAN) {
+void TypecheckVisitor::visit_ifthenelse(IfThenElseNode *node, Type* cond) {
+  if (*cond != TypeType::BOOLEAN) {
     driver_.error(node->condition_->location,
-                  "type of expression should be `Bool` but was `" +cond.to_str()+"`");
+                  "type of expression should be `Bool` but was `" +cond->to_str()+"`");
   }
 }
 
-void TypecheckVisitor::visit_assert(UnaryNode *assert, Type val) {
-  if (val != TypeType::BOOLEAN) {
+void TypecheckVisitor::visit_assert(UnaryNode *assert, Type* val) {
+  if (*val != TypeType::BOOLEAN) {
     driver_.error(assert->child_->location,
-                  "type of expression should be `Bool` but was `" +val.to_str()+"`");
+                  "type of expression should be `Bool` but was `" +val->to_str()+"`");
   }
 }
 
-void TypecheckVisitor::visit_update(UpdateNode *update, Type func_t, Type expr_t) {
-  if (expr_t != TypeType::UNDEF && func_t != expr_t) {
-    driver_.error(update->location, "type `"+func_t.to_str()+"` of `"+
+void TypecheckVisitor::visit_update(UpdateNode *update, Type* func_t, Type* expr_t) {
+  // TODO unify func->type and expr->type
+  DEBUG("UNIFY update");
+  if (!update->func->type_.unify(&update->expr_->type_)) {
+    driver_.error(update->location, "type `"+func_t->to_str()+"` of `"+
                                     update->func->name+"` does not match type `"+
-                                    expr_t.to_str()+"` of expression");
+                                    update->expr_->type_.to_str()+"` of expression");
   }
 
   if (update->func->symbol_type == FunctionAtom::SymbolType::PARAMETER) {
     driver_.error(update->location, "cannot update `"+update->func->name+
                                     "` because it is a parameter, not a function");
   }
+
+  update->type_ = update->func->type_;
+  DEBUG("Type of update "<<update->type_.to_str() << " func: "<<update->func->type_.to_str() << " expr: "<<update->expr_->type_.to_str());
 }
 
 void TypecheckVisitor::visit_call_pre(CallNode *call) {
@@ -80,15 +94,15 @@ void TypecheckVisitor::visit_call_pre(CallNode *call) {
   }
 }
 
-void TypecheckVisitor::visit_call_pre(CallNode *call, Type expr) {
-  if (expr != TypeType::RULEREF) {
+void TypecheckVisitor::visit_call_pre(CallNode *call, Type* expr) {
+  if (*expr != TypeType::RULEREF) {
     driver_.error(call->ruleref->location, "Indirect target must be a `Ruleref` but was `"+
-                                            expr.to_str()+"`");
+                                            expr->to_str()+"`");
   }
 }
 
 
-void TypecheckVisitor::visit_call(CallNode *call, std::vector<Type>& argument_results) {
+void TypecheckVisitor::visit_call(CallNode *call, std::vector<Type*>& argument_results) {
   // typecheck for indirect calls happens during execution
   if (call->ruleref) {
     return;
@@ -102,14 +116,14 @@ void TypecheckVisitor::visit_call(CallNode *call, std::vector<Type>& argument_re
                                   std::to_string(args_provided)+" where provided");
   } else {
     for (size_t i=0; i < args_defined; i++) {
-      if (call->rule->arguments[i] != argument_results[i]) {
+      if (call->rule->arguments[i] != *argument_results[i]) {
         driver_.error(call->arguments->at(i)->location,
                       "argument "+std::to_string(i+1)+" of rule `"+ call->rule_name+
                       "` must be `"+call->rule->arguments[i].to_str()+"` but was `"+
-                      argument_results[i].to_str()+"`");
+                      argument_results[i]->to_str()+"`");
       }
-    }
   }
+}
 }
 
 void TypecheckVisitor::visit_call_post(CallNode *call) {
@@ -118,8 +132,9 @@ void TypecheckVisitor::visit_call_post(CallNode *call) {
   rule_binding_offsets.pop_back();
 }
 
-void TypecheckVisitor::visit_let(LetNode *node, Type& v) {
-  if (node->type_ != TypeType::UNKNOWN && node->type_ != v) {
+void TypecheckVisitor::visit_let(LetNode *node, Type* v) {
+  DEBUG("LET "<<node->identifier << "\tT1 "<<node->type_.to_str()<< " T2 "<<v->to_str() << " addr "<<&node->type_);
+  if (!node->type_.unify(&node->expr->type_)) {
     driver_.error(node->location, "type of let conflicts with type of expression");
   }
 
@@ -130,27 +145,36 @@ void TypecheckVisitor::visit_let(LetNode *node, Type& v) {
       std::pair<std::string, size_t>(node->identifier,
                                      current_rule_binding_types->size())
   );
-  current_rule_binding_types->push_back(v);
+  current_rule_binding_types->push_back(&node->type_);
 }
 
 void TypecheckVisitor::visit_let_post(LetNode *node) {
+  DEBUG("type of let "<<node->type_.to_str());
+  if (node->type_ == TypeType::UNKNOWN) {
+    driver_.error(node->location, "type inference for `"+node->identifier+"` failed");
+  }
   rule_binding_types.back()->pop_back();
   rule_binding_offsets.back()->erase(node->identifier);
 }
 
 void TypecheckVisitor::check_numeric_operator(const yy::location& loc, 
-                                              const Type type,
-                                              const Expression::Operation op) {
-  if (type != TypeType::INT && type != TypeType::FLOAT && type != TypeType::UNDEF) {
+                                            Type* type,
+                                            const Expression::Operation op) {
+  if (*type == TypeType::UNKNOWN) {
+    DEBUG("Add numeric constraints");
+    type->constraints.push_back(Type(TypeType::INT));
+    type->constraints.push_back(Type(TypeType::FLOAT));
+  } else if (*type != TypeType::INT && *type != TypeType::FLOAT && *type != TypeType::UNDEF) {
     driver_.error(loc,
                   "operands of operator `"+operator_to_str(op)+
                   "` must be `Int` or `Float` but were `"+
-                  type.to_str()+"`");
+                  type->to_str()+"`");
   }
 }
 
-Type TypecheckVisitor::visit_expression(Expression *expr, Type left_val, Type right_val) {
-  if (left_val != right_val && left_val != TypeType::UNDEF && right_val != TypeType::UNDEF) {
+Type* TypecheckVisitor::visit_expression(Expression *expr, Type* left_val, Type* right_val) {
+  DEBUG("EXPR T1 "<<expr->left_->type_.to_str() << " T2: "<<expr->right_->type_.to_str());
+  if (!expr->left_->type_.unify(&expr->right_->type_)) {
       driver_.error(expr->location, "type of expressions did not match");
   }
   switch (expr->op) {
@@ -161,30 +185,37 @@ Type TypecheckVisitor::visit_expression(Expression *expr, Type left_val, Type ri
     case Expression::Operation::MOD:
     case Expression::Operation::RAT_DIV:
       check_numeric_operator(expr->location, left_val, expr->op);
-      return left_val;
+      // TODO Check unifying
+      expr->type_.unify(&expr->left_->type_);
+      break;
 
     case Expression::Operation::EQ:
     case Expression::Operation::NEQ:
-      return Type(TypeType::BOOLEAN);
+      expr->type_.unify(Type(TypeType::BOOLEAN));
+      break;
 
     case Expression::Operation::LESSER:
     case Expression::Operation::GREATER:
     case Expression::Operation::LESSEREQ:
     case Expression::Operation::GREATEREQ:
       check_numeric_operator(expr->location, left_val, expr->op);
-      return Type(TypeType::BOOLEAN);
+      expr->type_.unify(Type(TypeType::BOOLEAN));
+      break;
     default: assert(0);
   }
+
+  return &expr->type_;
 }
 
-Type TypecheckVisitor::visit_expression_single(Expression *expr, Type val) {
+Type* TypecheckVisitor::visit_expression_single(Expression *expr, Type* val) {
   // just pass to type of the expression up, nothing to check here
   UNUSED(expr);
   return val;
 }
 
-Type TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
-                                           const std::vector<Type> &expr_results) {
+Type* TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
+                                           const std::vector<Type*> &expr_results) {
+
   Function *sym = driver_.function_table.get(atom->name);
   if (!sym) {
     // check if a rule parameter with this name was defined
@@ -196,21 +227,20 @@ Type TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
           !atom->arguments) {
         atom->symbol_type = FunctionAtom::SymbolType::PARAMETER;
         atom->offset = current_rule_binding_offsets->at(atom->name);
-        return current_rule_binding_types->at(atom->offset);
+        // TODO check unifying
+        Type* binding_type = current_rule_binding_types->at(atom->offset);
+        atom->type_.unify(binding_type);
+        DEBUG("BINDING\t atom_t "<<atom->type_.to_str() << " binding_t "<<binding_type->to_str()) ;
+        return &atom->type_;
       }
     }
 
     driver_.error(atom->location, "use of undefined function `"+atom->name+"`");
-    return Type(TypeType::INVALID);
+    atom->type_ = Type(TypeType::INVALID);
+    return &atom->type_;
   }
 
   atom->symbol = sym;
-  if (atom->symbol->symbol_type == Function::SType::FUNCTION) {
-    atom->symbol_type = FunctionAtom::SymbolType::FUNCTION;
-  } else {
-    atom->symbol_type = FunctionAtom::SymbolType::DERIVED;
-  }
-
   // check for function definitions with arguments
   if(atom->symbol->arguments_.size() != expr_results.size()) {
     driver_.error(atom->location,
@@ -218,10 +248,12 @@ Type TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
                   atom->name+"`");
   } else {
     for (size_t i=0; i < atom->symbol->arguments_.size(); i++) {
-      if (expr_results[i] != TypeType::UNDEF && atom->symbol->arguments_[i] != expr_results[i]) {
+
+      DEBUG("UNIFY ARGS "<< atom->symbol->name() << "\n\n");
+      if (!expr_results[i]->unify(&atom->symbol->arguments_[i])) {
         driver_.error(atom->arguments->at(i)->location,
                       "type of "+std::to_string(i+1)+" argument of `"+atom->name+
-                      "` is "+expr_results[i].to_str()+" but should be "+
+                      "` is "+expr_results[i]->to_str()+" but should be "+
                       atom->symbol->arguments_[i].to_str());
       }
     }
@@ -232,17 +264,30 @@ Type TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
     driver_.error(atom->location, "number of provided arguments does not match definition of `"+atom->name+"`");
   }
 
-  return sym->return_type_;
+  if (atom->symbol->symbol_type == Function::SType::FUNCTION) {
+    atom->symbol_type = FunctionAtom::SymbolType::FUNCTION;
+  } else {
+    atom->symbol_type = FunctionAtom::SymbolType::DERIVED;
+  }
+
+
+  // TODO check unifying
+  atom->type_.unify(sym->return_type_);
+  return &sym->return_type_;
 }
 
 void TypecheckVisitor::visit_derived_function_atom_pre(FunctionAtom *atom) {
-  rule_binding_types.push_back(&atom->symbol->arguments_);
+  auto foo = new std::vector<Type*>();
+  for (Type &arg : atom->symbol->arguments_) {
+    foo->push_back(&arg);
+  }
+  rule_binding_types.push_back(foo);
   rule_binding_offsets.push_back(&atom->symbol->binding_offsets);
 }
 
-Type TypecheckVisitor::visit_derived_function_atom(FunctionAtom *atom,
-                                                  const std::vector<Type>& argument_results,
-                                                  Type expr) {
+Type* TypecheckVisitor::visit_derived_function_atom(FunctionAtom *atom,
+                                                  const std::vector<Type*>& argument_results,
+                                                  Type* expr) {
   rule_binding_types.pop_back();
   rule_binding_offsets.pop_back();
 
@@ -254,39 +299,39 @@ Type TypecheckVisitor::visit_derived_function_atom(FunctionAtom *atom,
                                   std::to_string(args_provided)+" where provided");
   } else {
     for (size_t i=0; i < args_defined; i++) {
-      if (atom->symbol->arguments_.at(i) != argument_results[i]) {
+      if (!argument_results[i]->unify(atom->symbol->arguments_.at(i))) {
         driver_.error(atom->arguments->at(i)->location,
                       "argument "+std::to_string(i+1)+" of must be `"+atom->symbol->arguments_.at(i).to_str()+"` but was `"+
-                      argument_results[i].to_str()+"`");
+                      argument_results[i]->to_str()+"`");
       }
     }
   }
   return expr;
 }
 
-Type TypecheckVisitor::visit_rule_atom(RuleAtom *atom) {
+Type* TypecheckVisitor::visit_rule_atom(RuleAtom *atom) {
   if (driver_.rules_map_.count(atom->name) == 1) {
     atom->rule = driver_.rules_map_[atom->name];
   } else {
     driver_.error(atom->location, "no rule with name `"+atom->name+"` found");
   }
-  return Type(TypeType::RULEREF);
+  return &atom->type_;
 }
 
-Type TypecheckVisitor::visit_list_atom(ListAtom *atom, std::vector<Type> &vals) {
+Type* TypecheckVisitor::visit_list_atom(ListAtom *atom, std::vector<Type*> &vals) {
   if (vals.size() == 0){
-    return Type(TypeType::LIST);
+    return &atom->type_;
   } else {
-    Type& first = vals[0];
+    Type first = *vals[0];
     for (size_t i=1; i < vals.size(); i++) {
-      if (first != vals[i]) {
+      if (first != *vals[i]) {
         driver_.error(atom->location, "types in list do not match, found `"+
                                       first.to_str()+"` at first position and `"+
-                                      vals[i].to_str()+"` at "+
+                                      vals[i]->to_str()+"` at "+
                                       std::to_string(i+1)+". position");
         break;
       }
     }
-    return Type(TypeType::LIST, first);
+    return &atom->type_;
   }
 }

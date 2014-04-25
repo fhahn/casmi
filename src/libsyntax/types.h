@@ -34,6 +34,9 @@ class Type {
   public:
     TypeType t;
     Type *internal_type;
+    Type *unify_with;
+
+    std::vector<Type> constraints;
 
     Type();
     Type(TypeType t);
@@ -49,6 +52,12 @@ class Type {
     bool operator!=(const Type& other) const;
 
     virtual const std::string to_str() const;
+
+    // unify with temporary type
+    bool unify(Type other);
+
+    // unify types of ast nodes
+    bool unify(Type *other);
 };
 
 
