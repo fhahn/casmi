@@ -4,6 +4,7 @@ function a: Int -> Int
 
 rule main = {
   print "test = " + a( "hallo" )
+  //~^ type of 1 argument of `a` is String but should be Int
 
   program( self ) := undef
 }

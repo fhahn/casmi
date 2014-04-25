@@ -1,0 +1,12 @@
+// error annotation @8
+
+function a: -> Int
+
+rule main = {
+  let x = undef in //~ type inference for `x` failed
+      let y = undef in //~ type inference for `y` failed
+          let z = x - y in skip //~ type inference for `z` failed
+
+  program( self ) := undef
+}
+init main
