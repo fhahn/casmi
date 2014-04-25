@@ -117,7 +117,8 @@ bool AstListNode::equals(AstNode *other) {
 }
 
 FunctionDefNode::FunctionDefNode(yy::location& loc, Function* sym) 
-    : AstNode(loc, NodeType::FUNCTION), sym(sym) {}
+    : AstNode(loc, NodeType::FUNCTION), sym(sym) {
+}
 
 FunctionDefNode::~FunctionDefNode() {
   // sym is deleted in the symbol table
@@ -276,8 +277,11 @@ bool FunctionAtom::equals(AstNode *other) {
 
 
 ListAtom::ListAtom(yy::location& loc, std::vector<ExpressionBase*> *exprs)
-    : AtomNode(loc, NodeType::LIST_ATOM, Type(TypeType::UNKNOWN)),
-      expr_list(exprs) {}
+    : AtomNode(loc, NodeType::LIST_ATOM, TypeType::UNKNOWN), expr_list(exprs) {
+  // TODO LEAK!
+  Type t = Type(TypeType::UNKNOWN);
+  type_ = Type(TypeType::LIST, t);
+}
 
 Expression::Expression(yy::location& loc, ExpressionBase *left, ExpressionBase *right,
                        Expression::Operation op)

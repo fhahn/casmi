@@ -70,7 +70,7 @@ void TypecheckVisitor::visit_assert(UnaryNode *assert, Type* val) {
 
 void TypecheckVisitor::visit_update(UpdateNode *update, Type* func_t, Type* expr_t) {
   // TODO unify func->type and expr->type
-  DEBUG("UNIFY update");
+  DEBUG("UNIFY update "<<update->func->type_.to_str() << " "<<update->expr_->type_.to_str());
   if (!update->func->type_.unify(&update->expr_->type_)) {
     driver_.error(update->location, "type `"+func_t->to_str()+"` of `"+
                                     update->func->name+"` does not match type `"+
@@ -138,6 +138,8 @@ void TypecheckVisitor::visit_let(LetNode *node, Type* v) {
     driver_.error(node->location, "type of let conflicts with type of expression");
   }
 
+  DEBUG("LET UNIFIED"<<node->type_.to_str());
+
   auto current_rule_binding_types = rule_binding_types.back();
   auto current_rule_binding_offsets = rule_binding_offsets.back();
 
@@ -149,8 +151,8 @@ void TypecheckVisitor::visit_let(LetNode *node, Type* v) {
 }
 
 void TypecheckVisitor::visit_let_post(LetNode *node) {
-  DEBUG("type of let "<<node->type_.to_str());
-  if (node->type_ == TypeType::UNKNOWN) {
+  DEBUG("type of let "<<&node->type_ << " "<<node->type_.to_str());
+  if (!node->type_.is_complete()) {
     driver_.error(node->location, "type inference for `"+node->identifier+"` failed");
   }
   rule_binding_types.back()->pop_back();
@@ -249,13 +251,15 @@ Type* TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
   } else {
     for (size_t i=0; i < atom->symbol->arguments_.size(); i++) {
 
-      DEBUG("UNIFY ARGS "<< atom->symbol->name() << "\n\n");
+      DEBUG("UNIFY ARGS "<< atom->symbol->name() << " "<<expr_results[i]->to_str() << " "<<atom->symbol->arguments_[i].to_str()<< "\n");
       if (!expr_results[i]->unify(&atom->symbol->arguments_[i])) {
         driver_.error(atom->arguments->at(i)->location,
                       "type of "+std::to_string(i+1)+" argument of `"+atom->name+
                       "` is "+expr_results[i]->to_str()+" but should be "+
                       atom->symbol->arguments_[i].to_str());
       }
+      DEBUG("UNIFY ARG done "<< atom->symbol->name() << " "<<expr_results[i]->to_str() <<"\n");
+      expr_results[i]->unify_links_to_str();
     }
   }
 
@@ -272,8 +276,8 @@ Type* TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
 
 
   // TODO check unifying
-  atom->type_.unify(sym->return_type_);
-  return &sym->return_type_;
+  atom->type_.unify(&sym->return_type_);
+  return &atom->type_;
 }
 
 void TypecheckVisitor::visit_derived_function_atom_pre(FunctionAtom *atom) {
@@ -319,9 +323,13 @@ Type* TypecheckVisitor::visit_rule_atom(RuleAtom *atom) {
 }
 
 Type* TypecheckVisitor::visit_list_atom(ListAtom *atom, std::vector<Type*> &vals) {
+  atom->type_.t = TypeType::LIST;
+  // TODO LEAK
   if (vals.size() == 0){
+    atom->type_.internal_type = new Type(TypeType::UNKNOWN);
     return &atom->type_;
   } else {
+    DEBUG("UNFIY list_atom "<<atom->type_.to_str());
     Type first = *vals[0];
     for (size_t i=1; i < vals.size(); i++) {
       if (first != *vals[i]) {
@@ -332,6 +340,7 @@ Type* TypecheckVisitor::visit_list_atom(ListAtom *atom, std::vector<Type*> &vals
         break;
       }
     }
+    atom->type_.internal_type = new Type(first);
     return &atom->type_;
   }
 }

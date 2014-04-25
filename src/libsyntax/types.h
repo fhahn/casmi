@@ -45,6 +45,7 @@ class Type {
     Type(TypeType t, std::vector<Type>& internal_types);
     Type(TypeType t, Type& int_typ);
     Type(const std::string& type_name);
+    Type(Type *other);
 
 
     bool operator==(const Type& other) const;
@@ -52,12 +53,14 @@ class Type {
     bool operator!=(const Type& other) const;
 
     virtual const std::string to_str() const;
+    virtual std::string unify_links_to_str() const;
 
     // unify with temporary type
     bool unify(Type other);
 
     // unify types of ast nodes
     bool unify(Type *other);
+    bool is_complete();
 };
 
 

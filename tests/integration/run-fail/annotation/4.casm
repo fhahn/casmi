@@ -1,0 +1,14 @@
+// error annotation @9
+
+function a: -> List(Int)
+function b: -> List(String)
+
+rule main = {
+    let x = [] in {
+        a := x
+        b := x //~ type `List(String)` of `b` does not match type `List(Int)` of expression
+    }
+
+    program( self ) := undef
+}
+init main

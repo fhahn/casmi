@@ -4,7 +4,7 @@ rule main = {
 }
 
 rule ruleWithParams( a : Int, b : Int ) = {
-    assert a=2
+    assert 2=a
     assert b=3
 
     program( self ) := undef
