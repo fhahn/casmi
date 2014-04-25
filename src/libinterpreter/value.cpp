@@ -37,6 +37,11 @@ Value::Value(const Value& other) : type(other.type), value(other.value) {}
 //Value::Value(Value&& other) : type(std::move(other.type)), value(other.value) {}
 
 Value::Value(Type t, casm_update* u) {
+  if (u->defined == 0) {
+    type = TypeType::UNDEF;
+    return;
+  }
+
   switch (t.t) {
     case TypeType::UNDEF:
       type = TypeType::UNDEF;
