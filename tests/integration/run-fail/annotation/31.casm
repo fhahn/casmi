@@ -1,0 +1,10 @@
+// error annotation @5
+
+rule main = {
+  let x = undef in //~ type inference for `x` failed
+  let y = undef in //~ type inference for `y` failed
+  let z = x != y in skip
+
+  program( self ) := undef
+}
+init main
