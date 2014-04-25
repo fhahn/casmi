@@ -60,7 +60,7 @@ class ExecutionVisitor {
     Value&& visit_rule_atom(RuleAtom *atom) { return std::move(Value(atom->rule)); }
     Value&& visit_boolean_atom(BooleanAtom *atom) { return std::move(Value(atom->value)); }
     Value&& visit_string_atom(StringAtom *atom) { return std::move(Value(&atom->string)); }
-    Value&& visit_list_atom(ListAtom *atom, std::vector<Value> &vals) { }
+    Value&& visit_list_atom(ListAtom *atom, std::vector<Value> &vals) { return std::move(Value()); }
 };
 
 // Specialize if-then-else for ExecutionVisitor

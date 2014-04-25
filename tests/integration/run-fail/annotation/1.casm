@@ -1,7 +1,7 @@
 // error annotation @4
 
 rule main = {
-  let x = [] in skip
+  let x = [] in skip //~ type inference for `x` failed
   program( self ) := undef
 }
 init main

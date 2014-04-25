@@ -77,7 +77,6 @@ void ExecutionVisitor::visit_call(CallNode *call, std::vector<Value> &argument_r
   if (call->ruleref) {
     size_t args_defined = call->rule->arguments.size();
     size_t args_provided = argument_results.size();
-    DEBUG(args_defined << " INDIREC "<<args_provided);
     if (args_defined != args_provided) {
       driver_.error(call->location, "indirectly called rule `"+call->rule->name+
                     "` expects "+std::to_string(args_defined)+" arguments but "+
@@ -197,7 +196,6 @@ Value&& ExecutionVisitor::visit_function_atom(FunctionAtom *atom, std::vector<Va
       args[0] = 0;
 
       pack_values_in_array(expr_results, args);
-      //
       // TODO handle function access and function write differently
       value_list.swap(expr_results);
 

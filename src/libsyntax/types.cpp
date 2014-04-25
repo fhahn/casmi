@@ -17,10 +17,12 @@ Type::Type(const std::string& type_name, std::vector<Type>& internal_types) : un
   if (internal_types.size() == 0) {
     internal_type = new Type(TypeType::UNKNOWN);
   } else if (internal_types.size() == 1) {
-    internal_type = new Type(internal_types[0]);
+    internal_type = new Type(&internal_types[0]);
   } else {
     t = TypeType::INVALID;
+    internal_type = nullptr;
   }
+
 }
 
 Type::Type(TypeType typ, std::vector<Type>& internal_types) : t(typ), unify_with(nullptr), constraints() {
@@ -30,9 +32,10 @@ Type::Type(TypeType typ, std::vector<Type>& internal_types) : t(typ), unify_with
   if (internal_types.size() == 0) {
     internal_type = new Type(TypeType::UNKNOWN);
   } else if (internal_types.size() == 1) {
-    internal_type = new Type(internal_types[0]);
+    internal_type = new Type(&internal_types[0]);
   } else {
     t = TypeType::INVALID;
+    internal_type = nullptr;
   }
 }
 
@@ -45,13 +48,23 @@ Type::Type(TypeType typ, Type& int_typ) : t(typ), unify_with(nullptr), constrain
 
 Type::Type() : t(TypeType::INVALID), internal_type(nullptr), unify_with(nullptr), constraints() {}
 
-Type::Type(TypeType t) : t(t), internal_type(nullptr), unify_with(nullptr) {
+Type::Type(TypeType t) : t(t), internal_type(nullptr), unify_with(nullptr), constraints() {
   if (t == TypeType::LIST || t == TypeType::TUPLE) {
     t = TypeType::INVALID;
   }
 }
 
-Type::Type(const Type& other) : t(other.t), internal_type(other.internal_type), unify_with(nullptr), constraints() {}
+Type::Type(Type *other) : t(other->t), internal_type(nullptr), unify_with(nullptr), constraints() {
+  if (other->internal_type != nullptr) {
+    internal_type = new Type(other->internal_type);
+  } else {
+    internal_type = nullptr;
+  }
+}
+
+
+Type::Type(const Type& other) : t(other.t), internal_type(other.internal_type), unify_with(nullptr), constraints() {
+}
 
 Type::Type(const std::string& type_name) {
   if (type_name == "Int") { t = TypeType::INT; }
@@ -93,9 +106,19 @@ const std::string Type::to_str() const {
     case TypeType::STRING: return "String";
     case TypeType::LIST: return "List("+internal_type->to_str()+")";
     case TypeType::UNKNOWN: return "Unkown";
+    case TypeType::SELF: return "Self";
     case TypeType::INVALID: return "Invalid";
     default: assert(0);
   }
+}
+
+std::string Type::unify_links_to_str() const {
+  std::string res = std::to_string((unsigned long) this);
+  DEBUG("-> "<<this);
+  if (unify_with) {
+    unify_with->unify_links_to_str();
+  }
+  return res;
 }
 
 bool Type::unify(Type other) {
@@ -106,43 +129,74 @@ bool Type::unify(Type other) {
   return t == other.t;
 }
 
+
+
+
 bool Type::unify(Type *other) {
+  DEBUG("IN UNIFY "<< this << " "<<other);
   bool result = false;
   if (t != TypeType::UNKNOWN && other->t != TypeType::UNKNOWN) {
     if (t != TypeType::LIST) {
       result = t == other->t;
     } else {
-      throw "unify concrete lists not implemtned";
+      if (other->t == TypeType::LIST) {
+        result = internal_type->unify(other->internal_type);
+        if (unify_with != nullptr && unify_with != other) {
+          DEBUG("UNIFIED1 "<<this<< " and "<< unify_with <<" TO "<<to_str());
+          result = unify(unify_with);
+        }
+        if (other->unify_with != nullptr && unify_with != other) {
+          DEBUG("UNIFIED2 "<<this<< " and "<< other->unify_with <<" TO "<<to_str());
+          result = unify(other->unify_with);
+        }
+        return result;
+      } else {
+        return false;
+      }
     }
   }
 
-  if (t == TypeType::UNKNOWN && other->t != TypeType::UNKNOWN) {
-    if (t != TypeType::LIST) {
-      t = other->t;
-      bool matched_constraint = true;
-      for (Type constraint : constraints) {
-        if (unify(constraint)) {
-          matched_constraint = true;
-          break;
-        } else {
-          matched_constraint = false;
-        }
+  if (t == TypeType::UNKNOWN && other->t == TypeType::LIST) {
+    internal_type = new Type(other->internal_type);
+    t = TypeType::LIST;
+
+    if (internal_type->t == TypeType::UNKNOWN) {
+      Type* last_link = this;
+
+      while (last_link->unify_with != nullptr) {
+        last_link = last_link->unify_with;
       }
 
-      if (!matched_constraint) {
-        DEBUG("Did not match any constriants");
-        return false;
-      }
-      if (unify_with != nullptr) {
-        DEBUG("UNIFIED "<<this<< " and "<< other <<" TO "<<to_str());
-        result = other->unify(unify_with);
-      }
-
-      DEBUG("UNIFIED "<<this<< " and "<< other <<" TO "<<to_str());
-      result = true;
-    } else {
-      throw "unify concrete lists not implemtned";
+      DEBUG("UNIFY link "<<other<<" to unify with "<<last_link);
+      last_link->unify_with = other;
+      assert(last_link != other);
     }
+    return  true;
+  }
+
+  if (t == TypeType::UNKNOWN && other->t != TypeType::UNKNOWN) {
+    t = other->t;
+    bool matched_constraint = true;
+    for (Type constraint : constraints) {
+      if (unify(constraint)) {
+        matched_constraint = true;
+        break;
+      } else {
+        matched_constraint = false;
+      }
+    }
+
+    if (!matched_constraint) {
+      DEBUG("Did not match any constriants");
+      return false;
+    }
+    if (unify_with != nullptr) {
+      DEBUG("UNIFIED "<<this<< " and "<< other <<" TO "<<to_str());
+      result = other->unify(unify_with);
+    }
+
+    DEBUG("UNIFIED "<<this<< " and "<< other <<" TO "<<to_str());
+    return true;
   }
 
   if (t != TypeType::UNKNOWN && other->t == TypeType::UNKNOWN) {
@@ -170,7 +224,9 @@ bool Type::unify(Type *other) {
       DEBUG("UNIFIED "<<this<< " and "<< other <<" TO "<<to_str());
       result = true;
     } else {
-      throw "unify concrete lists not implemtned";
+      other->internal_type = new Type(internal_type);
+      t = TypeType::LIST;
+      result = true;
     }
   }
 
@@ -191,6 +247,15 @@ bool Type::unify(Type *other) {
 }
 
 
+bool Type::is_complete() {
+  if (t == TypeType::UNKNOWN) {
+    return false;
+  }
+  if (internal_type) {
+    return internal_type->is_complete();
+  }
+  return true;
+}
 
 FunctionInfo::FunctionInfo(std::vector<Type> *args, Type return_type) :
     arguments_(args), return_type_(return_type) {}
