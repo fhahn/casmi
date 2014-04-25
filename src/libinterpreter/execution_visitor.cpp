@@ -35,8 +35,8 @@ void ExecutionVisitor::visit_update(UpdateNode *update, Value &func_val, Value& 
 
   casm_update* up = (casm_update*) pp_mem_alloc(&(context_.pp_stack), sizeof(casm_update));
 
-  // TODO initialize other fields
   up->value = (void*) expr_v.to_uint64_t();
+  up->defined = (expr_v.type == TypeType::UNDEF) ? 0 : 1;
   up->func = update->func->symbol->id;
   up->line = (uint64_t) update;
   pack_values_in_array(value_list, up->args);
