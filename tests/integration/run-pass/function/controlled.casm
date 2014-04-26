@@ -1,0 +1,17 @@
+function (controlled) a: -> Int
+function (controlled) b: Int -> Int
+function (controlled) c: Int * Int -> Int
+
+function d: -> Int
+function e: Int -> Int
+function f: Int * Int -> Int
+
+init main
+
+rule main = {|
+
+    b( 1 ) := 1
+
+    assert b( 1 ) = 1
+    program( self ) := undef
+|}

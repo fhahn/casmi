@@ -43,11 +43,33 @@ void ExecutionContext::apply_updates() {
 
     DEBUG("APPLY args "<<u->num_args << " arg "<<u->args[0] << " " << u->args[1]<<" func "<<u->func);
 
-    Value v(function_map.first->return_type_, u);
-    if (v.type == TypeType::UNDEF) {
-      function_map.second.erase({u->args, u->num_args});
+    if (function_map.first->return_type_.t == TypeType::LIST) {
+      if (u->defined == 0) {
+        Value& list = function_map.second[{u->args, u->num_args}];
+        if (list.is_undef()) {
+          delete list.value.list;
+          function_map.second.erase({u->args, u->num_args});
+        }
+      } else {
+        PermList *perm;
+        Value& list = function_map.second[{u->args, u->num_args}];
+        if (list.is_undef()) {
+          list.value.list = new PermList();
+          list.type = function_map.first->return_type_;
+        } 
+        
+        // Move temp changes to permanent lists, 
+        // TODO impßlement missing stuff
+        TempList *temp = reinterpret_cast<TempList*>(u->value);
+        reinterpret_cast<PermList*>(list.value.list)->values = temp->changes;
+      }
     } else {
-      function_map.second[{u->args, u->num_args}] = v;
+      Value v(function_map.first->return_type_, u);
+      if (v.type == TypeType::UNDEF) {
+        function_map.second.erase({u->args, u->num_args});
+      } else {
+        function_map.second[{u->args, u->num_args}] = v;
+      }
     }
 
     i->used = 0;
@@ -166,24 +188,40 @@ static Value undef = Value();
 
 static Value tmp;
 
-Value& ExecutionContext::get_function_value(Function *sym, uint64_t args[]) {
-  // TODO move should be used here
-  int64_t state = (updateset.pseudostate % 2 == 0) ? state = updateset.pseudostate-1:
-  state = updateset.pseudostate;
-  for (; state > 0; state -= 2) {
-    uint64_t key = (uint64_t) sym->id << 16 | state;
-    casm_update *update = (casm_update*) pp_hashmap_get(updateset.set, key);
-    if (update) {
-      tmp = Value(sym->return_type_, update);
-      return tmp;
+bool args_eq(uint64_t args1[], uint64_t args2[], size_t len) {
+
+  DEBUG("LEN "<<len);
+  for (size_t i=0; i < len; i++) {
+    DEBUG("args1 "<<args1[i]<<"args2 "<<args2[i]);
+    if (args1[i] != args2[i]) {
+      return false;
     }
   }
+  return true;
+}
 
+Value& ExecutionContext::get_function_value(Function *sym, uint64_t args[]) {
+  // TODO move should be used here
   auto& function_map = functions[sym->id];
   try {
-      DEBUG("get "<<sym->id << " " << sym->name()<<" size:"<<sym->arguments_.size() << " args "<<args[0]);
-    return function_map.second.at({&args[0], sym->arguments_.size()});
+      DEBUG("get "<<sym->id << " " << sym->name()<<" size:"<<sym->arguments_.size() << " args "<<args[0] << " Fun size "<< function_map.second.size());
+    Value &v = function_map.second.at({&args[0], sym->arguments_.size()});
+    int64_t state = (updateset.pseudostate % 2 == 0) ? state = updateset.pseudostate-1:
+                                                       state = updateset.pseudostate;
+    for (; state > 0; state -= 2) {
+      uint64_t key = (uint64_t) &v << 16 | state;
+      casm_update *update = (casm_update*) pp_hashmap_get(updateset.set, key);
+      if (update) {
+        tmp = Value(sym->return_type_, update);
+        DEBUG("FOUND UPDATE for "<< sym->name()<<" "<<tmp.value.ival);
+        return tmp;
+      }
+    }
+    DEBUG("FOUNDDDD");
+    return v;
+
   } catch (const std::out_of_range &e) {
+    DEBUG("NOT FOUND");
     undef.type = TypeType::UNDEF;
     return undef;
   }

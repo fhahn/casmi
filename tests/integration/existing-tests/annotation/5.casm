@@ -1,10 +1,17 @@
+function stop: -> Int
+
 function a: List(Int) -> Int
 
 rule main = {
-	let x = [] in {
-		a( x ) := 2
-	}
+    let x = [] in {
+        a( x ) := 2
+    }
+    stop := 1
+    print stop
 
-	program( self ) := undef
+    if stop = 1 then {
+        assert a([]) = 2
+        program( self ) := undef
+    }
 }
 init main

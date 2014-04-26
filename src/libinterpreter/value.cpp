@@ -1,6 +1,8 @@
 #include <assert.h>
 #include <utility>
 
+#include "libsyntax/ast.h"
+
 #include "libinterpreter/value.h"
 #include "libutil/exceptions.h"
 
@@ -26,7 +28,7 @@ Value::Value(std::string *string) : type(TypeType::STRING) {
   value.string = string;
 }
 
-Value::Value(Type t, std::vector<Value>* list) : type(t) {
+Value::Value(Type t,List *list) : type(t) {
   value.list = list;
 }
 
@@ -66,7 +68,17 @@ Value::Value(Type t, casm_update* u) {
         type = TypeType::UNDEF;
       }
       break;
-    default: throw RuntimeException("Unsupported tye in apply");
+    case TypeType::LIST:
+      if (u->value != 0) {
+        type = TypeType::LIST;
+        // TODO LEAK
+        value.list = new TempList();
+        //reinterpret_cast<std::vector<Value>*>(u->value);
+      } else {
+        type = TypeType::UNDEF;
+      }
+      break;
+    default: throw RuntimeException("Unsupported type in apply");
   }
 }
 
@@ -149,32 +161,6 @@ void Value::rat_div(const Value& other) {
 }
 
 void Value::eq(const Value& other) {
-  if (type == TypeType::UNDEF || other.type == TypeType::UNDEF) {
-    value.bval = type == other.type;
-  } else {
-    switch (type.t) {
-      case TypeType::INT: {
-        value.bval = value.ival == other.value.ival;
-        break;
-      }
-      case TypeType::BOOLEAN: {
-        value.bval = value.bval == other.value.bval;
-        break;
-      }
-      case TypeType::UNDEF:
-        if (other.type == TypeType::UNDEF) {
-          value.bval = true;
-        } else {
-          value.bval = false;
-        }
-        break;
-      case TypeType::STRING:
-        value.bval = *value.string == *other.value.string;
-        break;
-      default: assert(0);
-    }
-  }
-  type = TypeType::BOOLEAN;
 }
 
 void Value::lesser(const Value& other) {
@@ -240,10 +226,15 @@ uint64_t Value::to_uint64_t() const {
       return (uint64_t) value.rule;
     case TypeType::STRING: 
       return (uint64_t) value.string;
+    case TypeType::LIST:
+      return (uint64_t) value.list;
     default: throw RuntimeException("Unsupported type in Value.to_uint64_t");
   }
 }
 
+bool Value::is_undef() const {
+  return type == TypeType::UNDEF;
+}
 
 std::string Value::to_str() const {
   switch (type.t) {
@@ -257,6 +248,67 @@ std::string Value::to_str() const {
       return std::move("@"+value.rule->name);
     case TypeType::STRING:
       return *value.string;
+    case TypeType::LIST: {
+      if (value.list->list_type == List::ListType::TEMP) {
+        return "[" + reinterpret_cast<TempList*>(value.list)->to_str() +"]";
+      } else {
+        return "[" + reinterpret_cast<PermList*>(value.list)->to_str() +"]";
+      }
+    }
+    case TypeType::BOOLEAN:
+      if (value.bval) {
+        return "true";
+      } else {
+        return "false";
+      }
     default: throw RuntimeException("Unsupported type in Value.to_str() "+type.to_str());
   }
+}
+
+bool value_eq(const Value& v1, const Value& v2) {
+  if (v1.type == TypeType::UNDEF || v2.type == TypeType::UNDEF) {
+    return v1.type == v2.type;
+  } else {
+    switch (v1.type.t) {
+      case TypeType::INT: return v1.value.ival == v2.value.ival;
+      case TypeType::BOOLEAN: return v1.value.bval == v2.value.bval;
+      case TypeType::STRING: return *v1.value.string == *v2.value.string;
+      case TypeType::LIST: {
+
+        return true;
+      }
+      default: assert(0);
+    }
+  }
+}
+
+
+List::List(ListType t) : list_type(t) {}
+
+TempList::TempList() : List(ListType::TEMP), left(nullptr), right(nullptr), changes() {}
+
+const std::string TempList::to_str() const {
+  std::string res = "";
+  if (left != nullptr) {
+    res += left->to_str();
+  }
+  for (const Value& v : changes) {
+    res += v.to_str() + ", ";
+  }
+  if (right != nullptr) {
+    res += right->to_str();
+  }
+  return res;
+}
+
+
+PermList::PermList() : List(ListType::PERM), values() {}
+
+const std::string PermList::to_str() const {
+  std::string res = "";
+
+  for (const Value& v : values) {
+    res += v.to_str() + ", ";
+  }
+  return res;
 }

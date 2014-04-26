@@ -277,7 +277,7 @@ bool FunctionAtom::equals(AstNode *other) {
 
 
 ListAtom::ListAtom(yy::location& loc, std::vector<ExpressionBase*> *exprs)
-    : AtomNode(loc, NodeType::LIST_ATOM, TypeType::UNKNOWN), expr_list(exprs) {
+    : AtomNode(loc, NodeType::LIST_ATOM, TypeType::UNKNOWN), expr_list(exprs) , tmp_list() {
   // TODO LEAK!
   Type t = Type(TypeType::UNKNOWN);
   type_ = Type(TypeType::LIST, t);

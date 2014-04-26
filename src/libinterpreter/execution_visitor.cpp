@@ -44,9 +44,15 @@ void ExecutionVisitor::visit_update(UpdateNode *update, Value &func_val, Value& 
   up->num_args = value_list.size();
   value_list.clear();
 
+  auto& function_map = context_.functions[update->func->symbol->id];
+  if (function_map.second.count({up->args, up->num_args}) == 0) {
+    function_map.second[{up->args, up->num_args}] = Value();
+  }
+  Value& ref = function_map.second[{up->args, up->num_args}];
   casm_update* v = (casm_update*)casm_updateset_add(&(context_.updateset),
-                                                    (void*) update->func->symbol->id,
+                                                    (void*) &ref,
                                                     (void*) up);
+  DEBUG("UPADTE "<<update->func);
   if (v != nullptr) {
     // Check if values match
     for (int i=0; i < up->num_args; i++) {
@@ -120,6 +126,7 @@ void ExecutionVisitor::visit_let_post(LetNode *node) {
 }
 
 Value&& ExecutionVisitor::visit_expression(Expression *expr, Value &left_val, Value &right_val) {
+  DEBUG("left "<<left_val.value.ival<<" right "<<right_val.value.ival);
   switch (expr->op) {
     case Expression::Operation::ADD: {
       left_val.add(right_val);
@@ -147,13 +154,12 @@ Value&& ExecutionVisitor::visit_expression(Expression *expr, Value &left_val, Va
     }
 
     case Expression::Operation::EQ: {
-      left_val.eq(right_val);
-      return std::move(left_val);
+      Value tmp(value_eq(left_val, right_val));
+      return std::move(tmp);
     }
     case Expression::Operation::NEQ: {
-      left_val.eq(right_val);
-      left_val.value.bval = !left_val.value.bval;
-      return std::move(left_val);
+      Value tmp(!value_eq(left_val, right_val));
+      return std::move(tmp);
     }
 
     case Expression::Operation::LESSER:
@@ -199,7 +205,10 @@ Value&& ExecutionVisitor::visit_function_atom(FunctionAtom *atom, std::vector<Va
       // TODO handle function access and function write differently
       value_list.swap(expr_results);
 
-      return std::move(Value(context_.get_function_value(atom->symbol, args)));
+      DEBUG("CALLOOO "<<atom);
+      Value v = Value(context_.get_function_value(atom->symbol, args));
+      DEBUG("visit_atom "<<atom->symbol->name()<<" "<<v.value.ival);
+      return std::move(v);
     }
 
     default:
@@ -213,6 +222,10 @@ Value&& ExecutionVisitor::visit_derived_function_atom(FunctionAtom *atom,
   return std::move(expr);
 }
 
+Value&& ExecutionVisitor::visit_list_atom(ListAtom *atom, std::vector<Value> &vals) {
+  atom->tmp_list.changes = std::move(vals);
+  return std::move(Value(atom->type_, &atom->tmp_list));
+}
 std::string args_to_str(uint64_t args[], size_t size) {
   std::string res = "";
   size_t i = 0;
@@ -269,18 +282,21 @@ void AstWalker<ExecutionVisitor, Value>::walk_parblock(UnaryNode* parblock) {
 
 
 void ExecutionWalker::run() {
+  std::vector<uint64_t*> initializer_args;
+
   for (auto pair: visitor.context_.symbol_table.table_) {
     auto function_map = std::unordered_map<ArgumentsKey, Value>();
 
     if (pair.second->symbol_type == Function::SType::FUNCTION && pair.second->intitializers_ != nullptr) {
       for (std::pair<ExpressionBase*, ExpressionBase*> init : *pair.second->intitializers_) {
         size_t num_args = 0; 
-        uint64_t args[10];
+        uint64_t *args = new uint64_t[10];
         if (init.first != nullptr) {
           std::vector<Value> ident;
           ident.push_back(walk_expression_base(init.first));
           pack_values_in_array(ident, &args[0]);
           num_args = ident.size();
+          DEBUG("INTI FOO "<<pair.second->id << " arg: "<<args[0]);
         } else {
           args[0] = 0;
         }
@@ -291,6 +307,7 @@ void ExecutionWalker::run() {
           throw RuntimeException("function already initialized");
         }
         function_map.emplace(std::pair<ArgumentsKey, Value>({&args[0], num_args}, walk_expression_base(init.second)));
+        initializer_args.push_back(args);
       }
     }
     visitor.context_.functions[pair.second->id] = std::pair<Function*, std::unordered_map<ArgumentsKey, Value>>(pair.second, function_map);
@@ -299,7 +316,7 @@ void ExecutionWalker::run() {
   Function *program_sym = visitor.context_.symbol_table.get("program");
   uint64_t args[10] = {0};
   while(true) {
-    Value program_val = visitor.context_.get_function_value(program_sym, args);
+    Value& program_val = visitor.context_.get_function_value(program_sym, args);
     DEBUG(program_val.to_str());
     if (program_val.type == TypeType::UNDEF) {
       break;
@@ -307,5 +324,10 @@ void ExecutionWalker::run() {
     DEBUG("STARTOOO");
     walk_rule(program_val.value.rule);
     visitor.context_.apply_updates();
+  }
+
+
+  for (auto ptr : initializer_args) {
+    delete[] ptr;
   }
 }

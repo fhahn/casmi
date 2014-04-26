@@ -22,6 +22,7 @@ struct ArgumentsKey {
     if(other.size == size) {
       for(size_t i = 0; i < size; i++) {
         if (other.p[i] != p[i]) {
+          DEBUG(other.p[i] << " != "<<p[i] << " at "<<i);
           return false;
         }
       }
@@ -42,6 +43,7 @@ namespace std {
         for(size_t i = 0; i < key.size; i++) {
           h ^= hasher(key.p[i]);
         }
+        DEBUG("HASH: "<<h);
         return h;
     }
   };
