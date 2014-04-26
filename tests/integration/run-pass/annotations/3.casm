@@ -1,0 +1,11 @@
+function a: -> List(Int)
+
+rule main = {
+    let x = [1,2,3] in {|
+        a := x
+        assert a = x
+        assert a = [1,2,3]
+    |}
+    program( self ) := undef
+}
+init main

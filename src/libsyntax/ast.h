@@ -10,6 +10,8 @@
 #include "libsyntax/symbols.h"
 #include "libsyntax/location.hh" // reuse bison's location class
 
+#include "libinterpreter/value.h"
+
 enum NodeType {
   ASSERT,
   UNDEF_ATOM,
@@ -51,6 +53,9 @@ class AstVisitor;
 // Forward declarations for libsyntax/symbols.h
 class Function;
 class Binding;
+
+class List;
+class TempList;
 
 // Forward delclarations for this file
 class Expression;
@@ -229,6 +234,7 @@ class StringAtom : public AtomNode {
 class ListAtom : public AtomNode {
   public:
     std::vector<ExpressionBase*>* expr_list;
+    TempList tmp_list;
 
     ListAtom(yy::location& loc, std::vector<ExpressionBase*> *exprs);
 };

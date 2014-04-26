@@ -5,4 +5,4 @@ add_executable(unittest_runner
     libinterpreter/test_execution_context.cpp
 )
 
-target_link_libraries(unittest_runner gtest_main parser)
+target_link_libraries(unittest_runner gtest_main parser interpreter)

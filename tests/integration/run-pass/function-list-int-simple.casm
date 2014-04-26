@@ -1,0 +1,14 @@
+CASM foo
+
+function foo: Int -> List(Int)
+
+init main
+
+rule main = {
+    foo(1) := [1,2,3]
+
+    if foo(1) = [1,2,3] then 
+        program(self) := undef
+    else
+        assert foo(1) = undef
+}
