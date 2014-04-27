@@ -12,22 +12,22 @@ static std::map<const std::string, bool> builtin_names = {
 
 uint64_t Function::counter = 0;
 
-Function::Function(const std::string name, std::vector<Type>& args,
-              Type return_type, std::vector<std::pair<ExpressionBase*, ExpressionBase*>> *init) :
+Function::Function(const std::string name, std::vector<Type*>& args,
+              Type* return_type, std::vector<std::pair<ExpressionBase*, ExpressionBase*>> *init) :
                 name_(name), arguments_(std::move(args)), intitializers_(init),
                 return_type_(return_type), id(counter), symbol_type(SType::FUNCTION) {
   counter += 1;
 }
 
-Function::Function(const std::string name, std::vector<Type>& args,
-                   ExpressionBase *expr, Type return_type) :
+Function::Function(const std::string name, std::vector<Type*>& args,
+                   ExpressionBase *expr, Type* return_type) :
                 name_(name), arguments_(std::move(args)), derived(expr),
                 return_type_(return_type), id(counter), symbol_type(SType::DERIVED) {
   counter += 1;
 }
 
 Function::Function(const std::string name,
-                   ExpressionBase *expr, Type return_type) :
+                   ExpressionBase *expr, Type* return_type) :
                 name_(name), arguments_(), derived(expr),
                 return_type_(return_type), id(counter), symbol_type(SType::DERIVED) {
   counter += 1;
@@ -53,11 +53,11 @@ const std::string Function::to_str() const {
   std::string res = name_;
 
   res = ": (";
-  for (Type t : arguments_) {
-    res += t.to_str() + ", ";
+  for (Type* t : arguments_) {
+    res += t->to_str() + ", ";
   }
   res += ")";
-  res += "-> "+return_type_.to_str();
+  res += "-> "+return_type_->to_str();
   return res;
 }
 
@@ -77,8 +77,12 @@ bool Function::equals(Function *other) const {
   return return_type_ == other->return_type_;
 }
 
-bool Function::is_builtin() const {
-  return builtin_names.count(name_) != 0;
+bool Function::is_builtin() {
+  if(builtin_names.count(name_) != 0) {
+    symbol_type = SType::BUILTIN;
+    return true;
+  }
+  return false;
 }
 
 uint64_t Binding::counter = 0;

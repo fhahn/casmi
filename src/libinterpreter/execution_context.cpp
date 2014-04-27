@@ -6,11 +6,11 @@
 
 ExecutionContext::ExecutionContext(const SymbolTable<Function*>& st, RuleNode *init) : symbol_table(std::move(st)) {
   // use 10 MB for updateset data
-  pp_mem_new(&updateset_data_, 1024 * 1024 * 10, "mem for main updateset");
-  updateset.set =  pp_hashmap_new(&updateset_data_, 1024, "main updateset");
+  pp_mem_new(&updateset_data_, 1024 * 1024 * 100, "mem for main updateset");
+  updateset.set =  pp_hashmap_new(&updateset_data_, 1024*10, "main updateset");
 
   // use 10 MB for stack
-  pp_mem_new(&pp_stack, 1024 * 1024 * 10, "mem for stack stuff");
+  pp_mem_new(&pp_stack, 1024 * 1024 * 100, "mem for stack stuff");
 
   if (init->child_ && init->child_->node_type_ == NodeType::PARBLOCK) {
     updateset.pseudostate = 1;
@@ -41,9 +41,9 @@ void ExecutionContext::apply_updates() {
 
     auto& function_map = functions[u->func];
 
-    DEBUG("APPLY args "<<u->num_args << " arg "<<u->args[0] << " " << u->args[1]<<" func "<<u->func);
+    DEBUG("APPLY args "<<u->num_args << " arg "<<u->args[0] << " " << u->args[1]<<" func "<<function_map.first->name());
 
-    if (function_map.first->return_type_.t == TypeType::LIST) {
+    if (function_map.first->return_type_->t == TypeType::LIST) {
       if (u->defined == 0) {
         Value& list = function_map.second[{u->args, u->num_args}];
         if (list.is_undef()) {

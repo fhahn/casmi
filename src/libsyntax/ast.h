@@ -101,12 +101,12 @@ class UnaryNode: public AstNode {
 class RuleNode: public UnaryNode {
   public:
     const std::string name;
-    std::vector<Type> arguments;
+    std::vector<Type*> arguments;
     std::map<std::string, size_t> binding_offsets;
 
     RuleNode(yy::location& loc, AstNode *child, const std::string &name);
     RuleNode(yy::location& loc, AstNode *child, const std::string &name,
-        std::vector<Type>& args);
+        std::vector<Type*>& args);
 };
 
 

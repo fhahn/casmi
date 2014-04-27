@@ -222,7 +222,7 @@ bool StringAtom::equals(AstNode *other) {
 }
 
 
-FunctionAtom::FunctionAtom(yy::location& loc, const std::string name) 
+FunctionAtom::FunctionAtom(yy::location& loc, const std::string name)
     : FunctionAtom(loc, name, nullptr) {
 }
 
@@ -279,8 +279,7 @@ bool FunctionAtom::equals(AstNode *other) {
 ListAtom::ListAtom(yy::location& loc, std::vector<ExpressionBase*> *exprs)
     : AtomNode(loc, NodeType::LIST_ATOM, TypeType::UNKNOWN), expr_list(exprs) , tmp_list() {
   // TODO LEAK!
-  Type t = Type(TypeType::UNKNOWN);
-  type_ = Type(TypeType::LIST, t);
+  type_ = Type(TypeType::LIST, new Type(TypeType::UNKNOWN));
 }
 
 Expression::Expression(yy::location& loc, ExpressionBase *left, ExpressionBase *right,
@@ -390,7 +389,7 @@ RuleNode::RuleNode(yy::location& loc, AstNode *child, const std::string& name)
 RuleNode::RuleNode(yy::location& loc,
                    AstNode *child,
                    const std::string &name,
-                   std::vector<Type>& args)
+                   std::vector<Type*>& args)
   : UnaryNode(loc, NodeType::RULE, child), name(std::move(name)),
     arguments(std::move(args)), binding_offsets(std::move(binding_offsets)) {}
 
