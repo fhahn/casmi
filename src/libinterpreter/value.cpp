@@ -4,7 +4,6 @@
 #include "libsyntax/ast.h"
 
 #include "libinterpreter/value.h"
-#include "libutil/exceptions.h"
 
 Value::Value() : type(TypeType::UNDEF) {}
 
@@ -214,6 +213,7 @@ void Value::greatereq(const Value& other) {
     }
   }
 }
+
 
 uint64_t Value::to_uint64_t() const {
   switch (type.t) {
