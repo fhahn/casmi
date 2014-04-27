@@ -1,0 +1,24 @@
+function stop: -> Int
+
+function s: -> List(Int) initially { [9, 19] }
+
+function a: List(Int) -> Int
+
+rule main = {
+    let x = [1,2,3] in {
+        a( x ) := 2
+    }
+
+    a([1,2,3,4]) := 3
+    a(s) := 4
+
+    stop := 1
+
+    if stop = 1 then {
+        assert a([1,2,3]) = 2
+        let x = [1,2,3,4] in assert a(x) = 3
+        assert a([9, 19]) = 4
+        program( self ) := undef
+    }
+}
+init main

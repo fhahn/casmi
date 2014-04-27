@@ -71,28 +71,6 @@ class Value {
     std::string to_str() const;
 };
 
-namespace std {
-  template <> struct hash<Value> {
-    static std::hash<std::string> str_hasher;
-
-    size_t operator()(const Value &key) const {
-      switch (key.type.t) {
-        case TypeType::INT:
-          return key.value.ival;
-        case TypeType::SELF:
-        case TypeType::UNDEF: // are UNDEF and SELF the same here?
-          return 0;
-        case TypeType::RULEREF:
-          return (uint64_t) key.value.rule;
-        case TypeType::STRING: 
-          return (uint64_t) str_hasher(*key.value.string);
-        case TypeType::LIST:
-          return (uint64_t) key.value.list;
-        default: throw RuntimeException("Unsupported type in Value.to_uint64_t");
-      }
-    }
-  };
-}
 
 bool value_eq(const Value& v1, const Value& v2);
 
@@ -116,6 +94,37 @@ class PermList : public List {
 
     const std::string to_str() const;
 };
+
+namespace std {
+
+  template <> struct hash<TempList>;
+
+  template <> struct hash<Value> {
+    static std::hash<std::string> str_hasher;
+    static std::hash<TempList> temp_list_hasher;
+    static std::hash<PermList> perm_list_hasher;
+
+    size_t operator()(const Value &key) const;
+  };
+
+  template <> struct hash<std::vector<Value>> {
+    static std::hash<Value> hasher;
+
+    size_t operator()(const std::vector<Value> &key) const;
+  };
+
+  template <> struct hash<TempList> {
+    static std::hash<std::vector<Value>> list_hasher;
+
+    size_t operator()(const TempList &key) const;
+  };
+
+  template <> struct hash<PermList> {
+    static std::hash<std::vector<Value>> list_hasher;
+
+    size_t operator()(const PermList &key) const;
+  };
+}
 
 
 #endif
