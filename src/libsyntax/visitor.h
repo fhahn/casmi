@@ -143,8 +143,12 @@ template<class T, class V> class AstWalker {
     }
 
     void walk_update(UpdateNode *update) {
-      V func_t = walk_function_atom(update->func);
       V expr_t = walk_expression_base(update->expr_);
+
+      // we must walk the expression before walking update->func because it 
+      // sets the list of arguments and we do not want the update->expr_ to
+      // overwrite the value_list
+      V func_t = walk_function_atom(update->func);
       visitor.visit_update(update, func_t, expr_t);
     }
 
