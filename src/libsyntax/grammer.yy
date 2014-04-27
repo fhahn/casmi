@@ -135,6 +135,10 @@ BODY_ELEMENT: PROVIDER_SYNTAX { $$ = new AstNode(NodeType::PROVIDER); }
            | ENUM_SYNTAX { $$ = new AstNode(NodeType::ENUM); }
            | FUNCTION_DEFINITION {
                 $$ = new FunctionDefNode(@$, $1);
+                DEBUG("CALLL\n");
+                if ($1->is_builtin()) {
+                    driver.error(@$, "cannot use `"+$1->name()+"` as function identifier because it is a builtin name");
+                }
                 if (!driver.function_table.add($1)) {
                     driver.error(@$, "redefinition of symbol");
                     // if another symbol with same name exists we need to delete

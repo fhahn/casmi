@@ -22,7 +22,6 @@ Type::Type(const std::string& type_name, std::vector<Type>& internal_types) : un
     t = TypeType::INVALID;
     internal_type = nullptr;
   }
-
 }
 
 Type::Type(TypeType typ, std::vector<Type>& internal_types) : t(typ), unify_with(nullptr), constraints() {
@@ -66,7 +65,7 @@ Type::Type(Type *other) : t(other->t), internal_type(nullptr), unify_with(nullpt
 Type::Type(const Type& other) : t(other.t), internal_type(other.internal_type), unify_with(nullptr), constraints() {
 }
 
-Type::Type(const std::string& type_name) {
+Type::Type(const std::string& type_name) : internal_type(nullptr), unify_with(nullptr) {
   if (type_name == "Int") { t = TypeType::INT; }
   else if (type_name == "Float") { t = TypeType::FLOAT; }
   else if (type_name == "Undef") { t = TypeType::UNDEF; }
