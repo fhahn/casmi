@@ -314,40 +314,49 @@ const std::string PermList::to_str() const {
 }
 
 namespace std {
-    size_t hash<Value>::operator()(const Value &key) const {
-      switch (key.type.t) {
-        case TypeType::INT:
-          return key.value.ival;
-        case TypeType::SELF:
-        case TypeType::UNDEF: // are UNDEF and SELF the same here?
-          return 0;
-        case TypeType::RULEREF:
-          return (uint64_t) key.value.rule;
-        case TypeType::STRING: 
-          return (uint64_t) str_hasher(*key.value.string);
-        case TypeType::LIST: 
-          if (key.value.list->list_type == List::ListType::TEMP) {
-            return (uint64_t) temp_list_hasher(*reinterpret_cast<TempList*>(key.value.list));
-          } else {
-            return (uint64_t) perm_list_hasher(*reinterpret_cast<PermList*>(key.value.list));
-          }
-        default: throw RuntimeException("Unsupported type in Value.to_uint64_t");
-      }
-    }
 
-    size_t hash<std::vector<Value>>::operator()(const std::vector<Value> &key) const {
-      size_t h = 0;
-      for (const Value& v : key) {
-        h += hasher(v);
-      }
-      return h;
-    }
+  std::hash<std::string> hash<Value>::str_hasher;
+  std::hash<TempList> hash<Value>::temp_list_hasher;
+  std::hash<PermList> hash<Value>::perm_list_hasher;
 
-    size_t hash<TempList>::operator()(const TempList &key) const {
-      return list_hasher(key.changes);
+  size_t hash<Value>::operator()(const Value &key) const {
+    switch (key.type.t) {
+      case TypeType::INT:
+        return key.value.ival;
+      case TypeType::SELF:
+      case TypeType::UNDEF: // are UNDEF and SELF the same here?
+        return 0;
+      case TypeType::RULEREF:
+        return (uint64_t) key.value.rule;
+      case TypeType::STRING: 
+        return (uint64_t) str_hasher(*key.value.string);
+      case TypeType::LIST: 
+        if (key.value.list->list_type == List::ListType::TEMP) {
+          return (uint64_t) temp_list_hasher(*reinterpret_cast<TempList*>(key.value.list));
+        } else {
+          return (uint64_t) perm_list_hasher(*reinterpret_cast<PermList*>(key.value.list));
+        }
+      default: throw RuntimeException("Unsupported type in Value.to_uint64_t");
     }
+  }
 
-    size_t hash<PermList>::operator()(const PermList &key) const {
-      return list_hasher(key.values);
+
+  std::hash<Value> hash<std::vector<Value>>::hasher;
+  size_t hash<std::vector<Value>>::operator()(const std::vector<Value> &key) const {
+    size_t h = 0;
+    for (const Value& v : key) {
+      h += hasher(v);
     }
+    return h;
+  }
+
+  std::hash<std::vector<Value>> hash<TempList>::list_hasher;
+  size_t hash<TempList>::operator()(const TempList &key) const {
+    return list_hasher(key.changes);
+  }
+
+  std::hash<std::vector<Value>> hash<PermList>::list_hasher;
+  size_t hash<PermList>::operator()(const PermList &key) const {
+    return list_hasher(key.values);
+  }
 }
