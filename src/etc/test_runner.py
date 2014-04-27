@@ -43,6 +43,7 @@ def test_existing_parse(filename):
 def test_run_pass(filename):
     short_filename = filename.replace(RUN_PASS_PATH, '')
     sys.stdout.write('\t[run-pass] '+short_filename)
+    sys.stdout.flush()
 
     p1 = subprocess.Popen([test_exe, filename], stderr=subprocess.PIPE)
     err = p1.communicate()[1]
@@ -68,6 +69,9 @@ RUN_FAIL_TEMPLATE = ("{}\n"
 )
 
 def test_run_fail(filename):
+    short_filename = filename.replace(RUN_FAIL_PATH, '')
+    sys.stdout.write('\t[run-fail] '+short_filename )
+    sys.stdout.flush()
 
     expected_errors = {}
 
@@ -89,9 +93,9 @@ def test_run_fail(filename):
     p1 = subprocess.Popen([test_exe, filename], stderr=subprocess.PIPE)
     err = p1.communicate()[1]
     err = err.decode(encoding='UTF-8')
-    short_filename = filename.replace(RUN_FAIL_PATH, '')
+
     if p1.returncode == 0:
-        print('\t[run-fail] '+short_filename+' ... fail')
+        sys.stdout.write('... fail\n')
         return (False, RUN_FAIL_TEMPLATE.format(HR,
                                                     filename,
                                                     'Test did run, but should fail',
@@ -103,7 +107,7 @@ def test_run_fail(filename):
             if "error: " in l:
                 m = re.search(error_re, l)
                 if int(m.groupdict()['line']) not in expected_errors:
-                    print('  [run-fail] '+short_filename+' ... fail')
+                    sys.stdout.write('... fail\n')
                     return (False, RUN_FAIL_TEMPLATE.format(HR,
                                     filename,
                                     'unexpected error message: '+l,
@@ -114,17 +118,17 @@ def test_run_fail(filename):
                         found = True
 
                 if not found:
-                    print('  [run-fail] '+short_filename+' ... fail')
+                    sys.stdout.write('... fail\n')
                     return (False, RUN_FAIL_TEMPLATE.format(HR,
                                                 filename,
                                                 ('expected error message not thrown; expected: '+expected_error,
                                                 '\ngot error messages: '+m.groupdict()['msg']),
                                                 HR))
 
-        print('\t[run-fail] '+short_filename+' ... ok')
+        sys.stdout.write('... ok\n')
         return (True, '')
     else:
-        print('\t[run-fail] '+short_filename+' ... fail')
+        sys.stdout.write('... fail\n')
         return (False, RUN_FAIL_TEMPLATE.format(HR,
                                                     filename,
                                                     'Test did fail with error code != 1',
