@@ -1,0 +1,24 @@
+function stop: -> Int
+
+function s: -> String initially { "FOO" }
+
+function a: String -> Int
+
+rule main = {
+    let x = "Hallo" in {
+        a( x ) := 2
+    }
+
+    a("BARR") := 3
+    a(s) := 4
+
+    stop := 1
+
+    if stop = 1 then {
+        assert a("Hallo") = 2
+        let x = "BARR" in assert a(x) = 3
+        assert a("FOO") = 4
+        program( self ) := undef
+    }
+}
+init main

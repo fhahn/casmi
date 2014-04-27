@@ -9,10 +9,11 @@
 DEFINE_CASM_UPDATESET_FORK_PAR
 DEFINE_CASM_UPDATESET_FORK_SEQ
 
+std::hash<Value> hasher;
 
 void pack_values_in_array(const std::vector<Value> &value_list, uint64_t array[]) {
   for (size_t i=0; i < value_list.size(); i++) {
-    array[i] = value_list[i].to_uint64_t();
+    array[i] = hasher(value_list[i]);
   }
 }
 
