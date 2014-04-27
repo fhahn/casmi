@@ -53,7 +53,7 @@ void ExecutionVisitor::visit_update(UpdateNode *update, Value &func_val, Value& 
   casm_update* v = (casm_update*)casm_updateset_add(&(context_.updateset),
                                                     (void*) &ref,
                                                     (void*) up);
-  DEBUG("UPADTE "<<update->func);
+  DEBUG("UPADTE "<<update->func->name<<" num args "<<up->num_args << " arg[0] "<<up->args[0]);
   if (v != nullptr) {
     // Check if values match
     for (int i=0; i < up->num_args; i++) {
@@ -206,9 +206,8 @@ Value&& ExecutionVisitor::visit_function_atom(FunctionAtom *atom, std::vector<Va
       // TODO handle function access and function write differently
       value_list.swap(expr_results);
 
-      DEBUG("CALLOOO "<<atom);
       Value v = Value(context_.get_function_value(atom->symbol, args));
-      DEBUG("visit_atom "<<atom->symbol->name()<<" "<<v.value.ival);
+      DEBUG("visit_atom "<<atom->symbol->name()<<" "<<v.value.ival <<" size "<<value_list.size());
       return std::move(v);
     }
 
@@ -316,16 +315,19 @@ void ExecutionWalker::run() {
 
   Function *program_sym = visitor.context_.symbol_table.get("program");
   uint64_t args[10] = {0};
+  size_t steps = 0;
   while(true) {
     Value& program_val = visitor.context_.get_function_value(program_sym, args);
     DEBUG(program_val.to_str());
     if (program_val.type == TypeType::UNDEF) {
       break;
     }
-    DEBUG("STARTOOO");
     walk_rule(program_val.value.rule);
     visitor.context_.apply_updates();
+    steps += 1;
   }
+
+  std::cout << steps <<" steps later..."<<std::endl;
 
 
   for (auto ptr : initializer_args) {
