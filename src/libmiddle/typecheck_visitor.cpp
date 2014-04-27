@@ -12,15 +12,15 @@ void TypecheckVisitor::visit_function_def(FunctionDefNode *def,
       driver_.error(def->sym->intitializers_->at(i).second->location,
                   "type of initializer of function `" +def->sym->name()+
                   "` is `"+p.second->to_str()+"` but should be `"+
-                  def->sym->return_type_.to_str()+"´");
+                  def->sym->return_type_->to_str()+"´");
     }
   }
 }
 
 void TypecheckVisitor::visit_derived_def_pre(FunctionDefNode *def) {
   auto foo = new std::vector<Type*>();
-  for (Type &arg : def->sym->arguments_) {
-    foo->push_back(&arg);
+  for (Type *arg : def->sym->arguments_) {
+    foo->push_back(arg);
   }
   rule_binding_types.push_back(foo);
   rule_binding_offsets.push_back(&def->sym->binding_offsets);
@@ -30,25 +30,25 @@ void TypecheckVisitor::visit_derived_def(FunctionDefNode *def, Type* expr) {
   rule_binding_types.pop_back();
   rule_binding_offsets.pop_back();
 
-  if (def->sym->return_type_ == TypeType::UNKNOWN) {
+  if (*def->sym->return_type_ == TypeType::UNKNOWN) {
     if (*expr == TypeType::UNKNOWN) {
       driver_.error(def->location, std::string("type of derived expression is ")+
                                    "unknown because type of expression is `undef`");
    
     }
     // TODO unify
-    def->sym->return_type_ = *expr;
-  } else if (def->sym->return_type_ != *expr && *expr != TypeType::UNDEF) {
+    def->sym->return_type_ = expr;
+  } else if (*def->sym->return_type_ != *expr && *expr != TypeType::UNDEF) {
     driver_.error(def->location, "type of derived expression was `"+
                                  expr->to_str()+"` but should be `"+
-                                 def->sym->return_type_.to_str()+"`");
+                                 def->sym->return_type_->to_str()+"`");
   }
 }
 
 void TypecheckVisitor::visit_rule(RuleNode *rule) {
   auto foo = new std::vector<Type*>();
-  for (Type &arg : rule->arguments) {
-    foo->push_back(&arg);
+  for (Type *arg : rule->arguments) {
+    foo->push_back(arg);
   }
   rule_binding_types.push_back(foo);
   rule_binding_offsets.push_back(&rule->binding_offsets);
@@ -71,6 +71,8 @@ void TypecheckVisitor::visit_assert(UnaryNode *assert, Type* val) {
 void TypecheckVisitor::visit_update(UpdateNode *update, Type* func_t, Type* expr_t) {
   // TODO unify func->type and expr->type
   DEBUG("UNIFY update "<<update->func->type_.to_str() << " "<<update->expr_->type_.to_str());
+  //DEBUG("link "<<update->func->type_.unify_links_to_str());
+  //DEBUG("link "<<update->expr_->type_.unify_links_to_str());
   if (!update->func->type_.unify(&update->expr_->type_)) {
     driver_.error(update->location, "type `"+func_t->to_str()+"` of `"+
                                     update->func->name+"` does not match type `"+
@@ -116,10 +118,10 @@ void TypecheckVisitor::visit_call(CallNode *call, std::vector<Type*>& argument_r
                                   std::to_string(args_provided)+" where provided");
   } else {
     for (size_t i=0; i < args_defined; i++) {
-      if (call->rule->arguments[i] != *argument_results[i]) {
+      if (*call->rule->arguments[i] != *argument_results[i]) {
         driver_.error(call->arguments->at(i)->location,
                       "argument "+std::to_string(i+1)+" of rule `"+ call->rule_name+
-                      "` must be `"+call->rule->arguments[i].to_str()+"` but was `"+
+                      "` must be `"+call->rule->arguments[i]->to_str()+"` but was `"+
                       argument_results[i]->to_str()+"`");
       }
   }
@@ -164,8 +166,8 @@ void TypecheckVisitor::check_numeric_operator(const yy::location& loc,
                                             const Expression::Operation op) {
   if (*type == TypeType::UNKNOWN) {
     DEBUG("Add numeric constraints");
-    type->constraints.push_back(Type(TypeType::INT));
-    type->constraints.push_back(Type(TypeType::FLOAT));
+    type->constraints.push_back(new Type(TypeType::INT));
+    type->constraints.push_back(new Type(TypeType::FLOAT));
   } else if (*type != TypeType::INT && *type != TypeType::FLOAT && *type != TypeType::UNDEF) {
     driver_.error(loc,
                   "operands of operator `"+operator_to_str(op)+
@@ -251,12 +253,13 @@ Type* TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
   } else {
     for (size_t i=0; i < atom->symbol->arguments_.size(); i++) {
 
-      DEBUG("UNIFY ARGS "<< atom->symbol->name() << " "<<expr_results[i]->to_str() << " "<<atom->symbol->arguments_[i].to_str()<< "\n");
-      if (!expr_results[i]->unify(&atom->symbol->arguments_[i])) {
+      DEBUG("UNIFY ARGS "<< atom->symbol->name() << " "<<expr_results[i]->to_str() << " "<<atom->symbol->arguments_[i]<< "\n");
+      DEBUG(atom->symbol->arguments_[i]->unify_links_to_str());
+      if (!expr_results[i]->unify(atom->symbol->arguments_[i])) {
         driver_.error(atom->arguments->at(i)->location,
                       "type of "+std::to_string(i+1)+" argument of `"+atom->name+
                       "` is "+expr_results[i]->to_str()+" but should be "+
-                      atom->symbol->arguments_[i].to_str());
+                      atom->symbol->arguments_[i]->to_str());
       }
       DEBUG("UNIFY ARG done "<< atom->symbol->name() << " "<<expr_results[i]->to_str() <<"\n");
       expr_results[i]->unify_links_to_str();
@@ -276,14 +279,14 @@ Type* TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
 
 
   // TODO check unifying
-  atom->type_.unify(&sym->return_type_);
+  atom->type_.unify(sym->return_type_);
   return &atom->type_;
 }
 
 void TypecheckVisitor::visit_derived_function_atom_pre(FunctionAtom *atom) {
   auto foo = new std::vector<Type*>();
-  for (Type &arg : atom->symbol->arguments_) {
-    foo->push_back(&arg);
+  for (Type *arg : atom->symbol->arguments_) {
+    foo->push_back(arg);
   }
   rule_binding_types.push_back(foo);
   rule_binding_offsets.push_back(&atom->symbol->binding_offsets);
@@ -305,7 +308,7 @@ Type* TypecheckVisitor::visit_derived_function_atom(FunctionAtom *atom,
     for (size_t i=0; i < args_defined; i++) {
       if (!argument_results[i]->unify(atom->symbol->arguments_.at(i))) {
         driver_.error(atom->arguments->at(i)->location,
-                      "argument "+std::to_string(i+1)+" of must be `"+atom->symbol->arguments_.at(i).to_str()+"` but was `"+
+                      "argument "+std::to_string(i+1)+" of must be `"+atom->symbol->arguments_.at(i)->to_str()+"` but was `"+
                       argument_results[i]->to_str()+"`");
       }
     }

@@ -43,7 +43,6 @@ namespace std {
         for(size_t i = 0; i < key.size; i++) {
           h ^= hasher(key.p[i]);
         }
-        DEBUG("HASH: "<<h);
         return h;
     }
   };

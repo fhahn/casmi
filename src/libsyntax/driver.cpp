@@ -19,9 +19,26 @@ Driver::Driver ()
   file_ = nullptr;
   result = nullptr;
 
-  std::vector<Type> args;
-  args.push_back(Type(TypeType::SELF));
-  function_table.add(new Function("program", args, Type(TypeType::RULEREF), nullptr));
+  std::vector<Type*> args;
+  args.push_back(new Type(TypeType::SELF));
+  function_table.add(new Function("program", args, new Type(TypeType::RULEREF), nullptr));
+
+  Type *t1 = new Type(TypeType::UNKNOWN);
+  Type *t2 = new Type(TypeType::UNKNOWN);
+  Type *t3 = new Type(TypeType::UNKNOWN);
+
+  DEBUG("Start unifiying "<<t1 << " with "<<t2);
+  t1->unify(t2);
+  DEBUG("UNIFIED "<<t1 << " with "<<t2);
+  t2->unify(t3);
+  DEBUG("UNIFIED "<<t2 << " with "<<t3);
+
+  DEBUG(t1->unify_links_to_str());
+  DEBUG(t2->unify_links_to_str());
+  DEBUG(t3->unify_links_to_str());
+
+  std::vector<Type*> args_pow = { t1, t2 };
+  function_table.add(new Function("pow", args_pow, t3, nullptr));
 
   lines_.push_back("");
 }

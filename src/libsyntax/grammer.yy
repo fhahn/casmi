@@ -85,18 +85,18 @@
 %type <std::string> STRCONST
 %type <Function*> FUNCTION_DEFINITION DERIVED_SYNTAX
 %type <FunctionAtom*> FUNCTION_SYNTAX 
-%type <std::pair<std::vector<Type>, Type>> FUNCTION_SIGNATURE
-%type <Type> TYPE_SYNTAX
-%type <Type> PARAM
-%type <std::vector<Type>> PARAM_LIST_NO_COMMA PARAM_LIST
-%type <std::vector<Type>> TYPE_IDENTIFIER_STARLIST
+%type <std::pair<std::vector<Type*>, Type*>> FUNCTION_SIGNATURE
+%type <Type*> TYPE_SYNTAX
+%type <Type*> PARAM
+%type <std::vector<Type*>> PARAM_LIST_NO_COMMA PARAM_LIST
+%type <std::vector<Type*>> TYPE_IDENTIFIER_STARLIST
 %type <std::string> RULEREF
 %type <IfThenElseNode*> IFTHENELSE
 %type <CallNode*> CALL_SYNTAX
 %type <std::vector<ExpressionBase*>> DEBUG_ATOM_LIST
 %type <PrintNode*> PRINT_SYNTAX
 %type <LetNode*> LET_SYNTAX
-%type<std::vector<Type>> TYPE_SYNTAX_LIST
+%type<std::vector<Type*>> TYPE_SYNTAX_LIST
 
 %start SPECIFICATION
 
@@ -180,13 +180,13 @@ ENUM_SYNTAX: ENUM IDENTIFIER "=" "{" IDENTIFIER_LIST "}";
 
 DERIVED_SYNTAX: DERIVED IDENTIFIER "(" PARAM_LIST ")" "=" EXPRESSION {
                   // TODO: 2nd argument should be a reference
-                  $$ = new Function($2, $4, $7, Type(TypeType::UNKNOWN));
+                  $$ = new Function($2, $4, $7, new Type(TypeType::UNKNOWN));
                 }
               | DERIVED IDENTIFIER "=" EXPRESSION {
-                  $$ = new Function($2, $4, Type(TypeType::UNKNOWN));
+                  $$ = new Function($2, $4, new Type(TypeType::UNKNOWN));
                 }
               | DERIVED IDENTIFIER "(" ")" "=" EXPRESSION {
-                  $$ = new Function($2, $6, Type(TypeType::UNKNOWN));
+                  $$ = new Function($2, $6, new Type(TypeType::UNKNOWN));
                 }
               /* again with type syntax */
               | DERIVED IDENTIFIER "(" PARAM_LIST ")" ":" TYPE_SYNTAX "=" EXPRESSION {
@@ -219,10 +219,10 @@ IDENTIFIER_LIST: IDENTIFIER "," IDENTIFIER_LIST
 FUNCTION_SIGNATURE: ":" ARROW TYPE_SYNTAX 
                   /* this constructor is implementation dependant! */
                   { 
-                    std::vector<Type> foo;
-                    $$ = std::pair<std::vector<Type>, Type>(foo, $3); }
+                    std::vector<Type*> foo;
+                    $$ = std::pair<std::vector<Type*>, Type*>(foo, $3); }
                   | ":" TYPE_IDENTIFIER_STARLIST ARROW TYPE_SYNTAX
-                  { $$ = std::pair<std::vector<Type>, Type>($2, $4); }
+                  { $$ = std::pair<std::vector<Type*>, Type*>($2, $4); }
                   ;
 
 PARAM: IDENTIFIER ":" TYPE_SYNTAX {
@@ -234,7 +234,7 @@ PARAM: IDENTIFIER ":" TYPE_SYNTAX {
         size_t size = driver.binding_offsets.size();
         driver.binding_offsets[$1] = size;
         // TODO: fail for rules without types and print warnings
-        $$ = Type(TypeType::INT);
+        $$ = new Type(TypeType::INT);
      }
      ;
 
@@ -269,9 +269,9 @@ TYPE_IDENTIFIER_STARLIST: TYPE_SYNTAX "*" TYPE_IDENTIFIER_STARLIST
                         }
                         ;
 
-TYPE_SYNTAX: IDENTIFIER { $$ = Type($1); /* TODO check invalid types */}
+TYPE_SYNTAX: IDENTIFIER { $$ = new Type($1); /* TODO check invalid types */}
                | IDENTIFIER "(" TYPE_SYNTAX_LIST ")" {
-                $$ = Type($1, $3);
+                $$ = new Type($1, $3);
                }
                | IDENTIFIER "(" NUMBER DOTDOT NUMBER ")"
                ;

@@ -23,27 +23,28 @@ class Function {
   public:
     enum class SType {
       FUNCTION,
-      DERIVED
+      DERIVED,
+      BUILTIN,
     };
 
-    std::vector<Type> arguments_;
+    std::vector<Type*> arguments_;
 
     union {
       std::vector<std::pair<ExpressionBase*, ExpressionBase*>> *intitializers_;
       ExpressionBase *derived;
     };
 
-    Type return_type_;
+    Type *return_type_;
     const uint64_t id;
 
     SType symbol_type;
 
     std::map<std::string, size_t> binding_offsets;
 
-    Function(const std::string name, std::vector<Type>& args, Type return_type,
+    Function(const std::string name, std::vector<Type*>& args, Type* return_type,
            std::vector<std::pair<ExpressionBase*, ExpressionBase*>> *init);
-    Function(const std::string name, std::vector<Type>& args, ExpressionBase *expr, Type return_type);
-    Function(const std::string name, ExpressionBase *expr, Type return_type);
+    Function(const std::string name, std::vector<Type*>& args, ExpressionBase *expr, Type* return_type);
+    Function(const std::string name, ExpressionBase *expr, Type *return_type);
     ~Function();
 
     const std::string& name() const;
@@ -53,7 +54,7 @@ class Function {
       return arguments_.size();
     }
 
-    bool is_builtin() const;
+    bool is_builtin();
 };
 
 class Binding {
