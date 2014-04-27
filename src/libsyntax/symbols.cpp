@@ -2,6 +2,9 @@
 
 #include "libsyntax/symbols.h"
 
+static std::map<const std::string, bool> builtin_names = {
+  {"pow", true},
+};
 
 // -------------------------------------------------------------------------
 // Implementation of Function
@@ -30,12 +33,6 @@ Function::Function(const std::string name,
   counter += 1;
 }
 
-
-Function::Function(const std::string name) :
-        name_(name), arguments_(), intitializers_(nullptr),
-        return_type_(Type(TypeType::UNKNOWN)), id(counter) {
-  counter += 1;
-}
 
 Function::~Function() {
   arguments_.clear();
@@ -80,6 +77,9 @@ bool Function::equals(Function *other) const {
   return return_type_ == other->return_type_;
 }
 
+bool Function::is_builtin() const {
+  return builtin_names.count(name_) != 0;
+}
 
 uint64_t Binding::counter = 0;
 

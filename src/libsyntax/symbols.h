@@ -14,6 +14,7 @@ class ExpressionBase;
 class Expression;
 class FunctionAtom;
 
+
 class Function {
   private:
     static uint64_t counter;
@@ -43,7 +44,6 @@ class Function {
            std::vector<std::pair<ExpressionBase*, ExpressionBase*>> *init);
     Function(const std::string name, std::vector<Type>& args, ExpressionBase *expr, Type return_type);
     Function(const std::string name, ExpressionBase *expr, Type return_type);
-    Function(const std::string name);
     ~Function();
 
     const std::string& name() const;
@@ -52,6 +52,8 @@ class Function {
     inline size_t argument_count() const {
       return arguments_.size();
     }
+
+    bool is_builtin() const;
 };
 
 class Binding {
