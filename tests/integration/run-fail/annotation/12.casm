@@ -1,8 +1,0 @@
-// error annotation @4
-
-rule main = {
-    assert nth( [ 1, "hallo", true ], 0 ) = 1
-    //~^ types in list do not match, found `Int` at first position and `String` at 2. position
-    program( self ) := undef
-}
-init main

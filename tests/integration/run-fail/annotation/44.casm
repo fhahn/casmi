@@ -4,6 +4,7 @@ function a: -> List(Int)
 
 rule main = {
   let x = [ 1, "abc" ] = a in skip
+  //~^ type of expressions did not match: Tuple (Int,String,) != List(Int)
   program( self ) := undef
 }
 init main

@@ -1,0 +1,9 @@
+// error annotation @5
+
+rule main = {
+    let x = 3 in
+        assert nth( [ 1, true, "hallo" ], x ) = "hallo"
+        //~^ second argument of nth must be an Int constant for tuples
+    program( self ) := undef
+}
+init main

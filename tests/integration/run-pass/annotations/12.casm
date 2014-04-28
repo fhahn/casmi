@@ -1,0 +1,5 @@
+rule main = {
+    assert nth( [ 1, "hallo", true ], 1 ) = 1
+    program( self ) := undef
+}
+init main

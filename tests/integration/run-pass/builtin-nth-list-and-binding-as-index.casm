@@ -1,0 +1,11 @@
+init main
+
+rule main = {
+    let y = 1+1 in
+        let x = [ 1, 1, 2] in {
+            assert nth( x, y ) = 1
+        }
+
+    program(self) := undef
+
+}
