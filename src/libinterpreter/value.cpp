@@ -240,6 +240,8 @@ std::string Value::to_str() const {
   switch (type.t) {
     case TypeType::INT:
       return std::move(std::to_string(value.ival));
+    case TypeType::FLOAT:
+      return std::move(std::to_string(value.fval));
     case TypeType::SELF:
       return std::move("self");
     case TypeType::UNDEF: // are UNDEF and SELF the same here?
@@ -271,6 +273,7 @@ bool value_eq(const Value& v1, const Value& v2) {
   } else {
     switch (v1.type.t) {
       case TypeType::INT: return v1.value.ival == v2.value.ival;
+      case TypeType::FLOAT: return v1.value.fval == v2.value.fval;
       case TypeType::BOOLEAN: return v1.value.bval == v2.value.bval;
       case TypeType::STRING: return *v1.value.string == *v2.value.string;
       case TypeType::LIST: {
