@@ -6,5 +6,5 @@ init main
 
 rule main = {
     assert nth([1.0, 1.5, 2.0], 1.0) = 1.0
-    //~^  type of expressions did not match
+    //~^ type of 2 argument of `nth` is Float but should be Int
 }

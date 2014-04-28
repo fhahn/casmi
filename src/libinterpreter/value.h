@@ -44,7 +44,6 @@ class Value {
     Value(RuleNode *rule);
     Value(std::string *string);
     Value(Type t, List *list);
-
     Value(Value& other);
     Value(const Value& other);
     //Value(Value&& other);
@@ -84,6 +83,7 @@ class TempList : public List {
     TempList();
 
     const std::string to_str() const;
+    Value at(size_t i) const ;
 };
 
 class PermList : public List {
@@ -93,6 +93,7 @@ class PermList : public List {
     PermList();
 
     const std::string to_str() const;
+    Value at(size_t i) const ;
 };
 
 namespace std {

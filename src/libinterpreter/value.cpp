@@ -35,6 +35,7 @@ Value::Value(Value& other) : type(other.type), value(other.value) {}
 
 Value::Value(const Value& other) : type(other.type), value(other.value) {}
 
+// TODO CHECK MOVE HERE
 //Value::Value(Value&& other) : type(std::move(other.type)), value(other.value) {}
 
 Value::Value(Type t, casm_update* u) {
@@ -304,6 +305,17 @@ const std::string TempList::to_str() const {
   return res;
 }
 
+Value TempList::at(size_t i) const {
+  if (i == 0) {
+    throw RuntimeException("Array access with index 0 not supported");
+  }
+  if ((i-1) < changes.size()) {
+    return changes[i-1];
+  } else {
+    return Value();
+  }
+}
+
 
 PermList::PermList() : List(ListType::PERM), values() {}
 
@@ -314,6 +326,18 @@ const std::string PermList::to_str() const {
     res += v.to_str() + ", ";
   }
   return res;
+}
+
+Value PermList::at(size_t i) const {
+  if (i == 0) {
+    throw RuntimeException("Array access with index 0 not supported");
+  }
+
+  if ((i-1) < values.size()) {
+    return values[i-1];
+  } else {
+    return Value();
+  }
 }
 
 namespace std {

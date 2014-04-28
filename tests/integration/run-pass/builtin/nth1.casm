@@ -9,8 +9,8 @@ rule main = {|
   
   a := [1]
 
-  assert nth( a, 1 ) = 1
-  assert nth( a, 2 ) = undef
+  assert nth( [1], 1 ) = 1
+  assert nth( [1], 2 ) = undef
 
   program( self ) := undef
 |}
