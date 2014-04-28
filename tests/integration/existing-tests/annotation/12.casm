@@ -1,7 +1,0 @@
-// error annotation @4
-
-rule main = {
-	assert nth( [ 1, "hallo", true ], 0 )
-	program( self ) := undef
-}
-init main

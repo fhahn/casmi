@@ -1,0 +1,18 @@
+function i: -> Int initially {1}
+function bar: Int -> Int initially {0 -> 0}
+function foo: Int -> Int initially {1 -> 1}
+
+init main
+
+rule main = {
+    print "\n"
+    i := i+1
+    foo(i+1) := i+1
+    bar(foo(i)) := i
+    assert bar(i-1) = i-1
+
+    if i = 100 then {
+        print i
+        program(self) := undef
+    }
+}

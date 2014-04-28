@@ -271,7 +271,9 @@ Type* TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
     driver_.error(atom->location, "number of provided arguments does not match definition of `"+atom->name+"`");
   }
 
-  if (atom->symbol->symbol_type == Function::SType::FUNCTION) {
+  if (atom->symbol->is_builtin()) {
+    atom->symbol_type = FunctionAtom::SymbolType::BUILTIN;
+  } else if (atom->symbol->symbol_type == Function::SType::FUNCTION) {
     atom->symbol_type = FunctionAtom::SymbolType::FUNCTION;
   } else {
     atom->symbol_type = FunctionAtom::SymbolType::DERIVED;
