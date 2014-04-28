@@ -15,6 +15,9 @@ class Expression;
 class FunctionAtom;
 
 
+bool is_builtin_name(const std::string& name);
+
+
 class Function {
   private:
     static uint64_t counter;

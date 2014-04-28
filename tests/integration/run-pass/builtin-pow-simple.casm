@@ -1,0 +1,16 @@
+init main
+
+rule main = {
+    let x = pow(1,1) in assert x = 1
+    let x = pow(2,1) in assert x = 2
+    let x = pow(2,2) in assert x = 4
+
+    let x = 10 in assert pow(x,2) = 10 * 10
+
+    let x = 10 in 
+        let y = 2 in assert pow(x,y) = 10 * 10
+
+
+    let x = pow(1.0, 1.0) in assert x = 1.0
+    program(self) := undef
+}

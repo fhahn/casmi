@@ -1,3 +1,4 @@
+#include <cmath>
 #include <assert.h>
 #include <utility>
 
@@ -127,7 +128,7 @@ void ExecutionVisitor::visit_let_post(LetNode *node) {
 }
 
 Value&& ExecutionVisitor::visit_expression(Expression *expr, Value &left_val, Value &right_val) {
-  DEBUG("left "<<left_val.value.ival<<" right "<<right_val.value.ival);
+  DEBUG("left "<<left_val.to_str()<<" right "<<right_val.to_str());
   switch (expr->op) {
     case Expression::Operation::ADD: {
       left_val.add(right_val);
@@ -187,6 +188,22 @@ Value&& ExecutionVisitor::visit_expression_single(Expression *expr, Value &val) 
   return std::move(val);
 }
 
+Value&& casm_pow(std::vector<Value> &expr_results) {
+  DEBUG(expr_results[0].to_str());
+  switch (expr_results[0].type.t) {
+    case TypeType::INT:
+      return std::move(Value((INT_T)std::pow(expr_results[0].value.ival,
+                                             expr_results[1].value.ival)));
+    case TypeType::FLOAT:
+      DEBUG("POW ARGS "<<expr_results[0].value.fval<<" foobar "<<expr_results[1].value.fval);
+      return std::move(Value((FLOAT_T)std::pow(expr_results[0].value.fval,
+                                             expr_results[1].value.fval)));
+
+    default: assert(0);
+
+  }
+}
+
 Value&& ExecutionVisitor::visit_function_atom(FunctionAtom *atom, std::vector<Value> &expr_results) {
   auto current_rule_bindings = rule_bindings.back();
   switch (atom->symbol_type) {
@@ -210,10 +227,18 @@ Value&& ExecutionVisitor::visit_function_atom(FunctionAtom *atom, std::vector<Va
       DEBUG("visit_atom "<<atom->symbol->name()<<" "<<v.value.ival <<" size "<<value_list.size());
       return std::move(v);
     }
-
     default:
       assert(0);
   }
+}
+
+Value&& ExecutionVisitor::visit_builtin_atom(BuiltinAtom *atom, std::vector<Value> &expr_results) {
+  if (atom->name == "pow") {
+    return casm_pow(expr_results);
+  } else {
+    assert(0);
+  }
+
 }
 
 Value&& ExecutionVisitor::visit_derived_function_atom(FunctionAtom *atom,

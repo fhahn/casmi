@@ -245,6 +245,12 @@ Type* TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
   }
 
   atom->symbol = sym;
+  if (atom->symbol->symbol_type == Function::SType::FUNCTION) {
+    atom->symbol_type = FunctionAtom::SymbolType::FUNCTION;
+  } else {
+    atom->symbol_type = FunctionAtom::SymbolType::DERIVED;
+  }
+
   // check for function definitions with arguments
   if(atom->symbol->arguments_.size() != expr_results.size()) {
     driver_.error(atom->location,
@@ -253,13 +259,15 @@ Type* TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
   } else {
     for (size_t i=0; i < atom->symbol->arguments_.size(); i++) {
 
-      DEBUG("UNIFY ARGS "<< atom->symbol->name() << " "<<expr_results[i]->to_str() << " "<<atom->symbol->arguments_[i]<< "\n");
-      DEBUG(atom->symbol->arguments_[i]->unify_links_to_str());
-      if (!expr_results[i]->unify(atom->symbol->arguments_[i])) {
+     Type *argument_t = atom->symbol->arguments_[i];
+      DEBUG("UNIFY ARGS "<< atom->symbol->name() << " "<<expr_results[i]->to_str() << " "<<argument_t);
+      DEBUG(argument_t->unify_links_to_str());
+ 
+      if (!expr_results[i]->unify(argument_t)) {
         driver_.error(atom->arguments->at(i)->location,
                       "type of "+std::to_string(i+1)+" argument of `"+atom->name+
                       "` is "+expr_results[i]->to_str()+" but should be "+
-                      atom->symbol->arguments_[i]->to_str());
+                      argument_t->to_str());
       }
       DEBUG("UNIFY ARG done "<< atom->symbol->name() << " "<<expr_results[i]->to_str() <<"\n");
       expr_results[i]->unify_links_to_str();
@@ -271,18 +279,45 @@ Type* TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
     driver_.error(atom->location, "number of provided arguments does not match definition of `"+atom->name+"`");
   }
 
-  if (atom->symbol->is_builtin()) {
-    atom->symbol_type = FunctionAtom::SymbolType::BUILTIN;
-  } else if (atom->symbol->symbol_type == Function::SType::FUNCTION) {
-    atom->symbol_type = FunctionAtom::SymbolType::FUNCTION;
-  } else {
-    atom->symbol_type = FunctionAtom::SymbolType::DERIVED;
-  }
-
-
   // TODO check unifying
   atom->type_.unify(sym->return_type_);
   return &atom->type_;
+}
+
+Type* TypecheckVisitor::visit_builtin_atom(BuiltinAtom *atom,
+                                           const std::vector<Type*> &expr_results) {
+  if(atom->types.size() != expr_results.size()) {
+    driver_.error(atom->location,
+                  "number of provided arguments does not match definition of `"+
+                  atom->name+"`");
+  } else {
+    for (size_t i=0; i < atom->types.size(); i++) {
+
+     Type *argument_t = atom->types[i];
+      DEBUG("UNIFY ARGS "<< atom->name << " "<<expr_results[i]->to_str() << " "<<argument_t);
+      DEBUG(argument_t->unify_links_to_str());
+ 
+      if (!expr_results[i]->unify(argument_t)) {
+        driver_.error(atom->arguments->at(i)->location,
+                      "type of "+std::to_string(i+1)+" argument of `"+atom->name+
+                      "` is "+expr_results[i]->to_str()+" but should be "+
+                      argument_t->to_str());
+      }
+      DEBUG("UNIFY ARG done "<< atom->name << " "<<expr_results[i]->to_str() <<"\n");
+      expr_results[i]->unify_links_to_str();
+    }
+  }
+
+  // check for function definitions without arguments
+  if (atom->types.size() == 0 && expr_results.size() > 0 ) {
+    driver_.error(atom->location, "number of provided arguments does not match definition of `"+atom->name+"`");
+  }
+
+  // TODO check unifying
+  // TODO use tpye_ as return_type_ for builtins
+  atom->type_.unify(atom->return_type);
+  return &atom->type_;
+
 }
 
 void TypecheckVisitor::visit_derived_function_atom_pre(FunctionAtom *atom) {

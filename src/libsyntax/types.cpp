@@ -8,6 +8,7 @@
 
 #include "libsyntax/types.h"
 
+
 Type::Type(const std::string& type_name, std::vector<Type*>& internal_types) : unify_with_left(nullptr), unify_with_right(nullptr), constraints()  {
   if (type_name == "List") {
     t = TypeType::LIST;
@@ -158,7 +159,7 @@ bool Type::unify_nofollow(Type *other) {
   bool result = true;
   if (t != TypeType::UNKNOWN && other->t != TypeType::UNKNOWN) {
     if (t != TypeType::LIST) {
-      result = t == other->t;
+      return t == other->t;
     } else {
       if (other->t == TypeType::LIST) {
         result = internal_type->unify(other->internal_type);
@@ -259,9 +260,7 @@ bool Type::unify_right(Type *other) {
 bool Type::unify(Type *other) {
   if (t == TypeType::UNKNOWN && other->t == TypeType::UNKNOWN) {
     Type* left_link = this;
-    DEBUG("START JOIN");
     while (left_link->unify_with_left != nullptr) {
-      DEBUG("RUN1");
       if (left_link == other) {
         return true;
       }
@@ -270,18 +269,14 @@ bool Type::unify(Type *other) {
 
     Type* right_link = other;
     while (right_link->unify_with_right != nullptr) {
-      DEBUG("RUN2");
       if (right_link == this) {
         return true;
       }
       right_link = right_link->unify_with_right;
     }
-    DEBUG("END JOIN");
 
     left_link = other;
-    DEBUG("START JOIN");
     while (left_link->unify_with_left != nullptr) {
-      DEBUG("RUN1");
       if (left_link == this) {
         return true;
       }
@@ -290,7 +285,6 @@ bool Type::unify(Type *other) {
 
     right_link = this;
     while (right_link->unify_with_right != nullptr) {
-      DEBUG("RUN2");
       if (right_link == other) {
         return true;
       }

@@ -54,6 +54,7 @@ class ExecutionVisitor {
     Value&& visit_float_atom(FloatAtom *atom) { return std::move(Value(atom->val_)); }
     Value&& visit_undef_atom(UndefAtom *atom) { UNUSED(atom); return std::move(Value()); }
     Value&& visit_function_atom(FunctionAtom *atom, std::vector<Value> &expr_results);
+    Value&& visit_builtin_atom(BuiltinAtom *atom, std::vector<Value> &expr_results);
     void visit_derived_function_atom_pre(FunctionAtom *atom) {}
     Value&& visit_derived_function_atom(FunctionAtom *atom, std::vector<Value> &expr_results, Value& expr);
     Value&& visit_self_atom(SelfAtom *atom) { UNUSED(atom); return std::move(Value()); }

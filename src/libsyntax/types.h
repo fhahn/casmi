@@ -27,6 +27,7 @@ enum class TypeType {
 
 class Type;
 
+
 class Type {
   private:
     bool eq(const Type& other) const;

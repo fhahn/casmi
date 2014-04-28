@@ -84,7 +84,7 @@
 %type <FLOAT_T> FLOATCONST
 %type <std::string> STRCONST
 %type <Function*> FUNCTION_DEFINITION DERIVED_SYNTAX
-%type <FunctionAtom*> FUNCTION_SYNTAX 
+%type <BaseFunctionAtom*> FUNCTION_SYNTAX 
 %type <std::pair<std::vector<Type*>, Type*>> FUNCTION_SIGNATURE
 %type <Type*> TYPE_SYNTAX
 %type <Type*> PARAM
@@ -320,7 +320,7 @@ NUMBER: "+" INTCONST %prec UPLUS { $$ = new IntAtom(@$, $2); }
       | INTCONST { $$ = new IntAtom(@$, $1); }
       | "+" FLOATCONST %prec UPLUS { $$ = new FloatAtom(@$, $2); }
       | "-" FLOATCONST %prec UMINUS { $$ = new FloatAtom(@$, (-1) * $2); }
-      | FLOATCONST { $$ = new FloatAtom(@$, 0); }
+      | FLOATCONST { $$ = new FloatAtom(@$, $1); }
       | "+" RATIONALCONST %prec UPLUS { $$ = new IntAtom(@$, 0); }
       | "-" RATIONALCONST %prec UMINUS { $$ = new IntAtom(@$, 0); }
       | RATIONALCONST { $$ = new IntAtom(@$, 0); }
@@ -394,7 +394,13 @@ BRACKET_EXPRESSION: "(" EXPRESSION ")"  { $$ = $2; }
 
 FUNCTION_SYNTAX: IDENTIFIER { $$ = new FunctionAtom(@$, $1); }
                | IDENTIFIER "(" ")" { $$ = new FunctionAtom(@$, $1); }
-               | IDENTIFIER "(" EXPRESSION_LIST ")" { $$ = new FunctionAtom(@$, $1, $3); }
+               | IDENTIFIER "(" EXPRESSION_LIST ")" { 
+                  if (is_builtin_name($1)) {
+                    $$ = new BuiltinAtom(@$, $1, $3); 
+                  } else {
+                    $$ = new FunctionAtom(@$, $1, $3); 
+                  }
+                }
                ;
 
 RULE_SYNTAX: RULE IDENTIFIER "=" STATEMENT { $$ = new RuleNode(@$, $4, $2); }
@@ -471,7 +477,14 @@ DEBUG_ATOM_LIST: DEBUG_ATOM_LIST "+" ATOM { $$ = std::move($1); $$.push_back($3)
 PRINT_SYNTAX: PRINT DEBUG_ATOM_LIST { $$ = new PrintNode(@$, $2); }
             ;
 
-UPDATE_SYNTAX: FUNCTION_SYNTAX UPDATE EXPRESSION { $$ = new UpdateNode(@$, $1, $3); }
+UPDATE_SYNTAX: FUNCTION_SYNTAX UPDATE EXPRESSION {
+                  if ($1->node_type_ == NodeType::FUNCTION_ATOM) {
+                    $$ = new UpdateNode(@$, reinterpret_cast<FunctionAtom*>($1), $3);
+                  } else {
+                    driver.error(@$, "can only use functions for updates but `"+
+                                     std::string("TODO NAME HERE")+"` is a `"+type_to_str($1->node_type_));
+                  }
+                }
              ;
 
 CASE_SYNTAX: CASE EXPRESSION OF CASE_LABEL_LIST ENDCASE
