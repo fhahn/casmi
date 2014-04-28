@@ -1,0 +1,7 @@
+function pow: Int-> Int
+//~^ cannot use `pow` as function identifier because it is a builtin name
+//~^^ redefinition of symbol
+
+init main
+
+rule main = skip

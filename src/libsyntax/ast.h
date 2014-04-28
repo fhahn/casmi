@@ -187,6 +187,7 @@ class FunctionAtom : public AtomNode {
       FUNCTION,
       DERIVED,
       PARAMETER,
+      BUILTIN,
       UNSET
     };
 
