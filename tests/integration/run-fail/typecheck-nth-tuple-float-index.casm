@@ -1,0 +1,7 @@
+rule main = {
+    assert nth( [ 1, "hallo", true ], 0 ) = 1
+    //~^ second argument of nth must be a positive (>0) Int constant for tuples
+    assert nth( [ 1, "hallo", true ], -1 ) = 1
+    //~^ second argument of nth must be a positive (>0) Int constant for tuples
+}
+init main

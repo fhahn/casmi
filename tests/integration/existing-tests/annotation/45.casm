@@ -1,4 +1,4 @@
-function a: -> List /*ta: [Int,Int] */
+function a: -> List(Tuple(Int,Int))
 
 rule main =  {|
   a := []

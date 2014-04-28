@@ -1,4 +1,4 @@
-function foo: -> List /*ta: Int */
+function foo: -> List(Int)
 
 rule main =  {|
   let x = [] in foo := x
