@@ -214,19 +214,24 @@ template<class T, class V> class AstWalker {
       }
     }
 
-    V walk_function_atom(FunctionAtom *func) {
+    V walk_function_atom(BaseFunctionAtom *func) {
       std::vector<V> expr_results;
       if (func->arguments) {
         for (ExpressionBase* e : *func->arguments) {
           expr_results.push_back(walk_expression_base(e));
         }
       }
-      if (func->symbol_type == FunctionAtom::SymbolType::DERIVED) {
-        visitor.visit_derived_function_atom_pre(func);
-        V expr = walk_expression_base(func->symbol->derived);
-        return visitor.visit_derived_function_atom(func, expr_results, expr);
+      if (func->node_type_ == NodeType::BUILTIN_ATOM) {
+         return visitor.visit_builtin_atom(reinterpret_cast<BuiltinAtom*>(func), expr_results);
       } else {
-         return visitor.visit_function_atom(func, expr_results);
+        FunctionAtom *func_a = reinterpret_cast<FunctionAtom*>(func);
+        if (func_a->symbol_type == FunctionAtom::SymbolType::DERIVED) {
+          visitor.visit_derived_function_atom_pre(func_a);
+          V expr = walk_expression_base(func_a->symbol->derived);
+          return visitor.visit_derived_function_atom(func_a, expr_results, expr);
+        } else {
+           return visitor.visit_function_atom(func_a, expr_results);
+        }
       }
     }
 
@@ -251,8 +256,9 @@ template<class T, class V> class AstWalker {
         case NodeType::UNDEF_ATOM: { 
           return visitor.visit_undef_atom(reinterpret_cast<UndefAtom*>(atom));
         }
+        case NodeType::BUILTIN_ATOM:
         case NodeType::FUNCTION_ATOM: { 
-          return walk_function_atom(reinterpret_cast<FunctionAtom*>(atom));
+          return walk_function_atom(reinterpret_cast<BaseFunctionAtom*>(atom));
         }
         case NodeType::SELF_ATOM: {
           return visitor.visit_self_atom(reinterpret_cast<SelfAtom*>(atom));

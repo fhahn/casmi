@@ -55,6 +55,8 @@ class AstDumpVisitor {
     bool visit_undef_atom(UndefAtom *atom) { UNUSED(atom); return true; }
     bool visit_function_atom(FunctionAtom *atom,
                              const std::vector<bool> &expr_results);
+    bool visit_builtin_atom(BuiltinAtom *atom, 
+                         const std::vector<bool> &expr_results) {}
     bool visit_derived_function_atom(FunctionAtom *atom, 
                          const std::vector<bool> &expr_results, bool) {}
     void visit_derived_function_atom_pre(FunctionAtom *atom) {}

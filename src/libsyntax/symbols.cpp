@@ -7,6 +7,13 @@ static std::map<const std::string, bool> builtin_names = {
   {"nth", true},
 };
 
+bool is_builtin_name(const std::string& name) {
+  if(builtin_names.count(name) != 0) {
+    return true;
+  }
+  return false;
+}
+
 // -------------------------------------------------------------------------
 // Implementation of Function
 // -------------------------------------------------------------------------

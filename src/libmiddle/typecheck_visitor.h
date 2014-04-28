@@ -54,6 +54,8 @@ class TypecheckVisitor {
     Type* visit_undef_atom(UndefAtom *atom) { return &atom->type_; }
     Type* visit_function_atom(FunctionAtom *atom,
                              const std::vector<Type*> &expr_results);
+   Type* visit_builtin_atom(BuiltinAtom *atom,
+                             const std::vector<Type*> &expr_results);
 
     void visit_derived_function_atom_pre(FunctionAtom *atom);
     Type* visit_derived_function_atom(FunctionAtom *atom,

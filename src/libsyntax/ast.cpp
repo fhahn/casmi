@@ -221,6 +221,12 @@ bool StringAtom::equals(AstNode *other) {
   throw "NOT IMPLEMENTED";
 }
 
+BaseFunctionAtom::BaseFunctionAtom(yy::location& loc, NodeType t, const std::string name,
+                           std::vector<ExpressionBase*> *args) 
+    : AtomNode(loc, t, Type(TypeType::UNKNOWN)),
+       name(name), arguments(args) {
+}
+
 
 FunctionAtom::FunctionAtom(yy::location& loc, const std::string name)
     : FunctionAtom(loc, name, nullptr) {
@@ -228,8 +234,7 @@ FunctionAtom::FunctionAtom(yy::location& loc, const std::string name)
 
 FunctionAtom::FunctionAtom(yy::location& loc, const std::string name,
                            std::vector<ExpressionBase*> *args) 
-    : AtomNode(loc, NodeType::FUNCTION_ATOM, Type(TypeType::UNKNOWN)),
-       name(name), arguments(args), symbol_type(SymbolType::UNSET) {
+    : BaseFunctionAtom(loc, NodeType::FUNCTION_ATOM, name, args), symbol_type(SymbolType::UNSET) {
 }
 
 FunctionAtom::~FunctionAtom() {
@@ -275,6 +280,29 @@ bool FunctionAtom::equals(AstNode *other) {
   return false;
 }
 
+BuiltinAtom::BuiltinAtom(yy::location& loc, const std::string name,
+                           std::vector<ExpressionBase*> *args) 
+    : BaseFunctionAtom(loc, NodeType::BUILTIN_ATOM, name, args), return_type(nullptr) {
+  if (name == "pow") {
+    Type *a1 = new Type(TypeType::UNKNOWN);
+    Type *a2 = new Type(TypeType::UNKNOWN);
+    return_type = new Type(TypeType::UNKNOWN);
+
+    a1->unify(a2);
+    a2->unify(return_type);
+
+    types = { a1, a2 };
+  } else {
+    assert(0);
+  }
+  
+}
+
+BuiltinAtom::~BuiltinAtom() {}
+
+bool BuiltinAtom::equals(AstNode *other) {
+  throw "BuiltinAtom::equals() not implemented";
+}
 
 ListAtom::ListAtom(yy::location& loc, std::vector<ExpressionBase*> *exprs)
     : AtomNode(loc, NodeType::LIST_ATOM, TypeType::UNKNOWN), expr_list(exprs) , tmp_list() {

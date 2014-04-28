@@ -44,6 +44,7 @@ enum NodeType {
   PRINT,
   LET,
   LIST_ATOM,
+  BUILTIN_ATOM,
 };
 
 const std::string& type_to_str(NodeType t);
@@ -180,14 +181,24 @@ class BooleanAtom : public AtomNode {
 };
 
 
-class FunctionAtom : public AtomNode {
+class BaseFunctionAtom: public AtomNode {
+  public:
+    const std::string name;
+    std::vector<ExpressionBase*> *arguments;
+
+    BaseFunctionAtom(yy::location& loc, NodeType t, const std::string name,
+                 std::vector<ExpressionBase*> *args);
+ 
+
+};
+
+class FunctionAtom : public BaseFunctionAtom {
   public:
 
     enum class SymbolType {
       FUNCTION,
       DERIVED,
       PARAMETER,
-      BUILTIN,
       UNSET
     };
 
@@ -198,9 +209,6 @@ class FunctionAtom : public AtomNode {
       size_t offset;
     };
 
-    const std::string name;
-    std::vector<ExpressionBase*> *arguments;
-
     FunctionAtom(yy::location& loc, const std::string name);
     FunctionAtom(yy::location& loc, const std::string name,
                  std::vector<ExpressionBase*> *args);
@@ -208,6 +216,19 @@ class FunctionAtom : public AtomNode {
     virtual ~FunctionAtom();
     bool equals(AstNode *other);
 };
+
+class BuiltinAtom: public BaseFunctionAtom {
+  public:
+    std::vector<Type*> types;
+    Type* return_type;
+
+    BuiltinAtom(yy::location& loc, const std::string name,
+                 std::vector<ExpressionBase*> *args);
+ 
+    virtual ~BuiltinAtom();
+    bool equals(AstNode *other);
+};
+
 
 
 class RuleAtom : public AtomNode {
