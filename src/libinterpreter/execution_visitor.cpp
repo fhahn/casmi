@@ -189,7 +189,6 @@ Value&& ExecutionVisitor::visit_expression_single(Expression *expr, Value &val) 
 }
 
 Value&& casm_pow(std::vector<Value> &expr_results) {
-  DEBUG(expr_results[0].to_str());
   switch (expr_results[0].type.t) {
     case TypeType::INT:
       return std::move(Value((INT_T)std::pow(expr_results[0].value.ival,
@@ -201,6 +200,21 @@ Value&& casm_pow(std::vector<Value> &expr_results) {
 
     default: assert(0);
 
+  }
+}
+
+Value&& casm_nth(std::vector<Value> &expr_results) {
+  switch (expr_results[0].value.list->list_type) {
+    case List::ListType::TEMP: {
+      TempList *list = reinterpret_cast<TempList*>(expr_results[0].value.list);
+
+      Value v = list->at(expr_results[1].value.ival);
+      return std::move(v);
+    }
+    case List::ListType::PERM: {
+      PermList *list = reinterpret_cast<PermList*>(expr_results[0].value.list);
+      return std::move(list->at(expr_results[1].value.ival));
+    }
   }
 }
 
@@ -234,7 +248,11 @@ Value&& ExecutionVisitor::visit_function_atom(FunctionAtom *atom, std::vector<Va
 
 Value&& ExecutionVisitor::visit_builtin_atom(BuiltinAtom *atom, std::vector<Value> &expr_results) {
   if (atom->name == "pow") {
-    return casm_pow(expr_results);
+    return std::move(casm_pow(expr_results));
+  } else if (atom->name == "nth") {
+    // TODO check if move happens here, why do we need a tmp var v here?
+    Value v = casm_nth(expr_results);
+    return std::move(v);
   } else {
     assert(0);
   }
