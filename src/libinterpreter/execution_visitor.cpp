@@ -48,7 +48,7 @@ void ExecutionVisitor::visit_update(UpdateNode *update, Value &func_val, Value& 
 
   auto& function_map = context_.functions[update->func->symbol->id];
   if (function_map.second.count({up->args, up->num_args}) == 0) {
-    function_map.second[{up->args, up->num_args}] = Value();
+    function_map.second.emplace(ArgumentsKey{up->args, up->num_args}, Value());
   }
   Value& ref = function_map.second[{up->args, up->num_args}];
   casm_update* v = (casm_update*)casm_updateset_add(&(context_.updateset),
@@ -127,55 +127,56 @@ void ExecutionVisitor::visit_let_post(LetNode *node) {
   rule_bindings.back()->pop_back();
 }
 
-Value&& ExecutionVisitor::visit_expression(Expression *expr, Value &left_val, Value &right_val) {
+Value ExecutionVisitor::visit_expression(Expression *expr, Value &left_val, Value &right_val) {
   DEBUG("left "<<left_val.to_str()<<" right "<<right_val.to_str());
   switch (expr->op) {
     case Expression::Operation::ADD: {
       left_val.add(right_val);
-      return std::move(left_val);
+      DEBUG("ADD "<<left_val.to_str());
+      return left_val;
     }
     case Expression::Operation::SUB: {
       left_val.sub(right_val);
-      return std::move(left_val);
+      return left_val;
     }
     case Expression::Operation::MUL: {
       left_val.mul(right_val);
-      return std::move(left_val);
+      return left_val;
     }
     case Expression::Operation::DIV: {
       left_val.div(right_val);
-      return std::move(left_val);
+      return left_val;
     }
     case Expression::Operation::MOD: {
       left_val.mod(right_val);
-      return std::move(left_val);
+      return left_val;
     }
     case Expression::Operation::RAT_DIV: {
       left_val.mod(right_val);
-      return std::move(left_val);
+      return left_val;
     }
 
     case Expression::Operation::EQ: {
       Value tmp(value_eq(left_val, right_val));
-      return std::move(tmp);
+      return tmp;
     }
     case Expression::Operation::NEQ: {
       Value tmp(!value_eq(left_val, right_val));
-      return std::move(tmp);
+      return tmp;
     }
 
     case Expression::Operation::LESSER:
       left_val.lesser(right_val);
-      return std::move(left_val);
+      return left_val;
     case Expression::Operation::GREATER:
       left_val.greater(right_val);
-      return std::move(left_val);
+      return left_val;
     case Expression::Operation::LESSEREQ:
       left_val.lessereq(right_val);
-      return std::move(left_val);
+      return left_val;
     case Expression::Operation::GREATEREQ:
       left_val.greatereq(right_val);
-      return std::move(left_val);
+      return left_val;
 
 
 
@@ -183,46 +184,44 @@ Value&& ExecutionVisitor::visit_expression(Expression *expr, Value &left_val, Va
   }
 }
 
-Value&& ExecutionVisitor::visit_expression_single(Expression *expr, Value &val) {
+Value ExecutionVisitor::visit_expression_single(Expression *expr, Value &val) {
   UNUSED(expr);
-  return std::move(val);
+  return val;
 }
 
-Value&& casm_pow(std::vector<Value> &expr_results) {
+Value casm_pow(std::vector<Value> &expr_results) {
   switch (expr_results[0].type.t) {
     case TypeType::INT:
-      return std::move(Value((INT_T)std::pow(expr_results[0].value.ival,
-                                             expr_results[1].value.ival)));
+      return Value((INT_T)std::pow(expr_results[0].value.ival,
+                                             expr_results[1].value.ival));
     case TypeType::FLOAT:
       DEBUG("POW ARGS "<<expr_results[0].value.fval<<" foobar "<<expr_results[1].value.fval);
-      return std::move(Value((FLOAT_T)std::pow(expr_results[0].value.fval,
-                                             expr_results[1].value.fval)));
+      return Value((FLOAT_T)std::pow(expr_results[0].value.fval,
+                                             expr_results[1].value.fval));
 
     default: assert(0);
 
   }
 }
 
-Value&& casm_nth(std::vector<Value> &expr_results) {
+Value casm_nth(std::vector<Value> &expr_results) {
   switch (expr_results[0].value.list->list_type) {
     case List::ListType::TEMP: {
       TempList *list = reinterpret_cast<TempList*>(expr_results[0].value.list);
-
-      Value v = list->at(expr_results[1].value.ival);
-      return std::move(v);
+      return list->at(expr_results[1].value.ival);
     }
     case List::ListType::PERM: {
       PermList *list = reinterpret_cast<PermList*>(expr_results[0].value.list);
-      return std::move(list->at(expr_results[1].value.ival));
+      return list->at(expr_results[1].value.ival);
     }
   }
 }
 
-Value&& ExecutionVisitor::visit_function_atom(FunctionAtom *atom, std::vector<Value> &expr_results) {
+Value ExecutionVisitor::visit_function_atom(FunctionAtom *atom, std::vector<Value> &expr_results) {
   auto current_rule_bindings = rule_bindings.back();
   switch (atom->symbol_type) {
     case FunctionAtom::SymbolType::PARAMETER:
-      return std::move(Value(current_rule_bindings->at(atom->offset)));
+      return Value(current_rule_bindings->at(atom->offset));
 
     case FunctionAtom::SymbolType::FUNCTION: {
       size_t num_args = 1;
@@ -239,35 +238,34 @@ Value&& ExecutionVisitor::visit_function_atom(FunctionAtom *atom, std::vector<Va
 
       Value v = Value(context_.get_function_value(atom->symbol, args));
       DEBUG("visit_atom "<<atom->symbol->name()<<" "<<v.value.ival <<" size "<<value_list.size());
-      return std::move(v);
+      return v;
     }
     default:
       assert(0);
   }
 }
 
-Value&& ExecutionVisitor::visit_builtin_atom(BuiltinAtom *atom, std::vector<Value> &expr_results) {
+Value ExecutionVisitor::visit_builtin_atom(BuiltinAtom *atom, std::vector<Value> &expr_results) {
   if (atom->name == "pow") {
-    return std::move(casm_pow(expr_results));
+    return casm_pow(expr_results);
   } else if (atom->name == "nth") {
     // TODO check if move happens here, why do we need a tmp var v here?
     Value v = casm_nth(expr_results);
-    return std::move(v);
+    return v;
   } else {
     assert(0);
   }
-
 }
 
-Value&& ExecutionVisitor::visit_derived_function_atom(FunctionAtom *atom,
+Value ExecutionVisitor::visit_derived_function_atom(FunctionAtom *atom,
                                                       std::vector<Value> &expr_results,
                                                       Value& expr) {
-  return std::move(expr);
+  return expr;
 }
 
-Value&& ExecutionVisitor::visit_list_atom(ListAtom *atom, std::vector<Value> &vals) {
+Value ExecutionVisitor::visit_list_atom(ListAtom *atom, std::vector<Value> &vals) {
   atom->tmp_list.changes = std::move(vals);
-  return std::move(Value(atom->type_, &atom->tmp_list));
+  return Value(atom->type_, &atom->tmp_list);
 }
 std::string args_to_str(uint64_t args[], size_t size) {
   std::string res = "";

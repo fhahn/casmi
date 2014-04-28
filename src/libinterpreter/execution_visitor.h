@@ -48,20 +48,20 @@ class ExecutionVisitor {
     void visit_let(LetNode *node, Value& v);
     void visit_let_post(LetNode *node);
 
-    Value&& visit_expression(Expression *expr, Value& left_val, Value& right_val);
-    Value&& visit_expression_single(Expression *expr, Value& val);
-    Value&& visit_int_atom(IntAtom *atom) { return std::move(Value(atom->val_)); }
-    Value&& visit_float_atom(FloatAtom *atom) { return std::move(Value(atom->val_)); }
-    Value&& visit_undef_atom(UndefAtom *atom) { UNUSED(atom); return std::move(Value()); }
-    Value&& visit_function_atom(FunctionAtom *atom, std::vector<Value> &expr_results);
-    Value&& visit_builtin_atom(BuiltinAtom *atom, std::vector<Value> &expr_results);
+    Value visit_expression(Expression *expr, Value& left_val, Value& right_val);
+    Value visit_expression_single(Expression *expr, Value& val);
+    Value visit_int_atom(IntAtom *atom) { return std::move(Value(atom->val_)); }
+    Value visit_float_atom(FloatAtom *atom) { return std::move(Value(atom->val_)); }
+    Value visit_undef_atom(UndefAtom *atom) { UNUSED(atom); return std::move(Value()); }
+    Value visit_function_atom(FunctionAtom *atom, std::vector<Value> &expr_results);
+    Value visit_builtin_atom(BuiltinAtom *atom, std::vector<Value> &expr_results);
     void visit_derived_function_atom_pre(FunctionAtom *atom) {}
-    Value&& visit_derived_function_atom(FunctionAtom *atom, std::vector<Value> &expr_results, Value& expr);
-    Value&& visit_self_atom(SelfAtom *atom) { UNUSED(atom); return std::move(Value()); }
-    Value&& visit_rule_atom(RuleAtom *atom) { return std::move(Value(atom->rule)); }
-    Value&& visit_boolean_atom(BooleanAtom *atom) { return std::move(Value(atom->value)); }
-    Value&& visit_string_atom(StringAtom *atom) { return std::move(Value(&atom->string)); }
-    Value&& visit_list_atom(ListAtom *atom, std::vector<Value> &vals);
+    Value visit_derived_function_atom(FunctionAtom *atom, std::vector<Value> &expr_results, Value& expr);
+    Value visit_self_atom(SelfAtom *atom) { UNUSED(atom); return Value(); }
+    Value visit_rule_atom(RuleAtom *atom) { return Value(atom->rule); }
+    Value visit_boolean_atom(BooleanAtom *atom) { return Value(atom->value); }
+    Value visit_string_atom(StringAtom *atom) { return Value(&atom->string); }
+    Value visit_list_atom(ListAtom *atom, std::vector<Value> &vals);
 };
 
 // Specialize if-then-else for ExecutionVisitor
