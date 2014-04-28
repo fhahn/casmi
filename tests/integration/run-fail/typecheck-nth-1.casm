@@ -1,0 +1,10 @@
+CASM foo
+
+function x: -> List(Int)
+
+init main
+
+rule main = {
+    assert nth([1.0, 1.5, 2.0], 1) = 1
+    //~^  type of expressions did not match
+}
