@@ -46,8 +46,10 @@ class Value {
     Value(Type t, List *list);
     Value(Value& other);
     Value(const Value& other);
-    //Value(Value&& other);
+    Value(Value&& other);
     Value(Type type, casm_update* update);
+
+    Value& operator=(const Value& other);
 
     void add(const Value& other);
     void sub(const Value& other);

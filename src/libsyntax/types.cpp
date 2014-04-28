@@ -9,7 +9,7 @@
 #include "libsyntax/types.h"
 
 
-Type::Type(const std::string& type_name, std::vector<Type*>& internal_types) : unify_with_left(nullptr), unify_with_right(nullptr), constraints()  {
+Type::Type(const std::string& type_name, std::vector<Type*>& internal_types) : unify_with_left(nullptr), unify_with_right(nullptr), constraints(), tuple_types()  {
   if (type_name == "List") {
     t = TypeType::LIST;
   } else {
@@ -26,7 +26,7 @@ Type::Type(const std::string& type_name, std::vector<Type*>& internal_types) : u
   }
 }
 
-Type::Type(TypeType typ, std::vector<Type*>& internal_types) : t(typ), unify_with_left(nullptr), unify_with_right(nullptr), constraints() {
+Type::Type(TypeType typ, std::vector<Type*>& internal_types) : t(typ), unify_with_left(nullptr), unify_with_right(nullptr), constraints(), tuple_types()  {
   if (t != TypeType::LIST && t != TypeType::TUPLE) {
     t = TypeType::INVALID;
   }
@@ -40,22 +40,22 @@ Type::Type(TypeType typ, std::vector<Type*>& internal_types) : t(typ), unify_wit
   }
 }
 
-Type::Type(TypeType typ, Type *int_typ) : t(typ), unify_with_left(nullptr), unify_with_right(nullptr), constraints() {
+Type::Type(TypeType typ, Type *int_typ) : t(typ), unify_with_left(nullptr), unify_with_right(nullptr), constraints(), tuple_types()  {
   if (t != TypeType::LIST && t != TypeType::TUPLE) {
     t = TypeType::INVALID;
   }
   internal_type = int_typ;
 }
 
-Type::Type() : t(TypeType::INVALID), internal_type(nullptr), unify_with_left(nullptr), unify_with_right(nullptr), constraints() {}
+Type::Type() : t(TypeType::INVALID), internal_type(nullptr), unify_with_left(nullptr), unify_with_right(nullptr), constraints(), tuple_types()  {}
 
-Type::Type(TypeType t) : t(t), internal_type(nullptr), unify_with_left(nullptr), unify_with_right(nullptr), constraints() {
+Type::Type(TypeType t) : t(t), internal_type(nullptr), unify_with_left(nullptr), unify_with_right(nullptr), constraints(), tuple_types()  {
   if (t == TypeType::LIST || t == TypeType::TUPLE) {
     t = TypeType::INVALID;
   }
 }
 
-Type::Type(Type *other) : t(other->t), internal_type(nullptr), unify_with_left(nullptr), unify_with_right(nullptr), constraints() {
+Type::Type(Type *other) : t(other->t), internal_type(nullptr), unify_with_left(nullptr), unify_with_right(nullptr), constraints(), tuple_types()  {
   if (other->internal_type != nullptr) {
     internal_type = new Type(other->internal_type);
   } else {
@@ -64,10 +64,10 @@ Type::Type(Type *other) : t(other->t), internal_type(nullptr), unify_with_left(n
 }
 
 
-Type::Type(const Type& other) : t(other.t), internal_type(other.internal_type), unify_with_left(nullptr), unify_with_right(nullptr), constraints() {
+Type::Type(const Type& other) : t(other.t), internal_type(other.internal_type), unify_with_left(nullptr), unify_with_right(nullptr), constraints(), tuple_types()  {
 }
 
-Type::Type(const std::string& type_name) : internal_type(nullptr), unify_with_left(nullptr), unify_with_right(nullptr) {
+Type::Type(const std::string& type_name) : internal_type(nullptr), unify_with_left(nullptr), unify_with_right(nullptr), constraints(), tuple_types() {
   if (type_name == "Int") { t = TypeType::INT; }
   else if (type_name == "Float") { t = TypeType::FLOAT; }
   else if (type_name == "Undef") { t = TypeType::UNDEF; }
@@ -112,6 +112,13 @@ const std::string Type::to_str() const {
     case TypeType::LIST: return "List("+internal_type->to_str()+")";
     case TypeType::UNKNOWN: return "Unkown";
     case TypeType::SELF: return "Self";
+    case TypeType::TUPLE:{
+      std::string res = "Tuple (";
+      for (Type* t:tuple_types) {
+        res += t->to_str() + ",";
+      }
+      return res + ")";
+    }
     case TypeType::INVALID: return "Invalid";
     default: assert(0);
   }
@@ -158,15 +165,55 @@ bool Type::unify_nofollow(Type *other) {
   DEBUG("UNIFY NOFOLLOW "<<this << " and "<<other);
   bool result = true;
   if (t != TypeType::UNKNOWN && other->t != TypeType::UNKNOWN) {
-    if (t != TypeType::LIST) {
+    if (t != TypeType::LIST && t != TypeType::TUPLE) {
       return t == other->t;
-    } else {
-      if (other->t == TypeType::LIST) {
-        result = internal_type->unify(other->internal_type);
+    } else if(other->t == TypeType::LIST && t == TypeType::LIST) {
+      result = internal_type->unify(other->internal_type);
+    } else if(other->t == TypeType::LIST && t == TypeType::TUPLE) {
+      for (Type* typ : tuple_types) {
+        result = result && typ->unify(other->internal_type);
+      }
+      if (result) {
+        t = TypeType::LIST;
+        internal_type = new Type(other->internal_type);
+        tuple_types.clear();
+      }
+      return result;
+    } else if(other->t == TypeType::TUPLE&& t == TypeType::LIST) {
+      for (Type* typ : other->tuple_types) {
+        result = result && typ->unify(internal_type);
+      }
+      if (result) {
+        other->t = TypeType::LIST;
+        other->internal_type = new Type(internal_type);
+        other->tuple_types.clear();
+      }
+      return result;
+
+    } else if (other->t == TypeType::TUPLE) {
+      if (tuple_types.size() == 0) {
+        tuple_types = other->tuple_types;
+        return true;
+      } else if (other->tuple_types.size() == 0) {
+        other->tuple_types = tuple_types;
+        return true;
+      } else if (tuple_types.size() == other->tuple_types.size()) {
+        for (size_t i=0; i<tuple_types.size(); i++) {
+          result = result && tuple_types[i]->unify(other->tuple_types[i]);
+        }
+        return result;
       } else {
         return false;
       }
+    } else {
+      return false;
     }
+  }
+
+  if (t == TypeType::UNKNOWN && other->t == TypeType::TUPLE) {
+    t = TypeType::TUPLE;
+    tuple_types = other->tuple_types;
+    return true;
   }
 
   if (t == TypeType::UNKNOWN && other->t == TypeType::LIST) {
@@ -191,6 +238,12 @@ bool Type::unify_nofollow(Type *other) {
       DEBUG("Did not match any constriants");
       return false;
     }
+    return true;
+  }
+
+  if (t == TypeType::TUPLE && other->t == TypeType::UNKNOWN) {
+    other->t = TypeType::TUPLE;
+    other->tuple_types = tuple_types;
     return true;
   }
 
@@ -257,8 +310,17 @@ bool Type::unify_right(Type *other) {
   return result;
 }
 
+bool Type::is_unknown() const {
+  if (t == TypeType::UNKNOWN) {
+    return true;
+  } else if (t == TypeType::TUPLE && tuple_types.size() == 0) {
+    return true;
+  } 
+  return false;
+}
+
 bool Type::unify(Type *other) {
-  if (t == TypeType::UNKNOWN && other->t == TypeType::UNKNOWN) {
+  if (is_unknown() && other->is_unknown() ) {
     Type* left_link = this;
     while (left_link->unify_with_left != nullptr) {
       if (left_link == other) {
@@ -299,10 +361,10 @@ bool Type::unify(Type *other) {
 
   if (unify_nofollow(other)) {
     bool result = true;
-    DEBUG("UNIFY LEFT");
+    //DEBUG("UNIFY LEFT");
     result = result && unify_left(other->unify_with_left);
     result = result && unify_left(unify_with_left);
-    DEBUG("UNIFY RIGHT");
+    //DEBUG("UNIFY RIGHT");
     result = result && unify_right(other->unify_with_right);
     result = result && unify_right(unify_with_right);
     return result;
@@ -317,6 +379,17 @@ bool Type::is_complete() {
   }
   if (internal_type) {
     return internal_type->is_complete();
+  }
+  if (t == TypeType::TUPLE) {
+    if (tuple_types.size() == 0) {
+      return false;
+    } else {
+      bool res = true;
+      for (Type* typ : tuple_types) {
+        res = res && typ->is_complete();
+      }
+      return res;
+    }
   }
   return true;
 }

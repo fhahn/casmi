@@ -292,7 +292,7 @@ BuiltinAtom::BuiltinAtom(yy::location& loc, const std::string name,
     a2->unify(return_type);
     types = { a1, a2 };
   } else if (name == "nth"){
-    Type *a1 = new Type(TypeType::LIST, new Type(TypeType::UNKNOWN));
+    Type *a1 = new Type(TypeType::TUPLE, new Type(TypeType::UNKNOWN));
     Type *a2 = new Type(TypeType::INT);
     return_type = new Type(TypeType::UNKNOWN);
 
