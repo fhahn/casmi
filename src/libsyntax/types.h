@@ -23,6 +23,7 @@ enum class TypeType {
   UNDEF,
   LIST,
   TUPLE,
+  LIST_OR_TUPLE
 };
 
 class Type;
@@ -39,6 +40,7 @@ class Type {
     Type *unify_with_right;
 
     std::vector<Type*> constraints;
+    std::vector<Type*> tuple_types;
 
     Type();
     Type(TypeType t);
@@ -74,6 +76,7 @@ class Type {
 
 
     bool is_complete();
+    bool is_unknown() const;
 };
 
 

@@ -179,8 +179,12 @@ void TypecheckVisitor::check_numeric_operator(const yy::location& loc,
 Type* TypecheckVisitor::visit_expression(Expression *expr, Type* left_val, Type* right_val) {
   DEBUG("EXPR T1 "<<expr->left_->type_.to_str() << " T2: "<<expr->right_->type_.to_str());
   if (!expr->left_->type_.unify(&expr->right_->type_)) {
-      driver_.error(expr->location, "type of expressions did not match");
+      driver_.error(expr->location, "type of expressions did not match: "+
+                                     expr->left_->type_.to_str()+" != "+
+                                     expr->right_->type_.to_str());
   }
+
+  DEBUG("EXPR DONE T1 "<<expr->left_->type_.to_str() << " T2: "<<expr->right_->type_.to_str());
   switch (expr->op) {
     case Expression::Operation::ADD:
     case Expression::Operation::SUB:
@@ -260,7 +264,7 @@ Type* TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
     for (size_t i=0; i < atom->symbol->arguments_.size(); i++) {
 
      Type *argument_t = atom->symbol->arguments_[i];
-      DEBUG("UNIFY ARGS "<< atom->symbol->name() << " "<<expr_results[i]->to_str() << " "<<argument_t);
+      DEBUG("UNIFY ARG11 "<< atom->symbol->name() << " "<<expr_results[i]->to_str() << " "<<argument_t);
       DEBUG(argument_t->unify_links_to_str());
  
       if (!expr_results[i]->unify(argument_t)) {
@@ -308,16 +312,38 @@ Type* TypecheckVisitor::visit_builtin_atom(BuiltinAtom *atom,
     }
   }
 
-  // check for function definitions without arguments
-  if (atom->types.size() == 0 && expr_results.size() > 0 ) {
-    driver_.error(atom->location, "number of provided arguments does not match definition of `"+atom->name+"`");
+  if (atom->name == "nth") {
+    if (*atom->types[0] == TypeType::LIST) {
+      atom->type_.unify(atom->types[0]->internal_type);
+    } else {
+      ExpressionBase *ind_expr = atom->arguments->at(1);
+      if (ind_expr->node_type_ == NodeType::INT_ATOM) {
+        INT_T ind = reinterpret_cast<IntAtom*>(ind_expr)->val_;
+        if (ind <= 0) {
+          driver_.error(atom->arguments->at(1)->location,
+                        "second argument of nth must be a positive (>0) Int constant for tuples");
+
+          return &atom->type_;
+        }
+        if ((size_t) ind < (atom->types[0]->tuple_types.size()+1)) {
+          atom->type_.unify(atom->types[0]->tuple_types[ind-1]);
+        } else {
+          driver_.error(atom->arguments->at(1)->location,
+                        "index out of bounds for tuple, currently tuple only has "+
+                        std::to_string(atom->arguments->size())+" types");
+
+        }
+      } else {
+        driver_.error(atom->arguments->at(1)->location,
+                      "second argument of nth must be an Int constant for tuples");
+      }
+    }
+  } else {
+    // TODO check unifying
+    // TODO use tpye_ as return_type_ for builtins
+    atom->type_.unify(atom->return_type);
   }
-
-  // TODO check unifying
-  // TODO use tpye_ as return_type_ for builtins
-  atom->type_.unify(atom->return_type);
-  return &atom->type_;
-
+    return &atom->type_;
 }
 
 void TypecheckVisitor::visit_derived_function_atom_pre(FunctionAtom *atom) {
@@ -363,24 +389,28 @@ Type* TypecheckVisitor::visit_rule_atom(RuleAtom *atom) {
 }
 
 Type* TypecheckVisitor::visit_list_atom(ListAtom *atom, std::vector<Type*> &vals) {
-  atom->type_.t = TypeType::LIST;
-  // TODO LEAK
+  atom->type_.t = TypeType::TUPLE;
   if (vals.size() == 0){
+    // TODO LEAK
     atom->type_.internal_type = new Type(TypeType::UNKNOWN);
     return &atom->type_;
   } else {
-    DEBUG("UNFIY list_atom "<<atom->type_.to_str());
     Type first = *vals[0];
+    bool all_equal = true;
     for (size_t i=1; i < vals.size(); i++) {
       if (first != *vals[i]) {
-        driver_.error(atom->location, "types in list do not match, found `"+
-                                      first.to_str()+"` at first position and `"+
-                                      vals[i]->to_str()+"` at "+
-                                      std::to_string(i+1)+". position");
+        all_equal = false;
         break;
       }
     }
-    atom->type_.internal_type = new Type(first);
+
+    if (all_equal && first.is_complete()) {
+      atom->type_.t = TypeType::LIST;
+      atom->type_.internal_type = new Type(first);
+    } else {
+      atom->type_.tuple_types = vals;
+    }
+        DEBUG("UNFIED list_atom "<<atom->type_.to_str());
     return &atom->type_;
   }
 }

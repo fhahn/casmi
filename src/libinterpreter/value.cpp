@@ -35,8 +35,15 @@ Value::Value(Value& other) : type(other.type), value(other.value) {}
 
 Value::Value(const Value& other) : type(other.type), value(other.value) {}
 
-// TODO CHECK MOVE HERE
-//Value::Value(Value&& other) : type(std::move(other.type)), value(other.value) {}
+Value::Value(Value&& other) : type(std::move(other.type)), value(other.value) {}
+
+
+Value& Value::operator=(const Value& other) {
+  value = other.value;
+  type = other.type;
+  return *this;
+}
+
 
 Value::Value(Type t, casm_update* u) {
   if (u->defined == 0) {
