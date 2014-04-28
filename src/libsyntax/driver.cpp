@@ -22,26 +22,7 @@ Driver::Driver ()
   std::vector<Type*> args;
   args.push_back(new Type(TypeType::SELF));
   function_table.add(new Function("program", args, new Type(TypeType::RULEREF), nullptr));
-
-  Type *t1 = new Type(TypeType::UNKNOWN);
-  Type *t2 = new Type(TypeType::UNKNOWN);
-  Type *t3 = new Type(TypeType::UNKNOWN);
-
-  t1->unify(t2);
-  t2->unify(t3);
-
-  std::vector<Type*> args_pow = { t1, t2 };
-  function_table.add(new Function("pow", args_pow, t3, nullptr));
-
-  Type *nth_a1 = new Type(TypeType::LIST, new Type(TypeType::UNKNOWN));
-  Type *nth_a2 = new Type(TypeType::INT);
-  Type *nth_ret = new Type(TypeType::UNKNOWN);
-
-  nth_a1->internal_type->unify(nth_ret);
-  std::vector<Type*> nth_args = { nth_a1, nth_a2 };
-  function_table.add(new Function("nth", nth_args, nth_ret, nullptr));
-
-
+  
   lines_.push_back("");
 }
 
