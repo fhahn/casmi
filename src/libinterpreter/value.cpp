@@ -285,8 +285,7 @@ bool value_eq(const Value& v1, const Value& v2) {
       case TypeType::BOOLEAN: return v1.value.bval == v2.value.bval;
       case TypeType::STRING: return *v1.value.string == *v2.value.string;
       case TypeType::LIST: {
-
-        return true;
+        return *v1.value.list == *v2.value.list;
       }
       default: assert(0);
     }
@@ -296,13 +295,129 @@ bool value_eq(const Value& v1, const Value& v2) {
 
 List::List(ListType t) : list_type(t) {}
 
-TempList::TempList() : List(ListType::TEMP), left(nullptr), right(nullptr), changes() {}
+
+void List::const_iterator::do_init(const List *ptr) {
+  pos = 0;
+  if (!ptr) {
+    temp = nullptr;
+    perm = nullptr;
+    return;
+  }
+
+  if (ptr->is_temp()) {
+    temp = reinterpret_cast<const TempList*>(ptr);
+    if (temp->changes.size() == 0) {
+      temp = nullptr;
+    }
+    perm = nullptr;
+  } else {
+    perm = reinterpret_cast<const PermList*>(ptr);
+    if (perm->values.size() == 0) {
+      perm = nullptr;
+    }
+    temp = nullptr;
+  }
+}
+
+List::const_iterator::const_iterator(const List *ptr) {
+  do_init(ptr);
+}
+
+List::const_iterator::const_iterator(const self_type& other) : perm(other.perm), temp(other.temp), pos(other.pos) {}
+
+List::const_iterator::self_type List::const_iterator::operator++() {
+  if (temp) {
+    if (pos < (temp->changes.size()-1)) {
+      pos += 1;
+    } else {
+      do_init(temp->right);
+    }
+  } else if (perm) {
+    if (pos < (perm->values.size()-1)) {
+      pos += 1;
+    } else {
+      do_init(nullptr);
+    }
+  } else {
+    assert(0);
+  }
+  return *this;
+}
+
+List::const_iterator::self_type List::const_iterator::operator++(int) {
+  self_type copy(*this);
+  operator++();
+  return copy;
+}
+
+const Value& List::const_iterator::operator*() {
+  if (temp) {
+    return temp->changes[pos];
+  } else if (perm) {
+    return perm->values[pos];
+  } else {
+    assert(0);
+  }
+}
+
+// all iterators that are not invalid (temp = perm = nullptr and pos = 0)
+// are equal; a valid and an invalid iterator are _NOT_ equal
+bool List::const_iterator::operator==(const self_type& rhs) const {
+  if (!temp && !perm) {
+    return !rhs.temp && !rhs.perm;
+  } else {
+    return rhs.temp || rhs.perm;
+  }
+}
+
+bool List::const_iterator::operator!=(const self_type& rhs) const {
+  return !(*this == rhs);
+}
+
+List::const_iterator List::begin() const {
+  return const_iterator(this);
+}
+
+List::const_iterator List::end() const {
+  return const_iterator(nullptr);
+}
+
+
+bool List::operator==(const List& other) const {
+  auto iter1 = begin();
+  auto iter2 = other.begin();
+
+  while (iter1 != end() && iter2 != end()) {
+    if (!value_eq(*iter1, *iter2)) {
+      return false;
+    }
+    iter1++;
+    iter2++;
+  }
+
+  if (iter1 == end() && iter2 == end()) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+bool List::operator!=(const List& other) const {
+  return ! (*this == other);
+}
+
+bool List::is_perm() const {
+  return list_type == ListType::PERM;
+}
+
+bool List::is_temp() const {
+  return list_type == ListType::TEMP;
+}
+
+TempList::TempList() : List(ListType::TEMP), right(nullptr), changes(), bottom(false) {}
 
 const std::string TempList::to_str() const {
   std::string res = "";
-  if (left != nullptr) {
-    res += left->to_str();
-  }
   for (const Value& v : changes) {
     res += v.to_str() + ", ";
   }

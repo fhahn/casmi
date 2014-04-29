@@ -9,21 +9,9 @@
 
 class RuleNode;
 
-
-class List {
-  public:
-    enum class ListType {
-      TEMP,
-      PERM,
-    };
-
-    ListType list_type;
-
-    List(ListType t);
-
-    virtual const std::string to_str() const { return ""; }
-};
-
+class TempList;
+class PermList;
+class List;
 
 class Value {
   public:
@@ -76,13 +64,61 @@ class Value {
 bool value_eq(const Value& v1, const Value& v2);
 
 
+class List {
+  public:
+    enum class ListType {
+      TEMP,
+      PERM,
+    };
+
+    class const_iterator {
+      public:
+        typedef const_iterator self_type;
+        typedef Value value_type;
+        typedef Value& reference;
+        typedef int difference_type;
+        typedef std::forward_iterator_tag iterator_category;
+
+        const_iterator(const List *ptr);
+        const_iterator(const self_type& other);
+        self_type operator++();
+        self_type operator++(int);
+        const Value& operator*();
+        //const pointer operator->() { return ptr_; }
+        bool operator==(const self_type& rhs) const;
+        bool operator!=(const self_type& rhs) const;
+      private:
+        void do_init(const List *other);
+
+        const PermList *perm;
+        const TempList *temp;
+        size_t pos;
+    };
+    ListType list_type;
+
+    List(ListType t);
+
+
+    bool operator==(const List& other) const;
+    bool operator!=(const List& other) const;
+
+    virtual const std::string to_str() const { return ""; }
+    bool is_perm() const;
+    bool is_temp() const;
+
+    const_iterator begin() const;
+    const_iterator end() const;
+};
+
+
 class TempList : public List {
   public:
-    List* left;
     List* right;
     std::vector<Value> changes;
+    bool bottom;
 
     TempList();
+
 
     const std::string to_str() const;
     Value at(size_t i) const ;
