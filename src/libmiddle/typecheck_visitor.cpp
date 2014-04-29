@@ -140,7 +140,8 @@ void TypecheckVisitor::visit_let(LetNode *node, Type* v) {
     driver_.error(node->location, "type of let conflicts with type of expression");
   }
 
-  DEBUG("LET UNIFIED"<<node->type_.to_str());
+  DEBUG("LET UNIFIED "<<node->type_.to_str());
+  DEBUG(node->type_.unify_links_to_str());
 
   auto current_rule_binding_types = rule_binding_types.back();
   auto current_rule_binding_offsets = rule_binding_offsets.back();
@@ -313,6 +314,21 @@ Type* TypecheckVisitor::visit_builtin_atom(BuiltinAtom *atom,
   }
 
   if (atom->name == "nth") {
+    if (*atom->types[0] == TypeType::TUPLE_OR_LIST && atom->types[0]->tuple_types.size() > 0) {
+      Type first = *atom->types[0]->tuple_types[0];
+      bool all_equal = true;
+      for (size_t i=1; i < atom->types[0]->tuple_types.size(); i++) {
+        if (first != *atom->types[0]->tuple_types[i]) {
+          all_equal = false;
+          break;
+        }
+      }
+      if (all_equal) {
+        atom->types[0]->t = TypeType::LIST;
+        atom->types[0]->internal_type = new Type(first);
+      }
+    }
+
     if (*atom->types[0] == TypeType::LIST) {
       atom->type_.unify(atom->types[0]->internal_type);
     } else {
@@ -335,7 +351,8 @@ Type* TypecheckVisitor::visit_builtin_atom(BuiltinAtom *atom,
         }
       } else {
         driver_.error(atom->arguments->at(1)->location,
-                      "second argument of nth must be an Int constant for tuples");
+                      "second argument of nth must be an Int constant for tuples but was `"+
+                      type_to_str(ind_expr->node_type_)+"`");
       }
     }
   } else {
@@ -389,28 +406,7 @@ Type* TypecheckVisitor::visit_rule_atom(RuleAtom *atom) {
 }
 
 Type* TypecheckVisitor::visit_list_atom(ListAtom *atom, std::vector<Type*> &vals) {
-  atom->type_.t = TypeType::TUPLE;
-  if (vals.size() == 0){
-    // TODO LEAK
-    atom->type_.internal_type = new Type(TypeType::UNKNOWN);
-    return &atom->type_;
-  } else {
-    Type first = *vals[0];
-    bool all_equal = true;
-    for (size_t i=1; i < vals.size(); i++) {
-      if (first != *vals[i]) {
-        all_equal = false;
-        break;
-      }
-    }
-
-    if (all_equal && first.is_complete()) {
-      atom->type_.t = TypeType::LIST;
-      atom->type_.internal_type = new Type(first);
-    } else {
-      atom->type_.tuple_types = vals;
-    }
-        DEBUG("UNFIED list_atom "<<atom->type_.to_str());
-    return &atom->type_;
-  }
+  atom->type_.t = TypeType::TUPLE_OR_LIST;
+  atom->type_.tuple_types = vals;
+  return &atom->type_;
 }

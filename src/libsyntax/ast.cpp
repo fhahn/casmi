@@ -291,11 +291,12 @@ BuiltinAtom::BuiltinAtom(yy::location& loc, const std::string name,
     a1->unify(a2);
     a2->unify(return_type);
     types = { a1, a2 };
-  } else if (name == "nth"){
-    Type *a1 = new Type(TypeType::TUPLE, new Type(TypeType::UNKNOWN));
+  } else if (name == "nth") {
+    Type *a1 = new Type(TypeType::TUPLE_OR_LIST, new Type(TypeType::UNKNOWN));
     Type *a2 = new Type(TypeType::INT);
     return_type = new Type(TypeType::UNKNOWN);
 
+    DEBUG("JOJOJO");
     a1->internal_type->unify(return_type);
     types = { a1, a2 };
   } else if (name == "cons"){
@@ -306,6 +307,11 @@ BuiltinAtom::BuiltinAtom(yy::location& loc, const std::string name,
     a1->unify(a2->internal_type);
     a2->unify(return_type);
     types = { a1, a2 };
+  } else if (name == "len") {
+    Type *a1 = new Type(TypeType::LIST, new Type(TypeType::UNKNOWN));
+    return_type = new Type(TypeType::INT);
+
+    types = { a1 };
   } else {
     assert(0);
   }
