@@ -115,10 +115,8 @@ class TempList : public List {
   public:
     List* right;
     std::vector<Value> changes;
-    bool bottom;
 
     TempList();
-
 
     const std::string to_str() const;
     Value at(size_t i) const ;

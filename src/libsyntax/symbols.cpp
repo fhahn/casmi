@@ -5,6 +5,7 @@
 static std::map<const std::string, bool> builtin_names = {
   {"pow", true},
   {"nth", true},
+  {"cons", true},
 };
 
 bool is_builtin_name(const std::string& name) {
