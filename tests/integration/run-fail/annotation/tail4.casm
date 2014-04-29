@@ -2,7 +2,9 @@
 
 rule main = {
   let x = [ undef ] in
+  //~^ type inference for `x` failed
   let y = tail( x ) in skip
+  //~^ type inference for `y` failed
 
   program( self ) := undef
 }

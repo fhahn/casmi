@@ -2,7 +2,9 @@ function a: -> List(Tuple(Int,Int))
 
 rule main =  {|
   a := []
+  assert a = []
   a := [ [undef,undef], [1,2], undef ]
+  assert a = [ [undef,undef], [1,2], undef ]
   program( self ) := undef
 |}
 init main

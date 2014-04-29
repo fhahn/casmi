@@ -251,6 +251,25 @@ Value casm_len(std::vector<Value> &expr_results) {
   return Value((INT_T) count);
 }
 
+Value casm_tail(std::vector<Value> &expr_results) {
+  if (expr_results[0].is_undef()) {
+    return Value();
+  }
+
+  List *list = expr_results[0].value.list;
+
+  if (list->begin() != list->end()) {
+    TempList *tailed_list = new TempList();
+    tailed_list->right = list;
+    tailed_list->skip = 1;
+    return Value(expr_results[0].type, tailed_list);
+  } else {
+    return Value();
+  }
+
+}
+
+
 
 Value ExecutionVisitor::visit_function_atom(FunctionAtom *atom, std::vector<Value> &expr_results) {
   auto current_rule_bindings = rule_bindings.back();
@@ -291,6 +310,8 @@ Value ExecutionVisitor::visit_builtin_atom(BuiltinAtom *atom, std::vector<Value>
     return casm_cons(expr_results);
   } else if (atom->name == "len") {
     return casm_len(expr_results);
+  } else if (atom->name == "tail") {
+    return casm_tail(expr_results);
   } else {
     assert(0);
   }
