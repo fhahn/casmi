@@ -138,6 +138,44 @@ TEST_F(ListIteratorTest, test_iterator_temp_list_with_perm_list) {
   EXPECT_EQ(3, (*iter).value.ival);
 }
 
+TEST_F(ListIteratorTest, test_iterator_skip_with_perm_list) {
+  PermList bottom;
+  bottom.values = { Value((INT_T)1), Value((INT_T)2), Value((INT_T)3) };
+
+  TempList change1;
+  change1.right = &bottom;
+  change1.skip = 1;
+
+  std::cout <<"temlist "<<&change1 << " permlist "<<&bottom << std::endl;
+  auto iter = change1.begin();
+  EXPECT_EQ(2, (*iter).value.ival);
+
+  iter.next();
+  EXPECT_EQ(3, (*iter).value.ival);
+
+  iter.next();
+  EXPECT_TRUE(iter == change1.end());
+
+  TempList change2;
+  change2.right = &change1;
+  change2.skip = 1;
+
+  iter = change2.begin();
+  EXPECT_EQ(3, (*iter).value.ival);
+
+  iter.next();
+  EXPECT_TRUE(iter == change2.end());
+
+  TempList change3;
+  change3.right = &change2;
+  change3.skip = 1;
+
+  iter = change3.begin();
+  EXPECT_TRUE(iter == change3.end());
+
+}
+
+
 TEST_F(ListIteratorTest, test_iterator_eq_begin_end) {
   PermList list;
   list.values = { Value((INT_T)1), Value((INT_T)2), Value((INT_T)3) };
