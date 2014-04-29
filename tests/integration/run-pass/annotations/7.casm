@@ -1,0 +1,8 @@
+rule main = {
+    let x = [] in {
+        assert cons( 1, x ) = [ 1 ]
+    }
+
+    program( self ) := undef
+}
+init main

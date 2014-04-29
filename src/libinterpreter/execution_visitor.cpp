@@ -222,6 +222,10 @@ Value casm_nth(std::vector<Value> &expr_results) {
 
 Value casm_cons(std::vector<Value> &expr_results) {
   // TODO LEAK
+  if (expr_results[1].is_undef()) {
+    return Value();
+  }
+
   TempList *consed_list = new TempList();
   consed_list->changes.push_back(expr_results[0]);
   consed_list->right = expr_results[1].value.list;
