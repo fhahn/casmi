@@ -54,7 +54,7 @@ void ExecutionVisitor::visit_update(UpdateNode *update, Value &func_val, Value& 
   casm_update* v = (casm_update*)casm_updateset_add(&(context_.updateset),
                                                     (void*) &ref,
                                                     (void*) up);
-  DEBUG("UPADTE "<<update->func->name<<" num args "<<up->num_args << " arg[0] "<<up->args[0]);
+  DEBUG("UPADTE "<<update->func->name<<" num args "<<up->num_args << " arg[0] "<<up->args[0]<< " val "<<expr_v.to_str());
   if (v != nullptr) {
     // Check if values match
     for (int i=0; i < up->num_args; i++) {
@@ -205,15 +205,18 @@ Value casm_pow(std::vector<Value> &expr_results) {
 }
 
 Value casm_nth(std::vector<Value> &expr_results) {
-  switch (expr_results[0].value.list->list_type) {
-    case List::ListType::TEMP: {
-      TempList *list = reinterpret_cast<TempList*>(expr_results[0].value.list);
-      return list->at(expr_results[1].value.ival);
-    }
-    case List::ListType::PERM: {
-      PermList *list = reinterpret_cast<PermList*>(expr_results[0].value.list);
-      return list->at(expr_results[1].value.ival);
-    }
+  List *list = expr_results[0].value.list;
+  List::const_iterator iter = list->begin();
+  size_t i = 1;
+
+  while (iter != list->end() && i < expr_results[1].value.ival) {
+    i++;
+    iter++;
+  }
+  if (i == expr_results[1].value.ival && iter != list->end()) {
+    return Value(*iter);
+  } else {
+    return Value();
   }
 }
 
@@ -246,7 +249,7 @@ Value ExecutionVisitor::visit_function_atom(FunctionAtom *atom, std::vector<Valu
       value_list.swap(expr_results);
 
       Value v = Value(context_.get_function_value(atom->symbol, args));
-      DEBUG("visit_atom "<<atom->symbol->name()<<" "<<v.value.ival <<" size "<<value_list.size());
+      DEBUG("visit_atom "<<atom->symbol->name()<<" "<<v.to_str() <<" size "<<value_list.size());
       return v;
     }
     default:
