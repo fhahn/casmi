@@ -414,7 +414,7 @@ bool List::is_temp() const {
   return list_type == ListType::TEMP;
 }
 
-TempList::TempList() : List(ListType::TEMP), right(nullptr), changes(), bottom(false) {}
+TempList::TempList() : List(ListType::TEMP), right(nullptr), changes() {}
 
 const std::string TempList::to_str() const {
   std::string res = "";

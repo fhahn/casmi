@@ -217,6 +217,15 @@ Value casm_nth(std::vector<Value> &expr_results) {
   }
 }
 
+Value casm_cons(std::vector<Value> &expr_results) {
+  // TODO LEAK
+  TempList *consed_list = new TempList();
+  consed_list->changes.push_back(expr_results[0]);
+  consed_list->right = expr_results[1].value.list;
+  return Value(expr_results[1].type, consed_list);
+}
+
+
 Value ExecutionVisitor::visit_function_atom(FunctionAtom *atom, std::vector<Value> &expr_results) {
   auto current_rule_bindings = rule_bindings.back();
   switch (atom->symbol_type) {
@@ -252,6 +261,8 @@ Value ExecutionVisitor::visit_builtin_atom(BuiltinAtom *atom, std::vector<Value>
     // TODO check if move happens here, why do we need a tmp var v here?
     Value v = casm_nth(expr_results);
     return v;
+  } else if (atom->name == "cons"){
+    return casm_cons(expr_results);
   } else {
     assert(0);
   }
