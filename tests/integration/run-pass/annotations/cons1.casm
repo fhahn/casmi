@@ -7,7 +7,7 @@ rule main = {
 
   let x = cons( 1, undef ) in assert x = undef
   let x = cons( undef, [ 1 ] ) in assert x = [ undef, 1 ]
-  let x: List(Int) = cons( [ 1 ], undef ) in assert x = undef
+  let x: List(List(Int)) = cons( [ 1 ], undef ) in assert x = undef
 
   program( self ) := undef
 }

@@ -47,7 +47,6 @@ void ExecutionContext::apply_updates() {
       if (u->defined == 0) {
         Value& list = function_map.second[{u->args, u->num_args}];
         if (list.is_undef()) {
-          delete list.value.list;
           function_map.second.erase({u->args, u->num_args});
         }
       } else {

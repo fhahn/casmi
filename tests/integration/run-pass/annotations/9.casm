@@ -1,0 +1,7 @@
+rule main = {
+    let x : List(Int) = [ undef, 1, 2 ] in assert x = [ undef, 1, 2]
+    let x : List(String) = [ undef ] in assert [undef] = x
+
+    program( self ) := undef
+}
+init main
