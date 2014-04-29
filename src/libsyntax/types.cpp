@@ -122,7 +122,7 @@ const std::string Type::to_str() const {
     case TypeType::RULEREF: return "RuleRef";
     case TypeType::STRING: return "String";
     case TypeType::LIST: return "List("+internal_type->to_str()+")";
-    case TypeType::UNKNOWN: return "Unkown";
+    case TypeType::UNKNOWN: return "Unknown";
     case TypeType::SELF: return "Self";
     case TypeType::TUPLE_OR_LIST: /*{
       std::string res = "TupleOrList (";
@@ -189,6 +189,7 @@ bool Type::unify_nofollow(Type *other) {
     } else if(other->t == TypeType::LIST && t == TypeType::LIST) {
       result = internal_type->unify(other->internal_type);
     } else if(other->t == TypeType::LIST && t == TypeType::TUPLE_OR_LIST) {
+      bool internal_complete = other->internal_type->is_complete();
       for (Type* typ : tuple_types) {
         result = result && typ->unify(other->internal_type);
       }
@@ -196,9 +197,14 @@ bool Type::unify_nofollow(Type *other) {
         t = TypeType::LIST;
         internal_type = new Type(other->internal_type);
         tuple_types.clear();
+      } else {
+        if (!internal_complete) {
+          other->internal_type->t = TypeType::UNKNOWN;
+        }
       }
       return result;
     } else if(other->t == TypeType::TUPLE_OR_LIST && t == TypeType::LIST) {
+      bool internal_complete = internal_type->is_complete();
       for (Type* typ : other->tuple_types) {
         result = result && typ->unify(internal_type);
       }
@@ -206,6 +212,10 @@ bool Type::unify_nofollow(Type *other) {
         other->t = TypeType::LIST;
         other->internal_type = new Type(internal_type);
         other->tuple_types.clear();
+      } else {
+        if (!internal_complete) {
+          internal_type->t = TypeType::UNKNOWN;
+        }
       }
       return result;
     } else if(t == TypeType::TUPLE && other->t == TypeType::LIST) {
