@@ -83,6 +83,7 @@ class List {
         const_iterator(const self_type& other);
         self_type operator++();
         self_type operator++(int);
+        void next();
         const Value& operator*();
         //const pointer operator->() { return ptr_; }
         bool operator==(const self_type& rhs) const;
@@ -94,6 +95,7 @@ class List {
         const TempList *temp;
         size_t pos;
     };
+
     ListType list_type;
 
     List(ListType t);
@@ -115,6 +117,7 @@ class TempList : public List {
   public:
     List* right;
     std::vector<Value> changes;
+    size_t skip;
 
     TempList();
 

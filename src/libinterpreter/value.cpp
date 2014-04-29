@@ -308,10 +308,18 @@ void List::const_iterator::do_init(const List *ptr) {
 
   if (ptr->is_temp()) {
     temp = reinterpret_cast<const TempList*>(ptr);
-    if (temp->changes.size() == 0) {
-      temp = nullptr;
-    }
     perm = nullptr;
+    if (temp->changes.size() == 0) {
+      if (temp->skip > 0) {
+        size_t to_skip = temp->skip+1;
+        const_iterator res(*this);
+        for (size_t i=0; i < to_skip; i++) {
+          next();
+        }
+      } else {
+        temp = nullptr;
+      }
+    }
   } else {
     perm = reinterpret_cast<const PermList*>(ptr);
     if (perm->values.size() == 0) {
@@ -325,25 +333,30 @@ List::const_iterator::const_iterator(const List *ptr) {
   do_init(ptr);
 }
 
-List::const_iterator::const_iterator(const self_type& other) : perm(other.perm), temp(other.temp), pos(other.pos) {}
+List::const_iterator::const_iterator(const self_type& other) : perm(other.perm), temp(other.temp), pos(other.pos) { }
 
 List::const_iterator::self_type List::const_iterator::operator++() {
+  next();
+  return *this;
+}
+
+// Advancing an invalid iterator does not do anything
+void List::const_iterator::next() {
   if (temp) {
-    if (pos < (temp->changes.size()-1)) {
+    if ((1+pos) < temp->changes.size()) {
       pos += 1;
     } else {
       do_init(temp->right);
     }
   } else if (perm) {
-    if (pos < (perm->values.size()-1)) {
+    if ((1+pos) < perm->values.size()) {
       pos += 1;
     } else {
       do_init(nullptr);
     }
   } else {
-    assert(0);
+    //assert(0);
   }
-  return *this;
 }
 
 List::const_iterator::self_type List::const_iterator::operator++(int) {
@@ -416,7 +429,7 @@ bool List::is_temp() const {
   return list_type == ListType::TEMP;
 }
 
-TempList::TempList() : List(ListType::TEMP), right(nullptr), changes() {}
+TempList::TempList() : List(ListType::TEMP), right(nullptr), changes(), skip(0) {}
 
 const std::string TempList::to_str() const {
   std::string res = "";
