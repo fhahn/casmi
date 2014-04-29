@@ -232,6 +232,25 @@ Value casm_cons(std::vector<Value> &expr_results) {
   return Value(expr_results[1].type, consed_list);
 }
 
+Value casm_len(std::vector<Value> &expr_results) {
+  // TODO len is really slow right now, it itertes over complete list
+  if (expr_results[0].is_undef()) {
+    return Value();
+  }
+
+  List *list = expr_results[0].value.list;
+  List::const_iterator iter = list->begin();
+
+  size_t count = 0;
+
+  while (iter != list->end()) {
+    count++;
+    iter++;
+  }
+
+  return Value((INT_T) count);
+}
+
 
 Value ExecutionVisitor::visit_function_atom(FunctionAtom *atom, std::vector<Value> &expr_results) {
   auto current_rule_bindings = rule_bindings.back();
@@ -268,8 +287,10 @@ Value ExecutionVisitor::visit_builtin_atom(BuiltinAtom *atom, std::vector<Value>
     // TODO check if move happens here, why do we need a tmp var v here?
     Value v = casm_nth(expr_results);
     return v;
-  } else if (atom->name == "cons"){
+  } else if (atom->name == "cons") {
     return casm_cons(expr_results);
+  } else if (atom->name == "len") {
+    return casm_len(expr_results);
   } else {
     assert(0);
   }
