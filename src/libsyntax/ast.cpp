@@ -312,10 +312,15 @@ BuiltinAtom::BuiltinAtom(yy::location& loc, const std::string name,
     return_type = new Type(TypeType::INT);
 
     types = { a1 };
+  } else if (name == "tail") {
+    Type *a1 = new Type(TypeType::LIST, new Type(TypeType::UNKNOWN));
+    return_type = new Type(TypeType::UNKNOWN);
+    a1->unify(return_type);
+
+    types = { a1 };
   } else {
     assert(0);
   }
-  
 }
 
 BuiltinAtom::~BuiltinAtom() {}

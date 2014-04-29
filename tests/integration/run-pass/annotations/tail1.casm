@@ -1,6 +1,6 @@
 rule main = {
   let x = undef in
-  let y : List(Int) = tail( x ) in skip
+  let y : List(Int) = tail( x ) in assert y = undef
 
   program( self ) := undef
 }
