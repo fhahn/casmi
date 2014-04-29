@@ -232,6 +232,8 @@ uint64_t Value::to_uint64_t() const {
       return (uint64_t) value.rule;
     case TypeType::STRING: 
       return (uint64_t) value.string;
+    case TypeType::TUPLE: 
+    case TypeType::TUPLE_OR_LIST: 
     case TypeType::LIST:
       return (uint64_t) value.list;
     default: throw RuntimeException("Unsupported type in Value.to_uint64_t");
@@ -257,6 +259,7 @@ std::string Value::to_str() const {
     case TypeType::STRING:
       return *value.string;
     case TypeType::TUPLE:
+    case TypeType::TUPLE_OR_LIST:
     case TypeType::LIST: {
       if (value.list->list_type == List::ListType::TEMP) {
         return "[" + reinterpret_cast<TempList*>(value.list)->to_str() +"]";
@@ -283,9 +286,9 @@ bool value_eq(const Value& v1, const Value& v2) {
       case TypeType::FLOAT: return v1.value.fval == v2.value.fval;
       case TypeType::BOOLEAN: return v1.value.bval == v2.value.bval;
       case TypeType::STRING: return *v1.value.string == *v2.value.string;
-      case TypeType::LIST: {
-        return *v1.value.list == *v2.value.list;
-      }
+      case TypeType::TUPLE:
+      case TypeType::TUPLE_OR_LIST:
+      case TypeType::LIST: return *v1.value.list == *v2.value.list;
       default: assert(0);
     }
   }
@@ -478,13 +481,15 @@ namespace std {
         return (uint64_t) key.value.rule;
       case TypeType::STRING: 
         return (uint64_t) str_hasher(*key.value.string);
+      case TypeType::TUPLE: 
+      case TypeType::TUPLE_OR_LIST: 
       case TypeType::LIST: 
         if (key.value.list->list_type == List::ListType::TEMP) {
           return (uint64_t) temp_list_hasher(*reinterpret_cast<TempList*>(key.value.list));
         } else {
           return (uint64_t) perm_list_hasher(*reinterpret_cast<PermList*>(key.value.list));
         }
-      default: throw RuntimeException("Unsupported type in Value.to_uint64_t");
+      default: throw RuntimeException("Unsupported type in std::hash<Value>()");
     }
   }
 

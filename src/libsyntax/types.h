@@ -23,7 +23,7 @@ enum class TypeType {
   UNDEF,
   LIST,
   TUPLE,
-  LIST_OR_TUPLE
+  TUPLE_OR_LIST
 };
 
 class Type;

@@ -12,36 +12,48 @@
 Type::Type(const std::string& type_name, std::vector<Type*>& internal_types) : unify_with_left(nullptr), unify_with_right(nullptr), constraints(), tuple_types()  {
   if (type_name == "List") {
     t = TypeType::LIST;
-  } else {
-    t = TypeType::INVALID;
+
+    if (internal_types.size() == 0) {
+      internal_type = new Type(TypeType::UNKNOWN);
+    } else if (internal_types.size() == 1) {
+      internal_type = internal_types[0];
+    } else {
+      t = TypeType::INVALID;
+      internal_type = nullptr;
+    }
+  } else if (type_name == "Tuple") {
+    if (internal_types.size() > 0) {
+      t = TypeType::TUPLE;
+      tuple_types = internal_types;
+    } else {
+    DEBUG("INVALID");
+      t = TypeType::INVALID;
+    }
   }
 
-  if (internal_types.size() == 0) {
-    internal_type = new Type(TypeType::UNKNOWN);
-  } else if (internal_types.size() == 1) {
-    internal_type = internal_types[0];
-  } else {
-    t = TypeType::INVALID;
-    internal_type = nullptr;
-  }
 }
 
 Type::Type(TypeType typ, std::vector<Type*>& internal_types) : t(typ), unify_with_left(nullptr), unify_with_right(nullptr), constraints(), tuple_types()  {
-  if (t != TypeType::LIST && t != TypeType::TUPLE) {
-    t = TypeType::INVALID;
-  }
-  if (internal_types.size() == 0) {
-    internal_type = new Type(TypeType::UNKNOWN);
-  } else if (internal_types.size() == 1) {
-    internal_type = internal_types[0];
+  if (t == TypeType::LIST) {
+    if (internal_types.size() == 0) {
+      internal_type = new Type(TypeType::UNKNOWN);
+    } else if (internal_types.size() == 1) {
+      internal_type = internal_types[0];
+    } else {
+      t = TypeType::INVALID;
+      internal_type = nullptr;
+    }
+
+  } else if (t == TypeType::TUPLE_OR_LIST) {
+    tuple_types = internal_types;
   } else {
+    DEBUG("INVALID");
     t = TypeType::INVALID;
-    internal_type = nullptr;
   }
 }
 
 Type::Type(TypeType typ, Type *int_typ) : t(typ), unify_with_left(nullptr), unify_with_right(nullptr), constraints(), tuple_types()  {
-  if (t != TypeType::LIST && t != TypeType::TUPLE) {
+  if (t != TypeType::LIST && t != TypeType::TUPLE_OR_LIST) {
     t = TypeType::INVALID;
   }
   internal_type = int_typ;
@@ -112,6 +124,13 @@ const std::string Type::to_str() const {
     case TypeType::LIST: return "List("+internal_type->to_str()+")";
     case TypeType::UNKNOWN: return "Unkown";
     case TypeType::SELF: return "Self";
+    case TypeType::TUPLE_OR_LIST: /*{
+      std::string res = "TupleOrList (";
+      for (Type* t:tuple_types) {
+        res += t->to_str() + ",";
+      }
+      return res + ")";
+    } */
     case TypeType::TUPLE:{
       std::string res = "Tuple (";
       for (Type* t:tuple_types) {
@@ -162,14 +181,14 @@ bool Type::unify(Type other) {
 
 
 bool Type::unify_nofollow(Type *other) {
-  DEBUG("UNIFY NOFOLLOW "<<this << " and "<<other);
+  DEBUG("UNIFY NOFOLLOW "<<to_str() << " and "<<other->to_str());
   bool result = true;
   if (t != TypeType::UNKNOWN && other->t != TypeType::UNKNOWN) {
-    if (t != TypeType::LIST && t != TypeType::TUPLE) {
+    if (t != TypeType::LIST && t != TypeType::TUPLE && t != TypeType::TUPLE_OR_LIST) {
       return t == other->t;
     } else if(other->t == TypeType::LIST && t == TypeType::LIST) {
       result = internal_type->unify(other->internal_type);
-    } else if(other->t == TypeType::LIST && t == TypeType::TUPLE) {
+    } else if(other->t == TypeType::LIST && t == TypeType::TUPLE_OR_LIST) {
       for (Type* typ : tuple_types) {
         result = result && typ->unify(other->internal_type);
       }
@@ -179,7 +198,7 @@ bool Type::unify_nofollow(Type *other) {
         tuple_types.clear();
       }
       return result;
-    } else if(other->t == TypeType::TUPLE&& t == TypeType::LIST) {
+    } else if(other->t == TypeType::TUPLE_OR_LIST && t == TypeType::LIST) {
       for (Type* typ : other->tuple_types) {
         result = result && typ->unify(internal_type);
       }
@@ -189,8 +208,63 @@ bool Type::unify_nofollow(Type *other) {
         other->tuple_types.clear();
       }
       return result;
-
-    } else if (other->t == TypeType::TUPLE) {
+    } else if(t == TypeType::TUPLE && other->t == TypeType::LIST) {
+      if (!other->is_complete()) {
+        return false;
+      }
+      for (Type* typ : tuple_types) {
+        result = result && typ->unify(other->internal_type);
+      }
+      if (result) {
+        other->t = TypeType::TUPLE;
+        other->tuple_types = tuple_types;
+      }
+      return result;
+    } else if(other->t == TypeType::TUPLE && t == TypeType::LIST) {
+      if (!is_complete()) {
+        return false;
+      }
+      for (Type* typ : other->tuple_types) {
+        result = result && typ->unify(internal_type);
+      }
+      if (result) {
+        t = TypeType::TUPLE;
+        tuple_types = other->tuple_types;
+      }
+      return result;
+    } else if (other->t == TypeType::TUPLE && (t == TypeType::TUPLE_OR_LIST || t == TypeType::TUPLE)) {
+      t = TypeType::TUPLE;
+      if (tuple_types.size() == 0) {
+        tuple_types = other->tuple_types;
+        return true;
+      } else if (other->tuple_types.size() == 0) {
+        other->tuple_types = tuple_types;
+        return true;
+      } else if (tuple_types.size() == other->tuple_types.size()) {
+        for (size_t i=0; i<tuple_types.size(); i++) {
+          result = result && tuple_types[i]->unify(other->tuple_types[i]);
+        }
+        return result;
+      } else {
+        return false;
+      }
+    } else if (t == TypeType::TUPLE && (other->t == TypeType::TUPLE_OR_LIST || other->t == TypeType::TUPLE)) {
+      other->t = TypeType::TUPLE;
+      if (tuple_types.size() == 0) {
+        tuple_types = other->tuple_types;
+        return true;
+      } else if (other->tuple_types.size() == 0) {
+        other->tuple_types = tuple_types;
+        return true;
+      } else if (tuple_types.size() == other->tuple_types.size()) {
+        for (size_t i=0; i<tuple_types.size(); i++) {
+          result = result && tuple_types[i]->unify(other->tuple_types[i]);
+        }
+        return result;
+      } else {
+        return false;
+      }
+    } else if (t == TypeType::TUPLE_OR_LIST && other->t == TypeType::TUPLE_OR_LIST) {
       if (tuple_types.size() == 0) {
         tuple_types = other->tuple_types;
         return true;
@@ -210,8 +284,8 @@ bool Type::unify_nofollow(Type *other) {
     }
   }
 
-  if (t == TypeType::UNKNOWN && other->t == TypeType::TUPLE) {
-    t = TypeType::TUPLE;
+  if (t == TypeType::UNKNOWN && (other->t == TypeType::TUPLE || other->t == TypeType::TUPLE_OR_LIST)) {
+    t = other->t;
     tuple_types = other->tuple_types;
     return true;
   }
@@ -241,8 +315,8 @@ bool Type::unify_nofollow(Type *other) {
     return true;
   }
 
-  if (t == TypeType::TUPLE && other->t == TypeType::UNKNOWN) {
-    other->t = TypeType::TUPLE;
+  if ((t == TypeType::TUPLE || t == TypeType::TUPLE_OR_LIST) && other->t == TypeType::UNKNOWN) {
+    other->t = t;
     other->tuple_types = tuple_types;
     return true;
   }
@@ -270,11 +344,36 @@ bool Type::unify_nofollow(Type *other) {
         DEBUG("Did not match any constriants");
         return false;
       }
-
       return  true;
     } else {
       other->internal_type = new Type(internal_type);
       t = TypeType::LIST;
+      return true;
+    }
+  }
+
+  if (other->t != TypeType::UNKNOWN && t == TypeType::UNKNOWN) {
+    if (other->t != TypeType::LIST) {
+      t = other->t;
+      bool matched_constraint = true;
+      for (Type constraint : constraints) {
+        if (other->unify(constraint)) {
+          matched_constraint = true;
+          break;
+        } else {
+          matched_constraint = false;
+        }
+      }
+
+      if (!matched_constraint) {
+        DEBUG("Did not match any constriants");
+        return false;
+      }
+
+      return  true;
+    } else {
+      internal_type = new Type(other->internal_type);
+      other->t = TypeType::LIST;
       return true;
     }
   }
@@ -313,7 +412,7 @@ bool Type::unify_right(Type *other) {
 bool Type::is_unknown() const {
   if (t == TypeType::UNKNOWN) {
     return true;
-  } else if (t == TypeType::TUPLE && tuple_types.size() == 0) {
+  } else if ((t == TypeType::TUPLE || t == TypeType::TUPLE_OR_LIST) && tuple_types.size() == 0) {
     return true;
   } 
   return false;
@@ -380,7 +479,7 @@ bool Type::is_complete() {
   if (internal_type) {
     return internal_type->is_complete();
   }
-  if (t == TypeType::TUPLE) {
+  if (t == TypeType::TUPLE || t == TypeType::TUPLE_OR_LIST) {
     if (tuple_types.size() == 0) {
       return false;
     } else {
