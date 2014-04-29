@@ -1,8 +1,0 @@
-// error annotation
-
-rule main = {
-	assert len( [ 1, 2, "test" ] ) = 3
-
-	program( self ) := undef
-}
-init main
