@@ -77,10 +77,8 @@ Value::Value(Type t, casm_update* u) {
       break;
     case TypeType::LIST:
       if (u->value != 0) {
-        type = TypeType::LIST;
-        // TODO LEAK
-        value.list = new TempList();
-        //reinterpret_cast<std::vector<Value>*>(u->value);
+        type = t;
+        value.list = reinterpret_cast<List*>(u->value);
       } else {
         type = TypeType::UNDEF;
       }
@@ -258,6 +256,7 @@ std::string Value::to_str() const {
       return std::move("@"+value.rule->name);
     case TypeType::STRING:
       return *value.string;
+    case TypeType::TUPLE:
     case TypeType::LIST: {
       if (value.list->list_type == List::ListType::TEMP) {
         return "[" + reinterpret_cast<TempList*>(value.list)->to_str() +"]";

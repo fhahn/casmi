@@ -213,7 +213,7 @@ Value& ExecutionContext::get_function_value(Function *sym, uint64_t args[]) {
       casm_update *update = (casm_update*) pp_hashmap_get(updateset.set, key);
       if (update) {
         tmp = Value(sym->return_type_, update);
-        DEBUG("FOUND UPDATE for "<< sym->name()<<" "<<tmp.value.ival);
+        DEBUG("FOUND UPDATE for "<< sym->name()<<" "<<tmp.to_str() << " type "<<sym->return_type_->to_str());
         return tmp;
       }
     }
