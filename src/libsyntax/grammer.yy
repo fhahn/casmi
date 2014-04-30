@@ -74,7 +74,7 @@
 %type <UnaryNode*> PARBLOCK_SYNTAX KW_PARBLOCK_SYNTAX SEQBLOCK_SYNTAX
 %type <UnaryNode*> ASSERT_SYNTAX KW_SEQBLOCK_SYNTAX
 %type <AstListNode*> BODY_ELEMENTS STATEMENTS
-%type <AtomNode*> NUMBER VALUE
+%type <AtomNode*> NUMBER VALUE NUMBER_RANGE
 %type <std::pair<ExpressionBase*, ExpressionBase*>> INITIALIZER
 %type <std::vector<std::pair<ExpressionBase*, ExpressionBase*>>*> INITIALIZER_LIST INITIALIZERS
 %type <ExpressionBase*> EXPRESSION BRACKET_EXPRESSION ATOM
@@ -307,7 +307,7 @@ VALUE: RULEREF { $$ = new RuleAtom(@$, std::move($1)); }
      | NUMBER { $$ = $1; }
      | STRCONST { $$ = new StringAtom(@$, std::move($1)); }
      | LISTCONST { $$ = new ListAtom(@$, $1); }
-     | NUMBER_RANGE { $$ = new IntAtom(@$, 0); }
+     | NUMBER_RANGE { $$ = $1; }
      | SYMBOL { $$ = new IntAtom(@$, 0); }
      | SELF { $$ = new SelfAtom(@$); }
      | UNDEF { $$ = new UndefAtom(@$); }
@@ -329,8 +329,15 @@ NUMBER: "+" INTCONST %prec UPLUS { $$ = new IntAtom(@$, $2); }
 RULEREF: "@" IDENTIFIER { $$ = $2; }
        ;
 
-NUMBER_RANGE: "[" NUMBER DOTDOT NUMBER "]" 
-            | "[" IDENTIFIER DOTDOT IDENTIFIER "]" 
+NUMBER_RANGE: "[" NUMBER DOTDOT NUMBER "]"  {
+              if ($2->node_type_ == NodeType::INT_ATOM && $4->node_type_ == NodeType::INT_ATOM) {
+                $$ = new NumberRangeAtom(@$, reinterpret_cast<IntAtom*>($2), reinterpret_cast<IntAtom*>($4));
+              } else {
+                driver.error(@$, "numbers in range expression must be Int");
+                $$ = nullptr;
+              }
+            }
+            /*| "[" IDENTIFIER DOTDOT IDENTIFIER "]" */
             ;
 
 LISTCONST: "[" EXPRESSION_LIST "]" { $$ = $2; }

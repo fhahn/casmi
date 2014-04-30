@@ -275,6 +275,8 @@ template<class T, class V> class AstWalker {
         case NodeType::LIST_ATOM: {
           return walk_list_atom(reinterpret_cast<ListAtom*>(atom));
         }
+        case NodeType::NUMBER_RANGE_ATOM:
+          return visitor.visit_number_range_atom(reinterpret_cast<NumberRangeAtom*>(atom));
         default: {
           throw RuntimeException("Invalid atom type:"+type_to_str(atom->node_type_)+std::to_string(atom->node_type_));
         }

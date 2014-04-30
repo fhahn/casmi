@@ -62,6 +62,7 @@ class ExecutionVisitor {
     Value visit_boolean_atom(BooleanAtom *atom) { return Value(atom->value); }
     Value visit_string_atom(StringAtom *atom) { return Value(&atom->string); }
     Value visit_list_atom(ListAtom *atom, std::vector<Value> &vals);
+    Value visit_number_range_atom(NumberRangeAtom *atom);
 };
 
 // Specialize if-then-else for ExecutionVisitor

@@ -372,6 +372,9 @@ std::string args_to_str(uint64_t args[], size_t size) {
   return res;
 }
 
+Value ExecutionVisitor::visit_number_range_atom(NumberRangeAtom *atom) {
+  return Value(atom->type_, &atom->perm_list);
+}
 template <>
 void AstWalker<ExecutionVisitor, Value>::walk_ifthenelse(IfThenElseNode* node) {
   Value cond = walk_expression_base(node->condition_);

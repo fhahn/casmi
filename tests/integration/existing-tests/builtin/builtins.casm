@@ -42,16 +42,16 @@ rule main = seqblock
     assert cons( 1, b ) = undef
     assert cons( 1, undef ) = undef
     assert cons( 1, cons(2, cons(3, []))) = [1,2,3]
-
+/*
     assert app( [1,2,3], undef ) = [1,2,3,undef]
     assert app( [], undef ) = [undef]
-/*  XXX typ system can not handle this -> investigate 
-    assert app( [], [1] ) =  [[1]]
-    assert app( [], [] ) = [[]]
-*/
+    // XXX typ system can not handle this -> investigate 
+    // assert app( [], [1] ) =  [[1]]
+    // assert app( [], [] ) = [[]]
     assert app( b, 1 ) = undef
     assert app( undef, 1) = undef
     assert app( app( app([],1) ,2), 3) = [1,2,3]
+*/
 
     a := [ 1, 2, 3 ]
     assert tail( a ) = [2,3]

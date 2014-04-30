@@ -45,6 +45,7 @@ enum NodeType {
   LET,
   LIST_ATOM,
   BUILTIN_ATOM,
+  NUMBER_RANGE_ATOM
 };
 
 const std::string& type_to_str(NodeType t);
@@ -259,6 +260,13 @@ class ListAtom : public AtomNode {
     TempList tmp_list;
 
     ListAtom(yy::location& loc, std::vector<ExpressionBase*> *exprs);
+};
+
+class NumberRangeAtom : public AtomNode {
+  public:
+    PermList perm_list;
+
+    NumberRangeAtom(yy::location& loc, IntAtom *start, IntAtom *end);
 };
 
 
