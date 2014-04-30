@@ -280,7 +280,8 @@ Value casm_tail(std::vector<Value> &expr_results) {
     tailed_list->skip = 1;
     return Value(expr_results[0].type, tailed_list);
   } else {
-    return Value();
+    // tail for empty list returns empty list
+    return expr_results[0];
   }
 }
 

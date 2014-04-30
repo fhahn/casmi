@@ -27,7 +27,7 @@ rule main = seqblock
     assert nth([-1..1],3) = 1
     assert nth( b, 1 ) = undef
     assert nth( [ 1,2 ], undef ) = undef
-    assert nth( undef, 2 ) = undef
+    //assert nth( undef, 2 ) = undef
 
     assert peek( [0,1,2] ) = 0
     assert peek( [ "a", "b", "c" ] ) = "a"
@@ -42,16 +42,15 @@ rule main = seqblock
     assert cons( 1, b ) = undef
     assert cons( 1, undef ) = undef
     assert cons( 1, cons(2, cons(3, []))) = [1,2,3]
-/*
-    assert app( [1,2,3], undef ) = [1,2,3,undef]
-    assert app( [], undef ) = [undef]
+
+    // assert app( [1,2,3], undef ) = [1,2,3,undef]
+    // assert app( [], undef ) = [undef]
     // XXX typ system can not handle this -> investigate 
     // assert app( [], [1] ) =  [[1]]
     // assert app( [], [] ) = [[]]
-    assert app( b, 1 ) = undef
-    assert app( undef, 1) = undef
-    assert app( app( app([],1) ,2), 3) = [1,2,3]
-*/
+    // assert app( b, 1 ) = undef
+    // assert app( undef, 1) = undef
+    // assert app( app( app([],1) ,2), 3) = [1,2,3]
 
     a := [ 1, 2, 3 ]
     assert tail( a ) = [2,3]

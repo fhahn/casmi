@@ -355,8 +355,13 @@ NumberRangeAtom::NumberRangeAtom(yy::location& loc, IntAtom *start, IntAtom *end
     for (INT_T i=i_start; i <= i_end; i++) {
       perm_list.values.push_back(Value(i));
     }
+  } else {
+    for (INT_T i=i_start; i >= i_end; i--) {
+      perm_list.values.push_back(Value(i));
+    }
   }
 }
+
 Expression::Expression(yy::location& loc, ExpressionBase *left, ExpressionBase *right,
                        Expression::Operation op)
                        : ExpressionBase(loc, NodeType::EXPRESSION, Type(TypeType::UNKNOWN)),
