@@ -70,7 +70,7 @@ rule main = seqblock
     assert pow(-2,3) = -8
     assert pow(2,3) = 8
     assert pow(2,16) = 65536
-    //assert pow(2,32) = 4294967296 casmi seems to implement 32 bit interger arithmetic after all, eek. want 64 bit ...
+    assert pow(2,32) = 4294967296
 
     program(self) := undef
 endseqblock
