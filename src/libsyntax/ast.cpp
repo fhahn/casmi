@@ -345,6 +345,18 @@ ListAtom::ListAtom(yy::location& loc, std::vector<ExpressionBase*> *exprs)
   type_ = Type(TypeType::LIST, new Type(TypeType::UNKNOWN));
 }
 
+NumberRangeAtom::NumberRangeAtom(yy::location& loc, IntAtom *start, IntAtom *end) :
+    AtomNode(loc, NodeType::NUMBER_RANGE_ATOM, TypeType::UNKNOWN), perm_list() {
+  type_ = Type(TypeType::LIST, new Type(TypeType::INT));
+  INT_T i_start = start->val_;
+  INT_T i_end = end->val_;
+
+  if (i_start <= i_end) {
+    for (INT_T i=i_start; i <= i_end; i++) {
+      perm_list.values.push_back(Value(i));
+    }
+  }
+}
 Expression::Expression(yy::location& loc, ExpressionBase *left, ExpressionBase *right,
                        Expression::Operation op)
                        : ExpressionBase(loc, NodeType::EXPRESSION, Type(TypeType::UNKNOWN)),

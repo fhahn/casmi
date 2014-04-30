@@ -1,9 +1,0 @@
-init main_rule
-
-rule main_rule = {
-	program( self ) := undef
-
-	let i = 2 in assert i*2 = 4
-	let i = [1,2,3] in assert i = [1..3]
-
-}

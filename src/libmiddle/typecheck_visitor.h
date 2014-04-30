@@ -65,6 +65,7 @@ class TypecheckVisitor {
     Type* visit_boolean_atom(BooleanAtom *atom) { return &atom->type_; }
     Type* visit_string_atom(StringAtom *atom) { return &atom->type_; }
     Type* visit_list_atom(ListAtom *atom, std::vector<Type*> &vals);
+    Type* visit_number_range_atom(NumberRangeAtom *atom) { return &atom->type_; }
 };
 
 #endif //CASMI_LIBINTERPRETER_EXEC_VISITOR
