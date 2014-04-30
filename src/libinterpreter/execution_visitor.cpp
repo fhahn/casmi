@@ -266,10 +266,23 @@ Value casm_tail(std::vector<Value> &expr_results) {
   } else {
     return Value();
   }
-
 }
 
+Value casm_peek(std::vector<Value> &expr_results) {
+  DEBUG("PEEK");
+  if (expr_results[0].is_undef()) {
+    return Value();
+  }
 
+  List *list = expr_results[0].value.list;
+
+  if (list->begin() != list->end()) {
+    DEBUG("RETURN");
+    return Value(*(list->begin()));
+  } else {
+    return Value();
+  }
+}
 
 Value ExecutionVisitor::visit_function_atom(FunctionAtom *atom, std::vector<Value> &expr_results) {
   auto current_rule_bindings = rule_bindings.back();
@@ -312,10 +325,13 @@ Value ExecutionVisitor::visit_builtin_atom(BuiltinAtom *atom, std::vector<Value>
     return casm_len(expr_results);
   } else if (atom->name == "tail") {
     return casm_tail(expr_results);
+  } else if (atom->name == "peek") {
+    return casm_peek(expr_results);
   } else {
     assert(0);
   }
 }
+
 
 Value ExecutionVisitor::visit_derived_function_atom(FunctionAtom *atom,
                                                       std::vector<Value> &expr_results,

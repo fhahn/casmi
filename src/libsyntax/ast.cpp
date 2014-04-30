@@ -318,7 +318,13 @@ BuiltinAtom::BuiltinAtom(yy::location& loc, const std::string name,
     a1->unify(return_type);
 
     types = { a1 };
-  } else {
+  } else if (name == "peek") {
+    Type *a1 = new Type(TypeType::LIST, new Type(TypeType::UNKNOWN));
+    return_type = new Type(TypeType::UNKNOWN);
+    a1->internal_type->unify(return_type);
+
+    types = { a1 };
+ } else {
     assert(0);
   }
 }

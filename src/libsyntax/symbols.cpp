@@ -8,6 +8,7 @@ static std::map<const std::string, bool> builtin_names = {
   {"cons", true},
   {"len", true},
   {"tail", true},
+  {"peek", true},
 };
 
 bool is_builtin_name(const std::string& name) {
