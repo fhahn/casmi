@@ -4,6 +4,7 @@
 
 static std::map<const std::string, bool> builtin_names = {
   {"pow", true},
+  {"hex", true},
   {"nth", true},
   {"cons", true},
   {"len", true},

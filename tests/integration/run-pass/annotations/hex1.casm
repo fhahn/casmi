@@ -1,6 +1,6 @@
 rule main = {
   let x = undef in
-  let y = hex( x ) in skip
+  let y = hex( x ) in assert y = "undef"
 
   program( self ) := undef
 }
