@@ -1,6 +1,7 @@
 #include <cmath>
 #include <assert.h>
 #include <utility>
+#include <sstream>
 
 #include "macros.h"
 #include "libutil/exceptions.h"
@@ -204,6 +205,21 @@ Value casm_pow(std::vector<Value> &expr_results) {
   }
 }
 
+Value casm_hex(std::vector<Value> &expr_results) {
+  // TODO LEAK!
+  if (expr_results[0].is_undef()) {
+    return Value(new std::string("undef"));
+  }
+
+  std::stringstream ss;
+  if (expr_results[0].value.ival < 0) {
+    ss << "-" << std::hex << (-1) * expr_results[0].value.ival;
+  } else {
+    ss << std::hex << expr_results[0].value.ival;
+  }
+  return Value(new std::string(ss.str()));
+}
+
 Value casm_nth(std::vector<Value> &expr_results) {
   List *list = expr_results[0].value.list;
   List::const_iterator iter = list->begin();
@@ -315,10 +331,10 @@ Value ExecutionVisitor::visit_function_atom(FunctionAtom *atom, std::vector<Valu
 Value ExecutionVisitor::visit_builtin_atom(BuiltinAtom *atom, std::vector<Value> &expr_results) {
   if (atom->name == "pow") {
     return casm_pow(expr_results);
+  } else if (atom->name == "hex") {
+    return casm_hex(expr_results);
   } else if (atom->name == "nth") {
-    // TODO check if move happens here, why do we need a tmp var v here?
-    Value v = casm_nth(expr_results);
-    return v;
+    return casm_nth(expr_results);
   } else if (atom->name == "cons") {
     return casm_cons(expr_results);
   } else if (atom->name == "len") {
