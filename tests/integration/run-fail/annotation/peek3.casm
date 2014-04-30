@@ -2,7 +2,6 @@
 
 rule main = {
   let x = peek( [ undef, undef, [] ] ) in skip
-
-  program( self ) := undef
+  //~^ type inference for `x` failed
 }
 init main

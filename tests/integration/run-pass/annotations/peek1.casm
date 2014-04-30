@@ -1,5 +1,5 @@
 rule main = {
-  let x = peek( [ 1, 2, 3, 4 ] ) in skip
+  let x = peek( [ 1, 2, 3, 4 ] ) in assert x = 1
 
   program( self ) := undef
 }
