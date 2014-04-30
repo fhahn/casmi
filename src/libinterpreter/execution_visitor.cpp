@@ -246,9 +246,7 @@ Value casm_cons(std::vector<Value> &expr_results) {
     return Value();
   }
 
-  TempList *consed_list = new TempList();
-  consed_list->changes.push_back(expr_results[0]);
-  consed_list->right = expr_results[1].value.list;
+  HeadList *consed_list = new HeadList(expr_results[1].value.list, expr_results[0]);
   return Value(expr_results[1].type, consed_list);
 }
 
@@ -278,19 +276,25 @@ Value casm_tail(std::vector<Value> &expr_results) {
 
   List *list = expr_results[0].value.list;
 
-  if (list->begin() != list->end()) {
-    TempList *tailed_list = new TempList();
-    tailed_list->right = list;
-    tailed_list->skip = 1;
-    return Value(expr_results[0].type, tailed_list);
+  if (list->is_head()) {
+    return Value(expr_results[0].type, reinterpret_cast<HeadList*>(list)->right);
+  } else if (list->is_bottom()) {
+    BottomList *btm = reinterpret_cast<BottomList*>(list);
+    if (btm->values.size() > 0) {
+      SkipList *skip = new SkipList(1, btm);
+      return Value(expr_results[0].type, skip);
+    } else {
+      // tail for empty list returns empty list
+      return expr_results[0];
+    }
   } else {
-    // tail for empty list returns empty list
-    return expr_results[0];
+    SkipList *old_skip = reinterpret_cast<SkipList*>(list);
+    SkipList *skip = new SkipList(old_skip->skip+1, old_skip->bottom);
+    return Value(expr_results[0].type, skip);
   }
 }
 
 Value casm_peek(std::vector<Value> &expr_results) {
-  DEBUG("PEEK");
   if (expr_results[0].is_undef()) {
     return Value();
   }
@@ -298,7 +302,6 @@ Value casm_peek(std::vector<Value> &expr_results) {
   List *list = expr_results[0].value.list;
 
   if (list->begin() != list->end()) {
-    DEBUG("RETURN");
     return Value(*(list->begin()));
   } else {
     return Value();
@@ -361,9 +364,10 @@ Value ExecutionVisitor::visit_derived_function_atom(FunctionAtom *atom,
 }
 
 Value ExecutionVisitor::visit_list_atom(ListAtom *atom, std::vector<Value> &vals) {
-  atom->tmp_list.changes = std::move(vals);
-  return Value(atom->type_, &atom->tmp_list);
+  BottomList *list = new BottomList(vals);
+  return Value(atom->type_, list);
 }
+
 std::string args_to_str(uint64_t args[], size_t size) {
   std::string res = "";
   size_t i = 0;
@@ -378,8 +382,9 @@ std::string args_to_str(uint64_t args[], size_t size) {
 }
 
 Value ExecutionVisitor::visit_number_range_atom(NumberRangeAtom *atom) {
-  return Value(atom->type_, &atom->perm_list);
+  return Value(atom->type_, atom->list);
 }
+
 template <>
 void AstWalker<ExecutionVisitor, Value>::walk_ifthenelse(IfThenElseNode* node) {
   Value cond = walk_expression_base(node->condition_);

@@ -340,26 +340,28 @@ bool BuiltinAtom::equals(AstNode *other) {
 }
 
 ListAtom::ListAtom(yy::location& loc, std::vector<ExpressionBase*> *exprs)
-    : AtomNode(loc, NodeType::LIST_ATOM, TypeType::UNKNOWN), expr_list(exprs) , tmp_list() {
+    : AtomNode(loc, NodeType::LIST_ATOM, TypeType::UNKNOWN), expr_list(exprs) {
   // TODO LEAK!
   type_ = Type(TypeType::LIST, new Type(TypeType::UNKNOWN));
 }
 
 NumberRangeAtom::NumberRangeAtom(yy::location& loc, IntAtom *start, IntAtom *end) :
-    AtomNode(loc, NodeType::NUMBER_RANGE_ATOM, TypeType::UNKNOWN), perm_list() {
+    AtomNode(loc, NodeType::NUMBER_RANGE_ATOM, TypeType::UNKNOWN) {
   type_ = Type(TypeType::LIST, new Type(TypeType::INT));
   INT_T i_start = start->val_;
   INT_T i_end = end->val_;
 
+  std::vector<Value> vals;
   if (i_start <= i_end) {
     for (INT_T i=i_start; i <= i_end; i++) {
-      perm_list.values.push_back(Value(i));
+      vals.push_back(Value(i));
     }
   } else {
     for (INT_T i=i_start; i >= i_end; i--) {
-      perm_list.values.push_back(Value(i));
+      vals.push_back(Value(i));
     }
   }
+  list = new BottomList(vals);
 }
 
 Expression::Expression(yy::location& loc, ExpressionBase *left, ExpressionBase *right,
