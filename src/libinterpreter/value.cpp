@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <utility>
+#include <sstream>
 
 #include "libsyntax/ast.h"
 
@@ -261,11 +262,7 @@ std::string Value::to_str() const {
     case TypeType::TUPLE:
     case TypeType::TUPLE_OR_LIST:
     case TypeType::LIST: {
-      if (value.list->list_type == List::ListType::TEMP) {
-        return "[" + reinterpret_cast<TempList*>(value.list)->to_str() +"]";
-      } else {
-        return "[" + reinterpret_cast<PermList*>(value.list)->to_str() +"]";
-      }
+        return value.list->to_str();
     }
     case TypeType::BOOLEAN:
       if (value.bval) {
@@ -301,31 +298,29 @@ List::List(ListType t) : list_type(t) {}
 void List::const_iterator::do_init(const List *ptr) {
   pos = 0;
   if (!ptr) {
-    temp = nullptr;
-    perm = nullptr;
+    head = nullptr;
+    bottom = nullptr;
     return;
   }
 
-  if (ptr->is_temp()) {
-    temp = reinterpret_cast<const TempList*>(ptr);
-    perm = nullptr;
-    if (temp->changes.size() == 0) {
-      if (temp->skip > 0) {
-        size_t to_skip = temp->skip+1;
-        const_iterator res(*this);
-        for (size_t i=0; i < to_skip; i++) {
-          next();
-        }
-      } else {
-        temp = nullptr;
-      }
+  if (ptr->is_head()) {
+    head = reinterpret_cast<const HeadList*>(ptr);
+    bottom = nullptr;
+  } else if (ptr->is_bottom()){
+    bottom = reinterpret_cast<const BottomList*>(ptr);
+    if (bottom->values.size() == 0) {
+      bottom = nullptr;
     }
+    head = nullptr;
   } else {
-    perm = reinterpret_cast<const PermList*>(ptr);
-    if (perm->values.size() == 0) {
-      perm = nullptr;
+    const SkipList *skip = reinterpret_cast<const SkipList*>(ptr);
+    if (skip->bottom->values.size() > skip->skip) {
+      bottom = skip->bottom;
+      pos = skip->skip;
+    } else {
+      bottom = nullptr;
     }
-    temp = nullptr;
+    head = nullptr;
   }
 }
 
@@ -333,7 +328,7 @@ List::const_iterator::const_iterator(const List *ptr) {
   do_init(ptr);
 }
 
-List::const_iterator::const_iterator(const self_type& other) : perm(other.perm), temp(other.temp), pos(other.pos) { }
+List::const_iterator::const_iterator(const self_type& other) : bottom(other.bottom), head(other.head), pos(other.pos) { }
 
 List::const_iterator::self_type List::const_iterator::operator++() {
   next();
@@ -342,14 +337,10 @@ List::const_iterator::self_type List::const_iterator::operator++() {
 
 // Advancing an invalid iterator does not do anything
 void List::const_iterator::next() {
-  if (temp) {
-    if ((1+pos) < temp->changes.size()) {
-      pos += 1;
-    } else {
-      do_init(temp->right);
-    }
-  } else if (perm) {
-    if ((1+pos) < perm->values.size()) {
+  if (head) {
+    do_init(head->right);
+  } else if (bottom) {
+    if ((1+pos) < bottom->values.size()) {
       pos += 1;
     } else {
       do_init(nullptr);
@@ -366,22 +357,22 @@ List::const_iterator::self_type List::const_iterator::operator++(int) {
 }
 
 const Value& List::const_iterator::operator*() {
-  if (temp) {
-    return temp->changes[pos];
-  } else if (perm) {
-    return perm->values[pos];
+  if (head) {
+    return head->current_head;
+  } else if (bottom) {
+    return bottom->values[pos];
   } else {
     assert(0);
   }
 }
 
-// all iterators that are not invalid (temp = perm = nullptr and pos = 0)
+// all iterators that are not invalid (head = bottom = nullptr and pos = 0)
 // are equal; a valid and an invalid iterator are _NOT_ equal
 bool List::const_iterator::operator==(const self_type& rhs) const {
-  if (!temp && !perm) {
-    return !rhs.temp && !rhs.perm;
+  if (!head && !bottom) {
+    return !rhs.head && !rhs.bottom;
   } else {
-    return rhs.temp || rhs.perm;
+    return rhs.head || rhs.bottom;
   }
 }
 
@@ -421,67 +412,41 @@ bool List::operator!=(const List& other) const {
   return ! (*this == other);
 }
 
-bool List::is_perm() const {
-  return list_type == ListType::PERM;
+bool List::is_bottom() const {
+  return list_type == ListType::BOTTOM;
 }
 
-bool List::is_temp() const {
-  return list_type == ListType::TEMP;
+bool List::is_head() const {
+  return list_type == ListType::HEAD;
 }
 
-TempList::TempList() : List(ListType::TEMP), right(nullptr), changes(), skip(0) {}
-
-const std::string TempList::to_str() const {
-  std::string res = "";
-  for (const Value& v : changes) {
-    res += v.to_str() + ", ";
+const std::string List::to_str() const {
+  std::stringstream res;
+  res << "[";
+  for (auto iter=begin(); iter != end(); iter.next()) {
+    res << (*iter).to_str() << ", ";
   }
-  if (right != nullptr) {
-    res += right->to_str();
-  }
-  return res;
+  res << "]";
+  return res.str();
 }
 
-Value TempList::at(size_t i) const {
-  if (i == 0) {
-    throw RuntimeException("Array access with index 0 not supported");
-  }
-  if ((i-1) < changes.size()) {
-    return changes[i-1];
-  } else {
-    return Value();
-  }
-}
+HeadList::HeadList(List *l, const Value& val) : List(ListType::HEAD), right(l), current_head(val) {}
+
+BottomList::BottomList() 
+  : List(ListType::BOTTOM), values() {}
 
 
-PermList::PermList() : List(ListType::PERM), values() {}
+BottomList::BottomList(const std::vector<Value>& vals) 
+  : List(ListType::BOTTOM), values(std::move(vals)) {}
 
-const std::string PermList::to_str() const {
-  std::string res = "";
 
-  for (const Value& v : values) {
-    res += v.to_str() + ", ";
-  }
-  return res;
-}
-
-Value PermList::at(size_t i) const {
-  if (i == 0) {
-    throw RuntimeException("Array access with index 0 not supported");
-  }
-
-  if ((i-1) < values.size()) {
-    return values[i-1];
-  } else {
-    return Value();
-  }
-}
+SkipList::SkipList(size_t skip, BottomList *btm) : List(ListType::SKIP), skip(skip), bottom(btm) {}
 
 namespace std {
 
   std::hash<std::string> hash<Value>::str_hasher;
-  std::hash<TempList> hash<Value>::temp_list_hasher;
-  std::hash<PermList> hash<Value>::perm_list_hasher;
+  std::hash<HeadList> hash<Value>::head_list_hasher;
+  std::hash<BottomList> hash<Value>::perm_list_hasher;
 
   size_t hash<Value>::operator()(const Value &key) const {
     switch (key.type.t) {
@@ -496,12 +461,13 @@ namespace std {
         return (uint64_t) str_hasher(*key.value.string);
       case TypeType::TUPLE: 
       case TypeType::TUPLE_OR_LIST: 
-      case TypeType::LIST: 
-        if (key.value.list->list_type == List::ListType::TEMP) {
-          return (uint64_t) temp_list_hasher(*reinterpret_cast<TempList*>(key.value.list));
-        } else {
-          return (uint64_t) perm_list_hasher(*reinterpret_cast<PermList*>(key.value.list));
+      case TypeType::LIST: {
+        size_t h = 0; 
+        for (auto iter=key.value.list->begin(); iter!=key.value.list->end(); iter++) {
+          h += operator()(*iter);
         }
+        return h;
+      }
       default: throw RuntimeException("Unsupported type in std::hash<Value>()");
     }
   }
@@ -516,13 +482,13 @@ namespace std {
     return h;
   }
 
-  std::hash<std::vector<Value>> hash<TempList>::list_hasher;
-  size_t hash<TempList>::operator()(const TempList &key) const {
-    return list_hasher(key.changes);
+  std::hash<Value> hash<HeadList>::hasher;
+  size_t hash<HeadList>::operator()(const HeadList &key) const {
+    return hasher(key.current_head);
   }
 
-  std::hash<std::vector<Value>> hash<PermList>::list_hasher;
-  size_t hash<PermList>::operator()(const PermList &key) const {
+  std::hash<std::vector<Value>> hash<BottomList>::list_hasher;
+  size_t hash<BottomList>::operator()(const BottomList &key) const {
     return list_hasher(key.values);
   }
 }

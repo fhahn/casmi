@@ -44,23 +44,14 @@ void ExecutionContext::apply_updates() {
     DEBUG("APPLY args "<<u->num_args << " arg "<<u->args[0] << " " << u->args[1]<<" func "<<function_map.first->name());
 
     if (function_map.first->return_type_->t == TypeType::LIST) {
+      Value& list = function_map.second[{u->args, u->num_args}];
       if (u->defined == 0) {
-        Value& list = function_map.second[{u->args, u->num_args}];
         if (list.is_undef()) {
           function_map.second.erase({u->args, u->num_args});
         }
       } else {
-        PermList *perm;
-        Value& list = function_map.second[{u->args, u->num_args}];
-        if (list.is_undef()) {
-          list.value.list = new PermList();
-          list.type = function_map.first->return_type_;
-        } 
-        
-        // Move temp changes to permanent lists, 
-        // TODO impßlement missing stuff
-        TempList *temp = reinterpret_cast<TempList*>(u->value);
-        reinterpret_cast<PermList*>(list.value.list)->values = temp->changes;
+        list.type = function_map.first->return_type_;
+        list.value.list = reinterpret_cast<List*>(u->value);
       }
     } else {
       Value v(function_map.first->return_type_, u);

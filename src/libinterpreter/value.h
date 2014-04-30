@@ -9,8 +9,8 @@
 
 class RuleNode;
 
-class TempList;
-class PermList;
+class HeadList;
+class BottomList;
 class List;
 
 class Value {
@@ -67,8 +67,9 @@ bool value_eq(const Value& v1, const Value& v2);
 class List {
   public:
     enum class ListType {
-      TEMP,
-      PERM,
+      HEAD,
+      BOTTOM,
+      SKIP,
     };
 
     class const_iterator {
@@ -88,12 +89,13 @@ class List {
         //const pointer operator->() { return ptr_; }
         bool operator==(const self_type& rhs) const;
         bool operator!=(const self_type& rhs) const;
-      private:
-        void do_init(const List *other);
 
-        const PermList *perm;
-        const TempList *temp;
+      private:
+        const BottomList *bottom;
+        const HeadList *head;
         size_t pos;
+
+        void do_init(const List *other);
     };
 
     ListType list_type;
@@ -104,45 +106,48 @@ class List {
     bool operator==(const List& other) const;
     bool operator!=(const List& other) const;
 
-    virtual const std::string to_str() const { return ""; }
-    bool is_perm() const;
-    bool is_temp() const;
+    bool is_bottom() const;
+    bool is_head() const;
 
     const_iterator begin() const;
     const_iterator end() const;
+
+    const std::string to_str() const;
 };
 
 
-class TempList : public List {
+class HeadList : public List {
   public:
     List* right;
-    std::vector<Value> changes;
-    size_t skip;
+    const Value current_head;
 
-    TempList();
-
-    const std::string to_str() const;
-    Value at(size_t i) const ;
+    HeadList(List* right, const Value& val);
 };
 
-class PermList : public List {
+class BottomList : public List {
   public:
-    std::vector<Value> values;
+    const std::vector<Value> values;
 
-    PermList();
+    BottomList();
+    BottomList(const std::vector<Value>& vals);
+};
 
-    const std::string to_str() const;
-    Value at(size_t i) const ;
+class SkipList : public List {
+  public:
+    size_t skip;
+    BottomList* bottom;
+
+    SkipList(size_t skip, BottomList *btm);
 };
 
 namespace std {
 
-  template <> struct hash<TempList>;
+  template <> struct hash<HeadList>;
 
   template <> struct hash<Value> {
     static std::hash<std::string> str_hasher;
-    static std::hash<TempList> temp_list_hasher;
-    static std::hash<PermList> perm_list_hasher;
+    static std::hash<HeadList> head_list_hasher;
+    static std::hash<BottomList> perm_list_hasher;
 
     size_t operator()(const Value &key) const;
   };
@@ -153,16 +158,16 @@ namespace std {
     size_t operator()(const std::vector<Value> &key) const;
   };
 
-  template <> struct hash<TempList> {
-    static std::hash<std::vector<Value>> list_hasher;
+  template <> struct hash<HeadList> {
+    static std::hash<Value> hasher;
 
-    size_t operator()(const TempList &key) const;
+    size_t operator()(const HeadList &key) const;
   };
 
-  template <> struct hash<PermList> {
+  template <> struct hash<BottomList> {
     static std::hash<std::vector<Value>> list_hasher;
 
-    size_t operator()(const PermList &key) const;
+    size_t operator()(const BottomList &key) const;
   };
 }
 

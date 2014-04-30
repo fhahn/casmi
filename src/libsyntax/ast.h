@@ -257,14 +257,13 @@ class StringAtom : public AtomNode {
 class ListAtom : public AtomNode {
   public:
     std::vector<ExpressionBase*>* expr_list;
-    TempList tmp_list;
 
     ListAtom(yy::location& loc, std::vector<ExpressionBase*> *exprs);
 };
 
 class NumberRangeAtom : public AtomNode {
   public:
-    PermList perm_list;
+    BottomList *list;
 
     NumberRangeAtom(yy::location& loc, IntAtom *start, IntAtom *end);
 };
