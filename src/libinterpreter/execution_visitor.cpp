@@ -221,6 +221,10 @@ Value casm_hex(std::vector<Value> &expr_results) {
 }
 
 Value casm_nth(std::vector<Value> &expr_results) {
+  if (expr_results[0].is_undef()) {
+    return Value();
+  }
+
   List *list = expr_results[0].value.list;
   List::const_iterator iter = list->begin();
   size_t i = 1;

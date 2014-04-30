@@ -341,6 +341,12 @@ Type* TypecheckVisitor::visit_builtin_atom(BuiltinAtom *atom,
 
           return &atom->type_;
         }
+
+        // this is needed to handle stuff like:
+        //          assert nth(undef, 2) = undef
+        if (atom->types[0]->is_unknown() && atom->type_.is_unknown()) {
+          return &atom->type_;
+        }
         if ((size_t) ind < (atom->types[0]->tuple_types.size()+1)) {
           atom->type_.unify(atom->types[0]->tuple_types[ind-1]);
         } else {
