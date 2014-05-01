@@ -451,6 +451,56 @@ void List::bump_usage() {
   }
 }
 
+void List::decrease_usage() {
+  usage_count -= 1;
+
+  if (is_bottom()) {
+    return;
+  }
+
+  if (is_head()) {
+    reinterpret_cast<HeadList*>(this)->right->bump_usage();
+  }
+
+  if (is_skip()) {
+    reinterpret_cast<SkipList*>(this)->bottom->bump_usage();
+  }
+}
+
+std::vector<Value> List::collect(std::vector<Value>& vec) {
+
+  if (is_head()) {
+    HeadList* list = reinterpret_cast<HeadList*>(this);
+    vec.push_back(list->current_head);
+    return std::move(list->right->collect(vec));
+  }
+
+  if (is_skip()) {
+
+    SkipList *list = reinterpret_cast<SkipList*>(this);
+    if (list->bottom->usage_count <= 1) {
+      for (size_t i = list->skip; i < list->bottom->values.size(); i++) {
+        vec.push_back(list->bottom->values[i]);
+      }
+      return std::move(vec);
+    } else {
+      assert(0);
+    }
+  }
+
+  if (is_bottom()) {
+    BottomList* list = reinterpret_cast<BottomList*>(this);
+    if (list->usage_count <= 1) {
+      for (const Value& v : list->values) {
+        vec.push_back(v);
+      }
+      return std::move(vec);
+    } else {
+      assert(0);
+    }
+  }
+}
+
 bool List::is_used() const {
   return usage_count > 0;
 }
