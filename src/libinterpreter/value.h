@@ -125,7 +125,7 @@ class List {
     void decrease_usage();
     bool is_used() const;
 
-    std::vector<Value> collect(std::vector<Value>& vec);
+    BottomList* collect();
 };
 
 
@@ -139,7 +139,7 @@ class HeadList : public List {
 
 class BottomList : public List {
   public:
-    const std::vector<Value> values;
+    std::vector<Value> values;
 
     BottomList();
     BottomList(const std::vector<Value>& vals);

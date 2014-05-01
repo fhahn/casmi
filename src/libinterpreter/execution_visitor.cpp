@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cmath>
 #include <assert.h>
 #include <utility>
@@ -370,7 +371,10 @@ Value ExecutionVisitor::visit_derived_function_atom(FunctionAtom *atom,
 
 Value ExecutionVisitor::visit_list_atom(ListAtom *atom, std::vector<Value> &vals) {
   BottomList *list = new BottomList(vals);
-  context_.temp_lists.push_back(list);
+  // this could be faster if the list of expressions would be evaluated back to
+  // front as well
+  std::reverse(list->values.begin(), list->values.end());
+  //context_.temp_lists.push_back(list);
   return Value(atom->type_, list);
 }
 

@@ -53,9 +53,12 @@ void ExecutionContext::apply_updates() {
           function_map.second.erase({u->args, u->num_args});
         }
       } else {
-        list.type = function_map.first->return_type_->t;
-        // TODO HANDLE overwriting old lists
-        //list.value.list->decrease_usage();
+        if (!list.is_undef()) {
+          // TODO HANDLE overwriting old lists
+          list.value.list->decrease_usage();
+        } else {
+          list.type = function_map.first->return_type_->t;
+        }
         list.value.list = reinterpret_cast<List*>(u->value);
         list.value.list->bump_usage();
         to_fold.push_back(&list);
@@ -73,10 +76,8 @@ void ExecutionContext::apply_updates() {
     i = i->previous;
   }
 
-  /*
   for (Value* v : to_fold) {
-    std::vector<Value> vals;
-    v->value.list = new BottomList(v->value.list->collect(vals));
+    v->value.list = v->value.list->collect();
   }
   to_fold.clear(); 
   std::vector<size_t> deleted;
@@ -92,7 +93,6 @@ void ExecutionContext::apply_updates() {
     temp_lists[del] = std::move(temp_lists.back());
     temp_lists.pop_back();
   }
-  */
 
   updateset.set->head->previous = NULL;
   updateset.set->head->next     = updateset.set->tail;
