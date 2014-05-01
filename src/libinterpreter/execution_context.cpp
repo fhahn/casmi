@@ -4,7 +4,7 @@
 
 #include "libinterpreter/execution_context.h"
 
-ExecutionContext::ExecutionContext(const SymbolTable<Function*>& st, RuleNode *init) : symbol_table(std::move(st)) {
+ExecutionContext::ExecutionContext(const SymbolTable<Function*>& st, RuleNode *init) : symbol_table(std::move(st)), temp_lists() {
   // use 10 MB for updateset data
   pp_mem_new(&updateset_data_, 1024 * 1024 * 100, "mem for main updateset");
   updateset.set =  pp_hashmap_new(&updateset_data_, 1024*10, "main updateset");
@@ -46,12 +46,16 @@ void ExecutionContext::apply_updates() {
     if (function_map.first->return_type_->t == TypeType::LIST) {
       Value& list = function_map.second[{u->args, u->num_args}];
       if (u->defined == 0) {
+
+        // TODO HANDLE overwriting lists with undef
         if (list.is_undef()) {
           function_map.second.erase({u->args, u->num_args});
         }
       } else {
         list.type = function_map.first->return_type_;
+        // TODO HANDLE overwriting old lists
         list.value.list = reinterpret_cast<List*>(u->value);
+        list.value.list->bump_usage();
       }
     } else {
       Value v(function_map.first->return_type_, u);
@@ -64,6 +68,20 @@ void ExecutionContext::apply_updates() {
 
     i->used = 0;
     i = i->previous;
+  }
+
+  std::vector<size_t> deleted;
+
+  for (size_t i=0; i < temp_lists.size(); i++) {
+    if (!temp_lists[i]->is_used()) {
+      delete temp_lists[i];
+      deleted.push_back(i);
+    }
+  }
+
+  for (size_t del : deleted) {
+    temp_lists[del] = std::move(temp_lists.back());
+    temp_lists.pop_back();
   }
 
   updateset.set->head->previous = NULL;
