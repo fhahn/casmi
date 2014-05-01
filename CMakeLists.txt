@@ -9,6 +9,10 @@ set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${casmi_BINARY_DIR}/lib )
 
 set( CMAKE_CXX_FLAGS "-std=c++11 -pedantic -Wall -Wextra -O3 -D_XOPEN_SOURCE=500 -D_BSD_SOURCE" )
 
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DCASMI_DEBUG")
+
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ")
+
 include_directories( src "${casmi_BINARY_DIR}/src")
 
 
