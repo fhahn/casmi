@@ -34,6 +34,7 @@ void ExecutionContext::apply_updates() {
   pp_hashmap_bucket* i = updateset.set->tail->previous;
   casm_update* u;
 
+  std::vector<Value*> to_fold;
   while( i != updateset.set->head ) {
     u = (casm_update*)i->value;
 
@@ -54,8 +55,10 @@ void ExecutionContext::apply_updates() {
       } else {
         list.type = function_map.first->return_type_;
         // TODO HANDLE overwriting old lists
+        list.value.list->decrease_usage();
         list.value.list = reinterpret_cast<List*>(u->value);
         list.value.list->bump_usage();
+        to_fold.push_back(&list);
       }
     } else {
       Value v(function_map.first->return_type_, u);
@@ -70,6 +73,12 @@ void ExecutionContext::apply_updates() {
     i = i->previous;
   }
 
+  for (Value* v : to_fold) {
+    std::vector<Value> vals;
+    
+    v->value.list = new BottomList(v->value.list->collect(vals));
+  }
+  to_fold.clear(); 
   std::vector<size_t> deleted;
 
   for (size_t i=0; i < temp_lists.size(); i++) {

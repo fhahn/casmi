@@ -122,7 +122,10 @@ class List {
     const std::string to_str() const;
 
     void bump_usage();
+    void decrease_usage();
     bool is_used() const;
+
+    std::vector<Value> collect(std::vector<Value>& vec);
 };
 
 
