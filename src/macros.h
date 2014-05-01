@@ -3,8 +3,12 @@
 
 #include <iostream>
 
-#define DEBUG(x) do { std::cerr << "DEBUG: " << x << std::endl; } while (0)
-//#define DEBUG(x) do { } while (0)
+#if defined(CASMI_DEBUG)
+  #define DEBUG(x) do { std::cerr << "DEBUG: " << x << std::endl; } while (0)
+#else
+  #define DEBUG(x) do { } while (0)
+#endif
+
 
 #define UNUSED(expr) do { (void)(expr); } while (0)
 
