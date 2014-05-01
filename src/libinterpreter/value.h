@@ -65,8 +65,6 @@ bool value_eq(const Value& v1, const Value& v2);
 
 
 class List {
-  private:
-    uint32_t usage_count;
 
   protected:
     enum class ListType {
@@ -123,7 +121,6 @@ class List {
 
     void bump_usage();
     void decrease_usage();
-    bool is_used() const;
 
     BottomList* collect();
 };
@@ -138,6 +135,12 @@ class HeadList : public List {
 };
 
 class BottomList : public List {
+  friend class List;
+
+  private:
+    uint32_t usage_count;
+    bool allocated_in_collect; 
+
   public:
     std::vector<Value> values;
 
@@ -145,6 +148,9 @@ class BottomList : public List {
     BottomList(const std::vector<Value>& vals);
 
     virtual ~BottomList();
+
+    bool is_used() const;
+    bool check_allocated_and_set_to_false();
 };
 
 class SkipList : public List {

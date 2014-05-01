@@ -77,13 +77,19 @@ void ExecutionContext::apply_updates() {
   }
 
   for (Value* v : to_fold) {
-    v->value.list = v->value.list->collect();
+    BottomList *new_l = v->value.list->collect();
+    if (new_l->check_allocated_and_set_to_false()) {
+      temp_lists.push_back(new_l);
+    }
+    v->value.list = new_l;
   }
+
   to_fold.clear(); 
   std::vector<size_t> deleted;
 
   for (size_t i=0; i < temp_lists.size(); i++) {
-    if (!temp_lists[i]->is_used()) {
+    // delete all list objects, except BottomLists that are currently used
+    if (!(temp_lists[i]->is_bottom() && reinterpret_cast<BottomList*>(temp_lists[i])->is_used())) {
       delete temp_lists[i];
       deleted.push_back(i);
     }

@@ -292,7 +292,7 @@ bool value_eq(const Value& v1, const Value& v2) {
 }
 
 
-List::List(ListType t) : list_type(t), usage_count(0) {}
+List::List(ListType t) : list_type(t) {}
 
 
 void List::const_iterator::do_init(const List *ptr) {
@@ -318,7 +318,7 @@ void List::const_iterator::do_init(const List *ptr) {
     const SkipList *skip = reinterpret_cast<const SkipList*>(ptr);
     if (skip->bottom->values.size() > skip->skip) {
       bottom = skip->bottom;
-      pos = skip->skip;
+      pos = skip->bottom->values.size() - skip->skip - 1;
     } else {
       bottom = nullptr;
     }
@@ -438,9 +438,8 @@ const std::string List::to_str() const {
 
 
 void List::bump_usage() {
-  usage_count += 1;
-
   if (is_bottom()) {
+    reinterpret_cast<BottomList*>(this)->usage_count += 1;
     return;
   }
 
@@ -454,9 +453,8 @@ void List::bump_usage() {
 }
 
 void List::decrease_usage() {
-  usage_count -= 1;
-
   if (is_bottom()) {
+    reinterpret_cast<BottomList*>(this)->usage_count -= 1;
     return;
   }
 
@@ -470,10 +468,6 @@ void List::decrease_usage() {
 }
 
 BottomList* List::collect() {
-  if (usage_count > 0) {
-    usage_count -= 1;
-  }
-
   if (is_head()) {
     HeadList* list = reinterpret_cast<HeadList*>(this);
     BottomList *result = list->right->collect();
@@ -493,27 +487,42 @@ BottomList* List::collect() {
   if (is_bottom()) {
     BottomList* list = reinterpret_cast<BottomList*>(this);
     if (list->usage_count <= 1) {
+      list->usage_count = 1;
       return list;
     } else {
-      assert(0);
+      BottomList *copy = new BottomList();
+      copy->usage_count = 1;
+      copy->values = list->values;
+      list->usage_count -= 1;
+      copy->allocated_in_collect = true;
+      return copy;
     }
   }
-}
-
-bool List::is_used() const {
-  return usage_count > 0;
 }
 
 HeadList::HeadList(List *l, const Value& val) : List(ListType::HEAD), right(l), current_head(val) {}
 
 BottomList::BottomList() 
-  : List(ListType::BOTTOM), values() {}
+  : List(ListType::BOTTOM), usage_count(0), values() {}
 
 
 BottomList::BottomList(const std::vector<Value>& vals) 
-  : List(ListType::BOTTOM), values(std::move(vals)) {}
+  : List(ListType::BOTTOM), usage_count(0), values(std::move(vals)) {}
 
 BottomList::~BottomList() {
+}
+
+
+bool BottomList::is_used() const {
+  return usage_count > 0;
+}
+
+bool BottomList::check_allocated_and_set_to_false() {
+  if (allocated_in_collect) {
+    allocated_in_collect = false;
+    return true;
+  }
+  return false;
 }
 
 SkipList::SkipList(size_t skip, BottomList *btm) : List(ListType::SKIP), skip(skip), bottom(btm) {}
