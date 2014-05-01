@@ -65,13 +65,18 @@ bool value_eq(const Value& v1, const Value& v2);
 
 
 class List {
-  public:
+  private:
+    uint32_t usage_count;
+
+  protected:
     enum class ListType {
       HEAD,
       BOTTOM,
       SKIP,
     };
 
+  public:
+    
     class const_iterator {
       public:
         typedef const_iterator self_type;
@@ -93,7 +98,7 @@ class List {
       private:
         const BottomList *bottom;
         const HeadList *head;
-        size_t pos;
+        uint32_t pos;
 
         void do_init(const List *other);
     };
@@ -101,6 +106,7 @@ class List {
     ListType list_type;
 
     List(ListType t);
+    virtual ~List() {}
 
 
     bool operator==(const List& other) const;
@@ -108,11 +114,15 @@ class List {
 
     bool is_bottom() const;
     bool is_head() const;
+    bool is_skip() const;
 
     const_iterator begin() const;
     const_iterator end() const;
 
     const std::string to_str() const;
+
+    void bump_usage();
+    bool is_used() const;
 };
 
 
@@ -130,6 +140,8 @@ class BottomList : public List {
 
     BottomList();
     BottomList(const std::vector<Value>& vals);
+
+    virtual ~BottomList();
 };
 
 class SkipList : public List {

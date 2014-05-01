@@ -240,13 +240,14 @@ Value casm_nth(std::vector<Value> &expr_results) {
   }
 }
 
-Value casm_cons(std::vector<Value> &expr_results) {
+Value casm_cons(ExecutionContext& ctxt, std::vector<Value> &expr_results) {
   // TODO LEAK
   if (expr_results[1].is_undef()) {
     return Value();
   }
 
   HeadList *consed_list = new HeadList(expr_results[1].value.list, expr_results[0]);
+  ctxt.temp_lists.push_back(consed_list);
   return Value(expr_results[1].type, consed_list);
 }
 
@@ -269,7 +270,7 @@ Value casm_len(std::vector<Value> &expr_results) {
   return Value((INT_T) count);
 }
 
-Value casm_tail(std::vector<Value> &expr_results) {
+Value casm_tail(ExecutionContext& ctxt, std::vector<Value> &expr_results) {
   if (expr_results[0].is_undef()) {
     return Value();
   }
@@ -282,6 +283,7 @@ Value casm_tail(std::vector<Value> &expr_results) {
     BottomList *btm = reinterpret_cast<BottomList*>(list);
     if (btm->values.size() > 0) {
       SkipList *skip = new SkipList(1, btm);
+      ctxt.temp_lists.push_back(skip);
       return Value(expr_results[0].type, skip);
     } else {
       // tail for empty list returns empty list
@@ -290,6 +292,7 @@ Value casm_tail(std::vector<Value> &expr_results) {
   } else {
     SkipList *old_skip = reinterpret_cast<SkipList*>(list);
     SkipList *skip = new SkipList(old_skip->skip+1, old_skip->bottom);
+    ctxt.temp_lists.push_back(skip);
     return Value(expr_results[0].type, skip);
   }
 }
@@ -344,11 +347,11 @@ Value ExecutionVisitor::visit_builtin_atom(BuiltinAtom *atom, std::vector<Value>
   } else if (atom->name == "nth") {
     return casm_nth(expr_results);
   } else if (atom->name == "cons") {
-    return casm_cons(expr_results);
+    return casm_cons(context_, expr_results);
   } else if (atom->name == "len") {
     return casm_len(expr_results);
   } else if (atom->name == "tail") {
-    return casm_tail(expr_results);
+    return casm_tail(context_, expr_results);
   } else if (atom->name == "peek") {
     return casm_peek(expr_results);
   } else {
@@ -365,6 +368,7 @@ Value ExecutionVisitor::visit_derived_function_atom(FunctionAtom *atom,
 
 Value ExecutionVisitor::visit_list_atom(ListAtom *atom, std::vector<Value> &vals) {
   BottomList *list = new BottomList(vals);
+  context_.temp_lists.push_back(list);
   return Value(atom->type_, list);
 }
 
@@ -458,6 +462,11 @@ void ExecutionWalker::run() {
     }
     visitor.context_.functions[pair.second->id] = std::pair<Function*, std::unordered_map<ArgumentsKey, Value>>(pair.second, function_map);
   }
+  for (List *l : visitor.context_.temp_lists) {
+    l->bump_usage();
+  }
+
+  visitor.context_.temp_lists.clear();
 
   Function *program_sym = visitor.context_.symbol_table.get("program");
   uint64_t args[10] = {0};

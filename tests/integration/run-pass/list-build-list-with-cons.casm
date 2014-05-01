@@ -1,0 +1,12 @@
+function i: -> Int initially {0}
+function a: -> List(Int) initially { [] }
+
+rule main = {
+    i := i + 1 
+    a := cons(i, a)
+    if i = 20 then {
+        assert a = [19..0]
+        program(self) := undef
+    }
+}
+init main

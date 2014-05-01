@@ -292,7 +292,7 @@ bool value_eq(const Value& v1, const Value& v2) {
 }
 
 
-List::List(ListType t) : list_type(t) {}
+List::List(ListType t) : list_type(t), usage_count(0) {}
 
 
 void List::const_iterator::do_init(const List *ptr) {
@@ -420,6 +420,10 @@ bool List::is_head() const {
   return list_type == ListType::HEAD;
 }
 
+bool List::is_skip() const {
+  return list_type == ListType::SKIP;
+}
+
 const std::string List::to_str() const {
   std::stringstream res;
   res << "[";
@@ -428,6 +432,27 @@ const std::string List::to_str() const {
   }
   res << "]";
   return res.str();
+}
+
+
+void List::bump_usage() {
+  usage_count += 1;
+
+  if (is_bottom()) {
+    return;
+  }
+
+  if (is_head()) {
+    reinterpret_cast<HeadList*>(this)->right->bump_usage();
+  }
+
+  if (is_skip()) {
+    reinterpret_cast<SkipList*>(this)->bottom->bump_usage();
+  }
+}
+
+bool List::is_used() const {
+  return usage_count > 0;
 }
 
 HeadList::HeadList(List *l, const Value& val) : List(ListType::HEAD), right(l), current_head(val) {}
@@ -439,6 +464,8 @@ BottomList::BottomList()
 BottomList::BottomList(const std::vector<Value>& vals) 
   : List(ListType::BOTTOM), values(std::move(vals)) {}
 
+BottomList::~BottomList() {
+}
 
 SkipList::SkipList(size_t skip, BottomList *btm) : List(ListType::SKIP), skip(skip), bottom(btm) {}
 

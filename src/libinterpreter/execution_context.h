@@ -59,6 +59,7 @@ class ExecutionContext {
     const SymbolTable<Function*> symbol_table;
     casm_updateset updateset;
     pp_mem pp_stack;
+    std::vector<List*> temp_lists;
 
     ExecutionContext(const SymbolTable<Function*>& st, RuleNode *init);
 
