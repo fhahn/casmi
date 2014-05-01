@@ -1,0 +1,12 @@
+function i: -> Int initially {0}
+function a: -> List(Int) initially { [] }
+
+rule main = {
+    a := cons(i, a)
+    i := i+1
+    if i = 10000 then {
+        assert a = [9999..0]
+        program(self) := undef
+    }
+}
+init main
