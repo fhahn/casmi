@@ -94,16 +94,20 @@ void ExecutionVisitor::visit_call(CallNode *call, std::vector<Value> &argument_r
       throw RuntimeException("Invalid indirect call");
     } else {
       for (size_t i=0; i < args_defined; i++) {
-        /*
-        if (*call->rule->arguments[i] != argument_results[i].type) {
+        if (call->rule->arguments[i]->t == TypeType::LIST) {
+          // TODO
+          assert(0);
+        } else if (call->rule->arguments[i]->t == TypeType::LIST) {
+          // TODO
+          assert(0);
+        } else if (*call->rule->arguments[i] != argument_results[i].type) {
           driver_.error(call->arguments->at(i)->location,
                         "argument "+std::to_string(i+1)+" of indirectly called rule `"+
                         call->rule->name+"` must be `"+
                         call->rule->arguments[i]->to_str()+"` but was `"+
-                        argument_results[i].type.to_str()+"`");
+                        Type(argument_results[i].type).to_str()+"`");
           throw RuntimeException("Invalid indirect call");
-        }o*/
-        assert(0);
+        }
       }
     }
   }
