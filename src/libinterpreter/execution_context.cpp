@@ -44,17 +44,17 @@ void ExecutionContext::apply_updates() {
 
     DEBUG("APPLY args "<<u->num_args << " arg "<<u->args[0] << " " << u->args[1]<<" func "<<function_map.first->name());
 
+    // TODO handle tuples
     if (function_map.first->return_type_->t == TypeType::LIST) {
       Value& list = function_map.second[{u->args, u->num_args}];
       if (u->defined == 0) {
-
-        // TODO HANDLE overwriting lists with undef
-        if (list.is_undef()) {
-          function_map.second.erase({u->args, u->num_args});
+        // set list to undef
+        if (!list.is_undef()) {
+          list.value.list->decrease_usage();
+          list.type == TypeType::UNDEF;
         }
       } else {
         if (!list.is_undef()) {
-          // TODO HANDLE overwriting old lists
           list.value.list->decrease_usage();
         } else {
           list.type = function_map.first->return_type_->t;
