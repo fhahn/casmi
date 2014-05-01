@@ -308,8 +308,10 @@ void List::const_iterator::do_init(const List *ptr) {
     bottom = nullptr;
   } else if (ptr->is_bottom()){
     bottom = reinterpret_cast<const BottomList*>(ptr);
+    pos = bottom->values.size() - 1;
     if (bottom->values.size() == 0) {
       bottom = nullptr;
+      pos = 0;
     }
     head = nullptr;
   } else {
@@ -340,8 +342,8 @@ void List::const_iterator::next() {
   if (head) {
     do_init(head->right);
   } else if (bottom) {
-    if ((1+pos) < bottom->values.size()) {
-      pos += 1;
+    if (pos > 0) {
+      pos -= 1;
     } else {
       do_init(nullptr);
     }
@@ -467,34 +469,31 @@ void List::decrease_usage() {
   }
 }
 
-std::vector<Value> List::collect(std::vector<Value>& vec) {
+BottomList* List::collect() {
+  if (usage_count > 0) {
+    usage_count -= 1;
+  }
 
   if (is_head()) {
     HeadList* list = reinterpret_cast<HeadList*>(this);
-    vec.push_back(list->current_head);
-    return std::move(list->right->collect(vec));
+    BottomList *result = list->right->collect();
+    result->values.push_back(std::move(list->current_head));
+    return result;
   }
 
   if (is_skip()) {
-
     SkipList *list = reinterpret_cast<SkipList*>(this);
-    if (list->bottom->usage_count <= 1) {
-      for (size_t i = list->skip; i < list->bottom->values.size(); i++) {
-        vec.push_back(list->bottom->values[i]);
-      }
-      return std::move(vec);
-    } else {
-      assert(0);
+    BottomList *result = list->collect();
+    for (size_t i=list->skip; i > 0; i--) {
+      result->values.pop_back();
     }
+    return result;
   }
 
   if (is_bottom()) {
     BottomList* list = reinterpret_cast<BottomList*>(this);
     if (list->usage_count <= 1) {
-      for (const Value& v : list->values) {
-        vec.push_back(v);
-      }
-      return std::move(vec);
+      return list;
     } else {
       assert(0);
     }

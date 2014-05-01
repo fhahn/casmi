@@ -353,11 +353,11 @@ NumberRangeAtom::NumberRangeAtom(yy::location& loc, IntAtom *start, IntAtom *end
 
   std::vector<Value> vals;
   if (i_start <= i_end) {
-    for (INT_T i=i_start; i <= i_end; i++) {
+    for (INT_T i=i_end; i >= i_start; i--) {
       vals.push_back(Value(i));
     }
   } else {
-    for (INT_T i=i_start; i >= i_end; i--) {
+    for (INT_T i=i_end; i <= i_start; i++) {
       vals.push_back(Value(i));
     }
   }
