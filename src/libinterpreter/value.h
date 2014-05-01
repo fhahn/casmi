@@ -15,7 +15,7 @@ class List;
 
 class Value {
   public:
-    Type type;
+    TypeType type;
     union {
       INT_T ival;
       FLOAT_T fval;
@@ -31,11 +31,11 @@ class Value {
     Value(bool bval);
     Value(RuleNode *rule);
     Value(std::string *string);
-    Value(Type t, List *list);
+    Value(const Type& t, List *list);
     Value(Value& other);
     Value(const Value& other);
     Value(Value&& other);
-    Value(Type type, casm_update* update);
+    Value(const Type& type, casm_update* update);
 
     Value& operator=(const Value& other);
 

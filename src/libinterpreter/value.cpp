@@ -28,7 +28,7 @@ Value::Value(std::string *string) : type(TypeType::STRING) {
   value.string = string;
 }
 
-Value::Value(Type t,List *list) : type(t) {
+Value::Value(const Type &t, List *list) : type(t.t) {
   value.list = list;
 }
 
@@ -46,7 +46,7 @@ Value& Value::operator=(const Value& other) {
 }
 
 
-Value::Value(Type t, casm_update* u) {
+Value::Value(const Type& t, casm_update* u) {
   if (u->defined == 0) {
     type = TypeType::UNDEF;
     return;
@@ -78,7 +78,7 @@ Value::Value(Type t, casm_update* u) {
       break;
     case TypeType::LIST:
       if (u->value != 0) {
-        type = t;
+        type = TypeType::LIST;
         value.list = reinterpret_cast<List*>(u->value);
       } else {
         type = TypeType::UNDEF;
@@ -92,7 +92,7 @@ void Value::add(const Value& other) {
   if (type == TypeType::UNDEF || other.type == TypeType::UNDEF) {
     type = TypeType::UNDEF;
  } else {
-   switch (type.t) {
+   switch (type) {
       case TypeType::INT: {
         value.ival += other.value.ival;
         break;
@@ -106,7 +106,7 @@ void Value::sub(const Value& other) {
   if (type == TypeType::UNDEF || other.type == TypeType::UNDEF) {
     type = TypeType::UNDEF;
   } else {
-    switch (type.t) {
+    switch (type) {
       case TypeType::INT: {
         value.ival -= other.value.ival;
         break;
@@ -120,7 +120,7 @@ void Value::mul(const Value& other) {
   if (type == TypeType::UNDEF || other.type == TypeType::UNDEF) {
     type = TypeType::UNDEF;
   } else {
-    switch (type.t) {
+    switch (type) {
       case TypeType::INT: {
         value.ival *= other.value.ival;
         break;
@@ -134,7 +134,7 @@ void Value::div(const Value& other) {
   if (type == TypeType::UNDEF || other.type == TypeType::UNDEF) {
     type = TypeType::UNDEF;
   } else {
-    switch (type.t) {
+    switch (type) {
       case TypeType::INT: {
         value.ival /= other.value.ival;
         break;
@@ -148,7 +148,7 @@ void Value::mod(const Value& other) {
   if (type == TypeType::UNDEF || other.type == TypeType::UNDEF) {
     type = TypeType::UNDEF;
   } else {
-    switch (type.t) {
+    switch (type) {
       case TypeType::INT: {
         value.ival %= other.value.ival;
         break;
@@ -173,7 +173,7 @@ void Value::lesser(const Value& other) {
   if (type == TypeType::UNDEF || other.type == TypeType::UNDEF) {
     type = TypeType::UNDEF;
   } else {
-    switch (type.t) {
+    switch (type) {
       case TypeType::INT:
         value.bval = value.ival < other.value.ival;
         break;
@@ -186,7 +186,7 @@ void Value::greater(const Value& other) {
   if (type == TypeType::UNDEF || other.type == TypeType::UNDEF) {
     type = TypeType::UNDEF;
   } else {
-    switch (type.t) {
+    switch (type) {
       case TypeType::INT:
         value.bval = value.ival > other.value.ival;
         break;
@@ -199,7 +199,7 @@ void Value::lessereq(const Value& other) {
   if (type == TypeType::UNDEF || other.type == TypeType::UNDEF) {
     type = TypeType::UNDEF;
   } else {
-    switch (type.t) {
+    switch (type) {
       case TypeType::INT:
         value.bval = value.ival <= other.value.ival;
         break;
@@ -212,7 +212,7 @@ void Value::greatereq(const Value& other) {
   if (type == TypeType::UNDEF || other.type == TypeType::UNDEF) {
     type = TypeType::UNDEF;
   } else {
-    switch (type.t) {
+    switch (type) {
       case TypeType::INT:
         value.bval = value.ival >= other.value.ival;
         break;
@@ -223,7 +223,7 @@ void Value::greatereq(const Value& other) {
 
 
 uint64_t Value::to_uint64_t() const {
-  switch (type.t) {
+  switch (type) {
     case TypeType::INT:
       return value.ival;
     case TypeType::SELF:
@@ -246,7 +246,7 @@ bool Value::is_undef() const {
 }
 
 std::string Value::to_str() const {
-  switch (type.t) {
+  switch (type) {
     case TypeType::INT:
       return std::move(std::to_string(value.ival));
     case TypeType::FLOAT:
@@ -270,7 +270,7 @@ std::string Value::to_str() const {
       } else {
         return "false";
       }
-    default: throw RuntimeException("Unsupported type in Value.to_str() "+type.to_str());
+    default: throw RuntimeException("Unsupported type in Value.to_str() ");
   }
 }
 
@@ -278,7 +278,7 @@ bool value_eq(const Value& v1, const Value& v2) {
   if (v1.type == TypeType::UNDEF || v2.type == TypeType::UNDEF) {
     return v1.type == v2.type;
   } else {
-    switch (v1.type.t) {
+    switch (v1.type) {
       case TypeType::INT: return v1.value.ival == v2.value.ival;
       case TypeType::FLOAT: return v1.value.fval == v2.value.fval;
       case TypeType::BOOLEAN: return v1.value.bval == v2.value.bval;
@@ -526,7 +526,7 @@ namespace std {
   std::hash<BottomList> hash<Value>::perm_list_hasher;
 
   size_t hash<Value>::operator()(const Value &key) const {
-    switch (key.type.t) {
+    switch (key.type) {
       case TypeType::INT:
         return key.value.ival;
       case TypeType::SELF:
