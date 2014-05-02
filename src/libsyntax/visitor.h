@@ -116,6 +116,10 @@ template<class T, class V> class AstWalker {
           walk_let(reinterpret_cast<LetNode*>(stmt));
           break;
         }
+        case NodeType::POP: {
+          walk_pop(reinterpret_cast<PopNode*>(stmt));
+          break;
+        }
         default:
             throw RuntimeException(
               std::string("Invalid node type: ")+
@@ -190,6 +194,11 @@ template<class T, class V> class AstWalker {
       visitor.visit_let(node, v);
       walk_statement(node->stmt);
       visitor.visit_let_post(node);
+    }
+
+    void walk_pop(PopNode *node) {
+      walk_function_atom(node->from);
+      visitor.visit_pop(node);
     }
 
     V walk_expression_base(ExpressionBase *expr) {

@@ -162,6 +162,42 @@ void TypecheckVisitor::visit_let_post(LetNode *node) {
   rule_binding_offsets.back()->erase(node->identifier);
 }
 
+void TypecheckVisitor::visit_pop(PopNode *node) {
+  if (!node->from_type.unify(&node->from->type_)) {
+    driver_.error(node->from->location,
+                  "from argument must be List(Unknown) but was "+node->from->type_.to_str());
+  }
+
+  Function *sym = driver_.function_table.get(node->to->name);
+  if (sym) {
+    std::vector<Type*> func_arguments;
+    if (node->to->arguments) {
+      // TODO this should be doable!
+      driver_.error(node->to->location, "cannot pop into function with arguments");
+    }
+    visit_function_atom(node->to, func_arguments);
+    if (!node->type_.unify(&node->to->type_)) {
+      driver_.error(node->from->location,
+                    "cannot pop from "+node->from->type_.to_str()+" into "+node->to->type_.to_str());
+    }
+  } else {
+    auto current_rule_binding_types = rule_binding_types.back();
+    auto current_rule_binding_offsets = rule_binding_offsets.back();
+
+    if (current_rule_binding_offsets->count(node->to->name) != 0) {
+      driver_.error(node->to->location,
+                    "can only pop into functions or new bindings");
+    }
+    current_rule_binding_offsets->insert(
+        std::pair<std::string, size_t>(node->to->name,
+                                       current_rule_binding_types->size())
+    );
+    current_rule_binding_types->push_back(&node->type_);
+    node->to->symbol_type = FunctionAtom::SymbolType::PUSH_POP;
+    node->to->offset = current_rule_binding_offsets->at(node->to->name);
+  }
+}
+
 void TypecheckVisitor::check_numeric_operator(const yy::location& loc, 
                                             Type* type,
                                             const Expression::Operation op) {

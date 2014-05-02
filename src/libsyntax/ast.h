@@ -45,7 +45,8 @@ enum NodeType {
   LET,
   LIST_ATOM,
   BUILTIN_ATOM,
-  NUMBER_RANGE_ATOM
+  NUMBER_RANGE_ATOM,
+  POP,
 };
 
 const std::string& type_to_str(NodeType t);
@@ -200,7 +201,8 @@ class FunctionAtom : public BaseFunctionAtom {
       FUNCTION,
       DERIVED,
       PARAMETER,
-      UNSET
+      UNSET,
+      PUSH_POP,
     };
 
     SymbolType symbol_type;
@@ -311,6 +313,19 @@ class UpdateNode: public AstNode {
     virtual ~UpdateNode();
     virtual bool equals(AstNode *other);
 };
+
+class PopNode: public AstNode {
+  public:
+    FunctionAtom *to;
+    FunctionAtom *from;
+
+    Type from_type;
+
+    PopNode(yy::location& loc, FunctionAtom *to, FunctionAtom *from);
+    virtual ~PopNode();
+    virtual bool equals(AstNode *other);
+};
+
 
 class CallNode: public AstNode {
   public:

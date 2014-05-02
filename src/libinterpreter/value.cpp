@@ -477,7 +477,7 @@ BottomList* List::collect() {
 
   if (is_skip()) {
     SkipList *list = reinterpret_cast<SkipList*>(this);
-    BottomList *result = list->collect();
+    BottomList *result = list->bottom->collect();
     for (size_t i=list->skip; i > 0; i--) {
       result->values.pop_back();
     }

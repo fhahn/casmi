@@ -19,6 +19,9 @@ class ExecutionVisitor {
     std::vector<std::vector<Value> *> rule_bindings;
     std::vector<Value> main_bindings;
 
+  casm_update *add_update(const Value& val, size_t sym_id,
+                          const std::vector<Value> &arguments);
+
   public:
     Driver& driver_;
     ExecutionContext& context_;
@@ -47,6 +50,7 @@ class ExecutionVisitor {
 
     void visit_let(LetNode *node, Value& v);
     void visit_let_post(LetNode *node);
+    void visit_pop(PopNode *node, const Value& val);
 
     Value visit_expression(Expression *expr, Value& left_val, Value& right_val);
     Value visit_expression_single(Expression *expr, Value& val);

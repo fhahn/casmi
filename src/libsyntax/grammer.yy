@@ -97,6 +97,7 @@
 %type <PrintNode*> PRINT_SYNTAX
 %type <LetNode*> LET_SYNTAX
 %type<std::vector<Type*>> TYPE_SYNTAX_LIST
+%type <PopNode*> POP_SYNTAX
 
 %start SPECIFICATION
 
@@ -135,7 +136,6 @@ BODY_ELEMENT: PROVIDER_SYNTAX { $$ = new AstNode(NodeType::PROVIDER); }
            | ENUM_SYNTAX { $$ = new AstNode(NodeType::ENUM); }
            | FUNCTION_DEFINITION {
                 $$ = new FunctionDefNode(@$, $1);
-                DEBUG("CALLL\n");
                 if ($1->is_builtin()) {
                     driver.error(@$, "cannot use `"+$1->name()+"` as function identifier because it is a builtin name");
                 }
@@ -447,7 +447,7 @@ STATEMENT: ASSERT_SYNTAX { $$ = $1; }
          | IFTHENELSE { $$ = $1; }
          | LET_SYNTAX { $$ = $1; }
          | PUSH_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
-         | POP_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
+         | POP_SYNTAX { $$ = $1; }
          | FORALL_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
          | ITERATE_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
          | SKIP  { $$ = new AstNode(NodeType::SKIP); }
@@ -569,7 +569,15 @@ LET_SYNTAX: LET IDENTIFIER "=" EXPRESSION IN STATEMENT {
 PUSH_SYNTAX: PUSH EXPRESSION INTO IDENTIFIER
            ;
 
-POP_SYNTAX: POP IDENTIFIER FROM IDENTIFIER
+POP_SYNTAX: POP FUNCTION_SYNTAX FROM FUNCTION_SYNTAX {
+                if ($2->node_type_ == NodeType::BUILTIN_ATOM) {
+                  driver.error(@$, "cannot pop to builtin `"+$2->name+"`");
+                } else if ($4->node_type_ == NodeType::BUILTIN_ATOM) {
+                  driver.error(@$, "cannot pop to builtin `"+$4->name+"`");
+                } else {
+                    $$ = new PopNode(@$, reinterpret_cast<FunctionAtom*>($2), reinterpret_cast<FunctionAtom*>($4));
+                }
+          }
           ;
 
 FORALL_SYNTAX: FORALL IDENTIFIER IN EXPRESSION DO STATEMENT
