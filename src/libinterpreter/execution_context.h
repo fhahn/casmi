@@ -52,7 +52,7 @@ namespace std {
 class ExecutionContext {
   private:
     pp_mem updateset_data_;
-    std::vector<Function*> syms_to_apply;
+    std::map<const std::string, bool> debuginfo_filters;
 
   public:
     std::vector<std::pair<Function*, std::unordered_map<ArgumentsKey, Value> >> functions;
@@ -69,6 +69,9 @@ class ExecutionContext {
 
     void set_function(Function *sym, uint64_t args[], Value& val);
     Value& get_function_value(Function *sym, uint64_t args[]);
+
+    bool set_debuginfo_filter(const std::string& filters);
+    bool filter_enabled(const std::string& filter);
 };
 
 #endif //CASMI_LIBINTERPRETER_EXEC_CONTEXT
