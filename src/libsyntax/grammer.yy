@@ -94,7 +94,7 @@
 %type <IfThenElseNode*> IFTHENELSE
 %type <CallNode*> CALL_SYNTAX
 %type <std::vector<ExpressionBase*>> DEBUG_ATOM_LIST
-%type <PrintNode*> PRINT_SYNTAX
+%type <PrintNode*> PRINT_SYNTAX DEBUGINFO_SYNTAX
 %type <LetNode*> LET_SYNTAX
 %type<std::vector<Type*>> TYPE_SYNTAX_LIST
 %type <PushNode*> PUSH_SYNTAX
@@ -436,7 +436,7 @@ STATEMENT: ASSERT_SYNTAX { $$ = $1; }
          | ASSURE_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
          | DIEDIE_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
          | IMPOSSIBLE_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
-         | DEBUGINFO_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
+         | DEBUGINFO_SYNTAX { $$ = $1; }
          | PRINT_SYNTAX { $$ = $1; }
          | UPDATE_SYNTAX { $$ = $1; }
          | CASE_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
@@ -476,7 +476,7 @@ DIEDIE_SYNTAX: DIEDIE EXPRESSION
 IMPOSSIBLE_SYNTAX: IMPOSSIBLE 
          ;
 
-DEBUGINFO_SYNTAX: DEBUGINFO IDENTIFIER DEBUG_ATOM_LIST
+DEBUGINFO_SYNTAX: DEBUGINFO IDENTIFIER DEBUG_ATOM_LIST { $$ = new PrintNode(@$, $2, $3); }
                 ;
 
 DEBUG_ATOM_LIST: DEBUG_ATOM_LIST "+" ATOM { $$ = std::move($1); $$.push_back($3); }

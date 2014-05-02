@@ -523,9 +523,13 @@ CallNode::CallNode(yy::location& loc, const std::string& rule_name, ExpressionBa
 
 
 PrintNode::PrintNode(yy::location& loc, const std::vector<ExpressionBase*> &atoms)
-    : AstNode(loc, NodeType::PRINT, Type(TypeType::NO_TYPE)), atoms(std::move(atoms)){
-
+    : AstNode(loc, NodeType::PRINT, Type(TypeType::NO_TYPE)), atoms(std::move(atoms)), filter() {
 }
+
+PrintNode::PrintNode(yy::location& loc, const std::string& filter, const std::vector<ExpressionBase*> &atoms)
+    : AstNode(loc, NodeType::PRINT, Type(TypeType::NO_TYPE)), atoms(std::move(atoms)), filter(std::move(filter)) {
+}
+
 
 LetNode::LetNode(yy::location& loc, Type type, const std::string& identifier,
             ExpressionBase *expr, AstNode *stmt) 

@@ -254,6 +254,14 @@ void ExecutionVisitor::visit_call_post(CallNode *call) {
 }
 
 void ExecutionVisitor::visit_print(PrintNode *node, const std::vector<Value> &arguments) {
+  if (node->filter.size() > 0 ) {
+    if (context_.filter_enabled(node->filter)) {
+      std::cout << node->filter << ": ";
+    } else {
+      return;
+    }
+  }
+
   for (const Value& v: arguments) {
     std::cout << v.to_str();
   }

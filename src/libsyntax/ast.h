@@ -353,8 +353,10 @@ class CallNode: public AstNode {
 class PrintNode: public AstNode {
   public:
     std::vector<ExpressionBase*> atoms;
+    std::string filter;
 
     PrintNode(yy::location& loc, const std::vector<ExpressionBase*> &atoms);
+    PrintNode(yy::location& loc, const std::string& filter, const std::vector<ExpressionBase*> &atoms);
 };
 
 class LetNode: public AstNode {
