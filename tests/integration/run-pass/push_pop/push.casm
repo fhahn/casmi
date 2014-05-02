@@ -1,5 +1,4 @@
-
-function (controlled) a: -> List /*ta: Int */
+function (controlled) a: -> List(Int)
 
 rule main = seqblock
   a := [ 1,2,3 ]

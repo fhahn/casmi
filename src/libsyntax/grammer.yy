@@ -97,6 +97,7 @@
 %type <PrintNode*> PRINT_SYNTAX
 %type <LetNode*> LET_SYNTAX
 %type<std::vector<Type*>> TYPE_SYNTAX_LIST
+%type <PushNode*> PUSH_SYNTAX
 %type <PopNode*> POP_SYNTAX
 
 %start SPECIFICATION
@@ -446,7 +447,7 @@ STATEMENT: ASSERT_SYNTAX { $$ = $1; }
          | PARBLOCK_SYNTAX { $$ = $1; }
          | IFTHENELSE { $$ = $1; }
          | LET_SYNTAX { $$ = $1; }
-         | PUSH_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
+         | PUSH_SYNTAX { $$ = $1; }
          | POP_SYNTAX { $$ = $1; }
          | FORALL_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
          | ITERATE_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
@@ -566,7 +567,14 @@ LET_SYNTAX: LET IDENTIFIER "=" EXPRESSION IN STATEMENT {
 
           ;
 
-PUSH_SYNTAX: PUSH EXPRESSION INTO IDENTIFIER
+PUSH_SYNTAX: PUSH EXPRESSION INTO FUNCTION_SYNTAX {
+                if ($4->node_type_ == NodeType::BUILTIN_ATOM) {
+                  driver.error(@$, "cannot pop to builtin `"+$4->name+"`");
+                } else {
+                    $$ = new PushNode(@$, $2, reinterpret_cast<FunctionAtom*>($4));
+                }
+          }
+
            ;
 
 POP_SYNTAX: POP FUNCTION_SYNTAX FROM FUNCTION_SYNTAX {

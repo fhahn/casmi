@@ -50,6 +50,7 @@ class ExecutionVisitor {
 
     void visit_let(LetNode *node, Value& v);
     void visit_let_post(LetNode *node);
+    void visit_push(PushNode *node, const Value& expr, const Value& atom);
     void visit_pop(PopNode *node, const Value& val);
 
     Value visit_expression(Expression *expr, Value& left_val, Value& right_val);

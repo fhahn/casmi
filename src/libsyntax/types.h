@@ -75,7 +75,8 @@ class Type {
     bool unify_nofollow(Type *other);
 
 
-    bool is_complete();
+    const Type* get_most_general_type() const;
+    bool is_complete() const;
     bool is_unknown() const;
 };
 

@@ -62,15 +62,15 @@ Value casm_nth(std::vector<Value> &expr_results) {
   }
 }
 
-Value casm_cons(ExecutionContext& ctxt, std::vector<Value> &expr_results) {
+Value casm_cons(ExecutionContext& ctxt, const Value& val, const Value& list) {
   // TODO LEAK
-  if (expr_results[1].is_undef()) {
+  if (list.is_undef()) {
     return Value();
   }
 
-  HeadList *consed_list = new HeadList(expr_results[1].value.list, expr_results[0]);
+  HeadList *consed_list = new HeadList(list.value.list, val);
   ctxt.temp_lists.push_back(consed_list);
-  return Value(expr_results[1].type, consed_list);
+  return Value(list.type, consed_list);
 }
 
 Value casm_len(std::vector<Value> &expr_results) {
@@ -268,6 +268,21 @@ void ExecutionVisitor::visit_let_post(LetNode *node) {
   rule_bindings.back()->pop_back();
 }
 
+void ExecutionVisitor::visit_push(PushNode *node, const Value& expr, const Value& atom) {
+  Value to_res = casm_cons(context_, expr, atom);
+
+  try {
+    casm_update *up = add_update(to_res, node->to->symbol->id, value_list);
+    up->line = (uint64_t) &node->location;
+    value_list.clear();
+  } catch (const RuntimeException& ex) {
+    // TODO this is probably not the cleanest solutions
+    driver_.error(node->to->location,
+                  "update conflict in parallel block for function `"+node->to->name+"`");
+    throw ex;
+  }
+}
+
 void ExecutionVisitor::visit_pop(PopNode *node, const Value& val) {
   Value to_res = casm_peek(val);
 
@@ -399,7 +414,7 @@ Value ExecutionVisitor::visit_builtin_atom(BuiltinAtom *atom, std::vector<Value>
   } else if (atom->name == "nth") {
     return casm_nth(expr_results);
   } else if (atom->name == "cons") {
-    return casm_cons(context_, expr_results);
+    return casm_cons(context_, expr_results[0], expr_results[1]);
   } else if (atom->name == "len") {
     return casm_len(expr_results);
   } else if (atom->name == "tail") {
