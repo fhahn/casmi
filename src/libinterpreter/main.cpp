@@ -27,12 +27,14 @@ enum OptionValues {
   HELP = 1,
   DUMP_AST = (1 << 1),
   PARSE_ONLY = (1 << 2),
+  DEBUGINFO_FILTER = (1 << 3),
   ERROR = (1 << 9)
 };
 
 struct arguments {
   int flags;
   std::string filename;
+  std::string debuginfo_filter;
 };
 
 struct arguments parse_cmd_args(int argc, char *argv[]) {
@@ -42,6 +44,7 @@ struct arguments parse_cmd_args(int argc, char *argv[]) {
        {"help", no_argument, 0, 'h'},
        {"dump-ast", no_argument, &dump_ast, 1},
        {"parse-only", no_argument, &parse_only, 1},
+       {"debuginfo-filter", required_argument, 0, 'd'},
        {0, 0, 0, 0}
   };
 
@@ -49,7 +52,9 @@ struct arguments parse_cmd_args(int argc, char *argv[]) {
   int opt;
   int flags = 0;
 
-  while ((opt = getopt_long(argc, argv, "h",
+  struct arguments opts;
+
+  while ((opt = getopt_long(argc, argv, "hd:",
                             long_options, &option_index)) != -1) {
     switch(opt) {
       case 0:
@@ -62,6 +67,10 @@ struct arguments parse_cmd_args(int argc, char *argv[]) {
       case 'h':
         flags |= OptionValues::HELP;
         break;
+      case 'd':
+        flags |= OptionValues::DEBUGINFO_FILTER;
+        opts.debuginfo_filter = optarg;
+        break;
       case '?':
         flags |= OptionValues::ERROR;
         /* getopt_long already printed an error message. */
@@ -71,7 +80,6 @@ struct arguments parse_cmd_args(int argc, char *argv[]) {
         break;
     }
   }
-  struct arguments opts;
   opts.flags = flags;
 
   if (optind == argc-1) {
@@ -111,21 +119,17 @@ int main (int argc, char *argv[]) {
   Driver driver;
   global_driver = &driver;
 
-  switch (opts.flags) {
-    case OptionValues::PARSE_ONLY: {
+  if ((opts.flags & OptionValues::PARSE_ONLY) != 0) {
       if (driver.parse(opts.filename) == nullptr) {
         std::cerr << "Error parsing file" << std::endl;
         res = EXIT_FAILURE;
       } else {
         res = EXIT_SUCCESS;
       }
-      break;
-    }
-    case OptionValues::DUMP_AST: {
+  } else if ((opts.flags & OptionValues::DUMP_AST) != 0) {
       if (driver.parse(opts.filename) == nullptr) {
         std::cerr << "Error parsing file" << std::endl;
-        res = EXIT_FAILURE;
-        break;
+        return EXIT_FAILURE;
       }
 
       try {
@@ -138,13 +142,10 @@ int main (int argc, char *argv[]) {
         std::cerr << "Abort after catching a string: "<< e;
         res = EXIT_FAILURE;
       }
-      break;
-    }
-    case OptionValues::NO_OPTIONS: {
+  } else {
       if (driver.parse(opts.filename) == nullptr) {
         std::cerr << "Error parsing file " << driver.result << std::endl;
-        res = EXIT_FAILURE;
-        break;
+        return EXIT_FAILURE;
       }
 
       TypecheckVisitor typecheck_visitor(driver);
@@ -154,6 +155,11 @@ int main (int argc, char *argv[]) {
         res = EXIT_FAILURE;
       } else {
         ExecutionContext ctx(driver.function_table, driver.get_init_rule());
+
+        if ((opts.flags & OptionValues::DEBUGINFO_FILTER) != 0) {
+          ctx.set_debuginfo_filter(opts.debuginfo_filter);
+        }
+
         ExecutionVisitor visitor(ctx, driver);
         ExecutionWalker walker(visitor);
         try {
@@ -167,8 +173,6 @@ int main (int argc, char *argv[]) {
           res = EXIT_FAILURE;
         }
       }
-      break;
-    }
   }
   if (driver.result) {
     delete driver.result;

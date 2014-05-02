@@ -4,7 +4,7 @@
 
 #include "libinterpreter/execution_context.h"
 
-ExecutionContext::ExecutionContext(const SymbolTable<Function*>& st, RuleNode *init) : symbol_table(std::move(st)), temp_lists() {
+ExecutionContext::ExecutionContext(const SymbolTable<Function*>& st, RuleNode *init) : debuginfo_filters(), symbol_table(std::move(st)), temp_lists() {
   // use 10 MB for updateset data
   pp_mem_new(&updateset_data_, 1024 * 1024 * 100, "mem for main updateset");
   updateset.set =  pp_hashmap_new(&updateset_data_, 1024*10, "main updateset");
@@ -245,4 +245,30 @@ Value& ExecutionContext::get_function_value(Function *sym, uint64_t args[]) {
     undef.type = TypeType::UNDEF;
     return undef;
   }
+}
+
+bool ExecutionContext::set_debuginfo_filter(const std::string& filters) {
+  std::string current;
+  size_t last_pos = 0;
+  size_t match_pos = 0;
+
+  while ((match_pos = filters.find(",", last_pos)) != std::string::npos) {
+    current = filters.substr(last_pos, match_pos-last_pos);
+    if (current.size() > 0) {
+      debuginfo_filters[current] = true;
+    }
+    last_pos = match_pos+1;
+  }
+
+  match_pos = filters.size();
+  current = filters.substr(last_pos, match_pos-last_pos);
+  if (current.size() > 0) {
+    debuginfo_filters[current] = true;
+  }
+
+  return true;
+}
+
+bool ExecutionContext::filter_enabled(const std::string& filter) {
+  return debuginfo_filters.count("all") > 0 || debuginfo_filters.count(filter) > 0;
 }
