@@ -428,11 +428,16 @@ bool List::is_skip() const {
 
 const std::string List::to_str() const {
   std::stringstream res;
-  res << "[";
+  bool add_comma = false;
+  res << "[ ";
   for (auto iter=begin(); iter != end(); iter.next()) {
-    res << (*iter).to_str() << ", ";
+    if (add_comma) {
+      res << ", ";
+    }
+    res << (*iter).to_str();
+    add_comma = true;
   }
-  res << "]";
+  res << " ]";
   return res.str();
 }
 
