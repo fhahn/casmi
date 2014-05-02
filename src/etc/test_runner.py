@@ -19,6 +19,17 @@ EXISTING_PARSE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
 HR_LEN = 65
 HR = '-' * 65
 
+CMDLINE_RE = re.compile("// cmdline \"(.*)\"")
+
+def get_options(filename):
+    with open(filename, "rt") as f:
+        lines = f.readlines()
+        if len(lines) < 1:
+            return []
+        m = CMDLINE_RE.match(lines[0])
+        if m: return m.groups()[0].split(" ")
+    return []
+
 def test_existing_parse(filename):
     p1 = subprocess.Popen([test_exe, '--parse-only', filename], stderr=subprocess.PIPE)
     err = p1.communicate()[1]
@@ -44,10 +55,18 @@ def test_run_pass(filename):
     short_filename = filename.replace(RUN_PASS_PATH, '')
     sys.stdout.write('\t[run-pass] '+short_filename)
     sys.stdout.flush()
-
-    p1 = subprocess.Popen([test_exe, filename], stderr=subprocess.PIPE)
-    err = p1.communicate()[1]
+    p1 = subprocess.Popen([test_exe,]+get_options(filename)+[filename,],
+                          stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+    (stdout, err) = p1.communicate()
+    expected_path = filename.rsplit(".", 1)[0] + '.expected'
     if p1.returncode == 0:
+        if os.path.exists(expected_path) and stdout.decode('utf8') != open(expected_path).read():
+            print("")
+            print("Expected:\n"+HR+"\n"+open(expected_path).read()+HR)
+            print("\nGot:\n"+HR+"\n"+stdout.decode('utf8')+HR)
+
+            sys.stdout.write(' ... fail (output did not match expected)\n')
+            return (False, 'output did not match expected')
         sys.stdout.write(' ... ok\n')
         return (True, '')
     else:
