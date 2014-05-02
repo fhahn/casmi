@@ -16,11 +16,8 @@ rule main_rule = {
   assert a >= 2
   assert a >= 1
 
-  print "hallooooo ?"
-
   if a != 2 then
     assert false
   else
     assert true
-
 }
