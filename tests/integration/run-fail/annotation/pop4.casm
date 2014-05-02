@@ -5,6 +5,7 @@ function b: -> String
 
 rule main = {
   pop b from a
+  //~^ cannot pop from List(Int) into String
 
   program( self ) := undef
 }

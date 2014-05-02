@@ -51,10 +51,11 @@ void ExecutionContext::apply_updates() {
         // set list to undef
         if (!list.is_undef()) {
           list.value.list->decrease_usage();
-          list.type == TypeType::UNDEF;
+          list.type = TypeType::UNDEF;
         }
       } else {
         if (!list.is_undef()) {
+          DEBUG("PONG ");
           list.value.list->decrease_usage();
         } else {
           list.type = function_map.first->return_type_->t;
@@ -83,7 +84,6 @@ void ExecutionContext::apply_updates() {
     }
     v->value.list = new_l;
   }
-
   to_fold.clear(); 
   std::vector<size_t> deleted;
 
@@ -176,16 +176,12 @@ void ExecutionContext::merge_seq(Driver& driver) {
             if( (v = (casm_update*) pp_hashmap_set(updateset.set, i->key-1, i->value)) != NULL ) {
                 u = (casm_update*)i->value;
 
-                UpdateNode *up = reinterpret_cast<UpdateNode*>(u->line);
-                if (up->func->arguments) {
-                  for (size_t i=0; i < up->func->arguments->size(); i++) {
-                    if (u->args[i] != v->args[i]) {
-                      return;
-                    }
+                for (size_t i=0; i < u->num_args; i++) {
+                  if (u->args[i] != v->args[i]) {
+                    return;
                   }
                 }
-
-                driver.error(up->location, "conflict merging updatesets");
+                driver.error(*reinterpret_cast<yy::location*>(u->line), "conflict merging updatesets");
                 throw RuntimeException("merge error");
             }
 

@@ -1,0 +1,7 @@
+function a: -> List(Int) initially { [0] }
+
+rule main = {
+    let x = 1 in pop x from a
+    //~^ can only pop into functions or new bindings
+}
+init main

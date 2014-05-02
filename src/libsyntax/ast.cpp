@@ -34,6 +34,7 @@ static std::map<NodeType, const std::string> node_type_names_ = {
     {NodeType::FUNCTION_ATOM, std::string("FUNCTION ATOM")},
     {NodeType::CALL, std::string("CALL NODE")},
     {NodeType::PRINT, std::string("PRINT NODE")},
+    {NodeType::POP, std::string("POP NODE")},
 };
 
 std::string unknown_type = "unknown node type";
@@ -445,6 +446,23 @@ bool UpdateNode::equals(AstNode *other) {
 
   UpdateNode *other_cast = static_cast<UpdateNode*>(other);
   return expr_->equals(other_cast->expr_) && func->equals(other_cast->func);
+}
+
+PopNode::PopNode(yy::location& loc, FunctionAtom *to, FunctionAtom *from)
+    : AstNode(loc, NodeType::POP), to(std::move(to)), from(from), from_type(TypeType::LIST, new Type(TypeType::UNKNOWN)) {
+  type_.unify(from_type.internal_type);
+}
+
+PopNode::~PopNode() {
+  delete to;
+  delete from;
+}
+
+bool PopNode::equals(AstNode *other) {
+  if (!AstNode::equals(other)) {
+    return false;
+  }
+  assert(0);
 }
 
 UnaryNode::UnaryNode(yy::location& loc, NodeType node_type, AstNode *child) : AstNode(loc, node_type) {

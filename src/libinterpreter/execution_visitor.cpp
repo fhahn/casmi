@@ -12,191 +12,6 @@
 DEFINE_CASM_UPDATESET_FORK_PAR
 DEFINE_CASM_UPDATESET_FORK_SEQ
 
-std::hash<Value> hasher;
-
-void pack_values_in_array(const std::vector<Value> &value_list, uint64_t array[]) {
-  for (size_t i=0; i < value_list.size(); i++) {
-    array[i] = hasher(value_list[i]);
-  }
-}
-
-
-ExecutionVisitor::ExecutionVisitor(ExecutionContext &ctxt, Driver& driver)
-    : driver_(driver), context_(ctxt) {
-  rule_bindings.push_back(&main_bindings);
-}
-
-void ExecutionVisitor::visit_assert(UnaryNode* assert, Value& val) {
-  if (val.value.bval != true) {
-    driver_.error(assert->location,
-                  "Assertion failed");
-    throw RuntimeException("Assertion failed");
-  }
-}
-
-void ExecutionVisitor::visit_update(UpdateNode *update, Value &func_val, Value& expr_v) {
-  UNUSED(func_val);
-
-  casm_update* up = (casm_update*) pp_mem_alloc(&(context_.pp_stack), sizeof(casm_update));
-
-  up->value = (void*) expr_v.to_uint64_t();
-  up->defined = (expr_v.type == TypeType::UNDEF) ? 0 : 1;
-  up->func = update->func->symbol->id;
-  up->line = (uint64_t) update;
-  pack_values_in_array(value_list, up->args);
-
-  up->num_args = value_list.size();
-  value_list.clear();
-
-  auto& function_map = context_.functions[update->func->symbol->id];
-  if (function_map.second.count({up->args, up->num_args}) == 0) {
-    function_map.second.emplace(ArgumentsKey{up->args, up->num_args}, Value());
-  }
-  Value& ref = function_map.second[{up->args, up->num_args}];
-  casm_update* v = (casm_update*)casm_updateset_add(&(context_.updateset),
-                                                    (void*) &ref,
-                                                    (void*) up);
-  DEBUG("UPADTE "<<update->func->name<<" num args "<<up->num_args << " arg[0] "<<up->args[0]<< " val "<<expr_v.to_str());
-  if (v != nullptr) {
-    // Check if values match
-    for (int i=0; i < up->num_args; i++) {
-      if (up->args[i] != v->args[i]) {
-        return;
-      }
-    }
-
-    driver_.error(update->func->location,
-                  "update conflict in parallel block for function `"+update->func->name+"`");
-    throw RuntimeException("Conflict in updateset");
-  }
-}
-
-void ExecutionVisitor::visit_call_pre(CallNode *call) { UNUSED(call); }
-
-void ExecutionVisitor::visit_call_pre(CallNode *call, Value& expr) {
-  if (expr.type != TypeType::UNDEF) {
-    call->rule = expr.value.rule;
-  } else {
-    throw RuntimeException("Cannot call UNDEF");
-  }
-}
-
-void ExecutionVisitor::visit_call(CallNode *call, std::vector<Value> &argument_results) {
-  UNUSED(call);
-
-  if (call->ruleref) {
-    size_t args_defined = call->rule->arguments.size();
-    size_t args_provided = argument_results.size();
-    if (args_defined != args_provided) {
-      driver_.error(call->location, "indirectly called rule `"+call->rule->name+
-                    "` expects "+std::to_string(args_defined)+" arguments but "+
-                    std::to_string(args_provided)+" where provided");
-      throw RuntimeException("Invalid indirect call");
-    } else {
-      for (size_t i=0; i < args_defined; i++) {
-        if (call->rule->arguments[i]->t == TypeType::LIST) {
-          // TODO
-          assert(0);
-        } else if (call->rule->arguments[i]->t == TypeType::LIST) {
-          // TODO
-          assert(0);
-        } else if (*call->rule->arguments[i] != argument_results[i].type) {
-          driver_.error(call->arguments->at(i)->location,
-                        "argument "+std::to_string(i+1)+" of indirectly called rule `"+
-                        call->rule->name+"` must be `"+
-                        call->rule->arguments[i]->to_str()+"` but was `"+
-                        Type(argument_results[i].type).to_str()+"`");
-          throw RuntimeException("Invalid indirect call");
-        }
-      }
-    }
-  }
- 
-  rule_bindings.push_back(&argument_results);
-}
-
-void ExecutionVisitor::visit_call_post(CallNode *call) {
-  UNUSED(call);
-  rule_bindings.pop_back();
-}
-
-void ExecutionVisitor::visit_print(PrintNode *node, const std::vector<Value> &arguments) {
-  for (const Value& v: arguments) {
-    std::cout << v.to_str();
-  }
-  std::cout << std::endl;
-}
-
-void ExecutionVisitor::visit_let(LetNode *node, Value& v) {
-  rule_bindings.back()->push_back(v);
-}
-
-void ExecutionVisitor::visit_let_post(LetNode *node) {
-  rule_bindings.back()->pop_back();
-}
-
-Value ExecutionVisitor::visit_expression(Expression *expr, Value &left_val, Value &right_val) {
-  DEBUG("left "<<left_val.to_str()<<" right "<<right_val.to_str());
-  switch (expr->op) {
-    case Expression::Operation::ADD: {
-      left_val.add(right_val);
-      DEBUG("ADD "<<left_val.to_str());
-      return left_val;
-    }
-    case Expression::Operation::SUB: {
-      left_val.sub(right_val);
-      return left_val;
-    }
-    case Expression::Operation::MUL: {
-      left_val.mul(right_val);
-      return left_val;
-    }
-    case Expression::Operation::DIV: {
-      left_val.div(right_val);
-      return left_val;
-    }
-    case Expression::Operation::MOD: {
-      left_val.mod(right_val);
-      return left_val;
-    }
-    case Expression::Operation::RAT_DIV: {
-      left_val.mod(right_val);
-      return left_val;
-    }
-
-    case Expression::Operation::EQ: {
-      Value tmp(value_eq(left_val, right_val));
-      return tmp;
-    }
-    case Expression::Operation::NEQ: {
-      Value tmp(!value_eq(left_val, right_val));
-      return tmp;
-    }
-
-    case Expression::Operation::LESSER:
-      left_val.lesser(right_val);
-      return left_val;
-    case Expression::Operation::GREATER:
-      left_val.greater(right_val);
-      return left_val;
-    case Expression::Operation::LESSEREQ:
-      left_val.lessereq(right_val);
-      return left_val;
-    case Expression::Operation::GREATEREQ:
-      left_val.greatereq(right_val);
-      return left_val;
-
-
-
-    default: assert(0);
-  }
-}
-
-Value ExecutionVisitor::visit_expression_single(Expression *expr, Value &val) {
-  UNUSED(expr);
-  return val;
-}
-
 Value casm_pow(std::vector<Value> &expr_results) {
   switch (expr_results[0].type) {
     case TypeType::INT:
@@ -277,45 +92,275 @@ Value casm_len(std::vector<Value> &expr_results) {
   return Value((INT_T) count);
 }
 
-Value casm_tail(ExecutionContext& ctxt, std::vector<Value> &expr_results) {
-  if (expr_results[0].is_undef()) {
+Value casm_tail(ExecutionContext& ctxt, const Value& arg_list) {
+  if (arg_list.is_undef()) {
     return Value();
   }
 
-  List *list = expr_results[0].value.list;
+  List *list = arg_list.value.list;
 
   if (list->is_head()) {
-    return Value(expr_results[0].type, reinterpret_cast<HeadList*>(list)->right);
+    return Value(arg_list.type, reinterpret_cast<HeadList*>(list)->right);
   } else if (list->is_bottom()) {
     BottomList *btm = reinterpret_cast<BottomList*>(list);
     if (btm->values.size() > 0) {
       SkipList *skip = new SkipList(1, btm);
       ctxt.temp_lists.push_back(skip);
-      return Value(expr_results[0].type, skip);
+      return Value(arg_list.type, skip);
     } else {
       // tail for empty list returns empty list
-      return expr_results[0];
+      return arg_list;
     }
   } else {
     SkipList *old_skip = reinterpret_cast<SkipList*>(list);
     SkipList *skip = new SkipList(old_skip->skip+1, old_skip->bottom);
     ctxt.temp_lists.push_back(skip);
-    return Value(expr_results[0].type, skip);
+    return Value(arg_list.type, skip);
   }
 }
 
-Value casm_peek(std::vector<Value> &expr_results) {
-  if (expr_results[0].is_undef()) {
+Value casm_peek(const Value arg) {
+  if (arg.is_undef()) {
     return Value();
   }
 
-  List *list = expr_results[0].value.list;
+  List *list = arg.value.list;
 
   if (list->begin() != list->end()) {
     return Value(*(list->begin()));
   } else {
     return Value();
   }
+}
+
+
+std::hash<Value> hasher;
+
+void pack_values_in_array(const std::vector<Value> &value_list, uint64_t array[]) {
+  for (size_t i=0; i < value_list.size(); i++) {
+    array[i] = hasher(value_list[i]);
+  }
+}
+
+
+ExecutionVisitor::ExecutionVisitor(ExecutionContext &ctxt, Driver& driver)
+    : driver_(driver), context_(ctxt) {
+  rule_bindings.push_back(&main_bindings);
+}
+
+void ExecutionVisitor::visit_assert(UnaryNode* assert, Value& val) {
+  if (val.value.bval != true) {
+    driver_.error(assert->location,
+                  "Assertion failed");
+    throw RuntimeException("Assertion failed");
+  }
+}
+
+casm_update *ExecutionVisitor::add_update(const Value& val, size_t sym_id, const std::vector<Value> &arguments) {
+  casm_update* up = (casm_update*) pp_mem_alloc(&(context_.pp_stack), sizeof(casm_update));
+
+  up->value = (void*) val.to_uint64_t();
+  up->defined = (val.is_undef()) ? 0 : 1;
+  up->func = sym_id;
+  // TODO: Do we need line here?
+  //up->line = (uint64_t) loc.lines;
+  pack_values_in_array(arguments, up->args);
+
+  up->num_args = arguments.size();
+
+  auto& function_map = context_.functions[sym_id];
+  if (function_map.second.count({up->args, up->num_args}) == 0) {
+    function_map.second.emplace(ArgumentsKey{up->args, up->num_args}, Value());
+  }
+  Value& ref = function_map.second[{up->args, up->num_args}];
+  casm_update* v = (casm_update*)casm_updateset_add(&(context_.updateset),
+                                                    (void*) &ref,
+                                                    (void*) up);
+  if (v != nullptr) {
+    // Check if values match
+    for (int i=0; i < up->num_args; i++) {
+      if (up->args[i] != v->args[i]) {
+        return up;
+      }
+    }
+    throw RuntimeException("Conflict in updateset");
+  }
+  return up;
+}
+
+void ExecutionVisitor::visit_update(UpdateNode *update, Value &func_val, Value& expr_v) {
+  UNUSED(func_val);
+
+  try {
+    casm_update *up = add_update(expr_v, update->func->symbol->id, value_list);
+    up->line = (uint64_t) &update->location;
+    value_list.clear();
+    DEBUG("UPADTE "<<update->func->name<<" num args "<<up->num_args << " arg[0] "<<up->args[0]<< " val "<<expr_v.to_str());
+  } catch (const RuntimeException& ex) {
+    // TODO this is probably not the cleanest solutions
+    driver_.error(update->location,
+                  "update conflict in parallel block for function `"+update->func->name+"`");
+    throw ex;
+  }
+}
+
+void ExecutionVisitor::visit_call_pre(CallNode *call) { UNUSED(call); }
+
+void ExecutionVisitor::visit_call_pre(CallNode *call, Value& expr) {
+  if (expr.type != TypeType::UNDEF) {
+    call->rule = expr.value.rule;
+  } else {
+    throw RuntimeException("Cannot call UNDEF");
+  }
+}
+
+void ExecutionVisitor::visit_call(CallNode *call, std::vector<Value> &argument_results) {
+  UNUSED(call);
+
+  if (call->ruleref) {
+    size_t args_defined = call->rule->arguments.size();
+    size_t args_provided = argument_results.size();
+    if (args_defined != args_provided) {
+      driver_.error(call->location, "indirectly called rule `"+call->rule->name+
+                    "` expects "+std::to_string(args_defined)+" arguments but "+
+                    std::to_string(args_provided)+" where provided");
+      throw RuntimeException("Invalid indirect call");
+    } else {
+      for (size_t i=0; i < args_defined; i++) {
+        if (call->rule->arguments[i]->t == TypeType::LIST) {
+          // TODO
+          assert(0);
+        } else if (call->rule->arguments[i]->t == TypeType::LIST) {
+          // TODO
+          assert(0);
+        } else if (*call->rule->arguments[i] != argument_results[i].type) {
+          driver_.error(call->arguments->at(i)->location,
+                        "argument "+std::to_string(i+1)+" of indirectly called rule `"+
+                        call->rule->name+"` must be `"+
+                        call->rule->arguments[i]->to_str()+"` but was `"+
+                        Type(argument_results[i].type).to_str()+"`");
+          throw RuntimeException("Invalid indirect call");
+        }
+      }
+    }
+  }
+ 
+  rule_bindings.push_back(&argument_results);
+}
+
+void ExecutionVisitor::visit_call_post(CallNode *call) {
+  UNUSED(call);
+  rule_bindings.pop_back();
+}
+
+void ExecutionVisitor::visit_print(PrintNode *node, const std::vector<Value> &arguments) {
+  for (const Value& v: arguments) {
+    std::cout << v.to_str();
+  }
+  std::cout << std::endl;
+}
+
+void ExecutionVisitor::visit_let(LetNode *node, Value& v) {
+  rule_bindings.back()->push_back(v);
+}
+
+void ExecutionVisitor::visit_let_post(LetNode *node) {
+  rule_bindings.back()->pop_back();
+}
+
+void ExecutionVisitor::visit_pop(PopNode *node, const Value& val) {
+  Value to_res = casm_peek(val);
+
+  if (node->to->symbol_type == FunctionAtom::SymbolType::FUNCTION) {
+    try {
+      casm_update *up = add_update(to_res, node->to->symbol->id, value_list);
+      up->line = (uint64_t) &node->location;
+      value_list.clear();
+    } catch (const RuntimeException& ex) {
+      // TODO this is probably not the cleanest solutions
+      driver_.error(node->to->location,
+                    "update conflict in parallel block for function `"+node->to->name+"`");
+      throw ex;
+    }
+  } else {
+    rule_bindings.back()->push_back(to_res);
+  } 
+
+  Value from_res = casm_tail(context_, val);
+  try {
+    casm_update *up = add_update(from_res, node->from->symbol->id, value_list);
+    up->line = (uint64_t) &node->location;
+    value_list.clear();
+    DEBUG("POP");
+  } catch (const RuntimeException& ex) {
+    // TODO this is probably not the cleanest solutions
+    driver_.error(node->location,
+                  "update conflict in parallel block for function `"+node->from->name+"`");
+    throw ex;
+  }
+  DEBUG("POPed "<<to_res.to_str() << " from "<<val.to_str() << " -> "<<from_res.to_str());
+}
+
+Value ExecutionVisitor::visit_expression(Expression *expr, Value &left_val, Value &right_val) {
+  DEBUG("left "<<left_val.to_str()<<" right "<<right_val.to_str());
+  switch (expr->op) {
+    case Expression::Operation::ADD: {
+      left_val.add(right_val);
+      DEBUG("ADD "<<left_val.to_str());
+      return left_val;
+    }
+    case Expression::Operation::SUB: {
+      left_val.sub(right_val);
+      return left_val;
+    }
+    case Expression::Operation::MUL: {
+      left_val.mul(right_val);
+      return left_val;
+    }
+    case Expression::Operation::DIV: {
+      left_val.div(right_val);
+      return left_val;
+    }
+    case Expression::Operation::MOD: {
+      left_val.mod(right_val);
+      return left_val;
+    }
+    case Expression::Operation::RAT_DIV: {
+      left_val.mod(right_val);
+      return left_val;
+    }
+
+    case Expression::Operation::EQ: {
+      Value tmp(value_eq(left_val, right_val));
+      return tmp;
+    }
+    case Expression::Operation::NEQ: {
+      Value tmp(!value_eq(left_val, right_val));
+      return tmp;
+    }
+
+    case Expression::Operation::LESSER:
+      left_val.lesser(right_val);
+      return left_val;
+    case Expression::Operation::GREATER:
+      left_val.greater(right_val);
+      return left_val;
+    case Expression::Operation::LESSEREQ:
+      left_val.lessereq(right_val);
+      return left_val;
+    case Expression::Operation::GREATEREQ:
+      left_val.greatereq(right_val);
+      return left_val;
+
+
+
+    default: assert(0);
+  }
+}
+
+Value ExecutionVisitor::visit_expression_single(Expression *expr, Value &val) {
+  UNUSED(expr);
+  return val;
 }
 
 Value ExecutionVisitor::visit_function_atom(FunctionAtom *atom, std::vector<Value> &expr_results) {
@@ -358,9 +403,9 @@ Value ExecutionVisitor::visit_builtin_atom(BuiltinAtom *atom, std::vector<Value>
   } else if (atom->name == "len") {
     return casm_len(expr_results);
   } else if (atom->name == "tail") {
-    return casm_tail(context_, expr_results);
+    return casm_tail(context_, expr_results[0]);
   } else if (atom->name == "peek") {
-    return casm_peek(expr_results);
+    return casm_peek(expr_results[0]);
   } else {
     assert(0);
   }
@@ -440,6 +485,12 @@ void AstWalker<ExecutionVisitor, Value>::walk_parblock(UnaryNode* parblock) {
   }
 }
 
+template <>
+void AstWalker<ExecutionVisitor, Value>::walk_pop(PopNode* node) {
+  // TODO this should use the same code as the global visitor
+  Value from = walk_function_atom(node->from);
+  visitor.visit_pop(node, from);
+}
 
 void ExecutionWalker::run() {
   std::vector<uint64_t*> initializer_args;
