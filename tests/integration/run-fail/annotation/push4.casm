@@ -4,6 +4,7 @@ function a: -> List(Int)
 
 rule main = {
   push "hallo" into a
+  //~^ cannot push String into List(Int)
 
   program( self ) := undef
 }

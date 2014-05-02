@@ -47,6 +47,7 @@ enum NodeType {
   BUILTIN_ATOM,
   NUMBER_RANGE_ATOM,
   POP,
+  PUSH,
 };
 
 const std::string& type_to_str(NodeType t);
@@ -311,6 +312,16 @@ class UpdateNode: public AstNode {
 
     UpdateNode(yy::location& loc, FunctionAtom *func, ExpressionBase *expr);
     virtual ~UpdateNode();
+    virtual bool equals(AstNode *other);
+};
+
+class PushNode: public AstNode {
+  public:
+    ExpressionBase *expr;
+    FunctionAtom *to;
+
+    PushNode(yy::location& loc, ExpressionBase *expr, FunctionAtom *to);
+    virtual ~PushNode();
     virtual bool equals(AstNode *other);
 };
 

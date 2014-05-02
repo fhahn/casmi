@@ -170,6 +170,28 @@ std::string Type::unify_links_to_str_right() const {
   return res;
 }
 
+const Type* Type::get_most_general_type() const {
+  if (!is_complete()) {
+    return this;
+  }
+
+  const Type *right = nullptr;
+  if (unify_with_right) {
+    right = unify_with_right->get_most_general_type();
+    if (!right->is_complete()) {
+      return right;
+    }
+  }
+
+  const Type *left = this;
+  if (unify_with_left) {
+    left = unify_with_left->get_most_general_type();
+    if (!left->is_complete()) {
+      return left; 
+    }
+  }
+  return this;
+}
 
 bool Type::unify(Type other) {
   if (t == TypeType::UNKNOWN) {
@@ -482,7 +504,7 @@ bool Type::unify(Type *other) {
 }
 
 
-bool Type::is_complete() {
+bool Type::is_complete() const {
   if (t == TypeType::UNKNOWN) {
     return false;
   }

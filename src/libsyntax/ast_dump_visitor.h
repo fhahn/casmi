@@ -48,6 +48,7 @@ class AstDumpVisitor {
     void visit_let(LetNode *node, bool v) {}
     void visit_let_post(LetNode *node) {}
     void visit_pop(PopNode *node) { throw "Not implemented"; }
+    void visit_push(PushNode *node, bool expr, bool atom)  { throw "Not implemented"; }
 
     bool visit_expression(Expression *expr, bool, bool);
     bool visit_expression_single(Expression *expr, bool);

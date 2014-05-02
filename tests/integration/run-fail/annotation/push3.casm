@@ -5,6 +5,7 @@ function a: -> List(Int)
 rule main = {
   let x = [] in
     push x into a
+    //~^ cannot push Tuple () into List(Int)
 
   program( self ) := undef
 }

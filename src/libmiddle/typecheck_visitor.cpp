@@ -162,6 +162,18 @@ void TypecheckVisitor::visit_let_post(LetNode *node) {
   rule_binding_offsets.back()->erase(node->identifier);
 }
 
+void TypecheckVisitor::visit_push(PushNode *node, Type *expr, Type *atom) {
+  if (node->to->symbol_type != FunctionAtom::SymbolType::FUNCTION) {
+    driver_.error(node->to->location, 
+                  "can only push into functions");
+  
+  }
+  if (!expr->unify(atom->internal_type)) {
+    driver_.error(node->expr->location, 
+                  "cannot push "+expr->get_most_general_type()->to_str()+" into "+atom->to_str());
+  }
+}
+
 void TypecheckVisitor::visit_pop(PopNode *node) {
   if (!node->from_type.unify(&node->from->type_)) {
     driver_.error(node->from->location,

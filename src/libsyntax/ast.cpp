@@ -448,6 +448,25 @@ bool UpdateNode::equals(AstNode *other) {
   return expr_->equals(other_cast->expr_) && func->equals(other_cast->func);
 }
 
+PushNode::PushNode(yy::location& loc, ExpressionBase *expr, FunctionAtom *to)
+    : AstNode(loc, NodeType::PUSH), expr(expr), to(to) {
+  // TODO LEAK, use constructor of AstNode to set type_
+  type_ = new Type(TypeType::LIST, new Type(TypeType::UNKNOWN));
+}
+
+PushNode::~PushNode() {
+  delete expr;
+  delete to;
+}
+
+bool PushNode::equals(AstNode *other) {
+  if (!AstNode::equals(other)) {
+    return false;
+  }
+  assert(0);
+}
+
+
 PopNode::PopNode(yy::location& loc, FunctionAtom *to, FunctionAtom *from)
     : AstNode(loc, NodeType::POP), to(std::move(to)), from(from), from_type(TypeType::LIST, new Type(TypeType::UNKNOWN)) {
   type_.unify(from_type.internal_type);

@@ -46,6 +46,7 @@ class TypecheckVisitor {
 
     void visit_let(LetNode *node, Type* v);
     void visit_let_post(LetNode *node);
+    void visit_push(PushNode *node, Type *expr, Type *atom);
     void visit_pop(PopNode *node);
 
     Type* visit_expression(Expression *expr, Type* left_val, Type* right_val);
