@@ -55,7 +55,6 @@ void ExecutionContext::apply_updates() {
         }
       } else {
         if (!list.is_undef()) {
-          DEBUG("PONG ");
           list.value.list->decrease_usage();
         } else {
           list.type = function_map.first->return_type_->t;
@@ -76,6 +75,9 @@ void ExecutionContext::apply_updates() {
     i->used = 0;
     i = i->previous;
   }
+
+  // free allocated updateset data
+  pp_mem_free(&updateset_data_);
 
   for (Value* v : to_fold) {
     BottomList *new_l = v->value.list->collect();
