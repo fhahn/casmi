@@ -1,0 +1,10 @@
+Hallo Welt
+1
+true
+false
+0
+4711
+[ "hallo", "hallo", "foo" ]
+[ "foo", 1, true ]
+[ [ "foo", 1 ], [ "bar", 2 ] ]
+1 step later...
