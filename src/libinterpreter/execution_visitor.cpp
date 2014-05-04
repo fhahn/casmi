@@ -590,7 +590,11 @@ void ExecutionWalker::run() {
     steps += 1;
   }
 
-  std::cout << steps <<" steps later..."<<std::endl;
+  if (steps > 1) {
+    std::cout << steps <<" steps later..."<<std::endl;
+  } else {
+    std::cout << steps <<" step later..."<<std::endl;
+  }
 
 
   for (auto ptr : initializer_args) {

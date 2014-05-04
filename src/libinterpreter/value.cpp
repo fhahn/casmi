@@ -434,7 +434,11 @@ const std::string List::to_str() const {
     if (add_comma) {
       res << ", ";
     }
-    res << (*iter).to_str();
+    if ((*iter).type == TypeType::STRING) {
+      res << "\"" << (*iter).to_str() << "\"";
+    } else {
+      res << (*iter).to_str();
+    }
     add_comma = true;
   }
   res << " ]";

@@ -1,0 +1,16 @@
+rule main = {
+    print "Hallo Welt"
+    print 1
+    print true
+    print false
+    print 0
+    print 4711
+    print ["hallo", "hallo", "foo"]
+    print ["foo", 1, 1 = 1]
+    print [["foo", 1], ["bar", 2]]
+
+    program( self ) := undef
+}
+
+init main
+
