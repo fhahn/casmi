@@ -124,6 +124,10 @@ template<class T, class V> class AstWalker {
           walk_push(reinterpret_cast<PushNode*>(stmt));
           break;
         }
+        case NodeType::CASE: {
+          walk_case(reinterpret_cast<CaseNode*>(stmt));
+          break;
+        }
         default:
             throw RuntimeException(
               std::string("Invalid node type: ")+
@@ -211,6 +215,17 @@ template<class T, class V> class AstWalker {
       visitor.visit_push(node, expr, atom);
     }
 
+    void walk_case(CaseNode *node) {
+      std::vector<V> case_labels;
+      for (auto& pair : node->case_list) {
+        // pair.first == nullptr for default:
+        if (pair.first) {
+          case_labels.push_back(walk_atom(pair.first));
+        }
+        walk_statement(pair.second);
+      }
+      visitor.visit_case(node, walk_expression_base(node->expr), case_labels);
+    }
 
     V walk_expression_base(ExpressionBase *expr) {
       if (expr->node_type_ == NodeType::EXPRESSION) {

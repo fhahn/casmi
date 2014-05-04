@@ -6,6 +6,7 @@ rule main = {
     3: skip
     4: skip
     "Test": skip
+    //~^ type of case expression (Int) and label (String) do not match
     default: skip
   endcase
 

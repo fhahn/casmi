@@ -1,5 +1,6 @@
+/* TODO enable when enums are implemented
 enum myEnum = { enum1, enum2, enum3 }
-
+*/
 rule main = {
   case 1 of
     1: assert true
@@ -27,6 +28,7 @@ rule main = {
     default: assert true
   endcase
 
+/* TODO enable when ENUMs are implemented
   case enum1 of
     enum1: assert true
     default: assert false
@@ -37,9 +39,9 @@ rule main = {
     default: assert false
     enum2: assert true
   endcase
+  */
 
-	program(self) := undef
+  program(self) := undef
 }
 
 init main
-

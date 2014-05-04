@@ -324,6 +324,10 @@ void ExecutionVisitor::visit_pop(PopNode *node, const Value& val) {
   DEBUG("POPed "<<to_res.to_str() << " from "<<val.to_str() << " -> "<<from_res.to_str());
 }
 
+void ExecutionVisitor::visit_case(CaseNode *node, const Value& val) {
+  
+}
+
 Value ExecutionVisitor::visit_expression(Expression *expr, Value &left_val, Value &right_val) {
   DEBUG("left "<<left_val.to_str()<<" right "<<right_val.to_str());
   switch (expr->op) {
@@ -513,6 +517,26 @@ void AstWalker<ExecutionVisitor, Value>::walk_pop(PopNode* node) {
   // TODO this should use the same code as the global visitor
   Value from = walk_function_atom(node->from);
   visitor.visit_pop(node, from);
+}
+
+template <>
+void AstWalker<ExecutionVisitor, Value>::walk_case(CaseNode *node) {
+  Value expr_v = walk_expression_base(node->expr);
+  std::pair<AtomNode*, AstNode*> *default_pair = nullptr;
+  for (auto& pair : node->case_list) {
+    // pair.first == nullptr for default:
+    if (pair.first) {
+      if (value_eq(walk_atom(pair.first), expr_v)) {
+        walk_statement(pair.second);
+        return;
+      }
+    } else {
+      default_pair = &pair;
+    }
+  }
+  if (default_pair) {
+    walk_statement(default_pair->second);
+  }
 }
 
 void ExecutionWalker::run() {

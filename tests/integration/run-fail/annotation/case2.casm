@@ -1,8 +1,11 @@
+// error annotation @9
+
 rule main = {
-  case 1 of
+  case 1 of //~ more than one default label in case
     2: skip
     3: skip
     4: skip
+    default: skip
     default: skip
   endcase
 
