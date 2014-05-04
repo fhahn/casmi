@@ -227,13 +227,14 @@ void ExecutionVisitor::visit_call(CallNode *call, std::vector<Value> &argument_r
       throw RuntimeException("Invalid indirect call");
     } else {
       for (size_t i=0; i < args_defined; i++) {
+        Type arg_t(argument_results[i].type);
         if (call->rule->arguments[i]->t == TypeType::LIST) {
           // TODO
           assert(0);
         } else if (call->rule->arguments[i]->t == TypeType::LIST) {
           // TODO
           assert(0);
-        } else if (*call->rule->arguments[i] != argument_results[i].type) {
+        } else if (!call->rule->arguments[i]->unify(&arg_t) && !(argument_results[i].is_undef() && argument_results[i].type == TypeType::UNDEF)) {
           driver_.error(call->arguments->at(i)->location,
                         "argument "+std::to_string(i+1)+" of indirectly called rule `"+
                         call->rule->name+"` must be `"+
@@ -413,8 +414,10 @@ Value ExecutionVisitor::visit_function_atom(FunctionAtom *atom, std::vector<Valu
       DEBUG("visit_atom "<<atom->symbol->name()<<" "<<v.to_str() <<" size "<<value_list.size());
       return v;
     }
-    default:
+    default: {
+      DEBUG("visiting invalid symbol type of atom "<<atom->name<<" "<<atom->offset);
       assert(0);
+    }
   }
 }
 
@@ -536,6 +539,19 @@ void AstWalker<ExecutionVisitor, Value>::walk_case(CaseNode *node) {
   }
   if (default_pair) {
     walk_statement(default_pair->second);
+  }
+}
+
+template <>
+void AstWalker<ExecutionVisitor, Value>::walk_forall(ForallNode *node) {
+  Value in_list = walk_expression_base(node->in_expr);
+
+  List *l =  in_list.value.list;
+
+  for (auto iter = l->begin(); iter != l->end(); iter++) {
+    visitor.rule_bindings.back()->push_back(*iter);
+    walk_statement(node->statement);
+    visitor.rule_bindings.back()->pop_back();
   }
 }
 

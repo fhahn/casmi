@@ -50,6 +50,7 @@ enum NodeType {
   POP,
   PUSH,
   CASE,
+  FORALL,
 };
 
 const std::string& type_to_str(NodeType t);
@@ -339,6 +340,17 @@ class PopNode: public AstNode {
     virtual ~PopNode();
     virtual bool equals(AstNode *other);
 };
+
+class ForallNode: public AstNode {
+  public:
+    const std::string identifier;
+    ExpressionBase *in_expr;
+    AstNode *statement;
+
+    ForallNode(yy::location& loc, const std::string& ident, ExpressionBase *expr, AstNode *stmt);
+    virtual ~ForallNode();
+};
+
 
 class CaseNode: public AstNode {
   public:

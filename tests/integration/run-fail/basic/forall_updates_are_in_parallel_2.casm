@@ -1,0 +1,15 @@
+// error interpreter @10
+CASM te
+
+function x: -> Int
+
+init initR
+
+rule initR = {
+    forall i in [1..2] do
+        {|
+            x := i
+            //~^ conflict merging updatesets
+        |}
+    program(self) := undef
+}

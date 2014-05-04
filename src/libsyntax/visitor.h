@@ -124,6 +124,10 @@ template<class T, class V> class AstWalker {
           walk_push(reinterpret_cast<PushNode*>(stmt));
           break;
         }
+        case NodeType::FORALL: {
+          walk_forall(reinterpret_cast<ForallNode*>(stmt));
+          break;
+        }
         case NodeType::CASE: {
           walk_case(reinterpret_cast<CaseNode*>(stmt));
           break;
@@ -172,17 +176,16 @@ template<class T, class V> class AstWalker {
         visitor.visit_call_pre(call, v);
       }
 
-      if (call->rule != nullptr) {
-        std::vector<V> argument_results;
-        if (call->arguments != nullptr) {
-          for (ExpressionBase *e: *call->arguments) {
-            argument_results.push_back(walk_expression_base(e));
-          }
+      // we must evaluate all arguments, to set correct offset for bindings
+      std::vector<V> argument_results;
+      if (call->arguments != nullptr) {
+        for (ExpressionBase *e: *call->arguments) {
+          argument_results.push_back(walk_expression_base(e));
         }
+      }
+      if (call->rule != nullptr) {
         visitor.visit_call(call, argument_results);
-
         walk_rule(call->rule);
-
         visitor.visit_call_post(call);
       } else {
         DEBUG("rule not set!");
@@ -213,6 +216,13 @@ template<class T, class V> class AstWalker {
       V expr = walk_expression_base(node->expr);
       V atom = walk_function_atom(node->to);
       visitor.visit_push(node, expr, atom);
+    }
+
+    void walk_forall(ForallNode *node) {
+      walk_expression_base(node->in_expr);
+      visitor.visit_forall_pre(node);
+      walk_statement(node->statement);
+      visitor.visit_forall_post(node);
     }
 
     void walk_case(CaseNode *node) {

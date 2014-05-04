@@ -484,6 +484,14 @@ bool PopNode::equals(AstNode *other) {
   assert(0);
 }
 
+ForallNode::ForallNode(yy::location& loc, const std::string& ident,
+                       ExpressionBase *expr, AstNode *stmt) 
+    : AstNode(loc, NodeType::FORALL), identifier(std::move(ident)), in_expr(expr), statement(stmt) {}
+ForallNode::~ForallNode() {
+  delete in_expr;
+  delete statement;
+}
+
 CaseNode::CaseNode(yy::location& loc, ExpressionBase *expr,
              std::vector<std::pair<AtomNode*, AstNode*>>& case_list)
     : AstNode(loc, NodeType::CASE), expr(expr), case_list(std::move(case_list)), label_map(), map_fixed(false) {}

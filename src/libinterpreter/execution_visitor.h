@@ -16,8 +16,7 @@ class ExecutionVisitor {
   private:
 
     std::vector<Value> value_list;
-    std::vector<std::vector<Value> *> rule_bindings;
-    std::vector<Value> main_bindings;
+     std::vector<Value> main_bindings;
 
   casm_update *add_update(const Value& val, size_t sym_id,
                           const std::vector<Value> &arguments);
@@ -25,6 +24,8 @@ class ExecutionVisitor {
   public:
     Driver& driver_;
     ExecutionContext& context_;
+    std::vector<std::vector<Value> *> rule_bindings;
+
 
     ExecutionVisitor(ExecutionContext& context, Driver& driver);
 
