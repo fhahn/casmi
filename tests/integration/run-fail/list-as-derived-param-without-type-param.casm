@@ -1,6 +1,7 @@
 // error program
 
-derived x( a /*ta: List */ ) = a + ( b + c )
+derived x( a : List() ) = a + ( b + c )
+//~^ syntax error, unexpected )
 
 rule main = {
   program( self ) := undef

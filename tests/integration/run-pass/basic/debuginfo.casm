@@ -1,3 +1,5 @@
+// cmdline "-dall"
+
 rule main = {
   debuginfo trace "Das ist ein Test: " + 2
   debuginfo a "a"
