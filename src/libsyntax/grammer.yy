@@ -99,6 +99,10 @@
 %type<std::vector<Type*>> TYPE_SYNTAX_LIST
 %type <PushNode*> PUSH_SYNTAX
 %type <PopNode*> POP_SYNTAX
+%type <std::pair<AtomNode*, AstNode*>> CASE_LABEL_STRING CASE_LABEL_NUMBER CASE_LABEL_DEFAULT CASE_LABEL_IDENT CASE_LABEL
+%type <std::vector<std::pair<AtomNode*, AstNode*>>> CASE_LABEL_LIST
+%type <CaseNode*> CASE_SYNTAX
+
 
 %start SPECIFICATION
 
@@ -439,7 +443,7 @@ STATEMENT: ASSERT_SYNTAX { $$ = $1; }
          | DEBUGINFO_SYNTAX { $$ = $1; }
          | PRINT_SYNTAX { $$ = $1; }
          | UPDATE_SYNTAX { $$ = $1; }
-         | CASE_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
+         | CASE_SYNTAX { $$ = $1; }
          | CALL_SYNTAX { $$ = $1; }
          | KW_SEQBLOCK_SYNTAX { $$ = $1 ; }
          | SEQBLOCK_SYNTAX { $$ = $1; }
@@ -495,29 +499,45 @@ UPDATE_SYNTAX: FUNCTION_SYNTAX UPDATE EXPRESSION {
                 }
              ;
 
-CASE_SYNTAX: CASE EXPRESSION OF CASE_LABEL_LIST ENDCASE
+CASE_SYNTAX: CASE EXPRESSION OF CASE_LABEL_LIST ENDCASE {
+                $$ = new CaseNode(@$, $2, $4);
+           }
            ;
 
-CASE_LABEL_LIST: CASE_LABEL CASE_LABEL_LIST 
-               | CASE_LABEL 
+CASE_LABEL_LIST: CASE_LABEL_LIST CASE_LABEL {
+                    $$ = std::move($1);
+                    $$.push_back($2);
+               }
+               | CASE_LABEL {
+                    $$ = std::move(std::vector<std::pair<AtomNode*, AstNode*>>());
+                    $$.push_back($1);
+               }
                ;
 
-CASE_LABEL: CASE_LABEL_DEFAULT
-          | CASE_LABEL_NUMBER
-          | CASE_LABEL_IDENT
-          | CASE_LABEL_STRING
+CASE_LABEL: CASE_LABEL_DEFAULT { $$ =$1; }
+          | CASE_LABEL_NUMBER { $$ = $1; }
+          | CASE_LABEL_IDENT  { $$ = $1; }
+          | CASE_LABEL_STRING { $$ = $1; }
           ;
 
-CASE_LABEL_DEFAULT: DEFAULT ":" STATEMENT
+CASE_LABEL_DEFAULT: DEFAULT ":" STATEMENT {
+                    $$ = std::pair<AtomNode*, AstNode*>(nullptr, $3);
+                  }
                   ;
 
-CASE_LABEL_NUMBER: NUMBER ":" STATEMENT 
+CASE_LABEL_NUMBER: NUMBER ":" STATEMENT {
+                    $$ = std::pair<AtomNode*, AstNode*>($1, $3);
+                 }
                  ;
 
-CASE_LABEL_IDENT: IDENTIFIER ":" STATEMENT 
+CASE_LABEL_IDENT: FUNCTION_SYNTAX ":" STATEMENT {
+                    $$ = std::pair<AtomNode*, AstNode*>($1, $3);
+                }
                 ;
 
-CASE_LABEL_STRING: STRCONST ":" STATEMENT 
+CASE_LABEL_STRING: STRCONST ":" STATEMENT {
+                    $$ = std::pair<AtomNode*, AstNode*>(new StringAtom(@$, std::move($1)), $3);
+                 }
                  ;
 
 CALL_SYNTAX: CALL "(" EXPRESSION ")" "(" EXPRESSION_LIST ")" { $$ = new CallNode(@$, "", $3, $6); }

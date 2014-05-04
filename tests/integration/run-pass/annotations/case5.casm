@@ -1,10 +1,10 @@
 rule main = {
   let x = undef in {
     case x of
-      2: skip
-      3: skip
-      4: skip
-      default: skip
+      2: assert false
+      3: assert false
+      4: assert false
+      default: assert true
     endcase
   }
 

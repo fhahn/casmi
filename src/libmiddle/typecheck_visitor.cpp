@@ -210,6 +210,21 @@ void TypecheckVisitor::visit_pop(PopNode *node) {
   }
 }
 
+void TypecheckVisitor::visit_case(CaseNode *node, Type *expr, const std::vector<Type*>& case_labels) {
+  if (node->case_list.size() - case_labels.size() > 1) {
+   driver_.error(node->location,
+                 "more than one default label in case");
+  }
+
+  for (size_t i=0; i < case_labels.size(); i++) {
+    if (!expr->unify(case_labels[i])) {
+      driver_.error(node->case_list[i].first->location,
+                    "type of case expression ("+expr->get_most_general_type()->to_str()+") and label ("+
+                    case_labels[i]->get_most_general_type()->to_str()+") do not match");
+    }
+  }
+}
+
 void TypecheckVisitor::check_numeric_operator(const yy::location& loc, 
                                             Type* type,
                                             const Expression::Operation op) {

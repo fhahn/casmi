@@ -484,6 +484,21 @@ bool PopNode::equals(AstNode *other) {
   assert(0);
 }
 
+CaseNode::CaseNode(yy::location& loc, ExpressionBase *expr,
+             std::vector<std::pair<AtomNode*, AstNode*>>& case_list)
+    : AstNode(loc, NodeType::CASE), expr(expr), case_list(std::move(case_list)), label_map(), map_fixed(false) {}
+
+CaseNode::~CaseNode() {
+  delete expr;
+}
+
+bool CaseNode::equals(AstNode *other) {
+  if (!AstNode::equals(other)) {
+    return false;
+  }
+  assert(0);
+}
+
 UnaryNode::UnaryNode(yy::location& loc, NodeType node_type, AstNode *child) : AstNode(loc, node_type) {
   child_ = child;
 }

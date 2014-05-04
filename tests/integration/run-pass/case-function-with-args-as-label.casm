@@ -1,0 +1,11 @@
+function a: List(Int) -> Int initially { [1,2,3] -> 1}
+
+rule main = {
+    case 1 of
+        2: assert false
+        a([1,2,3]): assert true
+        default: assert false
+    endcase
+program(self) := undef
+}
+init main

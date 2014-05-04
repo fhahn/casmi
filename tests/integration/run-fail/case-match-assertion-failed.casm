@@ -1,0 +1,10 @@
+rule main = {
+    case 1 of
+        2: assert false
+        3: assert false
+        1: assert false //~ Assertion failed
+        default: assert false
+    endcase
+program(self) := undef
+}
+init main

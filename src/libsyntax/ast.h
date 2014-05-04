@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 #include "macros.h"
 
@@ -48,6 +49,7 @@ enum NodeType {
   NUMBER_RANGE_ATOM,
   POP,
   PUSH,
+  CASE,
 };
 
 const std::string& type_to_str(NodeType t);
@@ -64,6 +66,7 @@ class TempList;
 // Forward delclarations for this file
 class Expression;
 class ExpressionBase;
+class AtomNode;
 
 class AstNode {
     public:
@@ -334,6 +337,21 @@ class PopNode: public AstNode {
 
     PopNode(yy::location& loc, FunctionAtom *to, FunctionAtom *from);
     virtual ~PopNode();
+    virtual bool equals(AstNode *other);
+};
+
+class CaseNode: public AstNode {
+  public:
+    ExpressionBase *expr;
+
+    std::vector<std::pair<AtomNode*, AstNode*>> case_list;
+    std::unordered_map<Value, AstNode*> label_map;
+
+    bool map_fixed;
+
+    CaseNode(yy::location& loc, ExpressionBase *expr,
+             std::vector<std::pair<AtomNode*, AstNode*>>& case_list);
+    virtual ~CaseNode();
     virtual bool equals(AstNode *other);
 };
 

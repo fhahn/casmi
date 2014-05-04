@@ -48,6 +48,7 @@ class TypecheckVisitor {
     void visit_let_post(LetNode *node);
     void visit_push(PushNode *node, Type *expr, Type *atom);
     void visit_pop(PopNode *node);
+    void visit_case(CaseNode *node, Type *val, const std::vector<Type*>& case_labels);
 
     Type* visit_expression(Expression *expr, Type* left_val, Type* right_val);
     Type* visit_expression_single(Expression *expr, Type* val);

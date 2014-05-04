@@ -6,7 +6,7 @@ rule main = {
       2: skip
       3: skip
       4: skip
-      default: skip
+      default: assert false
     endcase
   }
 
