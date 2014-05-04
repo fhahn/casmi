@@ -4,7 +4,7 @@ rule main = {
   program( self ) := undef
 }
 
-rule x( a /*ta: List */ ) = {
+rule x( a : List() ) = { //~ syntax error, unexpected )
   skip
 }
 init main
