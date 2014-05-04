@@ -90,7 +90,7 @@ void TypecheckVisitor::visit_update(UpdateNode *update, Type* func_t, Type* expr
 
 void TypecheckVisitor::visit_call_pre(CallNode *call) {
   if (driver_.rules_map_.count(call->rule_name) == 1) {
-    call->rule = driver_.rules_map_[call->rule_name];
+   call->rule = driver_.rules_map_[call->rule_name];
   } else {
     driver_.error(call->location, "no rule with name `"+call->rule_name+"` found");
   }
@@ -225,6 +225,36 @@ void TypecheckVisitor::visit_case(CaseNode *node, Type *expr, const std::vector<
   }
 }
 
+void TypecheckVisitor::visit_forall_pre(ForallNode *node) {
+  Type list_t = new Type(TypeType::LIST, new Type(TypeType::UNKNOWN));
+
+  if (!node->in_expr->type_.unify(&list_t)) {
+    driver_.error(node->location, "expression must be a List but is "
+                                  +node->in_expr->type_.to_str());
+  }
+
+  node->type_.unify(node->in_expr->type_.internal_type);
+
+  auto current_rule_binding_types = rule_binding_types.back();
+  auto current_rule_binding_offsets = rule_binding_offsets.back();
+
+  current_rule_binding_offsets->insert(
+      std::pair<std::string, size_t>(node->identifier,
+                                     current_rule_binding_types->size())
+  );
+  current_rule_binding_types->push_back(&node->type_);
+}
+
+void TypecheckVisitor::visit_forall_post(ForallNode *node) {
+  if (!node->type_.is_complete()) {
+    driver_.error(node->location, "type inference for `"+node->identifier+"` failed");
+  }
+
+  rule_binding_types.back()->pop_back();
+  rule_binding_offsets.back()->erase(node->identifier);
+}
+
+
 void TypecheckVisitor::check_numeric_operator(const yy::location& loc, 
                                             Type* type,
                                             const Expression::Operation op) {
@@ -302,7 +332,7 @@ Type* TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
         // TODO check unifying
         Type* binding_type = current_rule_binding_types->at(atom->offset);
         atom->type_.unify(binding_type);
-        DEBUG("BINDING\t atom_t "<<atom->type_.to_str() << " binding_t "<<binding_type->to_str()) ;
+        DEBUG("BINDING "<<atom->name<<"\t atom_t "<<atom->type_.to_str() << " binding_t "<<binding_type->to_str()) ;
         return &atom->type_;
       }
     }

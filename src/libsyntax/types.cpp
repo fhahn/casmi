@@ -197,13 +197,15 @@ bool Type::unify(Type other) {
   if (t == TypeType::UNKNOWN) {
     t = other.t;
     return true;
+  } else if (other.t == TypeType::UNKNOWN) {
+    other.t = t;
+    return true;
   }
   return t == other.t;
 }
 
 
 bool Type::unify_nofollow(Type *other) {
-  DEBUG("UNIFY NOFOLLOW "<<to_str() << " and "<<other->to_str());
   bool result = true;
   if (t != TypeType::UNKNOWN && other->t != TypeType::UNKNOWN) {
     if (t != TypeType::LIST && t != TypeType::TUPLE && t != TypeType::TUPLE_OR_LIST) {

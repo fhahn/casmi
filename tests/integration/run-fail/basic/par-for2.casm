@@ -5,6 +5,8 @@ function x: Int -> Int
 rule main = {
   forall i in [ 1, 1 ] do {
     x( i ) := i
+    //~^ update conflict in parallel block for function `x`
+    // TODO error message could be improved
   }
 
   program( self ) := undef

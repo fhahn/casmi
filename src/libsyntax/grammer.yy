@@ -102,6 +102,7 @@
 %type <std::pair<AtomNode*, AstNode*>> CASE_LABEL_STRING CASE_LABEL_NUMBER CASE_LABEL_DEFAULT CASE_LABEL_IDENT CASE_LABEL
 %type <std::vector<std::pair<AtomNode*, AstNode*>>> CASE_LABEL_LIST
 %type <CaseNode*> CASE_SYNTAX
+%type <ForallNode*> FORALL_SYNTAX
 
 
 %start SPECIFICATION
@@ -453,7 +454,7 @@ STATEMENT: ASSERT_SYNTAX { $$ = $1; }
          | LET_SYNTAX { $$ = $1; }
          | PUSH_SYNTAX { $$ = $1; }
          | POP_SYNTAX { $$ = $1; }
-         | FORALL_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
+         | FORALL_SYNTAX { $$ = $1; }
          | ITERATE_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
          | SKIP  { $$ = new AstNode(NodeType::SKIP); }
          | IDENTIFIER  { $$ = new CallNode(@$, $1, nullptr); }
@@ -608,7 +609,9 @@ POP_SYNTAX: POP FUNCTION_SYNTAX FROM FUNCTION_SYNTAX {
           }
           ;
 
-FORALL_SYNTAX: FORALL IDENTIFIER IN EXPRESSION DO STATEMENT
+FORALL_SYNTAX: FORALL IDENTIFIER IN EXPRESSION DO STATEMENT {
+                $$ = new ForallNode(@$, $2, $4, $6);
+             }
              ;
 
 ITERATE_SYNTAX: ITERATE STATEMENT

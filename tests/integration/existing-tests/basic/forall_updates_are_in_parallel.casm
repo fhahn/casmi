@@ -8,9 +8,9 @@ init initR
 
 rule initR =
 {|
-	forall f in foo do	// all updates produced by a forall are composed in parallel, no matter the surrounding block
-		x := f		
+    forall f in foo do  // all updates produced by a forall are composed in parallel, no matter the surrounding block
+        x := f
 
-	// so this program fails
-	program(self) := undef
+    // so this program fails
+    program(self) := undef
 |}
