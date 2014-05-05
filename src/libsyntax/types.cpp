@@ -44,7 +44,7 @@ Type::Type(TypeType typ, std::vector<Type*>& internal_types) : t(typ), unify_wit
       internal_type = nullptr;
     }
 
-  } else if (t == TypeType::TUPLE_OR_LIST) {
+  } else if (t == TypeType::TUPLE_OR_LIST || t == TypeType::TUPLE) {
     tuple_types = internal_types;
   } else {
     DEBUG("INVALID");

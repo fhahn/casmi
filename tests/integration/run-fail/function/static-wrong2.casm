@@ -1,6 +1,8 @@
 // error annotation
 
 function (static) a: -> Int initially { 2 -> 3 }
+//~^ function `a` does not accept arguments but initializer provides some
+
 
 rule main = {
   program( self ) := undef

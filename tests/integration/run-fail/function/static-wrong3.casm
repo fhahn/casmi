@@ -1,6 +1,7 @@
 // error annotation
 
 function (static) a: Int * Int -> Int initially { 2 -> 3 }
+//~^ type of initializer arguments of function `a` is Int but should be Tuple (Int,Int,)
 
 rule main = {
   program( self ) := undef

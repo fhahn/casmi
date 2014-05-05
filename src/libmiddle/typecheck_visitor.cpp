@@ -8,11 +8,49 @@ void TypecheckVisitor::visit_function_def(FunctionDefNode *def,
   for (size_t i = 0; i < initializers.size(); i++) {
     const std::pair<Type*, Type*>& p = initializers[i];
 
-    if (def->sym->arguments_.size() == 0 && *p.first == TypeType::UNDEF && *p.second != def->sym->return_type_) {
+    // check type of initializer and type of function type
+    if (!p.second->unify(def->sym->return_type_)) {
       driver_.error(def->sym->intitializers_->at(i).second->location,
-                  "type of initializer of function `" +def->sym->name()+
-                  "` is `"+p.second->to_str()+"` but should be `"+
-                  def->sym->return_type_->to_str()+"´");
+                    "type of initializer of function `" +def->sym->name()+
+                    "` is `"+p.second->to_str()+"` but should be `"+
+                    def->sym->return_type_->to_str()+"´");
+    }
+
+    // check arument types
+    if (def->sym->arguments_.size() == 0) {
+      if (def->sym->intitializers_->at(i).first) {
+        driver_.error(def->sym->intitializers_->at(i).first->location,
+                      "function `" +def->sym->name()+
+                       "` does not accept arguments but initializer provides some");
+      }
+    } else if (def->sym->arguments_.size() == 1) {
+      if (def->sym->intitializers_->at(i).first && !p.first->unify(def->sym->arguments_[0])) {
+        driver_.error(def->sym->intitializers_->at(i).first->location,
+                      "type of initializer argument of function `" +def->sym->name()+
+                       "` is "+p.first->to_str()+" but should be "+
+                       def->sym->arguments_[0]->to_str());
+      } else if (!def->sym->intitializers_->at(i).first) {
+        driver_.error(def->sym->intitializers_->at(i).second->location,
+                      "function `" +def->sym->name()+
+                       "` needs one argument but initializer does not provide one");
+      }
+    } else {
+      if (def->sym->intitializers_->at(i).first) {
+        Type arg_tuple = Type(TypeType::TUPLE, def->sym->arguments_);
+        DEBUG("HUHU "<<p.first->to_str());
+        DEBUG("HUHU "<<arg_tuple.to_str());
+        if (!p.first->unify(&arg_tuple)) {
+          driver_.error(def->sym->intitializers_->at(i).first->location,
+                        "type of initializer arguments of function `" +def->sym->name()+
+                         "` is "+p.first->to_str()+" but should be "+
+                         arg_tuple.to_str());
+        }
+      } else if (!def->sym->intitializers_->at(i).first) {
+        driver_.error(def->sym->intitializers_->at(i).second->location,
+                      "function `" +def->sym->name()+
+                       "` needs multiple arguments but initializer does not provide one");
+      }
+   
     }
   }
 }
