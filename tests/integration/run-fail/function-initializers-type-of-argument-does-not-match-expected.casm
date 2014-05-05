@@ -1,0 +1,6 @@
+function(static) a: Int -> Int initially { 1.0 -> 1 }
+//~^ type of initializer argument of function `a` is Float but should be Int
+
+
+rule main = skip
+init main

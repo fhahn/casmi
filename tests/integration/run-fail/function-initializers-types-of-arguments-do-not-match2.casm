@@ -1,0 +1,6 @@
+function(static) a: Int * Int -> Int initially { [1, 1, 1] -> 1 }
+//~^ type of initializer arguments of function `a` is Tuple (Int,Int,Int,) but should be Tuple (Int,Int,)
+
+
+rule main = skip
+init main

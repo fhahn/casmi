@@ -566,11 +566,18 @@ void ExecutionWalker::run() {
         size_t num_args = 0; 
         uint64_t *args = new uint64_t[10];
         if (init.first != nullptr) {
-          std::vector<Value> ident;
-          ident.push_back(walk_expression_base(init.first));
-          pack_values_in_array(ident, &args[0]);
-          num_args = ident.size();
-          DEBUG("INTI FOO "<<pair.second->id << " arg: "<<args[0]);
+          std::vector<Value> arguments;
+          Value argument_v = walk_expression_base(init.first);
+          if (pair.second->arguments_.size() > 1) {
+            List *list = argument_v.value.list;
+            for (auto iter = list->begin(); iter != list->end(); iter++) {
+              arguments.push_back(*iter);
+            }
+          } else {
+            arguments.push_back(argument_v);
+          }
+          pack_values_in_array(arguments, &args[0]);
+          num_args = arguments.size();
         } else {
           args[0] = 0;
         }

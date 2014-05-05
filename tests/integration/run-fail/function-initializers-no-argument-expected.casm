@@ -1,0 +1,5 @@
+function(static) a:  -> Int initially { 1 -> 1 }
+//~^ function `a` does not accept arguments but initializer provides some
+
+rule main = skip
+init main
