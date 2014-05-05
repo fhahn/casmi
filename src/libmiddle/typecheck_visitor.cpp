@@ -69,6 +69,10 @@ void TypecheckVisitor::visit_assert(UnaryNode *assert, Type* val) {
 }
 
 void TypecheckVisitor::visit_update(UpdateNode *update, Type* func_t, Type* expr_t) {
+  if (update->func->symbol && update->func->symbol->is_static) {
+    driver_.error(update->location, "cannot update static function `"+update->func->name+"`");
+  }
+
   // TODO unify func->type and expr->type
   DEBUG("UNIFY update "<<update->func->type_.to_str() << " "<<update->expr_->type_.to_str());
   //DEBUG("link "<<update->func->type_.unify_links_to_str());
@@ -167,7 +171,13 @@ void TypecheckVisitor::visit_push(PushNode *node, Type *expr, Type *atom) {
     driver_.error(node->to->location, 
                   "can only push into functions");
   
+  } else {
+    if (node->to->symbol->is_static) {
+        driver_.error(node->to->location, "cannot push into static function `"+
+                                            node->to->symbol->name()+"`");
+    }
   }
+
   if (!expr->unify(atom->internal_type)) {
     driver_.error(node->expr->location, 
                   "cannot push "+expr->get_most_general_type()->to_str()+" into "+atom->to_str());
@@ -180,8 +190,21 @@ void TypecheckVisitor::visit_pop(PopNode *node) {
                   "from argument must be List(Unknown) but was "+node->from->type_.to_str());
   }
 
+  if (node->from->symbol_type != FunctionAtom::SymbolType::FUNCTION) {
+    driver_.error(node->from->location, "can only pop from functions");
+  } else {
+    if (node->from->symbol->is_static) {
+        driver_.error(node->from->location, "cannot pop from static function `"+node->from->symbol->name()+"`");
+    }
+  }
+
+
   Function *sym = driver_.function_table.get(node->to->name);
   if (sym) {
+    if (sym->is_static) {
+      driver_.error(node->to->location, "cannot pop into static function `"+sym->name()+"`");
+    }
+
     std::vector<Type*> func_arguments;
     if (node->to->arguments) {
       // TODO this should be doable!

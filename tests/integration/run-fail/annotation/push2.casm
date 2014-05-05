@@ -3,9 +3,8 @@
 function (static) a: -> List(Int) initially { [ 1, 2, 3 ] }
 
 rule main = {
-  let x = undef in
+  let x = 1 in
     push x into a
-
-  program( self ) := undef
+    //~^ cannot push into static function `a`
 }
 init main
