@@ -1,8 +1,7 @@
 // error annotation @4
-// TODO: better error message: only calls with 0 args allowed by this syntax
 
 rule main = {
-    x
+    call (@x)
     //~^ rule `x` expects 2 arguments but 0 where provided
 }
 

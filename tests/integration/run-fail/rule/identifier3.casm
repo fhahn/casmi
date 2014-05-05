@@ -1,11 +1,10 @@
 // error annotation @6
-// TODO: better error message -> x is an Int
 
 function x: -> Int
 
 rule main = {
-    x
-    //~^ no rule with name `x` foun
+    call (@x)
+    //~^ no rule with name `x` found
 }
 
 init main

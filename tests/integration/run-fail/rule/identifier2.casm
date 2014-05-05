@@ -1,7 +1,7 @@
 // error annotation @4
 
 rule main = {
-    y
+    call (@y)
     //~^ no rule with name `y` found
 }
 

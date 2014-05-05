@@ -457,7 +457,7 @@ STATEMENT: ASSERT_SYNTAX { $$ = $1; }
          | FORALL_SYNTAX { $$ = $1; }
          | ITERATE_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
          | SKIP  { $$ = new AstNode(NodeType::SKIP); }
-         | IDENTIFIER  { $$ = new CallNode(@$, $1, nullptr); }
+         | IDENTIFIER  { driver.error(@$, "this call syntax is obsolete, use `call "+$1+"`"); }
          | INTERN EXPRESSION_LIST  { $$ = new AstNode(NodeType::STATEMENT); }
          | OBJDUMP "(" IDENTIFIER ")"   { $$ = new AstNode(NodeType::STATEMENT);}
          ;
