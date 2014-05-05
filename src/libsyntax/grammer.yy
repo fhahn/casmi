@@ -36,6 +36,45 @@
 
 %code {
     #include "libsyntax/driver.h"
+
+    std::pair<bool, bool> parse_function_attributes(Driver& driver, const yy::location& loc,
+                                                    const std::vector<std::string>& attribute_names) {
+        bool is_static = false;
+        bool is_symbolic = false;
+        bool is_controlled = false;
+
+        for (const auto& attribute_name : attribute_names) {
+            if (attribute_name == "static") {
+                if (is_static) {
+                    driver.error(loc, "`static` attribute can only be used once per function");
+                    break;
+                } else {
+                    is_static = true;
+                }
+            }
+            if (attribute_name == "symbolic") {
+                if (is_symbolic) {
+                    driver.error(loc, "`symbolic` attribute can only be used once per function");
+                    break;
+                } else {
+                    is_symbolic = true;
+                }
+            }
+            if (attribute_name == "controlled") {
+                if (is_controlled) {
+                    driver.error(loc, "`controlled` attribute can only be used once per function");
+                    break;
+                } else {
+                    is_controlled = true;
+                }
+            }
+        }
+        if (is_static && is_controlled) {
+            driver.error(loc, "attributes `controlled` and `static` are mutually exclusive");
+        }
+
+        return std::pair<bool, bool>(is_static, is_symbolic);
+    }
 }
 
 %token AND OR XOR NOT ASSERT ASSURE DIEDIE IMPOSSIBLE SKIP SEQBLOCK ENDSEQBLOCK
@@ -103,6 +142,7 @@
 %type <std::vector<std::pair<AtomNode*, AstNode*>>> CASE_LABEL_LIST
 %type <CaseNode*> CASE_SYNTAX
 %type <ForallNode*> FORALL_SYNTAX
+%type <std::vector<std::string>> IDENTIFIER_LIST IDENTIFIER_LIST_NO_COMMA
 
 
 %start SPECIFICATION
@@ -206,10 +246,14 @@ DERIVED_SYNTAX: DERIVED IDENTIFIER "(" PARAM_LIST ")" "=" EXPRESSION {
                 }
               ;
 
-FUNCTION_DEFINITION: FUNCTION "(" IDENTIFIER_LIST ")" IDENTIFIER FUNCTION_SIGNATURE INITIALIZERS
-                   { $$ = new Function($5, $6.first, $6.second, $7); }
-           | FUNCTION "(" IDENTIFIER_LIST ")" IDENTIFIER FUNCTION_SIGNATURE
-                   { $$ = new Function($5, $6.first, $6.second, nullptr); }
+FUNCTION_DEFINITION: FUNCTION "(" IDENTIFIER_LIST ")" IDENTIFIER FUNCTION_SIGNATURE INITIALIZERS {
+                        auto attrs = parse_function_attributes(driver, @$, $3);
+                        $$ = new Function(attrs.first, attrs.second, $5, $6.first, $6.second, $7);
+                    }
+           | FUNCTION "(" IDENTIFIER_LIST ")" IDENTIFIER FUNCTION_SIGNATURE {
+                        auto attrs = parse_function_attributes(driver, @$, $3);
+                        $$ = new Function(attrs.first, attrs.second, $5, $6.first, $6.second, nullptr);
+                    }
            | FUNCTION IDENTIFIER FUNCTION_SIGNATURE INITIALIZERS
                    { $$ = new Function($2, $3.first, $3.second, $4); }
            | FUNCTION IDENTIFIER FUNCTION_SIGNATURE
@@ -217,10 +261,12 @@ FUNCTION_DEFINITION: FUNCTION "(" IDENTIFIER_LIST ")" IDENTIFIER FUNCTION_SIGNAT
            ;
 
 
-IDENTIFIER_LIST: IDENTIFIER "," IDENTIFIER_LIST
-               | IDENTIFIER
-               | IDENTIFIER ","
+IDENTIFIER_LIST: IDENTIFIER_LIST_NO_COMMA "," { $$ = std::move($1); }
+               | IDENTIFIER_LIST_NO_COMMA { $$ = std::move($1); }
                ;
+
+IDENTIFIER_LIST_NO_COMMA: IDENTIFIER_LIST_NO_COMMA "," IDENTIFIER { $$ = std::move($1); $$.push_back($3); }
+                        | IDENTIFIER { $$ = std::vector<std::string>(); $$.push_back($1); }
 
 FUNCTION_SIGNATURE: ":" ARROW TYPE_SYNTAX 
                   /* this constructor is implementation dependant! */
