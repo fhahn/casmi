@@ -1,0 +1,9 @@
+// error annotation @6
+
+function (static) a: -> List(Int)
+
+rule main = {
+  pop x from a
+  //~^ cannot pop from static function `a`
+}
+init main

@@ -3,5 +3,6 @@ function (static) a: -> Int initially { 2 }
 
 rule main = {
   a := 3
+  //~^ cannot update static function `a`
   program( self ) := undef
 }
