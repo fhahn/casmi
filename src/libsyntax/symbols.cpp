@@ -28,21 +28,34 @@ uint64_t Function::counter = 0;
 Function::Function(const std::string name, std::vector<Type*>& args,
               Type* return_type, std::vector<std::pair<ExpressionBase*, ExpressionBase*>> *init) :
                 name_(name), arguments_(std::move(args)), intitializers_(init),
-                return_type_(return_type), id(counter), symbol_type(SType::FUNCTION) {
+                return_type_(return_type), id(counter), symbol_type(SType::FUNCTION),
+                is_static(false), is_symbolic(false) {
+  counter += 1;
+}
+
+Function::Function(bool is_static, bool is_symbolic, const std::string name,
+             std::vector<Type*>& args, Type* return_type,
+             std::vector<std::pair<ExpressionBase*, ExpressionBase*>> *init) :
+                name_(name), arguments_(std::move(args)), intitializers_(init),
+                return_type_(return_type), id(counter), symbol_type(SType::FUNCTION),
+                is_static(is_static), is_symbolic(is_symbolic) {
+
   counter += 1;
 }
 
 Function::Function(const std::string name, std::vector<Type*>& args,
                    ExpressionBase *expr, Type* return_type) :
                 name_(name), arguments_(std::move(args)), derived(expr),
-                return_type_(return_type), id(counter), symbol_type(SType::DERIVED) {
+                return_type_(return_type), id(counter), symbol_type(SType::DERIVED),
+                is_static(false), is_symbolic(false) {
   counter += 1;
 }
 
 Function::Function(const std::string name,
                    ExpressionBase *expr, Type* return_type) :
                 name_(name), arguments_(), derived(expr),
-                return_type_(return_type), id(counter), symbol_type(SType::DERIVED) {
+                return_type_(return_type), id(counter), symbol_type(SType::DERIVED),
+                is_static(false), is_symbolic(false) {
   counter += 1;
 }
 

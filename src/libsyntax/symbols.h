@@ -17,7 +17,6 @@ class FunctionAtom;
 
 bool is_builtin_name(const std::string& name);
 
-
 class Function {
   private:
     static uint64_t counter;
@@ -44,8 +43,15 @@ class Function {
 
     std::map<std::string, size_t> binding_offsets;
 
+    const bool is_static;
+    const bool is_symbolic;
+
+
     Function(const std::string name, std::vector<Type*>& args, Type* return_type,
            std::vector<std::pair<ExpressionBase*, ExpressionBase*>> *init);
+    Function(bool is_static, bool is_symbolic, const std::string name,
+             std::vector<Type*>& args, Type* return_type,
+             std::vector<std::pair<ExpressionBase*, ExpressionBase*>> *init);
     Function(const std::string name, std::vector<Type*>& args, ExpressionBase *expr, Type* return_type);
     Function(const std::string name, ExpressionBase *expr, Type *return_type);
     ~Function();

@@ -1,0 +1,5 @@
+function(symbolic, static, static) a: -> List(Int)
+//~^ `static` attribute can only be used once per function
+
+rule main = skip
+init main

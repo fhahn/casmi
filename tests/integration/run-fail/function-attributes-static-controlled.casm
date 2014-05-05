@@ -1,0 +1,5 @@
+function(static, controlled) a: -> List(Int)
+//~^  attributes `controlled` and `static` are mutually exclusive
+
+rule main = skip
+init main
