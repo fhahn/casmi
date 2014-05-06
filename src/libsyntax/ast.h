@@ -59,6 +59,7 @@ class AstVisitor;
 
 // Forward declarations for libsyntax/symbols.h
 class Function;
+class Enum;
 class Binding;
 
 class List;
@@ -125,6 +126,12 @@ class FunctionDefNode: public AstNode {
     ~FunctionDefNode();
 };
 
+class EnumDefNode: public AstNode {
+  public:
+    Enum *enum_;
+    EnumDefNode(yy::location& loc, Enum *enum_);
+    ~EnumDefNode();
+};
 
 class IfThenElseNode : public AstNode {
   public:

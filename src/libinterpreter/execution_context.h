@@ -56,12 +56,12 @@ class ExecutionContext {
 
   public:
     std::vector<std::pair<Function*, std::unordered_map<ArgumentsKey, Value> >> functions;
-    const SymbolTable<Function*> symbol_table;
+    const SymbolTable symbol_table;
     casm_updateset updateset;
     pp_mem pp_stack;
     std::vector<List*> temp_lists;
 
-    ExecutionContext(const SymbolTable<Function*>& st, RuleNode *init);
+    ExecutionContext(const SymbolTable& st, RuleNode *init);
 
     void apply_updates();
     void merge_par();

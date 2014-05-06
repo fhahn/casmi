@@ -17,18 +17,26 @@ class FunctionAtom;
 
 bool is_builtin_name(const std::string& name);
 
-class Function {
-  private:
-    static uint64_t counter;
-    const std::string name_;
-
+class Symbol {
   public:
-    enum class SType {
+    const std::string name;
+
+    enum class SymbolType {
       FUNCTION,
       DERIVED,
       BUILTIN,
     };
+    
+    SymbolType type;
 
+    Symbol(const std::string& name, SymbolType type);
+};
+
+class Function : public Symbol {
+  private:
+    static uint64_t counter;
+
+  public:
     std::vector<Type*> arguments_;
 
     union {
@@ -39,13 +47,10 @@ class Function {
     Type *return_type_;
     const uint64_t id;
 
-    SType symbol_type;
-
     std::map<std::string, size_t> binding_offsets;
 
     const bool is_static;
     const bool is_symbolic;
-
 
     Function(const std::string name, std::vector<Type*>& args, Type* return_type,
            std::vector<std::pair<ExpressionBase*, ExpressionBase*>> *init);
@@ -56,7 +61,6 @@ class Function {
     Function(const std::string name, ExpressionBase *expr, Type *return_type);
     ~Function();
 
-    const std::string& name() const;
     bool equals(Function *other) const;
     const std::string to_str() const;
     inline size_t argument_count() const {
@@ -64,6 +68,17 @@ class Function {
     }
 
     bool is_builtin();
+};
+
+class Enum {
+  private:
+    std::unordered_map<std::string, size_t> mapping;
+
+  public:
+    const std::string name;
+
+    Enum(const std::string& name);
+    bool add_enum_element(const std::string& name);
 };
 
 class Binding {
@@ -79,10 +94,9 @@ class Binding {
     Binding(const std::string& name, Type t);
 };
 
-template<typename T>
 class SymbolTable {
   public:
-    std::map<std::string, T> table_;
+    std::map<std::string, Symbol*> table_;
 
     SymbolTable() {}
 
@@ -100,18 +114,18 @@ class SymbolTable {
       return table_.size();
     }
 
-    bool add(T sym) {
+    bool add(Symbol *sym) {
       try {
-        table_.at(sym->name());
+        table_.at(sym->name);
         return false;
       } catch (const std::out_of_range& e) {
-        DEBUG("Add symbol "+sym->name());
-        table_[sym->name()] = sym;
+        DEBUG("Add symbol "+sym->name);
+        table_[sym->name] = sym;
         return true;
       }
     }
 
-    T get(const std::string& name) const {
+    Symbol* get(const std::string& name) const {
       try {
         return table_.at(name);
       } catch (const std::out_of_range& e) {
@@ -119,7 +133,19 @@ class SymbolTable {
       }
     }
 
-    Type get(const FunctionAtom *func) const;
+     Function* get_function(const std::string& name) const {
+      try {
+        Symbol* sym = table_.at(name);
+        // TODO split Function and Derived symbols?
+        if (sym->type == Symbol::SymbolType::FUNCTION || sym->type == Symbol::SymbolType::DERIVED) {
+          return reinterpret_cast<Function*>(sym);
+        } else {
+          return nullptr;
+        }
+      } catch (const std::out_of_range& e) {
+        return nullptr;
+      }
+    }
 };
 
 #endif

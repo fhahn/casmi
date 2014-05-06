@@ -4,7 +4,7 @@
 
 #include "libinterpreter/execution_context.h"
 
-ExecutionContext::ExecutionContext(const SymbolTable<Function*>& st, RuleNode *init) : debuginfo_filters(), symbol_table(std::move(st)), temp_lists() {
+ExecutionContext::ExecutionContext(const SymbolTable& st, RuleNode *init) : debuginfo_filters(), symbol_table(std::move(st)), temp_lists() {
   // use 10 MB for updateset data
   pp_mem_new(&updateset_data_, 1024 * 1024 * 100, "mem for main updateset");
   updateset.set =  pp_hashmap_new(&updateset_data_, 1024*10, "main updateset");
@@ -19,7 +19,7 @@ ExecutionContext::ExecutionContext(const SymbolTable<Function*>& st, RuleNode *i
   }
 
   functions = std::vector<std::pair<Function*, std::unordered_map<ArgumentsKey, Value>>>(symbol_table.size());
-  Function *program_sym = symbol_table.get("program");
+  Function *program_sym = symbol_table.get_function("program");
   // TODO location is wrong here
   program_sym->intitializers_ = new std::vector<std::pair<ExpressionBase*, ExpressionBase*>>();
   RuleAtom *init_atom = new RuleAtom(init->location, std::string(init->name));
@@ -42,7 +42,7 @@ void ExecutionContext::apply_updates() {
 
     auto& function_map = functions[u->func];
 
-    DEBUG("APPLY args "<<u->num_args << " arg "<<u->args[0] << " " << u->args[1]<<" func "<<function_map.first->name());
+    DEBUG("APPLY args "<<u->num_args << " arg "<<u->args[0] << " " << u->args[1]<<" func "<<function_map.first->name);
 
     // TODO handle tuples
     if (function_map.first->return_type_->t == TypeType::LIST) {
@@ -226,7 +226,7 @@ Value& ExecutionContext::get_function_value(Function *sym, uint64_t args[]) {
   // TODO move should be used here
   auto& function_map = functions[sym->id];
   try {
-      DEBUG("get "<<sym->id << " " << sym->name()<<" size:"<<sym->arguments_.size() << " args "<<args[0] << " Fun size "<< function_map.second.size());
+      DEBUG("get "<<sym->id << " " << sym->name<<" size:"<<sym->arguments_.size() << " args "<<args[0] << " Fun size "<< function_map.second.size());
     Value &v = function_map.second.at({&args[0], sym->arguments_.size()});
     int64_t state = (updateset.pseudostate % 2 == 0) ? state = updateset.pseudostate-1:
                                                        state = updateset.pseudostate;
@@ -235,7 +235,7 @@ Value& ExecutionContext::get_function_value(Function *sym, uint64_t args[]) {
       casm_update *update = (casm_update*) pp_hashmap_get(updateset.set, key);
       if (update) {
         tmp = Value(sym->return_type_, update);
-        DEBUG("FOUND UPDATE for "<< sym->name()<<" "<<tmp.to_str() << " type "<<sym->return_type_->to_str());
+        DEBUG("FOUND UPDATE for "<< sym->name<<" "<<tmp.to_str() << " type "<<sym->return_type_->to_str());
         return tmp;
       }
     }

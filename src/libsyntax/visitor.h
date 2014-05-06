@@ -52,7 +52,7 @@ template<class T, class V> class AstWalker {
     }
 
     void walk_function_def(FunctionDefNode *def) {
-      if (def->sym->symbol_type == Function::SType::FUNCTION) {
+      if (def->sym->type == Symbol::SymbolType::FUNCTION) {
         std::vector<std::pair<V, V>> initializer_results;
         if (def->sym->intitializers_) {
           for (std::pair<ExpressionBase*, ExpressionBase*> p : *def->sym->intitializers_) {
