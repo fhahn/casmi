@@ -64,7 +64,7 @@ void ExecutionContext::apply_updates() {
         to_fold.push_back(&list);
       }
     } else {
-      Value v(function_map.first->return_type_, u);
+      Value v(function_map.first->return_type_->t, u);
       if (v.type == TypeType::UNDEF) {
         function_map.second.erase({u->args, u->num_args});
       } else {
@@ -234,7 +234,7 @@ Value& ExecutionContext::get_function_value(Function *sym, uint64_t args[]) {
       uint64_t key = (uint64_t) &v << 16 | state;
       casm_update *update = (casm_update*) pp_hashmap_get(updateset.set, key);
       if (update) {
-        tmp = Value(sym->return_type_, update);
+        tmp = Value(sym->return_type_->t, update);
         DEBUG("FOUND UPDATE for "<< sym->name<<" "<<tmp.to_str() << " type "<<sym->return_type_->to_str());
         return tmp;
       }

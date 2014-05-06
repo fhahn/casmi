@@ -46,13 +46,13 @@ Value& Value::operator=(const Value& other) {
 }
 
 
-Value::Value(const Type& t, casm_update* u) {
+Value::Value(TypeType t, casm_update* u) {
   if (u->defined == 0) {
     type = TypeType::UNDEF;
     return;
   }
 
-  switch (t.t) {
+  switch (t) {
     case TypeType::UNDEF:
       type = TypeType::UNDEF;
       break;

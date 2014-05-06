@@ -215,6 +215,7 @@ class FunctionAtom : public BaseFunctionAtom {
       PARAMETER,
       UNSET,
       PUSH_POP,
+      ENUM,
     };
 
     SymbolType symbol_type;
@@ -222,6 +223,7 @@ class FunctionAtom : public BaseFunctionAtom {
     union {
       Function *symbol;
       size_t offset;
+      Enum *enum_;
     };
 
     FunctionAtom(yy::location& loc, const std::string name);
