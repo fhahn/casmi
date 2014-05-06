@@ -10,6 +10,7 @@
 class RuleNode;
 
 class HeadList;
+class TailList;
 class BottomList;
 class List;
 
@@ -65,16 +66,14 @@ bool value_eq(const Value& v1, const Value& v2);
 
 
 class List {
-
-  protected:
+  public:
     enum class ListType {
       HEAD,
       BOTTOM,
       SKIP,
+      TAIL,
     };
-
-  public:
-    
+   
     class const_iterator {
       public:
         typedef const_iterator self_type;
@@ -96,6 +95,7 @@ class List {
       private:
         const BottomList *bottom;
         const HeadList *head;
+        const TailList *tail;
         uint32_t pos;
 
         void do_init(const List *other);
@@ -113,6 +113,7 @@ class List {
     bool is_bottom() const;
     bool is_head() const;
     bool is_skip() const;
+    bool is_tail() const;
 
     const_iterator begin() const;
     const_iterator end() const;
@@ -134,6 +135,17 @@ class HeadList : public List {
     HeadList(List* right, const Value& val);
 };
 
+class TailList : public List {
+  public:
+    TailList* right;
+    const Value current_tail;
+
+    TailList(TailList* right, const Value& val);
+
+    void collect(std::vector<Value>& collect_to);
+};
+
+
 class BottomList : public List {
   friend class List;
 
@@ -143,6 +155,8 @@ class BottomList : public List {
 
   public:
     std::vector<Value> values;
+
+    TailList *tail;
 
     BottomList();
     BottomList(const std::vector<Value>& vals);

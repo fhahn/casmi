@@ -1,0 +1,32 @@
+//function stop: -> Boolean initially { false }
+function stop: -> Int initially { 0 }
+
+function map: Int -> List(Int)
+
+rule main = {
+    map(1) := app([], 5)
+    map(2) := app(app([2], 1), 5)
+    map(3) := app(app(cons(2, []), 1), 5)
+
+    map(4) := tail(app([], 5))
+    map(5) := tail(app([1], 5))
+    map(6) := tail(app([1, 2], 5))
+    map(7) := cons(99, tail(app([1, 2], 5)))
+
+    stop := 1
+
+    if stop = 1 then {
+        assert map(1) = [5,]
+        assert map(2) = [2, 1, 5]
+        assert map(3) = [2, 1, 5]
+
+        assert map(4) = []
+        assert map(5) = [5]
+        assert map(6) = [2, 5]
+        assert map(7) = [99, 2, 5]
+
+        program(self) := undef
+    }
+}
+
+init main
