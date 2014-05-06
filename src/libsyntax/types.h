@@ -23,7 +23,8 @@ enum class TypeType {
   UNDEF,
   LIST,
   TUPLE,
-  TUPLE_OR_LIST
+  TUPLE_OR_LIST,
+  ENUM,
 };
 
 class Type;
@@ -42,6 +43,8 @@ class Type {
     std::vector<Type*> constraints;
     std::vector<Type*> tuple_types;
 
+    std::string enum_name;
+
     Type();
     Type(TypeType t);
     Type(const Type& other);
@@ -49,6 +52,7 @@ class Type {
     Type(TypeType t, std::vector<Type*>& internal_types);
     Type(TypeType t, Type *int_typ);
     Type(const std::string& type_name);
+    Type(TypeType enum_type, const std::string& type_name);
     Type(Type *other);
 
 

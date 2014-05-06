@@ -35,7 +35,7 @@ class Value {
     Value(Value& other);
     Value(const Value& other);
     Value(Value&& other);
-    Value(const Type& type, casm_update* update);
+    Value(TypeType type, casm_update* update);
 
     Value& operator=(const Value& other);
 

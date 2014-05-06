@@ -379,7 +379,16 @@ Type* TypecheckVisitor::visit_expression_single(Expression *expr, Type* val) {
 Type* TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
                                            const std::vector<Type*> &expr_results) {
 
-  Function *sym = driver_.function_table.get_function(atom->name);
+  Symbol *sym = driver_.function_table.get(atom->name);
+  if (sym && sym->type == Symbol::SymbolType::ENUM) {
+    atom->symbol_type = FunctionAtom::SymbolType::ENUM;
+    atom->enum_ = reinterpret_cast<Enum*>(sym);
+    // TODO leak
+    // TODO check unify here?
+    atom->type_.unify(new Type(TypeType::ENUM, sym->name));
+    return &atom->type_;
+  }
+
   if (!sym) {
     // check if a rule parameter with this name was defined
     if (rule_binding_offsets.size() > 0){
@@ -403,10 +412,11 @@ Type* TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
     return &atom->type_;
   }
 
-  atom->symbol = sym;
+  Function *func = reinterpret_cast<Function*>(sym);
+  atom->symbol = func;
   if (atom->symbol->type == Symbol::SymbolType::FUNCTION) {
     atom->symbol_type = FunctionAtom::SymbolType::FUNCTION;
-  } else {
+  } else{
     atom->symbol_type = FunctionAtom::SymbolType::DERIVED;
   }
 
@@ -439,7 +449,7 @@ Type* TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
   }
 
   // TODO check unifying
-  atom->type_.unify(sym->return_type_);
+  atom->type_.unify(func->return_type_);
   return &atom->type_;
 }
 

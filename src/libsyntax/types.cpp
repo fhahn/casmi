@@ -9,7 +9,7 @@
 #include "libsyntax/types.h"
 
 
-Type::Type(const std::string& type_name, std::vector<Type*>& internal_types) : unify_with_left(nullptr), unify_with_right(nullptr), constraints(), tuple_types()  {
+Type::Type(const std::string& type_name, std::vector<Type*>& internal_types) : unify_with_left(nullptr), unify_with_right(nullptr), constraints(), tuple_types(), enum_name() {
   if (type_name == "List") {
     t = TypeType::LIST;
 
@@ -30,10 +30,9 @@ Type::Type(const std::string& type_name, std::vector<Type*>& internal_types) : u
       t = TypeType::INVALID;
     }
   }
-
 }
 
-Type::Type(TypeType typ, std::vector<Type*>& internal_types) : t(typ), unify_with_left(nullptr), unify_with_right(nullptr), constraints(), tuple_types()  {
+Type::Type(TypeType typ, std::vector<Type*>& internal_types) : t(typ), unify_with_left(nullptr), unify_with_right(nullptr), constraints(), tuple_types(), enum_name() {
   if (t == TypeType::LIST) {
     if (internal_types.size() == 0) {
       internal_type = new Type(TypeType::UNKNOWN);
@@ -52,22 +51,22 @@ Type::Type(TypeType typ, std::vector<Type*>& internal_types) : t(typ), unify_wit
   }
 }
 
-Type::Type(TypeType typ, Type *int_typ) : t(typ), unify_with_left(nullptr), unify_with_right(nullptr), constraints(), tuple_types()  {
+Type::Type(TypeType typ, Type *int_typ) : t(typ), unify_with_left(nullptr), unify_with_right(nullptr), constraints(), tuple_types(), enum_name() {
   if (t != TypeType::LIST && t != TypeType::TUPLE_OR_LIST) {
     t = TypeType::INVALID;
   }
   internal_type = int_typ;
 }
 
-Type::Type() : t(TypeType::INVALID), internal_type(nullptr), unify_with_left(nullptr), unify_with_right(nullptr), constraints(), tuple_types()  {}
+Type::Type() : t(TypeType::INVALID), internal_type(nullptr), unify_with_left(nullptr), unify_with_right(nullptr), constraints(), tuple_types(), enum_name() {}
 
-Type::Type(TypeType t) : t(t), internal_type(nullptr), unify_with_left(nullptr), unify_with_right(nullptr), constraints(), tuple_types()  {
+Type::Type(TypeType t) : t(t), internal_type(nullptr), unify_with_left(nullptr), unify_with_right(nullptr), constraints(), tuple_types(), enum_name() {
   if (t == TypeType::LIST || t == TypeType::TUPLE) {
     t = TypeType::INVALID;
   }
 }
 
-Type::Type(Type *other) : t(other->t), internal_type(nullptr), unify_with_left(nullptr), unify_with_right(nullptr), constraints(), tuple_types()  {
+Type::Type(Type *other) : t(other->t), internal_type(nullptr), unify_with_left(nullptr), unify_with_right(nullptr), constraints(), tuple_types(), enum_name()  {
   if (other->internal_type != nullptr) {
     internal_type = new Type(other->internal_type);
   } else {
@@ -76,7 +75,15 @@ Type::Type(Type *other) : t(other->t), internal_type(nullptr), unify_with_left(n
 }
 
 
-Type::Type(const Type& other) : t(other.t), internal_type(other.internal_type), unify_with_left(nullptr), unify_with_right(nullptr), constraints(), tuple_types()  {
+Type::Type(const Type& other) : t(other.t), internal_type(other.internal_type), unify_with_left(nullptr), unify_with_right(nullptr), constraints(), tuple_types(), enum_name(other.enum_name)  {
+}
+
+Type::Type(TypeType enum_type, const std::string& name) : unify_with_left(nullptr), unify_with_right(nullptr), constraints(), tuple_types(), enum_name(std::move(name))  {
+  if (enum_type == TypeType::ENUM) {
+    t = enum_type;
+  } else {
+    t = TypeType::INVALID;
+  }
 }
 
 Type::Type(const std::string& type_name) : internal_type(nullptr), unify_with_left(nullptr), unify_with_right(nullptr), constraints(), tuple_types() {
@@ -138,6 +145,7 @@ const std::string Type::to_str() const {
       }
       return res + ")";
     }
+    case TypeType::ENUM: return enum_name;
     case TypeType::INVALID: return "Invalid";
     default: assert(0);
   }
@@ -208,6 +216,10 @@ bool Type::unify(Type other) {
 bool Type::unify_nofollow(Type *other) {
   bool result = true;
   if (t != TypeType::UNKNOWN && other->t != TypeType::UNKNOWN) {
+    if (t == TypeType::ENUM && other->t == TypeType::ENUM) {
+      return enum_name == other->enum_name;
+    }
+
     if (t != TypeType::LIST && t != TypeType::TUPLE && t != TypeType::TUPLE_OR_LIST) {
       return t == other->t;
     } else if(other->t == TypeType::LIST && t == TypeType::LIST) {
@@ -318,6 +330,12 @@ bool Type::unify_nofollow(Type *other) {
     }
   }
 
+  if (t == TypeType::UNKNOWN && other->t == TypeType::ENUM) {
+    t = TypeType::ENUM;
+    enum_name = other->enum_name;
+    return true;
+  }
+
   if (t == TypeType::UNKNOWN && (other->t == TypeType::TUPLE || other->t == TypeType::TUPLE_OR_LIST)) {
     t = other->t;
     tuple_types = other->tuple_types;
@@ -352,6 +370,12 @@ bool Type::unify_nofollow(Type *other) {
   if ((t == TypeType::TUPLE || t == TypeType::TUPLE_OR_LIST) && other->t == TypeType::UNKNOWN) {
     other->t = t;
     other->tuple_types = tuple_types;
+    return true;
+  }
+
+  if (t == TypeType::ENUM && other->t == TypeType::UNKNOWN) {
+    other->t = TypeType::ENUM;
+    other->enum_name = enum_name;
     return true;
   }
 
