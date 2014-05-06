@@ -47,7 +47,7 @@ class Driver {
     RuleNode *get_init_rule() const;
 
     // functions
-    SymbolTable<Function*> function_table;
+    SymbolTable function_table;
 
     // Bindings
     std::map<std::string, size_t> binding_offsets;

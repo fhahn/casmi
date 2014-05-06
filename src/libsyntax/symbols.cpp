@@ -19,6 +19,9 @@ bool is_builtin_name(const std::string& name) {
   return false;
 }
 
+
+Symbol::Symbol(const std::string& name, SymbolType type) : name(std::move(name)), type(type) {}
+
 // -------------------------------------------------------------------------
 // Implementation of Function
 // -------------------------------------------------------------------------
@@ -27,17 +30,16 @@ uint64_t Function::counter = 0;
 
 Function::Function(const std::string name, std::vector<Type*>& args,
               Type* return_type, std::vector<std::pair<ExpressionBase*, ExpressionBase*>> *init) :
-                name_(name), arguments_(std::move(args)), intitializers_(init),
-                return_type_(return_type), id(counter), symbol_type(SType::FUNCTION),
-                is_static(false), is_symbolic(false) {
+                Symbol(name, SymbolType::FUNCTION), arguments_(std::move(args)), intitializers_(init),
+                return_type_(return_type), id(counter), is_static(false), is_symbolic(false) {
   counter += 1;
 }
 
 Function::Function(bool is_static, bool is_symbolic, const std::string name,
              std::vector<Type*>& args, Type* return_type,
              std::vector<std::pair<ExpressionBase*, ExpressionBase*>> *init) :
-                name_(name), arguments_(std::move(args)), intitializers_(init),
-                return_type_(return_type), id(counter), symbol_type(SType::FUNCTION),
+                Symbol(name, SymbolType::FUNCTION), arguments_(std::move(args)), intitializers_(init),
+                return_type_(return_type), id(counter),
                 is_static(is_static), is_symbolic(is_symbolic) {
 
   counter += 1;
@@ -45,17 +47,16 @@ Function::Function(bool is_static, bool is_symbolic, const std::string name,
 
 Function::Function(const std::string name, std::vector<Type*>& args,
                    ExpressionBase *expr, Type* return_type) :
-                name_(name), arguments_(std::move(args)), derived(expr),
-                return_type_(return_type), id(counter), symbol_type(SType::DERIVED),
+                Symbol(name, SymbolType::DERIVED), arguments_(std::move(args)), derived(expr),
+                return_type_(return_type), id(counter),
                 is_static(false), is_symbolic(false) {
   counter += 1;
 }
 
 Function::Function(const std::string name,
                    ExpressionBase *expr, Type* return_type) :
-                name_(name), arguments_(), derived(expr),
-                return_type_(return_type), id(counter), symbol_type(SType::DERIVED),
-                is_static(false), is_symbolic(false) {
+                Symbol(name, SymbolType::DERIVED), arguments_(), derived(expr),
+                return_type_(return_type), id(counter), is_static(false), is_symbolic(false) {
   counter += 1;
 }
 
@@ -71,12 +72,8 @@ Function::~Function() {
   }
 }
 
-const std::string& Function::name() const {
-  return name_;
-}
-
 const std::string Function::to_str() const {
-  std::string res = name_;
+  std::string res = name;
 
   res = ": (";
   for (Type* t : arguments_) {
@@ -88,7 +85,7 @@ const std::string Function::to_str() const {
 }
 
 bool Function::equals(Function *other) const {
-  if (name_ != other->name_) {
+  if (name != other->name) {
     return false;
   }
 
@@ -104,11 +101,17 @@ bool Function::equals(Function *other) const {
 }
 
 bool Function::is_builtin() {
-  if(builtin_names.count(name_) != 0) {
-    symbol_type = SType::BUILTIN;
+  if(builtin_names.count(name) != 0) {
+    type = SymbolType::BUILTIN;
     return true;
   }
   return false;
+}
+
+Enum::Enum(const std::string& name) : mapping(), name(std::move(name)) {}
+
+bool Enum::add_enum_element(const std::string& name) {
+  return true;
 }
 
 uint64_t Binding::counter = 0;

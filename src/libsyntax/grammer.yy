@@ -143,6 +143,7 @@
 %type <CaseNode*> CASE_SYNTAX
 %type <ForallNode*> FORALL_SYNTAX
 %type <std::vector<std::string>> IDENTIFIER_LIST IDENTIFIER_LIST_NO_COMMA
+%type <Enum*> ENUM_SYNTAX;
 
 
 %start SPECIFICATION
@@ -179,11 +180,11 @@ BODY_ELEMENTS: BODY_ELEMENTS BODY_ELEMENT { $1->add($2); $$ = $1; }
 
 BODY_ELEMENT: PROVIDER_SYNTAX { $$ = new AstNode(NodeType::PROVIDER); }
            | OPTION_SYNTAX { $$ = new AstNode(NodeType::OPTION); }
-           | ENUM_SYNTAX { $$ = new AstNode(NodeType::ENUM); }
+           | ENUM_SYNTAX { $$ = new EnumDefNode(@$, $1); }
            | FUNCTION_DEFINITION {
                 $$ = new FunctionDefNode(@$, $1);
                 if ($1->is_builtin()) {
-                    driver.error(@$, "cannot use `"+$1->name()+"` as function identifier because it is a builtin name");
+                    driver.error(@$, "cannot use `"+$1->name+"` as function identifier because it is a builtin name");
                 }
                 if (!driver.function_table.add($1)) {
                     driver.error(@$, "redefinition of symbol");
@@ -222,7 +223,13 @@ PROVIDER_SYNTAX: PROVIDER IDENTIFIER
 
 OPTION_SYNTAX: OPTION IDENTIFIER "." IDENTIFIER IDENTIFIER;
 
-ENUM_SYNTAX: ENUM IDENTIFIER "=" "{" IDENTIFIER_LIST "}";
+ENUM_SYNTAX: ENUM IDENTIFIER "=" "{" IDENTIFIER_LIST "}" {
+                $$ = new Enum($2);
+                for (const std::string& name : $5) {
+                    $$->add_enum_element(name);
+                }
+           }
+           ;
 
 DERIVED_SYNTAX: DERIVED IDENTIFIER "(" PARAM_LIST ")" "=" EXPRESSION {
                   // TODO: 2nd argument should be a reference

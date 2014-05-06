@@ -11,7 +11,7 @@ void TypecheckVisitor::visit_function_def(FunctionDefNode *def,
     // check type of initializer and type of function type
     if (!p.second->unify(def->sym->return_type_)) {
       driver_.error(def->sym->intitializers_->at(i).second->location,
-                    "type of initializer of function `" +def->sym->name()+
+                    "type of initializer of function `" +def->sym->name+
                     "` is `"+p.second->to_str()+"` but should be `"+
                     def->sym->return_type_->to_str()+"´");
     }
@@ -20,18 +20,18 @@ void TypecheckVisitor::visit_function_def(FunctionDefNode *def,
     if (def->sym->arguments_.size() == 0) {
       if (def->sym->intitializers_->at(i).first) {
         driver_.error(def->sym->intitializers_->at(i).first->location,
-                      "function `" +def->sym->name()+
+                      "function `" +def->sym->name+
                        "` does not accept arguments but initializer provides some");
       }
     } else if (def->sym->arguments_.size() == 1) {
       if (def->sym->intitializers_->at(i).first && !p.first->unify(def->sym->arguments_[0])) {
         driver_.error(def->sym->intitializers_->at(i).first->location,
-                      "type of initializer argument of function `" +def->sym->name()+
+                      "type of initializer argument of function `" +def->sym->name+
                        "` is "+p.first->to_str()+" but should be "+
                        def->sym->arguments_[0]->to_str());
       } else if (!def->sym->intitializers_->at(i).first) {
         driver_.error(def->sym->intitializers_->at(i).second->location,
-                      "function `" +def->sym->name()+
+                      "function `" +def->sym->name+
                        "` needs one argument but initializer does not provide one");
       }
     } else {
@@ -41,13 +41,13 @@ void TypecheckVisitor::visit_function_def(FunctionDefNode *def,
         DEBUG("HUHU "<<arg_tuple.to_str());
         if (!p.first->unify(&arg_tuple)) {
           driver_.error(def->sym->intitializers_->at(i).first->location,
-                        "type of initializer arguments of function `" +def->sym->name()+
+                        "type of initializer arguments of function `" +def->sym->name+
                          "` is "+p.first->to_str()+" but should be "+
                          arg_tuple.to_str());
         }
       } else if (!def->sym->intitializers_->at(i).first) {
         driver_.error(def->sym->intitializers_->at(i).second->location,
-                      "function `" +def->sym->name()+
+                      "function `" +def->sym->name+
                        "` needs multiple arguments but initializer does not provide one");
       }
    
@@ -212,7 +212,7 @@ void TypecheckVisitor::visit_push(PushNode *node, Type *expr, Type *atom) {
   } else {
     if (node->to->symbol->is_static) {
         driver_.error(node->to->location, "cannot push into static function `"+
-                                            node->to->symbol->name()+"`");
+                                            node->to->symbol->name+"`");
     }
   }
 
@@ -232,15 +232,15 @@ void TypecheckVisitor::visit_pop(PopNode *node) {
     driver_.error(node->from->location, "can only pop from functions");
   } else {
     if (node->from->symbol->is_static) {
-        driver_.error(node->from->location, "cannot pop from static function `"+node->from->symbol->name()+"`");
+        driver_.error(node->from->location, "cannot pop from static function `"+node->from->symbol->name+"`");
     }
   }
 
 
-  Function *sym = driver_.function_table.get(node->to->name);
+  Function *sym = driver_.function_table.get_function(node->to->name);
   if (sym) {
     if (sym->is_static) {
-      driver_.error(node->to->location, "cannot pop into static function `"+sym->name()+"`");
+      driver_.error(node->to->location, "cannot pop into static function `"+sym->name+"`");
     }
 
     std::vector<Type*> func_arguments;
@@ -379,7 +379,7 @@ Type* TypecheckVisitor::visit_expression_single(Expression *expr, Type* val) {
 Type* TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
                                            const std::vector<Type*> &expr_results) {
 
-  Function *sym = driver_.function_table.get(atom->name);
+  Function *sym = driver_.function_table.get_function(atom->name);
   if (!sym) {
     // check if a rule parameter with this name was defined
     if (rule_binding_offsets.size() > 0){
@@ -404,7 +404,7 @@ Type* TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
   }
 
   atom->symbol = sym;
-  if (atom->symbol->symbol_type == Function::SType::FUNCTION) {
+  if (atom->symbol->type == Symbol::SymbolType::FUNCTION) {
     atom->symbol_type = FunctionAtom::SymbolType::FUNCTION;
   } else {
     atom->symbol_type = FunctionAtom::SymbolType::DERIVED;
@@ -419,7 +419,7 @@ Type* TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
     for (size_t i=0; i < atom->symbol->arguments_.size(); i++) {
 
      Type *argument_t = atom->symbol->arguments_[i];
-      DEBUG("UNIFY ARG11 "<< atom->symbol->name() << " "<<expr_results[i]->to_str() << " "<<argument_t);
+      DEBUG("UNIFY ARG11 "<< atom->symbol->name << " "<<expr_results[i]->to_str() << " "<<argument_t);
       DEBUG(argument_t->unify_links_to_str());
  
       if (!expr_results[i]->unify(argument_t)) {
@@ -428,7 +428,7 @@ Type* TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
                       "` is "+expr_results[i]->to_str()+" but should be "+
                       argument_t->to_str());
       }
-      DEBUG("UNIFY ARG done "<< atom->symbol->name() << " "<<expr_results[i]->to_str() <<"\n");
+      DEBUG("UNIFY ARG done "<< atom->symbol->name << " "<<expr_results[i]->to_str() <<"\n");
       expr_results[i]->unify_links_to_str();
     }
   }

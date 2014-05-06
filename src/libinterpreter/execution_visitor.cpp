@@ -411,7 +411,7 @@ Value ExecutionVisitor::visit_function_atom(FunctionAtom *atom, std::vector<Valu
       value_list.swap(expr_results);
 
       Value v = Value(context_.get_function_value(atom->symbol, args));
-      DEBUG("visit_atom "<<atom->symbol->name()<<" "<<v.to_str() <<" size "<<value_list.size());
+      DEBUG("visit_atom "<<atom->symbol->name<<" "<<v.to_str() <<" size "<<value_list.size());
       return v;
     }
     default: {
@@ -561,14 +561,19 @@ void ExecutionWalker::run() {
   for (auto pair: visitor.context_.symbol_table.table_) {
     auto function_map = std::unordered_map<ArgumentsKey, Value>();
 
-    if (pair.second->symbol_type == Function::SType::FUNCTION && pair.second->intitializers_ != nullptr) {
-      for (std::pair<ExpressionBase*, ExpressionBase*> init : *pair.second->intitializers_) {
+    if (pair.second->type != Symbol::SymbolType::FUNCTION) {
+      continue;
+    }
+
+    Function *func = reinterpret_cast<Function*>(pair.second);
+    if (func->intitializers_ != nullptr) {
+      for (std::pair<ExpressionBase*, ExpressionBase*> init : *func->intitializers_) {
         size_t num_args = 0; 
         uint64_t *args = new uint64_t[10];
         if (init.first != nullptr) {
           std::vector<Value> arguments;
           Value argument_v = walk_expression_base(init.first);
-          if (pair.second->arguments_.size() > 1) {
+          if (func->arguments_.size() > 1) {
             List *list = argument_v.value.list;
             for (auto iter = list->begin(); iter != list->end(); iter++) {
               arguments.push_back(*iter);
@@ -591,7 +596,7 @@ void ExecutionWalker::run() {
         initializer_args.push_back(args);
       }
     }
-    visitor.context_.functions[pair.second->id] = std::pair<Function*, std::unordered_map<ArgumentsKey, Value>>(pair.second, function_map);
+    visitor.context_.functions[func->id] = std::pair<Function*, std::unordered_map<ArgumentsKey, Value>>(func, function_map);
   }
   for (List *l : visitor.context_.temp_lists) {
     l->bump_usage();
@@ -599,7 +604,7 @@ void ExecutionWalker::run() {
 
   visitor.context_.temp_lists.clear();
 
-  Function *program_sym = visitor.context_.symbol_table.get("program");
+  Function *program_sym = visitor.context_.symbol_table.get_function("program");
   uint64_t args[10] = {0};
   size_t steps = 0;
   while(true) {

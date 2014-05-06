@@ -125,6 +125,12 @@ FunctionDefNode::~FunctionDefNode() {
   // sym is deleted in the symbol table
 }
 
+EnumDefNode::EnumDefNode(yy::location& loc, Enum *enum_)
+    : AstNode(loc, NodeType::ENUM), enum_(enum_) {}
+
+EnumDefNode::~EnumDefNode() {
+  // enum_ is deleted in the symbol table
+}
 
 IfThenElseNode::IfThenElseNode(yy::location& loc, ExpressionBase *condition, AstNode *then, AstNode *els)
     : AstNode(loc, NodeType::IFTHENELSE), condition_(condition), then_(then), else_(els) {}
@@ -267,7 +273,7 @@ bool FunctionAtom::equals(AstNode *other) {
 
   if (symbol_type == FunctionAtom::SymbolType::FUNCTION && symbol_type == other_func->symbol_type) {
     if (symbol && other_func->symbol &&
-        symbol->name() != other_func->symbol->name()) {
+        symbol->name != other_func->symbol->name) {
       return false;
     }
 
