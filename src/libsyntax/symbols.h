@@ -25,6 +25,7 @@ class Symbol {
       FUNCTION,
       DERIVED,
       BUILTIN,
+      ENUM,
     };
     
     SymbolType type;
@@ -70,7 +71,7 @@ class Function : public Symbol {
     bool is_builtin();
 };
 
-class Enum {
+class Enum : public Symbol {
   private:
     std::unordered_map<std::string, size_t> mapping;
 
@@ -125,6 +126,17 @@ class SymbolTable {
       }
     }
 
+   bool add_enum_element(const std::string& name, Enum *enum_) {
+      try {
+        table_.at(name);
+        return false;
+      } catch (const std::out_of_range& e) {
+        table_[name] = enum_;
+        return true;
+      }
+    }
+
+ 
     Symbol* get(const std::string& name) const {
       try {
         return table_.at(name);

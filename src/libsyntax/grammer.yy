@@ -225,8 +225,17 @@ OPTION_SYNTAX: OPTION IDENTIFIER "." IDENTIFIER IDENTIFIER;
 
 ENUM_SYNTAX: ENUM IDENTIFIER "=" "{" IDENTIFIER_LIST "}" {
                 $$ = new Enum($2);
+                if (!driver.function_table.add($$)) {
+                    driver.error(@$, "redefinition of symbol `"+$2+"`");
+                }
                 for (const std::string& name : $5) {
-                    $$->add_enum_element(name);
+                    if ($$->add_enum_element(name)) {
+                        if (!driver.function_table.add_enum_element(name, $$)) {
+                            driver.error(@$, "redefinition of symbol `"+name+"`");
+                        }
+                    } else {
+                        driver.error(@$, "name `"+name+"` already used in enum");
+                    }
                 }
            }
            ;
