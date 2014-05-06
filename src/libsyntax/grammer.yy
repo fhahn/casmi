@@ -51,22 +51,22 @@
                 } else {
                     is_static = true;
                 }
-            }
-            if (attribute_name == "symbolic") {
+            } else if (attribute_name == "symbolic") {
                 if (is_symbolic) {
                     driver.error(loc, "`symbolic` attribute can only be used once per function");
                     break;
                 } else {
                     is_symbolic = true;
                 }
-            }
-            if (attribute_name == "controlled") {
+            } else if (attribute_name == "controlled") {
                 if (is_controlled) {
                     driver.error(loc, "`controlled` attribute can only be used once per function");
                     break;
                 } else {
                     is_controlled = true;
                 }
+            } else {
+              driver.error(loc, "`"+attribute_name+"` is no valid function attribute, only static, symbolic and controlled are allowed");
             }
         }
         if (is_static && is_controlled) {

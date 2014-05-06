@@ -2,10 +2,10 @@ rule main = {
   let x = undef in
   let y = undef in {
     case y of
-      x: print "undef = " + y
-      2: skip
-      3: skip
-      4: skip
+      x: skip
+      2: assert false
+      3: assert false
+      4: assert false
       default: assert false
     endcase
   }
