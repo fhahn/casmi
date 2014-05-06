@@ -1,0 +1,6 @@
+// error program @3
+
+function (XXX_not_supported_attribute) foo : -> Int
+//~^  `XXX_not_supported_attribute` is no valid function attribute, only static, symbolic and controlled are allowed
+
+rule main = skip
