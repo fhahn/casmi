@@ -93,7 +93,12 @@ Type::Type(const std::string& type_name) : internal_type(nullptr), unify_with_le
   else if (type_name == "Boolean") { t = TypeType::BOOLEAN; }
   else if (type_name == "RuleRef") { t = TypeType::RULEREF; }
   else if (type_name == "String") { t = TypeType::STRING; }
-  else { t = TypeType::INVALID; }
+  else {
+    // if the string does not match any known type assume enum;
+    // make sure enum exists during typechecking
+    t = TypeType::ENUM;
+    enum_name = type_name;
+  }
 }
 
 bool Type::eq(const Type& other) const {

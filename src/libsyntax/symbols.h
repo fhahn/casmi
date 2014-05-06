@@ -72,11 +72,10 @@ class Function : public Symbol {
 };
 
 class Enum : public Symbol {
-  private:
-    std::unordered_map<std::string, size_t> mapping;
-
   public:
-    const std::string name;
+    // TODO use unordered_map here, but ordering cannot be garantueed in 
+    // forall
+    std::map<std::string, std::string*> mapping;
 
     Enum(const std::string& name);
     bool add_enum_element(const std::string& name);
@@ -158,6 +157,21 @@ class SymbolTable {
         return nullptr;
       }
     }
+
+    Enum* get_enum(const std::string& name) const {
+      try {
+        Symbol* sym = table_.at(name);
+        // TODO split Function and Derived symbols?
+        if (sym->type == Symbol::SymbolType::ENUM) {
+          return reinterpret_cast<Enum*>(sym);
+        } else {
+          return nullptr;
+        }
+      } catch (const std::out_of_range& e) {
+        return nullptr;
+      }
+    }
+
 };
 
 #endif

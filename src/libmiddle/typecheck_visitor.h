@@ -12,6 +12,9 @@
 
 class TypecheckVisitor {
   private:
+    void check_type_valid(const yy::location& location, const Type& type);
+
+  public:
     Driver& driver_;
     void check_numeric_operator(const yy::location& loc,  Type *type,
                                 const Expression::Operation op);
@@ -19,7 +22,7 @@ class TypecheckVisitor {
     std::vector<std::vector<Type*> *> rule_binding_types;
     std::vector<std::map<std::string, size_t> *> rule_binding_offsets;
 
-  public:
+    bool forall_head;
     TypecheckVisitor(Driver& driver);
 
     void visit_specification(AstNode *spec) { UNUSED(spec); }
@@ -50,9 +53,6 @@ class TypecheckVisitor {
     void visit_pop(PopNode *node);
     void visit_case(CaseNode *node, Type *val, const std::vector<Type*>& case_labels);
 
-    void visit_forall_pre(ForallNode *node);
-    void visit_forall_post(ForallNode *node);
-
     Type* visit_expression(Expression *expr, Type* left_val, Type* right_val);
     Type* visit_expression_single(Expression *expr, Type* val);
     Type* visit_int_atom(IntAtom *atom) { return &atom->type_; }
@@ -73,5 +73,8 @@ class TypecheckVisitor {
     Type* visit_list_atom(ListAtom *atom, std::vector<Type*> &vals);
     Type* visit_number_range_atom(NumberRangeAtom *atom) { return &atom->type_; }
 };
+
+template <>
+void AstWalker<TypecheckVisitor, Type*>::walk_forall(ForallNode *node);
 
 #endif //CASMI_LIBINTERPRETER_EXEC_VISITOR

@@ -1,10 +1,27 @@
 #include "libmiddle/typecheck_visitor.h"
 
 
-TypecheckVisitor::TypecheckVisitor(Driver& driver) : driver_(driver), rule_binding_types(), rule_binding_offsets() {}
+TypecheckVisitor::TypecheckVisitor(Driver& driver) : driver_(driver), rule_binding_types(), rule_binding_offsets(), forall_head(false) {}
 
+void TypecheckVisitor::check_type_valid(const yy::location& location, const Type& type) {
+  if (type == TypeType::ENUM &&
+      !driver_.function_table.get_enum(type.enum_name)) {
+    driver_.error(location,
+                  "unknown type "+type.enum_name+"");
+  }
+
+}
 void TypecheckVisitor::visit_function_def(FunctionDefNode *def,
                                           const std::vector<std::pair<Type*, Type*>>& initializers) {
+
+  check_type_valid(def->location, *def->sym->return_type_);
+
+  // Check if argument types are valid
+  for (Type* argument_t : def->sym->arguments_) {
+      check_type_valid(def->location, *argument_t);
+  }
+
+  // check if initializer types match argument types
   for (size_t i = 0; i < initializers.size(); i++) {
     const std::pair<Type*, Type*>& p = initializers[i];
 
@@ -37,8 +54,6 @@ void TypecheckVisitor::visit_function_def(FunctionDefNode *def,
     } else {
       if (def->sym->intitializers_->at(i).first) {
         Type arg_tuple = Type(TypeType::TUPLE, def->sym->arguments_);
-        DEBUG("HUHU "<<p.first->to_str());
-        DEBUG("HUHU "<<arg_tuple.to_str());
         if (!p.first->unify(&arg_tuple)) {
           driver_.error(def->sym->intitializers_->at(i).first->location,
                         "type of initializer arguments of function `" +def->sym->name+
@@ -286,36 +301,6 @@ void TypecheckVisitor::visit_case(CaseNode *node, Type *expr, const std::vector<
   }
 }
 
-void TypecheckVisitor::visit_forall_pre(ForallNode *node) {
-  Type list_t = new Type(TypeType::LIST, new Type(TypeType::UNKNOWN));
-
-  if (!node->in_expr->type_.unify(&list_t)) {
-    driver_.error(node->location, "expression must be a List but is "
-                                  +node->in_expr->type_.to_str());
-  }
-
-  node->type_.unify(node->in_expr->type_.internal_type);
-
-  auto current_rule_binding_types = rule_binding_types.back();
-  auto current_rule_binding_offsets = rule_binding_offsets.back();
-
-  current_rule_binding_offsets->insert(
-      std::pair<std::string, size_t>(node->identifier,
-                                     current_rule_binding_types->size())
-  );
-  current_rule_binding_types->push_back(&node->type_);
-}
-
-void TypecheckVisitor::visit_forall_post(ForallNode *node) {
-  if (!node->type_.is_complete()) {
-    driver_.error(node->location, "type inference for `"+node->identifier+"` failed");
-  }
-
-  rule_binding_types.back()->pop_back();
-  rule_binding_offsets.back()->erase(node->identifier);
-}
-
-
 void TypecheckVisitor::check_numeric_operator(const yy::location& loc, 
                                             Type* type,
                                             const Expression::Operation op) {
@@ -383,6 +368,9 @@ Type* TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
   if (sym && sym->type == Symbol::SymbolType::ENUM) {
     atom->symbol_type = FunctionAtom::SymbolType::ENUM;
     atom->enum_ = reinterpret_cast<Enum*>(sym);
+    if (!forall_head && atom->enum_->name == atom->name) {
+      driver_.error(atom->location, "`"+atom->name+"` is an enum, not a member of an enum");
+    }
     // TODO leak
     // TODO check unify here?
     atom->type_.unify(new Type(TypeType::ENUM, sym->name));
@@ -579,4 +567,43 @@ Type* TypecheckVisitor::visit_list_atom(ListAtom *atom, std::vector<Type*> &vals
   atom->type_.t = TypeType::TUPLE_OR_LIST;
   atom->type_.tuple_types = vals;
   return &atom->type_;
+}
+
+template <>
+void AstWalker<TypecheckVisitor, Type*>::walk_forall(ForallNode *node) {
+
+  visitor.forall_head = true;
+  walk_expression_base(node->in_expr);
+  visitor.forall_head = false;
+
+  Type list_t = new Type(TypeType::LIST, new Type(TypeType::UNKNOWN));
+
+  if (node->in_expr->type_ == TypeType::INT || node->in_expr->type_ == TypeType::ENUM) {
+    DEBUG("START UNIFY");
+    node->type_.unify(&node->in_expr->type_);
+    DEBUG("DONE UNIFY\n Type:"<<node->type_.enum_name << "|"<<node->in_expr->type_.to_str());
+  } else if (node->in_expr->type_.unify(&list_t)) {
+    node->type_.unify(node->in_expr->type_.internal_type);
+  } else {
+    visitor.driver_.error(node->location, "expression must be a List, an Int or enum, but is "
+                                  +node->in_expr->type_.to_str());
+  }
+
+  auto current_rule_binding_types = visitor.rule_binding_types.back();
+  auto current_rule_binding_offsets = visitor.rule_binding_offsets.back();
+
+  current_rule_binding_offsets->insert(
+      std::pair<std::string, size_t>(node->identifier,
+                                     current_rule_binding_types->size())
+  );
+  current_rule_binding_types->push_back(&node->type_);
+
+  walk_statement(node->statement);
+
+  if (!node->type_.is_complete()) {
+    visitor.driver_.error(node->location, "type inference for `"+node->identifier+"` failed");
+  }
+
+  visitor.rule_binding_types.back()->pop_back();
+  visitor.rule_binding_offsets.back()->erase(node->identifier);
 }

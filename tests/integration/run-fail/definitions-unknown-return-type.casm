@@ -1,0 +1,6 @@
+function func: -> enum12
+//~^ unknown type enum12
+
+rule main = skip
+
+init main

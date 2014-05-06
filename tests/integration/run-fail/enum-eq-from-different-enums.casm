@@ -1,0 +1,7 @@
+enum enum1 = {foo, bar}
+enum enum2 = {xx, yy}
+
+rule main = assert foo != xx
+//~^ type of expressions did not match: enum1 != enum2
+
+init main

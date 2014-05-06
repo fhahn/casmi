@@ -112,7 +112,7 @@ Enum::Enum(const std::string& name) : Symbol(name, Symbol::SymbolType::ENUM), ma
 
 bool Enum::add_enum_element(const std::string& name) {
   if (mapping.count(name) == 0) {
-    mapping[name] = mapping.size();
+    mapping[name] = new std::string(name);
     return true;
   } else {
     return false;
