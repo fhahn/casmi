@@ -62,6 +62,58 @@ Value casm_nth(std::vector<Value> &expr_results) {
   }
 }
 
+Value casm_app(ExecutionContext& ctxt, const Value& list, const Value& val) {
+  // TODO LEAK
+  if (list.is_undef()) {
+    return Value();
+  }
+
+  List *current = list.value.list;
+
+  DEBUG("START APP");
+  while (1 == 1) {
+    if (current->list_type == List::ListType::HEAD) {
+      current = reinterpret_cast<HeadList*>(current)->right;
+    }
+    if (current->list_type == List::ListType::SKIP) {
+      current = reinterpret_cast<SkipList*>(current)->bottom;
+    }
+    if (current->list_type == List::ListType::BOTTOM) {
+      BottomList *bottom = reinterpret_cast<BottomList*>(current);
+      DEBUG("FOUND END "<<bottom->tail);
+      if (bottom->tail) {
+        current = bottom->tail;
+      } else {
+        break;
+      }
+    }
+    if (current->list_type == List::ListType::TAIL) {
+      TailList *tail = reinterpret_cast<TailList*>(current);
+      if (tail->right) {
+        current = tail->right;
+      } else {
+        break;
+      }
+    }
+  }
+
+  DEBUG("DONE APP");
+
+  TailList *tail = new TailList(nullptr, val);
+  ctxt.temp_lists.push_back(tail);
+
+  if (current->list_type == List::ListType::TAIL) {
+    reinterpret_cast<TailList*>(current)->right = tail;
+  } else if (current->list_type == List::ListType::BOTTOM) {
+    DEBUG("ADD NEW TAIL ");
+    reinterpret_cast<BottomList*>(current)->tail = tail;
+  } else {
+    assert(0);
+  }
+  return Value(list.type, list.value.list);
+}
+
+
 Value casm_cons(ExecutionContext& ctxt, const Value& val, const Value& list) {
   // TODO LEAK
   if (list.is_undef()) {
@@ -103,14 +155,9 @@ Value casm_tail(ExecutionContext& ctxt, const Value& arg_list) {
     return Value(arg_list.type, reinterpret_cast<HeadList*>(list)->right);
   } else if (list->is_bottom()) {
     BottomList *btm = reinterpret_cast<BottomList*>(list);
-    if (btm->values.size() > 0) {
-      SkipList *skip = new SkipList(1, btm);
-      ctxt.temp_lists.push_back(skip);
-      return Value(arg_list.type, skip);
-    } else {
-      // tail for empty list returns empty list
-      return arg_list;
-    }
+    SkipList *skip = new SkipList(1, btm);
+    ctxt.temp_lists.push_back(skip);
+    return Value(arg_list.type, skip);
   } else {
     SkipList *old_skip = reinterpret_cast<SkipList*>(list);
     SkipList *skip = new SkipList(old_skip->skip+1, old_skip->bottom);
@@ -436,6 +483,8 @@ Value ExecutionVisitor::visit_builtin_atom(BuiltinAtom *atom, std::vector<Value>
     return casm_nth(expr_results);
   } else if (atom->name == "cons") {
     return casm_cons(context_, expr_results[0], expr_results[1]);
+  } else if (atom->name == "app") {
+    return casm_app(context_, expr_results[0], expr_results[1]);
   } else if (atom->name == "len") {
     return casm_len(expr_results);
   } else if (atom->name == "tail") {

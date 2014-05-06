@@ -304,29 +304,53 @@ void List::const_iterator::do_init(const List *ptr) {
   if (!ptr) {
     head = nullptr;
     bottom = nullptr;
+    tail = nullptr;
     return;
   }
 
   if (ptr->is_head()) {
     head = reinterpret_cast<const HeadList*>(ptr);
     bottom = nullptr;
+    tail = nullptr;
   } else if (ptr->is_bottom()){
     bottom = reinterpret_cast<const BottomList*>(ptr);
     pos = bottom->values.size() - 1;
     if (bottom->values.size() == 0) {
-      bottom = nullptr;
-      pos = 0;
+      do_init(bottom->tail);
+    } else {
+      head = nullptr;
+      tail = nullptr;
     }
-    head = nullptr;
-  } else {
+  } else if (ptr->is_skip()){
+    bottom = nullptr;
     const SkipList *skip = reinterpret_cast<const SkipList*>(ptr);
     if (skip->bottom->values.size() > skip->skip) {
       bottom = skip->bottom;
       pos = skip->bottom->values.size() - skip->skip - 1;
+      tail = nullptr;
     } else {
-      bottom = nullptr;
+      if (skip->bottom->tail) {
+        TailList *current = skip->bottom->tail;
+        size_t i;
+        size_t additional_skip =  skip->skip - skip->bottom->values.size();
+        for (i=0; current && i < additional_skip; i++) {
+          current = current->right;
+        }
+
+        if (i == additional_skip) {
+          tail = current;
+        } else {
+          tail = nullptr;
+        }
+      } else {
+        tail = nullptr;
+      }
     }
     head = nullptr;
+  } else if (ptr->is_tail()) {
+    tail = reinterpret_cast<const TailList*>(ptr);
+    head = nullptr;
+    bottom = nullptr;
   }
 }
 
@@ -349,9 +373,10 @@ void List::const_iterator::next() {
     if (pos > 0) {
       pos -= 1;
     } else {
-      do_init(nullptr);
+      do_init(bottom->tail);
     }
-  } else {
+  } else if (tail) {
+      do_init(tail->right);
     //assert(0);
   }
 }
@@ -367,6 +392,8 @@ const Value& List::const_iterator::operator*() {
     return head->current_head;
   } else if (bottom) {
     return bottom->values[pos];
+  } else if (tail) {
+    return tail->current_tail;
   } else {
     assert(0);
   }
@@ -375,10 +402,10 @@ const Value& List::const_iterator::operator*() {
 // all iterators that are not invalid (head = bottom = nullptr and pos = 0)
 // are equal; a valid and an invalid iterator are _NOT_ equal
 bool List::const_iterator::operator==(const self_type& rhs) const {
-  if (!head && !bottom) {
-    return !rhs.head && !rhs.bottom;
+  if (!head && !bottom && !tail) {
+    return !rhs.head && !rhs.bottom && !rhs.tail;
   } else {
-    return rhs.head || rhs.bottom;
+    return rhs.head || rhs.bottom || rhs.tail;
   }
 }
 
@@ -428,6 +455,10 @@ bool List::is_head() const {
 
 bool List::is_skip() const {
   return list_type == ListType::SKIP;
+}
+
+bool List::is_tail() const {
+  return list_type == ListType::TAIL;
 }
 
 const std::string List::to_str() const {
@@ -501,6 +532,10 @@ BottomList* List::collect() {
     BottomList* list = reinterpret_cast<BottomList*>(this);
     if (list->usage_count <= 1) {
       list->usage_count = 1;
+      if (list->tail) {
+        list->tail->collect(list->values);
+        list->tail = nullptr;
+      }
       return list;
     } else {
       BottomList *copy = new BottomList();
@@ -508,6 +543,11 @@ BottomList* List::collect() {
       copy->values = list->values;
       list->usage_count -= 1;
       copy->allocated_in_collect = true;
+
+      if (list->tail) {
+        list->tail->collect(copy->values);
+        list->tail = nullptr;
+      }
       return copy;
     }
   }
@@ -515,12 +555,21 @@ BottomList* List::collect() {
 
 HeadList::HeadList(List *l, const Value& val) : List(ListType::HEAD), right(l), current_head(val) {}
 
+TailList::TailList(TailList *l, const Value& val) : List(ListType::TAIL), right(l), current_tail(val) {}
+
+void TailList::collect(std::vector<Value>& collect_to) {
+  collect_to.insert(collect_to.begin(), current_tail);
+  if (right) {
+    right->collect(collect_to);
+  }
+}
+
 BottomList::BottomList() 
-  : List(ListType::BOTTOM), usage_count(0), values() {}
+  : List(ListType::BOTTOM), usage_count(0), values(), tail(nullptr) {}
 
 
 BottomList::BottomList(const std::vector<Value>& vals) 
-  : List(ListType::BOTTOM), usage_count(0), values(std::move(vals)) {}
+  : List(ListType::BOTTOM), usage_count(0), values(std::move(vals)), tail(nullptr) {}
 
 BottomList::~BottomList() {
 }

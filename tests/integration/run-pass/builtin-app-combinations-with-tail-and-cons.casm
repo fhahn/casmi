@@ -1,0 +1,14 @@
+rule main = {
+    assert app([], 5) = [5,]
+    assert app(app([2], 1), 5) = [2, 1, 5]
+    assert app(app(cons(2, []), 1), 5) = [2, 1, 5]
+
+    assert tail(app([], 5)) = []
+    assert tail(app([1], 5)) = [5]
+    assert tail(app([1, 2], 5)) = [2, 5]
+    assert cons(99, tail(app([1, 2], 5))) = [99, 2, 5]
+
+    program(self) := undef
+}
+
+init main
