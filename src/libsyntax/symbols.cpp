@@ -108,10 +108,15 @@ bool Function::is_builtin() {
   return false;
 }
 
-Enum::Enum(const std::string& name) : mapping(), name(std::move(name)) {}
+Enum::Enum(const std::string& name) : Symbol(name, Symbol::SymbolType::ENUM), mapping() {}
 
 bool Enum::add_enum_element(const std::string& name) {
-  return true;
+  if (mapping.count(name) == 0) {
+    mapping[name] = mapping.size();
+    return true;
+  } else {
+    return false;
+  }
 }
 
 uint64_t Binding::counter = 0;

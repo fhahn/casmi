@@ -1,0 +1,7 @@
+function a : ->Int
+
+enum a = {foo, bar}
+//~^  redefinition of symbol `a`
+
+rule main = skip
+init main
