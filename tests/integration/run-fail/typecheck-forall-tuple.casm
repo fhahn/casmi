@@ -1,7 +1,7 @@
 
 rule main = {
     forall x in ["hallo", 1] do
-    //~^ expression must be a List but is Tuple (String,Int,)
+    //~^ expression must be a List, an Int or enum, but is Tuple (String,Int,)
     //~^^ type inference for `x` failed
 
         assert false

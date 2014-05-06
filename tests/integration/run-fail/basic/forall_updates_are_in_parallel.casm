@@ -10,6 +10,7 @@ rule initR =
 {|
     forall f in foo do  // all updates produced by a forall are composed in parallel, no matter the surrounding block
         x := f
+        //~^ update conflict in parallel block for function `x`
 
     // so this program fails
     program(self) := undef

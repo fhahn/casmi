@@ -414,6 +414,12 @@ Value ExecutionVisitor::visit_function_atom(FunctionAtom *atom, std::vector<Valu
       DEBUG("visit_atom "<<atom->symbol->name<<" "<<v.to_str() <<" size "<<value_list.size());
       return v;
     }
+    case FunctionAtom::SymbolType::ENUM: {
+      std::string *val = atom->enum_->mapping[atom->name];
+      Value v = Value(val);
+      v.type = TypeType::ENUM;
+      return v;
+    }
     default: {
       DEBUG("visiting invalid symbol type of atom "<<atom->name<<" "<<atom->offset);
       assert(0);
@@ -544,14 +550,67 @@ void AstWalker<ExecutionVisitor, Value>::walk_case(CaseNode *node) {
 
 template <>
 void AstWalker<ExecutionVisitor, Value>::walk_forall(ForallNode *node) {
+  bool forked = false;
   Value in_list = walk_expression_base(node->in_expr);
 
-  List *l =  in_list.value.list;
+  if (visitor.context_.updateset.pseudostate % 2 == 1) {
+    CASM_UPDATESET_FORK_PAR(&visitor.context_.updateset);
+    forked = true;
+  }
 
-  for (auto iter = l->begin(); iter != l->end(); iter++) {
-    visitor.rule_bindings.back()->push_back(*iter);
-    walk_statement(node->statement);
-    visitor.rule_bindings.back()->pop_back();
+  switch (node->in_expr->type_.t) {
+    case TypeType::LIST: {
+      List *l =  in_list.value.list;
+
+      for (auto iter = l->begin(); iter != l->end(); iter++) {
+        visitor.rule_bindings.back()->push_back(*iter);
+        walk_statement(node->statement);
+        visitor.rule_bindings.back()->pop_back();
+      }
+      break;
+    }
+    case TypeType::INT: {
+      INT_T end =  in_list.value.ival;
+
+      if (end > 0) {
+        for (INT_T i = 0; i < end; i++) {
+          visitor.rule_bindings.back()->push_back(Value(i));
+          walk_statement(node->statement);
+          visitor.rule_bindings.back()->pop_back();
+        }
+      } else {
+        for (INT_T i = 0; end < i; i--) {
+          visitor.rule_bindings.back()->push_back(Value(i));
+          walk_statement(node->statement);
+          visitor.rule_bindings.back()->pop_back();
+        }
+      }
+      break;
+    }
+    case TypeType::ENUM: {
+      FunctionAtom *func = reinterpret_cast<FunctionAtom*>(node->in_expr);
+      if (func->name == func->enum_->name) {
+        for (auto pair : func->enum_->mapping) {
+          // why is an element with the name of the enum in the map??
+          if (func->name == pair.first) {
+            continue;
+          }
+          Value v = Value(pair.second);
+          v.type = TypeType::ENUM;
+          visitor.rule_bindings.back()->push_back(std::move(v));
+          walk_statement(node->statement);
+          visitor.rule_bindings.back()->pop_back();
+        }
+      } else {
+        assert(0);
+      }
+      break;
+    }
+    default: assert(0);
+  }
+
+  if (forked) {
+    visitor.context_.merge_par();
   }
 }
 

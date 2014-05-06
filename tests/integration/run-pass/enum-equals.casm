@@ -1,0 +1,10 @@
+enum en = {foo, bar}
+
+rule main = {
+    assert foo != bar
+    assert foo = foo
+    assert bar = bar
+
+    program(self) := undef
+}
+init main

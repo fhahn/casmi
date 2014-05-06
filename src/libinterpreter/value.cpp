@@ -68,6 +68,7 @@ Value::Value(TypeType t, casm_update* u) {
       type = TypeType::INT;
       value.ival = (int64_t)u->value;
       break;
+    case TypeType::ENUM:
     case TypeType::STRING:
       if (u->value != 0) {
         type = TypeType::STRING;
@@ -231,6 +232,7 @@ uint64_t Value::to_uint64_t() const {
       return 0;
     case TypeType::RULEREF:
       return (uint64_t) value.rule;
+    case TypeType::ENUM:
     case TypeType::STRING: 
       return (uint64_t) value.string;
     case TypeType::TUPLE: 
@@ -257,6 +259,7 @@ std::string Value::to_str() const {
       return std::move("undef");
     case TypeType::RULEREF: 
       return std::move("@"+value.rule->name);
+    case TypeType::ENUM:
     case TypeType::STRING:
       return *value.string;
     case TypeType::TUPLE:
@@ -282,6 +285,7 @@ bool value_eq(const Value& v1, const Value& v2) {
       case TypeType::INT: return v1.value.ival == v2.value.ival;
       case TypeType::FLOAT: return v1.value.fval == v2.value.fval;
       case TypeType::BOOLEAN: return v1.value.bval == v2.value.bval;
+      case TypeType::ENUM: // is this save enough?
       case TypeType::STRING: return *v1.value.string == *v2.value.string;
       case TypeType::TUPLE:
       case TypeType::TUPLE_OR_LIST:
