@@ -236,6 +236,17 @@ class FunctionAtom : public BaseFunctionAtom {
 
 class BuiltinAtom: public BaseFunctionAtom {
   public:
+    enum class Id {
+      POW,
+      HEX,
+      NTH,
+      CONS,
+      APP,
+      LEN,
+      TAIL,
+      PEEK,
+    } id;
+
     std::vector<Type*> types;
     Type* return_type;
 
@@ -303,7 +314,7 @@ class Expression : public ExpressionBase {
       OR,
       XOR,
       AND,
-      NOP
+      NOT
     };
 
     ExpressionBase *left_;

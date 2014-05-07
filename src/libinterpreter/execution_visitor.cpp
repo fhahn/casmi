@@ -217,7 +217,7 @@ Value ExecutionVisitor::visit_expression(Expression *expr, Value &left_val, Valu
 
 Value ExecutionVisitor::visit_expression_single(Expression *expr, Value &val) {
   UNUSED(expr);
-  return val;
+  return operators::dispatch(expr->op, val, val);
 }
 
 Value ExecutionVisitor::visit_function_atom(FunctionAtom *atom, std::vector<Value> &expr_results) {

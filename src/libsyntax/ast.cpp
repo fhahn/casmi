@@ -298,11 +298,13 @@ BuiltinAtom::BuiltinAtom(yy::location& loc, const std::string name,
     a1->unify(a2);
     a2->unify(return_type);
     types = { a1, a2 };
+    id = Id::POW;
   } else if (name == "hex") {
     Type *a1 = new Type(TypeType::INT);
     return_type = new Type(TypeType::STRING);
 
     types = { a1 };
+    id = Id::HEX;
   } else if (name == "nth") {
     Type *a1 = new Type(TypeType::TUPLE_OR_LIST, new Type(TypeType::UNKNOWN));
     Type *a2 = new Type(TypeType::INT);
@@ -310,6 +312,7 @@ BuiltinAtom::BuiltinAtom(yy::location& loc, const std::string name,
 
     a1->internal_type->unify(return_type);
     types = { a1, a2 };
+    id = Id::NTH;
   } else if (name == "cons"){
     Type *a1 = new Type(TypeType::UNKNOWN);
     Type *a2 = new Type(TypeType::LIST, new Type(TypeType::UNKNOWN));
@@ -318,6 +321,7 @@ BuiltinAtom::BuiltinAtom(yy::location& loc, const std::string name,
     a1->unify(a2->internal_type);
     a2->unify(return_type);
     types = { a1, a2 };
+    id = Id::CONS;
   } else if (name == "app"){
     Type *a1 = new Type(TypeType::UNKNOWN);
     Type *a2 = new Type(TypeType::LIST, new Type(TypeType::UNKNOWN));
@@ -326,23 +330,27 @@ BuiltinAtom::BuiltinAtom(yy::location& loc, const std::string name,
     a1->unify(a2->internal_type);
     a2->unify(return_type);
     types = { a2, a1 };
+    id = Id::APP;
   } else if (name == "len") {
     Type *a1 = new Type(TypeType::LIST, new Type(TypeType::UNKNOWN));
     return_type = new Type(TypeType::INT);
 
     types = { a1 };
+    id = Id::LEN;
   } else if (name == "tail") {
     Type *a1 = new Type(TypeType::LIST, new Type(TypeType::UNKNOWN));
     return_type = new Type(TypeType::UNKNOWN);
     a1->unify(return_type);
 
     types = { a1 };
+    id = Id::TAIL;
   } else if (name == "peek") {
     Type *a1 = new Type(TypeType::LIST, new Type(TypeType::UNKNOWN));
     return_type = new Type(TypeType::UNKNOWN);
     a1->internal_type->unify(return_type);
 
     types = { a1 };
+    id = Id::PEEK;
  } else {
     assert(0);
   }
@@ -435,6 +443,11 @@ std::string operator_to_str(const Expression::Operation op) {
 
     case Expression::Operation::EQ: return "=";
     case Expression::Operation::NEQ: return "!=";
+
+    case Expression::Operation::AND: return "and";
+    case Expression::Operation::OR: return "or";
+    case Expression::Operation::XOR: return "xor";
+    case Expression::Operation::NOT: return "not";
 
     case Expression::Operation::LESSER: return "<";
     case Expression::Operation::GREATER: return ">";

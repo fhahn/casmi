@@ -316,9 +316,10 @@ void TypecheckVisitor::check_numeric_operator(const yy::location& loc,
   }
 }
 
+
 Type* TypecheckVisitor::visit_expression(Expression *expr, Type* left_val, Type* right_val) {
   DEBUG("EXPR T1 "<<expr->left_->type_.to_str() << " T2: "<<expr->right_->type_.to_str());
-  if (!expr->left_->type_.unify(&expr->right_->type_)) {
+  if (expr->left_ && expr->right_ && !expr->left_->type_.unify(&expr->right_->type_)) {
       driver_.error(expr->location, "type of expressions did not match: "+
                                      expr->left_->type_.to_str()+" != "+
                                      expr->right_->type_.to_str());
@@ -349,6 +350,17 @@ Type* TypecheckVisitor::visit_expression(Expression *expr, Type* left_val, Type*
       check_numeric_operator(expr->location, left_val, expr->op);
       expr->type_.unify(Type(TypeType::BOOLEAN));
       break;
+
+    case Expression::Operation::OR:
+    case Expression::Operation::XOR:
+    case Expression::Operation::AND:
+      if (!expr->left_->type_.unify(new Type(TypeType::BOOLEAN))) {
+        driver_.error(expr->location,
+                  "operands of operator `"+operator_to_str(expr->op)+
+                  "` must be Boolean but are "+expr->left_->type_.to_str());
+      }
+      expr->type_.unify(Type(TypeType::BOOLEAN));
+      break;
     default: assert(0);
   }
 
@@ -356,9 +368,18 @@ Type* TypecheckVisitor::visit_expression(Expression *expr, Type* left_val, Type*
 }
 
 Type* TypecheckVisitor::visit_expression_single(Expression *expr, Type* val) {
-  // just pass to type of the expression up, nothing to check here
-  UNUSED(expr);
-  return val;
+  switch (expr->op) {
+    case Expression::Operation::NOT:
+      if (!expr->left_->type_.unify(new Type(TypeType::BOOLEAN))) {
+        driver_.error(expr->location,
+                  "operand of `not` must be Boolean but is "+expr->left_->type_.to_str());
+      }
+      expr->type_.unify(Type(TypeType::BOOLEAN));
+      return &expr->type_;
+      break;
+    default: assert(0);
+  }
+
 }
 
 Type* TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
