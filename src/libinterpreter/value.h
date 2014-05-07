@@ -3,9 +3,12 @@
 
 
 #include "libsyntax/types.h"
+#include "libsyntax/symbols.h"
 #include "libutil/exceptions.h"
 
 #include "librt/rt.h"
+
+struct enum_value_t;
 
 class RuleNode;
 
@@ -24,6 +27,7 @@ class Value {
       RuleNode *rule;
       std::string *string;
       List *list;
+      const enum_value_t *enum_val;
     } value;
 
     Value();
@@ -33,6 +37,7 @@ class Value {
     Value(RuleNode *rule);
     Value(std::string *string);
     Value(const Type& t, List *list);
+    Value(const enum_value_t *enum_val);
     Value(Value& other);
     Value(const Value& other);
     Value(Value&& other);
@@ -46,7 +51,7 @@ class Value {
 
     bool is_undef() const;
 
-    std::string to_str() const;
+    const std::string to_str() const;
 };
 
 
@@ -159,6 +164,7 @@ class SkipList : public List {
 
     SkipList(size_t skip, BottomList *btm);
 };
+
 
 namespace std {
 

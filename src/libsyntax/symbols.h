@@ -71,11 +71,18 @@ class Function : public Symbol {
     bool is_builtin();
 };
 
+struct enum_value_t {
+  const std::string *name;
+  const uint16_t id;
+
+  enum_value_t(const std::string *name, const uint16_t id);
+};
+
 class Enum : public Symbol {
   public:
     // TODO use unordered_map here, but ordering cannot be garantueed in 
     // forall
-    std::map<std::string, std::string*> mapping;
+    std::map<std::string, enum_value_t*> mapping;
 
     Enum(const std::string& name);
     bool add_enum_element(const std::string& name);

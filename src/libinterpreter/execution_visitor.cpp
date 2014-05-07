@@ -244,7 +244,7 @@ Value ExecutionVisitor::visit_function_atom(FunctionAtom *atom, std::vector<Valu
       return v;
     }
     case FunctionAtom::SymbolType::ENUM: {
-      std::string *val = atom->enum_->mapping[atom->name];
+      enum_value_t *val = atom->enum_->mapping[atom->name];
       Value v = Value(val);
       v.type = TypeType::ENUM;
       return v;

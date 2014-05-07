@@ -111,11 +111,14 @@ bool Function::is_builtin() {
   return false;
 }
 
+enum_value_t::enum_value_t(const std::string *name, const uint16_t id)
+    : name(name), id(id) {}
+
 Enum::Enum(const std::string& name) : Symbol(name, Symbol::SymbolType::ENUM), mapping() {}
 
 bool Enum::add_enum_element(const std::string& name) {
   if (mapping.count(name) == 0) {
-    mapping[name] = new std::string(name);
+    mapping[name] = new enum_value_t(new std::string(name), mapping.size());
     return true;
   } else {
     return false;
