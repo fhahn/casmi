@@ -245,6 +245,8 @@ class BuiltinAtom: public BaseFunctionAtom {
       LEN,
       TAIL,
       PEEK,
+      BOOLEAN2INT,
+      INT2BOOLEAN,
     } id;
 
     std::vector<Type*> types;
