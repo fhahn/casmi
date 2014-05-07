@@ -1,0 +1,9 @@
+CASM foo
+
+
+rule main = {
+    let foo: my_e = Int2Enum(0) in skip
+    //~^ unknown type my_e
+}
+
+init main
