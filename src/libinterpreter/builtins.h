@@ -39,8 +39,20 @@ class Value {
     Value(TypeType type, casm_update* update);
 
     Value& operator=(const Value& other);
-    bool operator==(const Value &other) const;
-    bool operator!=(const Value &other) const;
+
+    void add(const Value& other);
+    void sub(const Value& other);
+    void mul(const Value& other);
+    void div(const Value& other);
+    void mod(const Value& other);
+    void rat_div(const Value& other);
+
+    void eq(const Value& other);
+
+    void lesser(const Value& other);
+    void greater(const Value& other);
+    void lessereq(const Value& other);
+    void greatereq(const Value& other);
 
     uint64_t to_uint64_t() const;
 
@@ -48,6 +60,9 @@ class Value {
 
     std::string to_str() const;
 };
+
+
+bool value_eq(const Value& v1, const Value& v2);
 
 
 class List {
