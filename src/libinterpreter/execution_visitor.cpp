@@ -8,6 +8,8 @@
 #include "libutil/exceptions.h"
 
 #include "libinterpreter/execution_visitor.h"
+#include "libinterpreter/operators.h"
+
 
 DEFINE_CASM_UPDATESET_FORK_PAR
 DEFINE_CASM_UPDATESET_FORK_SEQ
@@ -378,59 +380,7 @@ void ExecutionVisitor::visit_case(CaseNode *node, const Value& val) {
 
 Value ExecutionVisitor::visit_expression(Expression *expr, Value &left_val, Value &right_val) {
   DEBUG("left "<<left_val.to_str()<<" right "<<right_val.to_str());
-  switch (expr->op) {
-    case Expression::Operation::ADD: {
-      left_val.add(right_val);
-      DEBUG("ADD "<<left_val.to_str());
-      return left_val;
-    }
-    case Expression::Operation::SUB: {
-      left_val.sub(right_val);
-      return left_val;
-    }
-    case Expression::Operation::MUL: {
-      left_val.mul(right_val);
-      return left_val;
-    }
-    case Expression::Operation::DIV: {
-      left_val.div(right_val);
-      return left_val;
-    }
-    case Expression::Operation::MOD: {
-      left_val.mod(right_val);
-      return left_val;
-    }
-    case Expression::Operation::RAT_DIV: {
-      left_val.mod(right_val);
-      return left_val;
-    }
-
-    case Expression::Operation::EQ: {
-      Value tmp(value_eq(left_val, right_val));
-      return tmp;
-    }
-    case Expression::Operation::NEQ: {
-      Value tmp(!value_eq(left_val, right_val));
-      return tmp;
-    }
-
-    case Expression::Operation::LESSER:
-      left_val.lesser(right_val);
-      return left_val;
-    case Expression::Operation::GREATER:
-      left_val.greater(right_val);
-      return left_val;
-    case Expression::Operation::LESSEREQ:
-      left_val.lessereq(right_val);
-      return left_val;
-    case Expression::Operation::GREATEREQ:
-      left_val.greatereq(right_val);
-      return left_val;
-
-
-
-    default: assert(0);
-  }
+  return operators::dispatch(expr->op, left_val, right_val);
 }
 
 Value ExecutionVisitor::visit_expression_single(Expression *expr, Value &val) {
@@ -586,7 +536,7 @@ void AstWalker<ExecutionVisitor, Value>::walk_case(CaseNode *node) {
   for (auto& pair : node->case_list) {
     // pair.first == nullptr for default:
     if (pair.first) {
-      if (value_eq(walk_atom(pair.first), expr_v)) {
+      if (walk_atom(pair.first) == expr_v) {
         walk_statement(pair.second);
         return;
       }

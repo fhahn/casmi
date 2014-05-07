@@ -38,6 +38,14 @@ Value::Value(const Value& other) : type(other.type), value(other.value) {}
 
 Value::Value(Value&& other) : type(std::move(other.type)), value(other.value) {}
 
+
+Value& Value::operator=(const Value& other) {
+  value = other.value;
+  type = other.type;
+  return *this;
+}
+
+
 Value::Value(TypeType t, casm_update* u) {
   if (u->defined == 0) {
     type = TypeType::UNDEF;
@@ -81,33 +89,139 @@ Value::Value(TypeType t, casm_update* u) {
   }
 }
 
-Value& Value::operator=(const Value& other) {
-  value = other.value;
-  type = other.type;
-  return *this;
-}
-
-bool Value::operator==(const Value &other) const {
-  if (is_undef() || other.is_undef()) {
-    return is_undef() && other.is_undef();
-  }
-
-  switch (type) {
-    case TypeType::INT: return value.ival == other.value.ival;
-    case TypeType::FLOAT: return value.fval == other.value.fval;
-    case TypeType::BOOLEAN: return value.bval == other.value.bval;
-    case TypeType::ENUM: // is this save enough?
-    case TypeType::STRING: return *value.string == *other.value.string;
-    case TypeType::TUPLE:
-    case TypeType::TUPLE_OR_LIST:
-    case TypeType::LIST: return *value.list == *other.value.list;
-    default: assert(0);
+void Value::add(const Value& other) {
+  if (type == TypeType::UNDEF || other.type == TypeType::UNDEF) {
+    type = TypeType::UNDEF;
+ } else {
+   switch (type) {
+      case TypeType::INT: {
+        value.ival += other.value.ival;
+        break;
+      }
+      default: assert(0);
+    }
   }
 }
 
-bool Value::operator!=(const Value &other) const {
-  return !operator==(other);
+void Value::sub(const Value& other) {
+  if (type == TypeType::UNDEF || other.type == TypeType::UNDEF) {
+    type = TypeType::UNDEF;
+  } else {
+    switch (type) {
+      case TypeType::INT: {
+        value.ival -= other.value.ival;
+        break;
+      }
+      default: assert(0);
+    }
+  }
 }
+
+void Value::mul(const Value& other) {
+  if (type == TypeType::UNDEF || other.type == TypeType::UNDEF) {
+    type = TypeType::UNDEF;
+  } else {
+    switch (type) {
+      case TypeType::INT: {
+        value.ival *= other.value.ival;
+        break;
+      }
+      default: assert(0);
+    }
+  }
+}
+
+void Value::div(const Value& other) {
+  if (type == TypeType::UNDEF || other.type == TypeType::UNDEF) {
+    type = TypeType::UNDEF;
+  } else {
+    switch (type) {
+      case TypeType::INT: {
+        value.ival /= other.value.ival;
+        break;
+      }
+      default: assert(0);
+    }
+  }
+}
+
+void Value::mod(const Value& other) {
+  if (type == TypeType::UNDEF || other.type == TypeType::UNDEF) {
+    type = TypeType::UNDEF;
+  } else {
+    switch (type) {
+      case TypeType::INT: {
+        value.ival %= other.value.ival;
+        break;
+      }
+      default: assert(0);
+    }
+  }
+}
+
+void Value::rat_div(const Value& other) {
+  if (type == TypeType::UNDEF || other.type == TypeType::UNDEF) {
+    type = TypeType::UNDEF;
+  } else {
+    assert(0);
+  }
+}
+
+void Value::eq(const Value& other) {
+}
+
+void Value::lesser(const Value& other) {
+  if (type == TypeType::UNDEF || other.type == TypeType::UNDEF) {
+    type = TypeType::UNDEF;
+  } else {
+    switch (type) {
+      case TypeType::INT:
+        value.bval = value.ival < other.value.ival;
+        break;
+      default: assert(0);
+    }
+  }
+}
+
+void Value::greater(const Value& other) {
+  if (type == TypeType::UNDEF || other.type == TypeType::UNDEF) {
+    type = TypeType::UNDEF;
+  } else {
+    switch (type) {
+      case TypeType::INT:
+        value.bval = value.ival > other.value.ival;
+        break;
+      default: assert(0);
+    }
+  }
+}
+
+void Value::lessereq(const Value& other) {
+  if (type == TypeType::UNDEF || other.type == TypeType::UNDEF) {
+    type = TypeType::UNDEF;
+  } else {
+    switch (type) {
+      case TypeType::INT:
+        value.bval = value.ival <= other.value.ival;
+        break;
+      default: assert(0);
+    }
+  }
+}
+
+void Value::greatereq(const Value& other) {
+  if (type == TypeType::UNDEF || other.type == TypeType::UNDEF) {
+    type = TypeType::UNDEF;
+  } else {
+    switch (type) {
+      case TypeType::INT:
+        value.bval = value.ival >= other.value.ival;
+        break;
+      default: assert(0);
+    }
+  }
+}
+
 
 uint64_t Value::to_uint64_t() const {
   switch (type) {
@@ -160,6 +274,24 @@ std::string Value::to_str() const {
         return "false";
       }
     default: throw RuntimeException("Unsupported type in Value.to_str() ");
+  }
+}
+
+bool value_eq(const Value& v1, const Value& v2) {
+  if (v1.type == TypeType::UNDEF || v2.type == TypeType::UNDEF) {
+    return v1.type == v2.type;
+  } else {
+    switch (v1.type) {
+      case TypeType::INT: return v1.value.ival == v2.value.ival;
+      case TypeType::FLOAT: return v1.value.fval == v2.value.fval;
+      case TypeType::BOOLEAN: return v1.value.bval == v2.value.bval;
+      case TypeType::ENUM: // is this save enough?
+      case TypeType::STRING: return *v1.value.string == *v2.value.string;
+      case TypeType::TUPLE:
+      case TypeType::TUPLE_OR_LIST:
+      case TypeType::LIST: return *v1.value.list == *v2.value.list;
+      default: assert(0);
+    }
   }
 }
 
@@ -295,7 +427,7 @@ bool List::operator==(const List& other) const {
   auto iter2 = other.begin();
 
   while (iter1 != end() && iter2 != end()) {
-    if (*iter1 != *iter2) {
+    if (!value_eq(*iter1, *iter2)) {
       return false;
     }
     iter1++;
