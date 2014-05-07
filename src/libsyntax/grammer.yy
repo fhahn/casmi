@@ -460,7 +460,7 @@ EXPRESSION: EXPRESSION "+" EXPRESSION
           | EXPRESSION AND EXPRESSION
             { $$ = new Expression(@$, $1, $3, Expression::Operation::AND); }
           | NOT EXPRESSION
-            { $$ = new Expression(@$, $2, nullptr, Expression::Operation::NOP);}
+            { $$ = new Expression(@$, $2, nullptr, Expression::Operation::NOT);}
           | ATOM  { $$ = $1; }
           ;
 

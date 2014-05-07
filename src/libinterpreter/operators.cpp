@@ -16,6 +16,10 @@
   }                                                               \
 } 
 
+#define CREATE_LOGICAL_OPERATION(op, lhs, rhs)  {                   \
+ \
+} 
+
 const Value operators::dispatch(Expression::Operation op, const Value& lhs, const Value& rhs) {
   switch (op) {
     case Expression::Operation::ADD:
@@ -41,6 +45,18 @@ const Value operators::dispatch(Expression::Operation op, const Value& lhs, cons
 
     case Expression::Operation::NEQ: 
       return std::move(operators::neq(lhs, rhs));
+
+    case Expression::Operation::AND: 
+      return std::move(operators::and_(lhs, rhs));
+
+    case Expression::Operation::OR: 
+      return std::move(operators::or_(lhs, rhs));
+
+    case Expression::Operation::XOR: 
+      return std::move(operators::xor_(lhs, rhs));
+
+    case Expression::Operation::NOT: 
+      return std::move(operators::not_(lhs));
 
     case Expression::Operation::LESSER:
       return std::move(operators::lesser(lhs, rhs));
@@ -90,6 +106,34 @@ const Value operators::rat_div(const Value& lhs, const Value& rhs) {
 
 const Value operators::eq(const Value& lhs, const Value& rhs) {
   return std::move(Value(lhs == rhs));
+}
+
+const Value operators::and_(const Value& lhs, const Value& rhs) {
+  if (lhs.is_undef() || rhs.is_undef()) {
+    return Value();
+  }
+  return std::move(Value(lhs.value.bval && rhs.value.bval));  
+}
+
+const Value operators::or_(const Value& lhs, const Value& rhs) {
+  if (lhs.is_undef() || rhs.is_undef()) {
+    return Value();
+  }
+  return std::move(Value(lhs.value.bval || rhs.value.bval));  
+}
+
+const Value operators::xor_(const Value& lhs, const Value& rhs) {
+  if (lhs.is_undef() || rhs.is_undef()) {
+    return Value();
+  }
+  return std::move(Value((bool)(lhs.value.bval ^ rhs.value.bval)));  
+}
+
+const Value operators::not_(const Value& lhs) {
+  if (lhs.is_undef()) {
+    return Value();
+  }
+  return std::move(Value(!lhs.value.bval));  
 }
 
 const Value operators::neq(const Value& lhs, const Value& rhs) {

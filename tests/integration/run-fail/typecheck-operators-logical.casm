@@ -1,0 +1,22 @@
+CASM foo
+
+rule main = {
+    assert not 1
+    //~^ operand of `not` must be Boolean but is Int
+
+    assert 1 and 1
+    //~^ operands of operator `and` must be Boolean but are Int
+
+    assert 1 or 1
+    //~^ operands of operator `or` must be Boolean but are Int
+
+    assert 1 xor 1
+    //~^ operands of operator `xor` must be Boolean but are Int
+
+    assert true and 1
+    //~^  type of expressions did not match: Boolean != Int
+
+    program(self) := undef
+}
+
+init main

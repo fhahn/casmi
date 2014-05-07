@@ -18,6 +18,11 @@ namespace operators {
   const Value eq(const Value& lhs, const Value& rhs);
   const Value neq(const Value& lhs, const Value& rhs);
 
+  const Value and_(const Value& lhs, const Value& rhs);
+  const Value or_(const Value& lhs, const Value& rhs);
+  const Value xor_(const Value& lhs, const Value& rhs);
+  const Value not_(const Value& lhs);
+
   const Value lesser(const Value& lhs, const Value& rhs);
   const Value greater(const Value& lhs, const Value& rhs);
   const Value lessereq(const Value& lhs, const Value& rhs);

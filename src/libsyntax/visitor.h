@@ -241,8 +241,12 @@ template<class T, class V> class AstWalker {
       if (expr->node_type_ == NodeType::EXPRESSION) {
         Expression *e = reinterpret_cast<Expression*>(expr);
         V v1 = walk_expression_base(e->left_);
-        V v2 = walk_expression_base(e->right_);
-        return visitor.visit_expression(e, v1, v2);
+        if (e->right_) {
+          V v2 = walk_expression_base(e->right_);
+          return visitor.visit_expression(e, v1, v2);
+        } else {
+          return visitor.visit_expression_single(e, v1);
+        }
       } else {
         return walk_atom(reinterpret_cast<AtomNode*>(expr));
       }
