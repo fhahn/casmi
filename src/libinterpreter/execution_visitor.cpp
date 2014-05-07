@@ -496,10 +496,12 @@ Value ExecutionVisitor::visit_builtin_atom(BuiltinAtom *atom, std::vector<Value>
   }
 }
 
+void ExecutionVisitor::visit_derived_function_atom_pre(FunctionAtom *atom, std::vector<Value>& arguments) {
+  rule_bindings.push_back(&arguments);
+}
 
-Value ExecutionVisitor::visit_derived_function_atom(FunctionAtom *atom,
-                                                      std::vector<Value> &expr_results,
-                                                      Value& expr) {
+Value ExecutionVisitor::visit_derived_function_atom(FunctionAtom *atom, Value& expr) {
+  rule_bindings.pop_back();
   return expr;
 }
 

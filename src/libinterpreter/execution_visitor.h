@@ -62,8 +62,8 @@ class ExecutionVisitor {
     Value visit_undef_atom(UndefAtom *atom) { UNUSED(atom); return std::move(Value()); }
     Value visit_function_atom(FunctionAtom *atom, std::vector<Value> &expr_results);
     Value visit_builtin_atom(BuiltinAtom *atom, std::vector<Value> &expr_results);
-    void visit_derived_function_atom_pre(FunctionAtom *atom) {}
-    Value visit_derived_function_atom(FunctionAtom *atom, std::vector<Value> &expr_results, Value& expr);
+    void visit_derived_function_atom_pre(FunctionAtom *atom, std::vector<Value>& arguments);
+    Value visit_derived_function_atom(FunctionAtom *atom, Value& expr);
     Value visit_self_atom(SelfAtom *atom) { UNUSED(atom); return Value(); }
     Value visit_rule_atom(RuleAtom *atom) { return Value(atom->rule); }
     Value visit_boolean_atom(BooleanAtom *atom) { return Value(atom->value); }
