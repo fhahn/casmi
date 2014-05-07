@@ -32,6 +32,10 @@ Value::Value(const Type &t, List *list) : type(t.t) {
   value.list = list;
 }
 
+Value::Value(const enum_value_t *enum_val) {
+  value.enum_val = enum_val;
+}
+
 Value::Value(Value& other) : type(other.type), value(other.value) {}
 
 Value::Value(const Value& other) : type(other.type), value(other.value) {}
@@ -61,6 +65,12 @@ Value::Value(TypeType t, casm_update* u) {
       value.ival = (int64_t)u->value;
       break;
     case TypeType::ENUM:
+      if (u->value != 0) {
+        type = TypeType::ENUM; 
+        value.enum_val = reinterpret_cast<enum_value_t*>(u->value);
+      } else {
+        type = TypeType::UNDEF; 
+      }
     case TypeType::STRING:
       if (u->value != 0) {
         type = TypeType::STRING;
@@ -96,7 +106,7 @@ bool Value::operator==(const Value &other) const {
     case TypeType::INT: return value.ival == other.value.ival;
     case TypeType::FLOAT: return value.fval == other.value.fval;
     case TypeType::BOOLEAN: return value.bval == other.value.bval;
-    case TypeType::ENUM: // is this save enough?
+    case TypeType::ENUM: return value.enum_val->id == other.value.enum_val->id;
     case TypeType::STRING: return *value.string == *other.value.string;
     case TypeType::TUPLE:
     case TypeType::TUPLE_OR_LIST:
@@ -119,6 +129,7 @@ uint64_t Value::to_uint64_t() const {
     case TypeType::RULEREF:
       return (uint64_t) value.rule;
     case TypeType::ENUM:
+      return (uint64_t) value.enum_val;
     case TypeType::STRING: 
       return (uint64_t) value.string;
     case TypeType::TUPLE: 
@@ -133,7 +144,7 @@ bool Value::is_undef() const {
   return type == TypeType::UNDEF;
 }
 
-std::string Value::to_str() const {
+const std::string Value::to_str() const {
   switch (type) {
     case TypeType::INT:
       return std::move(std::to_string(value.ival));
@@ -146,6 +157,7 @@ std::string Value::to_str() const {
     case TypeType::RULEREF: 
       return std::move("@"+value.rule->name);
     case TypeType::ENUM:
+      return *value.enum_val->name;
     case TypeType::STRING:
       return *value.string;
     case TypeType::TUPLE:
