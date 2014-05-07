@@ -63,9 +63,8 @@ class TypecheckVisitor {
    Type* visit_builtin_atom(BuiltinAtom *atom,
                              const std::vector<Type*> &expr_results);
 
-    void visit_derived_function_atom_pre(FunctionAtom *atom);
-    Type* visit_derived_function_atom(FunctionAtom *atom,
-                             const std::vector<Type*> &expr_results, Type* expr);
+    void visit_derived_function_atom_pre(FunctionAtom *atom, std::vector<Type*> arguments);
+    Type* visit_derived_function_atom(FunctionAtom *atom, Type *expr);
     Type* visit_self_atom(SelfAtom *atom) { return &atom->type_;  }
     Type* visit_rule_atom(RuleAtom *atom);
     Type* visit_boolean_atom(BooleanAtom *atom) { return &atom->type_; }

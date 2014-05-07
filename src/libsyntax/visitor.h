@@ -271,9 +271,9 @@ template<class T, class V> class AstWalker {
       } else {
         FunctionAtom *func_a = reinterpret_cast<FunctionAtom*>(func);
         if (func_a->symbol_type == FunctionAtom::SymbolType::DERIVED) {
-          visitor.visit_derived_function_atom_pre(func_a);
+          visitor.visit_derived_function_atom_pre(func_a, expr_results);
           V expr = walk_expression_base(func_a->symbol->derived);
-          return visitor.visit_derived_function_atom(func_a, expr_results, expr);
+          return visitor.visit_derived_function_atom(func_a, expr);
         } else {
            return visitor.visit_function_atom(func_a, expr_results);
         }

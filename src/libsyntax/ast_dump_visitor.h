@@ -63,9 +63,8 @@ class AstDumpVisitor {
                              const std::vector<bool> &expr_results);
     bool visit_builtin_atom(BuiltinAtom *atom, 
                          const std::vector<bool> &expr_results) {}
-    bool visit_derived_function_atom(FunctionAtom *atom, 
-                         const std::vector<bool> &expr_results, bool) {}
-    void visit_derived_function_atom_pre(FunctionAtom *atom) {}
+    void visit_derived_function_atom_pre(FunctionAtom *atom, const std::vector<bool> &expr_results) {}
+    bool visit_derived_function_atom(FunctionAtom *atom, bool) {}
     bool visit_self_atom(SelfAtom *atom);
     bool visit_rule_atom(RuleAtom *atom);
     bool visit_boolean_atom(BooleanAtom *atom);

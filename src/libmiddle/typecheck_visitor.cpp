@@ -389,8 +389,9 @@ Type* TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
         atom->offset = current_rule_binding_offsets->at(atom->name);
         // TODO check unifying
         Type* binding_type = current_rule_binding_types->at(atom->offset);
-        atom->type_.unify(binding_type);
+        DEBUG("ATOM OFFSET  "<<current_rule_binding_types << " "<<atom->offset << " "<<binding_type);
         DEBUG("BINDING "<<atom->name<<"\t atom_t "<<atom->type_.to_str() << " binding_t "<<binding_type->to_str()) ;
+        atom->type_.unify(binding_type);
         return &atom->type_;
       }
     }
@@ -521,21 +522,7 @@ Type* TypecheckVisitor::visit_builtin_atom(BuiltinAtom *atom,
     return &atom->type_;
 }
 
-void TypecheckVisitor::visit_derived_function_atom_pre(FunctionAtom *atom) {
-  auto foo = new std::vector<Type*>();
-  for (Type *arg : atom->symbol->arguments_) {
-    foo->push_back(arg);
-  }
-  rule_binding_types.push_back(foo);
-  rule_binding_offsets.push_back(&atom->symbol->binding_offsets);
-}
-
-Type* TypecheckVisitor::visit_derived_function_atom(FunctionAtom *atom,
-                                                  const std::vector<Type*>& argument_results,
-                                                  Type* expr) {
-  rule_binding_types.pop_back();
-  rule_binding_offsets.pop_back();
-
+void TypecheckVisitor::visit_derived_function_atom_pre(FunctionAtom *atom, std::vector<Type*> argument_results) {
   size_t args_defined = atom->symbol->arguments_.size();
   size_t args_provided = argument_results.size();
   if (args_defined != args_provided) {
@@ -551,6 +538,17 @@ Type* TypecheckVisitor::visit_derived_function_atom(FunctionAtom *atom,
       }
     }
   }
+  DEBUG("CHECKO NED "<<argument_results.size() << " "<<&argument_results<<"   "<<argument_results.at(0));
+
+  rule_binding_types.push_back(new std::vector<Type*>(atom->symbol->arguments_));
+  rule_binding_offsets.push_back(&atom->symbol->binding_offsets);
+}
+
+Type* TypecheckVisitor::visit_derived_function_atom(FunctionAtom *atom,
+                                                    Type* expr) {
+  delete rule_binding_types.back();
+  rule_binding_types.pop_back();
+  rule_binding_offsets.pop_back();
   return expr;
 }
 
