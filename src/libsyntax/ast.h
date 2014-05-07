@@ -247,6 +247,8 @@ class BuiltinAtom: public BaseFunctionAtom {
       PEEK,
       BOOLEAN2INT,
       INT2BOOLEAN,
+      ENUM2INT,
+      INT2ENUM,
     } id;
 
     std::vector<Type*> types;

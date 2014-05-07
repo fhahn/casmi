@@ -257,6 +257,22 @@ Value ExecutionVisitor::visit_function_atom(FunctionAtom *atom, std::vector<Valu
 }
 
 Value ExecutionVisitor::visit_builtin_atom(BuiltinAtom *atom, std::vector<Value> &expr_results) {
+  // TODO Int2Enum is a special builtin, it needs the complete type information
+  // for the enum, values only store TypeType and passing the type to all
+  // builtins seems ugly.
+  // Maybe store Type* in Value?
+  if (atom->id == BuiltinAtom::Id::INT2ENUM) {
+    Enum *enum_ = context_.symbol_table.get_enum(atom->type_.enum_name);
+    for (auto pair : enum_->mapping) {
+      // TODO check why the enum mapping contains an extra entry with the name
+      // of the enum
+      if (pair.first != enum_->name && pair.second->id == expr_results[0].value.ival) {
+        return std::move(Value(pair.second));
+      }
+    }
+    return std::move(Value());
+  }
+
   return builtins::dispatch(atom->id, context_, expr_results);
 }
 

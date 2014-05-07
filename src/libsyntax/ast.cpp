@@ -363,6 +363,18 @@ BuiltinAtom::BuiltinAtom(yy::location& loc, const std::string name,
 
     types = { a1 };
     id = Id::INT2BOOLEAN;
+  } else if (name == "Enum2Int") {
+    Type *a1 = new Type(TypeType::ENUM);
+    return_type = new Type(TypeType::INT);
+
+    types = { a1 };
+    id = Id::ENUM2INT;
+  } else if (name == "Int2Enum") {
+    Type *a1 = new Type(TypeType::INT);
+    return_type = new Type(TypeType::ENUM);
+
+    types = { a1 };
+    id = Id::INT2ENUM;
  } else {
     assert(0);
   }

@@ -66,7 +66,7 @@ Type::Type(TypeType t) : t(t), internal_type(nullptr), unify_with_left(nullptr),
   }
 }
 
-Type::Type(Type *other) : t(other->t), internal_type(nullptr), unify_with_left(nullptr), unify_with_right(nullptr), constraints(), tuple_types(), enum_name()  {
+Type::Type(Type *other) : t(other->t), internal_type(nullptr), unify_with_left(nullptr), unify_with_right(nullptr), constraints(), tuple_types(), enum_name(other->enum_name)  {
   if (other->internal_type != nullptr) {
     internal_type = new Type(other->internal_type);
   } else {
@@ -222,6 +222,11 @@ bool Type::unify_nofollow(Type *other) {
   bool result = true;
   if (t != TypeType::UNKNOWN && other->t != TypeType::UNKNOWN) {
     if (t == TypeType::ENUM && other->t == TypeType::ENUM) {
+      if (enum_name.size() == 0 && other->enum_name.size() > 0) {
+        enum_name = other->enum_name;
+      } else if (enum_name.size() > 0 && other->enum_name.size() == 0) {
+        other->enum_name = enum_name;
+      }
       return enum_name == other->enum_name;
     }
 
