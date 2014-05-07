@@ -32,7 +32,7 @@ Value::Value(const Type &t, List *list) : type(t.t) {
   value.list = list;
 }
 
-Value::Value(const enum_value_t *enum_val) {
+Value::Value(const enum_value_t *enum_val) : type(TypeType::ENUM) {
   value.enum_val = enum_val;
 }
 
@@ -106,7 +106,7 @@ bool Value::operator==(const Value &other) const {
     case TypeType::INT: return value.ival == other.value.ival;
     case TypeType::FLOAT: return value.fval == other.value.fval;
     case TypeType::BOOLEAN: return value.bval == other.value.bval;
-    case TypeType::ENUM: return value.enum_val->id == other.value.enum_val->id;
+    case TypeType::ENUM: return value.enum_val == other.value.enum_val;
     case TypeType::STRING: return *value.string == *other.value.string;
     case TypeType::TUPLE:
     case TypeType::TUPLE_OR_LIST:
@@ -495,6 +495,8 @@ namespace std {
         }
         return h;
       }
+      case TypeType::ENUM:
+        return (size_t) key.value.enum_val->id;
       default: throw RuntimeException("Unsupported type in std::hash<Value>()");
     }
   }

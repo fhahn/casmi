@@ -36,7 +36,10 @@ const Value builtins::dispatch(BuiltinAtom::Id atom_id,  ExecutionContext ctxt,
     case BuiltinAtom::Id::INT2BOOLEAN:
       return std::move(int2boolean(arguments[0]));
 
-    default: assert(0);
+    case BuiltinAtom::Id::ENUM2INT:
+      return std::move(enum2int(arguments[0]));
+
+     default: assert(0);
   }
 }
 
@@ -213,4 +216,12 @@ const Value builtins::int2boolean(const Value& arg) {
   }
 
   return std::move(Value((bool)arg.value.ival));
+}
+
+const Value builtins::enum2int(const Value& arg) {
+  if (arg.is_undef()) {
+    return std::move(arg);
+  }
+
+  return std::move(Value((INT_T)arg.value.enum_val->id));
 }

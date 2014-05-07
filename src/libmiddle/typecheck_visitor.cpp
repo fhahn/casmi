@@ -540,7 +540,7 @@ Type* TypecheckVisitor::visit_builtin_atom(BuiltinAtom *atom,
     // TODO use tpye_ as return_type_ for builtins
     atom->type_.unify(atom->return_type);
   }
-    return &atom->type_;
+  return &atom->type_;
 }
 
 void TypecheckVisitor::visit_derived_function_atom_pre(FunctionAtom *atom, std::vector<Type*> argument_results) {

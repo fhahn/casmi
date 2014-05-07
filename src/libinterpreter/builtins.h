@@ -21,6 +21,7 @@ namespace builtins {
 
   const Value boolean2int(const Value& arg);
   const Value int2boolean(const Value& arg);
+  const Value enum2int(const Value& arg);
 };
 
 #endif

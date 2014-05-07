@@ -15,7 +15,6 @@ rule main = {
     assert Int2Boolean(42) = true
     assert Int2Boolean(undef) = undef
 
-    /*
     assert Enum2Int(e1) = 0
     assert Enum2Int(e2) = 1
     assert Enum2Int(e3) = 2
@@ -34,7 +33,6 @@ rule main = {
     let e:en2 = Int2Enum(0) in assert e = e2_1
     let e:en2 = Int2Enum(1) in assert e = e2_2
     let e:en2 = Int2Enum(2) in assert e = undef
-    */
 
     program(self) := undef
 }
