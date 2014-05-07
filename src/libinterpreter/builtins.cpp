@@ -30,6 +30,12 @@ const Value builtins::dispatch(BuiltinAtom::Id atom_id,  ExecutionContext ctxt,
     case BuiltinAtom::Id::PEEK:
       return std::move(peek(arguments[0]));
 
+    case BuiltinAtom::Id::BOOLEAN2INT:
+      return std::move(boolean2int(arguments[0]));
+
+    case BuiltinAtom::Id::INT2BOOLEAN:
+      return std::move(int2boolean(arguments[0]));
+
     default: assert(0);
   }
 }
@@ -191,4 +197,20 @@ const Value builtins::peek(const Value& arg_list) {
   } else {
     return std::move(Value());
   }
+}
+
+const Value builtins::boolean2int(const Value& arg) {
+  if (arg.is_undef()) {
+    return std::move(arg);
+  }
+
+  return std::move(Value((INT_T)arg.value.bval));
+}
+
+const Value builtins::int2boolean(const Value& arg) {
+  if (arg.is_undef()) {
+    return std::move(arg);
+  }
+
+  return std::move(Value((bool)arg.value.ival));
 }

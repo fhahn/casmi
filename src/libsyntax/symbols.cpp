@@ -11,6 +11,8 @@ static std::map<const std::string, bool> builtin_names = {
   {"len", true},
   {"tail", true},
   {"peek", true},
+  {"Boolean2Int", true},
+  {"Int2Boolean", true},
 };
 
 bool is_builtin_name(const std::string& name) {

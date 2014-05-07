@@ -18,6 +18,9 @@ namespace builtins {
   const Value tail(ExecutionContext& ctxt, const Value& arg_list);
   const Value len(const Value& list_arg);
   const Value peek(const Value& arg_list);
+
+  const Value boolean2int(const Value& arg);
+  const Value int2boolean(const Value& arg);
 };
 
 #endif

@@ -351,6 +351,18 @@ BuiltinAtom::BuiltinAtom(yy::location& loc, const std::string name,
 
     types = { a1 };
     id = Id::PEEK;
+  } else if (name == "Boolean2Int") {
+    Type *a1 = new Type(TypeType::BOOLEAN);
+    return_type = new Type(TypeType::INT);
+
+    types = { a1 };
+    id = Id::BOOLEAN2INT;
+  } else if (name == "Int2Boolean") {
+    Type *a1 = new Type(TypeType::INT);
+    return_type = new Type(TypeType::BOOLEAN);
+
+    types = { a1 };
+    id = Id::INT2BOOLEAN;
  } else {
     assert(0);
   }
