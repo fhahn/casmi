@@ -2,185 +2,17 @@
 #include <cmath>
 #include <assert.h>
 #include <utility>
-#include <sstream>
 
 #include "macros.h"
 #include "libutil/exceptions.h"
 
 #include "libinterpreter/execution_visitor.h"
+#include "libinterpreter/builtins.h"
 #include "libinterpreter/operators.h"
 
 
 DEFINE_CASM_UPDATESET_FORK_PAR
 DEFINE_CASM_UPDATESET_FORK_SEQ
-
-Value casm_pow(std::vector<Value> &expr_results) {
-  switch (expr_results[0].type) {
-    case TypeType::INT:
-      return Value((INT_T)std::pow(expr_results[0].value.ival,
-                                             expr_results[1].value.ival));
-    case TypeType::FLOAT:
-      DEBUG("POW ARGS "<<expr_results[0].value.fval<<" foobar "<<expr_results[1].value.fval);
-      return Value((FLOAT_T)std::pow(expr_results[0].value.fval,
-                                             expr_results[1].value.fval));
-
-    default: assert(0);
-
-  }
-}
-
-Value casm_hex(std::vector<Value> &expr_results) {
-  // TODO LEAK!
-  if (expr_results[0].is_undef()) {
-    return Value(new std::string("undef"));
-  }
-
-  std::stringstream ss;
-  if (expr_results[0].value.ival < 0) {
-    ss << "-" << std::hex << (-1) * expr_results[0].value.ival;
-  } else {
-    ss << std::hex << expr_results[0].value.ival;
-  }
-  return Value(new std::string(ss.str()));
-}
-
-Value casm_nth(std::vector<Value> &expr_results) {
-  if (expr_results[0].is_undef()) {
-    return Value();
-  }
-
-  List *list = expr_results[0].value.list;
-  List::const_iterator iter = list->begin();
-  size_t i = 1;
-
-  while (iter != list->end() && i < expr_results[1].value.ival) {
-    i++;
-    iter++;
-  }
-  if (i == expr_results[1].value.ival && iter != list->end()) {
-    return Value(*iter);
-  } else {
-    return Value();
-  }
-}
-
-Value casm_app(ExecutionContext& ctxt, const Value& list, const Value& val) {
-  // TODO LEAK
-  if (list.is_undef()) {
-    return Value();
-  }
-
-  List *current = list.value.list;
-
-  DEBUG("START APP");
-  while (1 == 1) {
-    if (current->list_type == List::ListType::HEAD) {
-      current = reinterpret_cast<HeadList*>(current)->right;
-    }
-    if (current->list_type == List::ListType::SKIP) {
-      current = reinterpret_cast<SkipList*>(current)->bottom;
-    }
-    if (current->list_type == List::ListType::BOTTOM) {
-      BottomList *bottom = reinterpret_cast<BottomList*>(current);
-      DEBUG("FOUND END "<<bottom->tail);
-      if (bottom->tail) {
-        current = bottom->tail;
-      } else {
-        break;
-      }
-    }
-    if (current->list_type == List::ListType::TAIL) {
-      TailList *tail = reinterpret_cast<TailList*>(current);
-      if (tail->right) {
-        current = tail->right;
-      } else {
-        break;
-      }
-    }
-  }
-
-  DEBUG("DONE APP");
-
-  TailList *tail = new TailList(nullptr, val);
-  ctxt.temp_lists.push_back(tail);
-
-  if (current->list_type == List::ListType::TAIL) {
-    reinterpret_cast<TailList*>(current)->right = tail;
-  } else if (current->list_type == List::ListType::BOTTOM) {
-    DEBUG("ADD NEW TAIL ");
-    reinterpret_cast<BottomList*>(current)->tail = tail;
-  } else {
-    assert(0);
-  }
-  return Value(list.type, list.value.list);
-}
-
-
-Value casm_cons(ExecutionContext& ctxt, const Value& val, const Value& list) {
-  // TODO LEAK
-  if (list.is_undef()) {
-    return Value();
-  }
-
-  HeadList *consed_list = new HeadList(list.value.list, val);
-  ctxt.temp_lists.push_back(consed_list);
-  return Value(list.type, consed_list);
-}
-
-Value casm_len(std::vector<Value> &expr_results) {
-  // TODO len is really slow right now, it itertes over complete list
-  if (expr_results[0].is_undef()) {
-    return Value();
-  }
-
-  List *list = expr_results[0].value.list;
-  List::const_iterator iter = list->begin();
-
-  size_t count = 0;
-
-  while (iter != list->end()) {
-    count++;
-    iter++;
-  }
-
-  return Value((INT_T) count);
-}
-
-Value casm_tail(ExecutionContext& ctxt, const Value& arg_list) {
-  if (arg_list.is_undef()) {
-    return Value();
-  }
-
-  List *list = arg_list.value.list;
-
-  if (list->is_head()) {
-    return Value(arg_list.type, reinterpret_cast<HeadList*>(list)->right);
-  } else if (list->is_bottom()) {
-    BottomList *btm = reinterpret_cast<BottomList*>(list);
-    SkipList *skip = new SkipList(1, btm);
-    ctxt.temp_lists.push_back(skip);
-    return Value(arg_list.type, skip);
-  } else {
-    SkipList *old_skip = reinterpret_cast<SkipList*>(list);
-    SkipList *skip = new SkipList(old_skip->skip+1, old_skip->bottom);
-    ctxt.temp_lists.push_back(skip);
-    return Value(arg_list.type, skip);
-  }
-}
-
-Value casm_peek(const Value arg) {
-  if (arg.is_undef()) {
-    return Value();
-  }
-
-  List *list = arg.value.list;
-
-  if (list->begin() != list->end()) {
-    return Value(*(list->begin()));
-  } else {
-    return Value();
-  }
-}
 
 
 std::hash<Value> hasher;
@@ -327,7 +159,7 @@ void ExecutionVisitor::visit_let_post(LetNode *node) {
 }
 
 void ExecutionVisitor::visit_push(PushNode *node, const Value& expr, const Value& atom) {
-  Value to_res = casm_cons(context_, expr, atom);
+  Value to_res = builtins::cons(context_, expr, atom);
 
   try {
     casm_update *up = add_update(to_res, node->to->symbol->id, value_list);
@@ -342,7 +174,7 @@ void ExecutionVisitor::visit_push(PushNode *node, const Value& expr, const Value
 }
 
 void ExecutionVisitor::visit_pop(PopNode *node, const Value& val) {
-  Value to_res = casm_peek(val);
+  Value to_res = builtins::peek(val);
 
   if (node->to->symbol_type == FunctionAtom::SymbolType::FUNCTION) {
     try {
@@ -359,7 +191,7 @@ void ExecutionVisitor::visit_pop(PopNode *node, const Value& val) {
     rule_bindings.back()->push_back(to_res);
   } 
 
-  Value from_res = casm_tail(context_, val);
+  Value from_res = builtins::tail(context_, val);
   try {
     casm_update *up = add_update(from_res, node->from->symbol->id, value_list);
     up->line = (uint64_t) &node->location;
@@ -425,25 +257,7 @@ Value ExecutionVisitor::visit_function_atom(FunctionAtom *atom, std::vector<Valu
 }
 
 Value ExecutionVisitor::visit_builtin_atom(BuiltinAtom *atom, std::vector<Value> &expr_results) {
-  if (atom->name == "pow") {
-    return casm_pow(expr_results);
-  } else if (atom->name == "hex") {
-    return casm_hex(expr_results);
-  } else if (atom->name == "nth") {
-    return casm_nth(expr_results);
-  } else if (atom->name == "cons") {
-    return casm_cons(context_, expr_results[0], expr_results[1]);
-  } else if (atom->name == "app") {
-    return casm_app(context_, expr_results[0], expr_results[1]);
-  } else if (atom->name == "len") {
-    return casm_len(expr_results);
-  } else if (atom->name == "tail") {
-    return casm_tail(context_, expr_results[0]);
-  } else if (atom->name == "peek") {
-    return casm_peek(expr_results[0]);
-  } else {
-    assert(0);
-  }
+  return builtins::dispatch(atom->id, context_, expr_results);
 }
 
 void ExecutionVisitor::visit_derived_function_atom_pre(FunctionAtom *atom, std::vector<Value>& arguments) {

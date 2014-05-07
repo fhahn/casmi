@@ -1,641 +1,194 @@
-#include <assert.h>
-#include <utility>
+#include <cassert>
 #include <sstream>
 
-#include "libsyntax/ast.h"
+#include "libinterpreter/builtins.h"
 
-#include "libinterpreter/value.h"
+const Value builtins::dispatch(BuiltinAtom::Id atom_id,  ExecutionContext ctxt,
+                               const std::vector<Value>& arguments) {
+  switch (atom_id) {
+    case BuiltinAtom::Id::POW:
+      return std::move(pow(arguments[0], arguments[1]));
 
-Value::Value() : type(TypeType::UNDEF) {}
+    case BuiltinAtom::Id::HEX:
+      return std::move(hex(arguments[0]));
 
-Value::Value(INT_T ival) : type(TypeType::INT) {
-  value.ival = ival;
-}
+    case BuiltinAtom::Id::NTH:
+      return std::move(nth(arguments[0], arguments[1]));
 
-Value::Value(FLOAT_T fval) : type(TypeType::FLOAT) {
-  value.fval = fval;
-}
+    case BuiltinAtom::Id::APP:
+      return std::move(app(ctxt, arguments[0], arguments[1]));
 
-Value::Value(bool bval) : type(TypeType::BOOLEAN) {
-  value.bval = bval;
-}
+    case BuiltinAtom::Id::CONS:
+      return std::move(cons(ctxt, arguments[0], arguments[1]));
 
-Value::Value(RuleNode *rule) : type(TypeType::RULEREF) {
-  value.rule = rule;
-}
+    case BuiltinAtom::Id::TAIL:
+      return std::move(tail(ctxt, arguments[0]));
 
-Value::Value(std::string *string) : type(TypeType::STRING) {
-  value.string = string;
-}
+    case BuiltinAtom::Id::LEN:
+      return std::move(len(arguments[0]));
 
-Value::Value(const Type &t, List *list) : type(t.t) {
-  value.list = list;
-}
+    case BuiltinAtom::Id::PEEK:
+      return std::move(peek(arguments[0]));
 
-Value::Value(Value& other) : type(other.type), value(other.value) {}
-
-Value::Value(const Value& other) : type(other.type), value(other.value) {}
-
-Value::Value(Value&& other) : type(std::move(other.type)), value(other.value) {}
-
-
-Value& Value::operator=(const Value& other) {
-  value = other.value;
-  type = other.type;
-  return *this;
-}
-
-
-Value::Value(TypeType t, casm_update* u) {
-  if (u->defined == 0) {
-    type = TypeType::UNDEF;
-    return;
+    default: assert(0);
   }
+}
 
-  switch (t) {
-    case TypeType::UNDEF:
-      type = TypeType::UNDEF;
-      break;
-    case TypeType::RULEREF:
-      if (u->value != 0) {
-        type = TypeType::RULEREF; 
-        value.rule = reinterpret_cast<RuleNode*>(u->value);
-      } else {
-        type = TypeType::UNDEF; 
-      }
-      break;
+
+const Value builtins::pow(const Value& base, const Value& power) {
+  switch (base.type) {
     case TypeType::INT:
-      type = TypeType::INT;
-      value.ival = (int64_t)u->value;
-      break;
-    case TypeType::ENUM:
-    case TypeType::STRING:
-      if (u->value != 0) {
-        type = TypeType::STRING;
-        value.string = reinterpret_cast<std::string*>(u->value);
-      } else {
-        type = TypeType::UNDEF;
-      }
-      break;
-    case TypeType::LIST:
-      if (u->value != 0) {
-        type = TypeType::LIST;
-        value.list = reinterpret_cast<List*>(u->value);
-      } else {
-        type = TypeType::UNDEF;
-      }
-      break;
-    default: throw RuntimeException("Unsupported type in apply");
-  }
-}
+      return std::move(Value((INT_T)std::pow(base.value.ival, power.value.ival)));
 
-void Value::add(const Value& other) {
-  if (type == TypeType::UNDEF || other.type == TypeType::UNDEF) {
-    type = TypeType::UNDEF;
- } else {
-   switch (type) {
-      case TypeType::INT: {
-        value.ival += other.value.ival;
-        break;
-      }
-      default: assert(0);
-    }
-  }
-}
-
-void Value::sub(const Value& other) {
-  if (type == TypeType::UNDEF || other.type == TypeType::UNDEF) {
-    type = TypeType::UNDEF;
-  } else {
-    switch (type) {
-      case TypeType::INT: {
-        value.ival -= other.value.ival;
-        break;
-      }
-      default: assert(0);
-    }
-  }
-}
-
-void Value::mul(const Value& other) {
-  if (type == TypeType::UNDEF || other.type == TypeType::UNDEF) {
-    type = TypeType::UNDEF;
-  } else {
-    switch (type) {
-      case TypeType::INT: {
-        value.ival *= other.value.ival;
-        break;
-      }
-      default: assert(0);
-    }
-  }
-}
-
-void Value::div(const Value& other) {
-  if (type == TypeType::UNDEF || other.type == TypeType::UNDEF) {
-    type = TypeType::UNDEF;
-  } else {
-    switch (type) {
-      case TypeType::INT: {
-        value.ival /= other.value.ival;
-        break;
-      }
-      default: assert(0);
-    }
-  }
-}
-
-void Value::mod(const Value& other) {
-  if (type == TypeType::UNDEF || other.type == TypeType::UNDEF) {
-    type = TypeType::UNDEF;
-  } else {
-    switch (type) {
-      case TypeType::INT: {
-        value.ival %= other.value.ival;
-        break;
-      }
-      default: assert(0);
-    }
-  }
-}
-
-void Value::rat_div(const Value& other) {
-  if (type == TypeType::UNDEF || other.type == TypeType::UNDEF) {
-    type = TypeType::UNDEF;
-  } else {
-    assert(0);
-  }
-}
-
-void Value::eq(const Value& other) {
-}
-
-void Value::lesser(const Value& other) {
-  if (type == TypeType::UNDEF || other.type == TypeType::UNDEF) {
-    type = TypeType::UNDEF;
-  } else {
-    switch (type) {
-      case TypeType::INT:
-        value.bval = value.ival < other.value.ival;
-        break;
-      default: assert(0);
-    }
-  }
-}
-
-void Value::greater(const Value& other) {
-  if (type == TypeType::UNDEF || other.type == TypeType::UNDEF) {
-    type = TypeType::UNDEF;
-  } else {
-    switch (type) {
-      case TypeType::INT:
-        value.bval = value.ival > other.value.ival;
-        break;
-      default: assert(0);
-    }
-  }
-}
-
-void Value::lessereq(const Value& other) {
-  if (type == TypeType::UNDEF || other.type == TypeType::UNDEF) {
-    type = TypeType::UNDEF;
-  } else {
-    switch (type) {
-      case TypeType::INT:
-        value.bval = value.ival <= other.value.ival;
-        break;
-      default: assert(0);
-    }
-  }
-}
-
-void Value::greatereq(const Value& other) {
-  if (type == TypeType::UNDEF || other.type == TypeType::UNDEF) {
-    type = TypeType::UNDEF;
-  } else {
-    switch (type) {
-      case TypeType::INT:
-        value.bval = value.ival >= other.value.ival;
-        break;
-      default: assert(0);
-    }
-  }
-}
-
-
-uint64_t Value::to_uint64_t() const {
-  switch (type) {
-    case TypeType::INT:
-      return value.ival;
-    case TypeType::SELF:
-    case TypeType::UNDEF: // are UNDEF and SELF the same here?
-      return 0;
-    case TypeType::RULEREF:
-      return (uint64_t) value.rule;
-    case TypeType::ENUM:
-    case TypeType::STRING: 
-      return (uint64_t) value.string;
-    case TypeType::TUPLE: 
-    case TypeType::TUPLE_OR_LIST: 
-    case TypeType::LIST:
-      return (uint64_t) value.list;
-    default: throw RuntimeException("Unsupported type in Value.to_uint64_t");
-  }
-}
-
-bool Value::is_undef() const {
-  return type == TypeType::UNDEF;
-}
-
-std::string Value::to_str() const {
-  switch (type) {
-    case TypeType::INT:
-      return std::move(std::to_string(value.ival));
     case TypeType::FLOAT:
-      return std::move(std::to_string(value.fval));
-    case TypeType::SELF:
-      return std::move("self");
-    case TypeType::UNDEF: // are UNDEF and SELF the same here?
-      return std::move("undef");
-    case TypeType::RULEREF: 
-      return std::move("@"+value.rule->name);
-    case TypeType::ENUM:
-    case TypeType::STRING:
-      return *value.string;
-    case TypeType::TUPLE:
-    case TypeType::TUPLE_OR_LIST:
-    case TypeType::LIST: {
-        return value.list->to_str();
-    }
-    case TypeType::BOOLEAN:
-      if (value.bval) {
-        return "true";
-      } else {
-        return "false";
-      }
-    default: throw RuntimeException("Unsupported type in Value.to_str() ");
+      return std::move(Value((FLOAT_T)std::pow(base.value.fval, power.value.fval)));
+    default: assert(0);
   }
 }
 
-bool value_eq(const Value& v1, const Value& v2) {
-  if (v1.type == TypeType::UNDEF || v2.type == TypeType::UNDEF) {
-    return v1.type == v2.type;
+const Value builtins::hex(const Value& arg) {
+  // TODO LEAK!
+  if (arg.is_undef()) {
+    return std::move(Value(new std::string("undef")));
+  }
+
+  std::stringstream ss;
+  if (arg.value.ival < 0) {
+    ss << "-" << std::hex << (-1) * arg.value.ival;
   } else {
-    switch (v1.type) {
-      case TypeType::INT: return v1.value.ival == v2.value.ival;
-      case TypeType::FLOAT: return v1.value.fval == v2.value.fval;
-      case TypeType::BOOLEAN: return v1.value.bval == v2.value.bval;
-      case TypeType::ENUM: // is this save enough?
-      case TypeType::STRING: return *v1.value.string == *v2.value.string;
-      case TypeType::TUPLE:
-      case TypeType::TUPLE_OR_LIST:
-      case TypeType::LIST: return *v1.value.list == *v2.value.list;
-      default: assert(0);
-    }
+    ss << std::hex << arg.value.ival;
+  }
+  return std::move(Value(new std::string(ss.str())));
+}
+
+const Value builtins::nth(const Value& list_arg, const Value& index ) {
+  if (list_arg.is_undef()) {
+    return Value();
+  }
+
+  List *list = list_arg.value.list;
+  List::const_iterator iter = list->begin();
+  INT_T i = 1;
+
+  while (iter != list->end() && i < index.value.ival) {
+    i++;
+    iter++;
+  }
+  if (i == index.value.ival && iter != list->end()) {
+    return std::move(Value(*iter));
+  } else {
+    return std::move(Value());
   }
 }
 
-
-List::List(ListType t) : list_type(t) {}
-
-
-void List::const_iterator::do_init(const List *ptr) {
-  pos = 0;
-  if (!ptr) {
-    head = nullptr;
-    bottom = nullptr;
-    tail = nullptr;
-    return;
+const Value builtins::app(ExecutionContext& ctxt, const Value& list, const Value& val) {
+  // TODO LEAK
+  if (list.is_undef()) {
+    return std::move(Value());
   }
 
-  if (ptr->is_head()) {
-    head = reinterpret_cast<const HeadList*>(ptr);
-    bottom = nullptr;
-    tail = nullptr;
-  } else if (ptr->is_bottom()){
-    bottom = reinterpret_cast<const BottomList*>(ptr);
-    pos = bottom->values.size() - 1;
-    if (bottom->values.size() == 0) {
-      do_init(bottom->tail);
-    } else {
-      head = nullptr;
-      tail = nullptr;
-    }
-  } else if (ptr->is_skip()){
-    bottom = nullptr;
-    const SkipList *skip = reinterpret_cast<const SkipList*>(ptr);
-    if (skip->bottom->values.size() > skip->skip) {
-      bottom = skip->bottom;
-      pos = skip->bottom->values.size() - skip->skip - 1;
-      tail = nullptr;
-    } else {
-      if (skip->bottom->tail) {
-        TailList *current = skip->bottom->tail;
-        size_t i;
-        size_t additional_skip =  skip->skip - skip->bottom->values.size();
-        for (i=0; current && i < additional_skip; i++) {
-          current = current->right;
-        }
+  List *current = list.value.list;
 
-        if (i == additional_skip) {
-          tail = current;
-        } else {
-          tail = nullptr;
-        }
+  while (1 == 1) {
+    if (current->list_type == List::ListType::HEAD) {
+      current = reinterpret_cast<HeadList*>(current)->right;
+    }
+    if (current->list_type == List::ListType::SKIP) {
+      current = reinterpret_cast<SkipList*>(current)->bottom;
+    }
+    if (current->list_type == List::ListType::BOTTOM) {
+      BottomList *bottom = reinterpret_cast<BottomList*>(current);
+      if (bottom->tail) {
+        current = bottom->tail;
       } else {
-        tail = nullptr;
+        break;
       }
     }
-    head = nullptr;
-  } else if (ptr->is_tail()) {
-    tail = reinterpret_cast<const TailList*>(ptr);
-    head = nullptr;
-    bottom = nullptr;
-  }
-}
-
-List::const_iterator::const_iterator(const List *ptr) {
-  do_init(ptr);
-}
-
-List::const_iterator::const_iterator(const self_type& other) : bottom(other.bottom), head(other.head), pos(other.pos) { }
-
-List::const_iterator::self_type List::const_iterator::operator++() {
-  next();
-  return *this;
-}
-
-// Advancing an invalid iterator does not do anything
-void List::const_iterator::next() {
-  if (head) {
-    do_init(head->right);
-  } else if (bottom) {
-    if (pos > 0) {
-      pos -= 1;
-    } else {
-      do_init(bottom->tail);
+    if (current->list_type == List::ListType::TAIL) {
+      TailList *tail = reinterpret_cast<TailList*>(current);
+      if (tail->right) {
+        current = tail->right;
+      } else {
+        break;
+      }
     }
-  } else if (tail) {
-      do_init(tail->right);
-    //assert(0);
   }
-}
 
-List::const_iterator::self_type List::const_iterator::operator++(int) {
-  self_type copy(*this);
-  operator++();
-  return copy;
-}
 
-const Value& List::const_iterator::operator*() {
-  if (head) {
-    return head->current_head;
-  } else if (bottom) {
-    return bottom->values[pos];
-  } else if (tail) {
-    return tail->current_tail;
+  TailList *tail = new TailList(nullptr, val);
+  ctxt.temp_lists.push_back(tail);
+
+  if (current->list_type == List::ListType::TAIL) {
+    reinterpret_cast<TailList*>(current)->right = tail;
+  } else if (current->list_type == List::ListType::BOTTOM) {
+    reinterpret_cast<BottomList*>(current)->tail = tail;
   } else {
     assert(0);
   }
+  return std::move(Value(list.type, list.value.list));
 }
 
-// all iterators that are not invalid (head = bottom = nullptr and pos = 0)
-// are equal; a valid and an invalid iterator are _NOT_ equal
-bool List::const_iterator::operator==(const self_type& rhs) const {
-  if (!head && !bottom && !tail) {
-    return !rhs.head && !rhs.bottom && !rhs.tail;
+const Value builtins::cons(ExecutionContext& ctxt, const Value& val, const Value& list) {
+  // TODO LEAK
+  if (list.is_undef()) {
+    return std::move(Value());
+  }
+
+  HeadList *consed_list = new HeadList(list.value.list, val);
+  ctxt.temp_lists.push_back(consed_list);
+  return Value(list.type, consed_list);
+}
+
+const Value builtins::tail(ExecutionContext& ctxt, const Value& arg_list) {
+  if (arg_list.is_undef()) {
+    return std::move(Value());
+  }
+
+  List *list = arg_list.value.list;
+
+  if (list->is_head()) {
+    return std::move(Value(arg_list.type, reinterpret_cast<HeadList*>(list)->right));
+  } else if (list->is_bottom()) {
+    BottomList *btm = reinterpret_cast<BottomList*>(list);
+    SkipList *skip = new SkipList(1, btm);
+    ctxt.temp_lists.push_back(skip);
+    return std::move(Value(arg_list.type, skip));
   } else {
-    return rhs.head || rhs.bottom || rhs.tail;
+    SkipList *old_skip = reinterpret_cast<SkipList*>(list);
+    SkipList *skip = new SkipList(old_skip->skip+1, old_skip->bottom);
+    ctxt.temp_lists.push_back(skip);
+    return std::move(Value(arg_list.type, skip));
   }
 }
 
-bool List::const_iterator::operator!=(const self_type& rhs) const {
-  return !(*this == rhs);
-}
-
-List::const_iterator List::begin() const {
-  return const_iterator(this);
-}
-
-List::const_iterator List::end() const {
-  return const_iterator(nullptr);
-}
-
-
-bool List::operator==(const List& other) const {
-  auto iter1 = begin();
-  auto iter2 = other.begin();
-
-  while (iter1 != end() && iter2 != end()) {
-    if (!value_eq(*iter1, *iter2)) {
-      return false;
-    }
-    iter1++;
-    iter2++;
+const Value builtins::len(const Value& list_arg) {
+  // TODO len is really slow right now, it itertes over complete list
+  if (list_arg.is_undef()) {
+    return std::move(Value());
   }
 
-  if (iter1 == end() && iter2 == end()) {
-    return true;
+  List *list = list_arg.value.list;
+  List::const_iterator iter = list->begin();
+
+  size_t count = 0;
+
+  while (iter != list->end()) {
+    count++;
+    iter++;
+  }
+  return std::move(Value((INT_T) count));
+}
+
+const Value builtins::peek(const Value& arg_list) {
+  if (arg_list.is_undef()) {
+    return std::move(Value());
+  }
+
+  List *list = arg_list.value.list;
+
+  if (list->begin() != list->end()) {
+    return std::move(Value(*(list->begin())));
   } else {
-    return false;
-  }
-}
-
-bool List::operator!=(const List& other) const {
-  return ! (*this == other);
-}
-
-bool List::is_bottom() const {
-  return list_type == ListType::BOTTOM;
-}
-
-bool List::is_head() const {
-  return list_type == ListType::HEAD;
-}
-
-bool List::is_skip() const {
-  return list_type == ListType::SKIP;
-}
-
-bool List::is_tail() const {
-  return list_type == ListType::TAIL;
-}
-
-const std::string List::to_str() const {
-  std::stringstream res;
-  bool add_comma = false;
-  res << "[ ";
-  for (auto iter=begin(); iter != end(); iter.next()) {
-    if (add_comma) {
-      res << ", ";
-    }
-    if ((*iter).type == TypeType::STRING) {
-      res << "\"" << (*iter).to_str() << "\"";
-    } else {
-      res << (*iter).to_str();
-    }
-    add_comma = true;
-  }
-  res << " ]";
-  return res.str();
-}
-
-
-void List::bump_usage() {
-  if (is_bottom()) {
-    reinterpret_cast<BottomList*>(this)->usage_count += 1;
-    return;
-  }
-
-  if (is_head()) {
-    reinterpret_cast<HeadList*>(this)->right->bump_usage();
-  }
-
-  if (is_skip()) {
-    reinterpret_cast<SkipList*>(this)->bottom->bump_usage();
-  }
-}
-
-void List::decrease_usage() {
-  if (is_bottom()) {
-    reinterpret_cast<BottomList*>(this)->usage_count -= 1;
-    return;
-  }
-
-  if (is_head()) {
-    reinterpret_cast<HeadList*>(this)->right->bump_usage();
-  }
-
-  if (is_skip()) {
-    reinterpret_cast<SkipList*>(this)->bottom->bump_usage();
-  }
-}
-
-BottomList* List::collect() {
-  if (is_head()) {
-    HeadList* list = reinterpret_cast<HeadList*>(this);
-    BottomList *result = list->right->collect();
-    result->values.push_back(std::move(list->current_head));
-    return result;
-  }
-
-  if (is_skip()) {
-    SkipList *list = reinterpret_cast<SkipList*>(this);
-    BottomList *result = list->bottom->collect();
-    for (size_t i=list->skip; i > 0; i--) {
-      result->values.pop_back();
-    }
-    return result;
-  }
-
-  if (is_bottom()) {
-    BottomList* list = reinterpret_cast<BottomList*>(this);
-    if (list->usage_count <= 1) {
-      list->usage_count = 1;
-      if (list->tail) {
-        list->tail->collect(list->values);
-        list->tail = nullptr;
-      }
-      return list;
-    } else {
-      BottomList *copy = new BottomList();
-      copy->usage_count = 1;
-      copy->values = list->values;
-      list->usage_count -= 1;
-      copy->allocated_in_collect = true;
-
-      if (list->tail) {
-        list->tail->collect(copy->values);
-        list->tail = nullptr;
-      }
-      return copy;
-    }
-  }
-}
-
-HeadList::HeadList(List *l, const Value& val) : List(ListType::HEAD), right(l), current_head(val) {}
-
-TailList::TailList(TailList *l, const Value& val) : List(ListType::TAIL), right(l), current_tail(val) {}
-
-void TailList::collect(std::vector<Value>& collect_to) {
-  collect_to.insert(collect_to.begin(), current_tail);
-  if (right) {
-    right->collect(collect_to);
-  }
-}
-
-BottomList::BottomList() 
-  : List(ListType::BOTTOM), usage_count(0), values(), tail(nullptr) {}
-
-
-BottomList::BottomList(const std::vector<Value>& vals) 
-  : List(ListType::BOTTOM), usage_count(0), values(std::move(vals)), tail(nullptr) {}
-
-BottomList::~BottomList() {
-}
-
-
-bool BottomList::is_used() const {
-  return usage_count > 0;
-}
-
-bool BottomList::check_allocated_and_set_to_false() {
-  if (allocated_in_collect) {
-    allocated_in_collect = false;
-    return true;
-  }
-  return false;
-}
-
-SkipList::SkipList(size_t skip, BottomList *btm) : List(ListType::SKIP), skip(skip), bottom(btm) {}
-
-namespace std {
-
-  std::hash<std::string> hash<Value>::str_hasher;
-  std::hash<HeadList> hash<Value>::head_list_hasher;
-  std::hash<BottomList> hash<Value>::perm_list_hasher;
-
-  size_t hash<Value>::operator()(const Value &key) const {
-    switch (key.type) {
-      case TypeType::INT:
-        return key.value.ival;
-      case TypeType::SELF:
-      case TypeType::UNDEF: // are UNDEF and SELF the same here?
-        return 0;
-      case TypeType::RULEREF:
-        return (uint64_t) key.value.rule;
-      case TypeType::STRING: 
-        return (uint64_t) str_hasher(*key.value.string);
-      case TypeType::TUPLE: 
-      case TypeType::TUPLE_OR_LIST: 
-      case TypeType::LIST: {
-        size_t h = 0; 
-        for (auto iter=key.value.list->begin(); iter!=key.value.list->end(); iter++) {
-          h += operator()(*iter);
-        }
-        return h;
-      }
-      default: throw RuntimeException("Unsupported type in std::hash<Value>()");
-    }
-  }
-
-
-  std::hash<Value> hash<std::vector<Value>>::hasher;
-  size_t hash<std::vector<Value>>::operator()(const std::vector<Value> &key) const {
-    size_t h = 0;
-    for (const Value& v : key) {
-      h += hasher(v);
-    }
-    return h;
-  }
-
-  std::hash<Value> hash<HeadList>::hasher;
-  size_t hash<HeadList>::operator()(const HeadList &key) const {
-    return hasher(key.current_head);
-  }
-
-  std::hash<std::vector<Value>> hash<BottomList>::list_hasher;
-  size_t hash<BottomList>::operator()(const BottomList &key) const {
-    return list_hasher(key.values);
+    return std::move(Value());
   }
 }
