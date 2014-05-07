@@ -192,10 +192,17 @@ void TypecheckVisitor::visit_call_post(CallNode *call) {
 }
 
 void TypecheckVisitor::visit_let(LetNode *node, Type* v) {
+  if (node->type_ == TypeType::ENUM &&
+      !driver_.function_table.get_enum(node->type_.enum_name)) {
+    driver_.error(node->location,
+                  "unknown type "+node->type_.enum_name+"");
+  }
+
   DEBUG("LET "<<node->identifier << "\tT1 "<<node->type_.to_str()<< " T2 "<<v->to_str() << " addr "<<&node->type_);
   if (!node->type_.unify(&node->expr->type_)) {
     driver_.error(node->location, "type of let conflicts with type of expression");
   }
+
 
   DEBUG("LET UNIFIED "<<node->type_.to_str());
   DEBUG(node->type_.unify_links_to_str());

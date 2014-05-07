@@ -1,0 +1,23 @@
+CASM foo
+
+function stop: -> Int initially { 0 }
+function foo: my_e -> Int
+
+enum my_e = { e1, e2, e3 }
+
+rule main = {
+    foo(e1) := 100
+    foo(e2) := 200
+    foo(e3) := 300
+
+    stop := 1
+
+    if stop = 1 then {
+        assert foo(e1) = 100
+        assert foo(e2) = 200
+        assert foo(e3) = 300
+        program(self) := undef
+    }
+}
+
+init main
