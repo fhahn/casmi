@@ -4,6 +4,7 @@ add_library(interpreter
   value.cpp
   operators.cpp
   builtins.cpp
+  ${SHARED_GLUE_HEADER}
 )
 
 target_link_libraries(interpreter parser middle)

@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "libsyntax/symbols.h"
+#include "shared_glue.h"
 
 static std::map<const std::string, bool> builtin_names = {
   {"pow", true},
@@ -15,6 +16,7 @@ static std::map<const std::string, bool> builtin_names = {
   {"Int2Boolean", true},
   {"Enum2Int", true},
   {"Int2Enum", true},
+  SHARED_BUILTIN_NAMES
 };
 
 bool is_builtin_name(const std::string& name) {

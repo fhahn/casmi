@@ -4,6 +4,7 @@
 #include "libsyntax/driver.h"
 
 
+
 static std::map<NodeType, const std::string> node_type_names_ = {
     {NodeType::ASSERT, std::string("ASSERT")},
     {NodeType::UNDEF_ATOM, std::string("UNDEF ATOM")},
@@ -375,9 +376,8 @@ BuiltinAtom::BuiltinAtom(yy::location& loc, const std::string name,
 
     types = { a1 };
     id = Id::INT2ENUM;
- } else {
-    assert(0);
-  }
+ } else 
+  SHARED_BUILTINS_TYPECHECK
 }
 
 BuiltinAtom::~BuiltinAtom() {}
