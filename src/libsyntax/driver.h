@@ -6,6 +6,7 @@
 #include <cstdio>
 #include <map>
 #include <memory>
+#include <set>
 
 #include "libsyntax/parser.tab.h"
 #include "libsyntax/symbols.h"
@@ -31,6 +32,8 @@ class Driver {
     // State information for the lexer
     bool trace_parsing;
     bool trace_scanning;
+
+    std::map<std::string, std::set<std::string>> init_dependencies;;
 
     // Handling the scanner.
     size_t get_next_chars(char buffer[], size_t max_size);

@@ -15,7 +15,7 @@ extern int yylex_destroy(void);
 Driver *global_driver;
 
 Driver::Driver () 
-    : error_(false), trace_parsing (false), trace_scanning (false), function_table() {
+    : error_(false), trace_parsing (false), trace_scanning (false), function_table(), init_dependencies() {
   file_ = nullptr;
   result = nullptr;
 

@@ -445,49 +445,92 @@ void AstWalker<ExecutionVisitor, Value>::walk_forall(ForallNode *node) {
   }
 }
 
-void ExecutionWalker::run() {
+bool ExecutionWalker::init_function(const std::string& name, std::set<std::string>& visited) {
+  if (visitor.driver_.init_dependencies.count(name) != 0) {
+    visited.insert(name);
+    const std::set<std::string>& deps = visitor.driver_.init_dependencies[name];
+    for (const std::string& dep : deps) {
+      if (visited.count(dep) > 0) {
+        return false;
+      } else {
+        if (!init_function(dep, visited)) {
+          return false;
+        }
+      }
+    }
+  }
+
   std::vector<uint64_t*> initializer_args;
+  auto function_map = std::unordered_map<ArgumentsKey, Value>();
+
+  Function *func = visitor.context_.symbol_table.get_function(name);
+  if (!func) {
+    return true;
+  }
+  if (func->intitializers_ != nullptr) {
+    for (std::pair<ExpressionBase*, ExpressionBase*> init : *func->intitializers_) {
+      size_t num_args = 0; 
+      uint64_t *args = new uint64_t[10];
+      if (init.first != nullptr) {
+        std::vector<Value> arguments;
+        Value argument_v = walk_expression_base(init.first);
+        if (func->arguments_.size() > 1) {
+          List *list = argument_v.value.list;
+          for (auto iter = list->begin(); iter != list->end(); iter++) {
+            arguments.push_back(*iter);
+          }
+        } else {
+          arguments.push_back(argument_v);
+        }
+        pack_values_in_array(arguments, &args[0]);
+        num_args = arguments.size();
+      } else {
+        args[0] = 0;
+      }
+
+      if (function_map.count({&args[0], num_args}) != 0) {
+        yy::location loc = init.first ? init.first->location+init.second->location : init.second->location;
+        visitor.driver_.error(loc, "function `"+func->name+"("+args_to_str(args, num_args)+")` already initialized");
+        throw RuntimeException("function already initialized");
+      }
+      function_map.emplace(std::pair<ArgumentsKey, Value>({&args[0], num_args}, walk_expression_base(init.second)));
+      initializer_args.push_back(args);
+    }
+  }
+  visitor.context_.functions[func->id] = std::pair<Function*, std::unordered_map<ArgumentsKey, Value>>(func, function_map);
+
+  initialized.insert(name);
+  return true;
+}
+
+void ExecutionWalker::run() {
+
+  for (auto pair : visitor.driver_.init_dependencies) {
+    std::set<std::string> visited;
+    if (initialized.count(pair.first) > 0) {
+      continue;;
+    }
+    if (!init_function(pair.first, visited)) {
+      Function *func = visitor.context_.symbol_table.get_function(pair.first);
+      std::string cycle = pair.first;
+      for (const std::string& dep : visited) {
+        cycle = cycle + " => " + dep;
+      }
+      visitor.driver_.error(func->intitializers_->at(0).second->location, "initializer dependency cycle detected: "+cycle);
+      throw RuntimeException("Initializer cycle");
+    }
+  }
+
 
   for (auto pair: visitor.context_.symbol_table.table_) {
-    auto function_map = std::unordered_map<ArgumentsKey, Value>();
-
-    if (pair.second->type != Symbol::SymbolType::FUNCTION) {
+    if (pair.second->type != Symbol::SymbolType::FUNCTION || initialized.count(pair.first) > 0) {
       continue;
     }
 
-    Function *func = reinterpret_cast<Function*>(pair.second);
-    if (func->intitializers_ != nullptr) {
-      for (std::pair<ExpressionBase*, ExpressionBase*> init : *func->intitializers_) {
-        size_t num_args = 0; 
-        uint64_t *args = new uint64_t[10];
-        if (init.first != nullptr) {
-          std::vector<Value> arguments;
-          Value argument_v = walk_expression_base(init.first);
-          if (func->arguments_.size() > 1) {
-            List *list = argument_v.value.list;
-            for (auto iter = list->begin(); iter != list->end(); iter++) {
-              arguments.push_back(*iter);
-            }
-          } else {
-            arguments.push_back(argument_v);
-          }
-          pack_values_in_array(arguments, &args[0]);
-          num_args = arguments.size();
-        } else {
-          args[0] = 0;
-        }
-
-        if (function_map.count({&args[0], num_args}) != 0) {
-          yy::location loc = init.first ? init.first->location+init.second->location : init.second->location;
-          visitor.driver_.error(loc, "function `"+pair.first+"("+args_to_str(args, num_args)+")` already initialized");
-          throw RuntimeException("function already initialized");
-        }
-        function_map.emplace(std::pair<ArgumentsKey, Value>({&args[0], num_args}, walk_expression_base(init.second)));
-        initializer_args.push_back(args);
-      }
-    }
-    visitor.context_.functions[func->id] = std::pair<Function*, std::unordered_map<ArgumentsKey, Value>>(func, function_map);
+    std::set<std::string> visited;
+    init_function(pair.first, visited);
   }
+
   for (List *l : visitor.context_.temp_lists) {
     l->bump_usage();
   }
@@ -512,10 +555,5 @@ void ExecutionWalker::run() {
     std::cout << steps <<" steps later..."<<std::endl;
   } else {
     std::cout << steps <<" step later..."<<std::endl;
-  }
-
-
-  for (auto ptr : initializer_args) {
-    delete[] ptr;
   }
 }

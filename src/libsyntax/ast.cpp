@@ -237,12 +237,12 @@ BaseFunctionAtom::BaseFunctionAtom(yy::location& loc, NodeType t, const std::str
 
 
 FunctionAtom::FunctionAtom(yy::location& loc, const std::string name)
-    : FunctionAtom(loc, name, nullptr) {
+    : FunctionAtom(loc, name, nullptr)  {
 }
 
 FunctionAtom::FunctionAtom(yy::location& loc, const std::string name,
                            std::vector<ExpressionBase*> *args) 
-    : BaseFunctionAtom(loc, NodeType::FUNCTION_ATOM, name, args), symbol_type(SymbolType::UNSET) {
+    : BaseFunctionAtom(loc, NodeType::FUNCTION_ATOM, name, args), symbol_type(SymbolType::UNSET), initialized(false) {
 }
 
 FunctionAtom::~FunctionAtom() {

@@ -345,15 +345,15 @@ template<class T> class BaseVisitor {
     void visit_statements(AstListNode*) {}
     void visit_statement(AstNode*) {}
     void visit_ifthenelse(IfThenElseNode*, T) {}
-    T visit_assert(UnaryNode*, T) {}
+    T visit_assert(UnaryNode*, T) { return T(); }
     void visit_seqblock(UnaryNode*) {}
     void visit_parblock(UnaryNode*) {}
-    T visit_update(UpdateNode*, T, T) {}
-    T visit_call_pre(CallNode*) {}
-    T visit_call_pre(CallNode*, T) {}
-    T visit_call(CallNode*, std::vector<T>&) {}
+    T visit_update(UpdateNode*, T, T) { return T(); }
+    T visit_call_pre(CallNode*) { return T(); }
+    T visit_call_pre(CallNode*, T) { return T(); }
+    T visit_call(CallNode*, std::vector<T>&) { return T(); }
     void visit_call_post(CallNode*) {}
-    T visit_print(PrintNode*, std::vector<T>&) {}
+    T visit_print(PrintNode*, std::vector<T>&) { return T(); }
 
     void visit_let(LetNode*, T) {}
     void visit_let_post(LetNode*) {}
@@ -364,21 +364,21 @@ template<class T> class BaseVisitor {
     void visit_forall_pre(ForallNode*) { }
     void visit_forall_post(ForallNode*) { }
 
-    T visit_expression(Expression*, T, T) {}
-    T visit_expression_single(Expression*, T) {}
-    T visit_int_atom(IntAtom*) {}
-    T visit_float_atom(FloatAtom*) {}
-    T visit_undef_atom(UndefAtom*) { }
-    T visit_function_atom(FunctionAtom *, const std::vector<T> &) {}
-    T visit_builtin_atom(BuiltinAtom *, const std::vector<T> &) {}
+    T visit_expression(Expression*, T, T) { return T(); }
+    T visit_expression_single(Expression*, T) { return T(); }
+    T visit_int_atom(IntAtom*) { return T(); }
+    T visit_float_atom(FloatAtom*) { return T(); }
+    T visit_undef_atom(UndefAtom*) { return T(); }
+    T visit_function_atom(FunctionAtom *, const std::vector<T> &) { return T(); }
+    T visit_builtin_atom(BuiltinAtom *, const std::vector<T> &) { return T(); }
     void visit_derived_function_atom_pre(FunctionAtom*, const std::vector<T> &) {}
-    T visit_derived_function_atom(FunctionAtom*, T) {}
-    T visit_self_atom(SelfAtom*) {}
-    T visit_rule_atom(RuleAtom*) {}
-    T visit_boolean_atom(BooleanAtom*) {}
-    T visit_string_atom(StringAtom*) {}
-    T visit_list_atom(ListAtom*, std::vector<T> &) { }
-    T visit_number_range_atom(NumberRangeAtom*) { }
+    T visit_derived_function_atom(FunctionAtom*, T) { return T(); }
+    T visit_self_atom(SelfAtom*) { return T(); }
+    T visit_rule_atom(RuleAtom*) { return T(); }
+    T visit_boolean_atom(BooleanAtom*) { return T(); }
+    T visit_string_atom(StringAtom*) { return T(); }
+    T visit_list_atom(ListAtom*, std::vector<T> &) { return T(); }
+    T visit_number_range_atom(NumberRangeAtom*) { return T(); }
 };
 
 #endif
