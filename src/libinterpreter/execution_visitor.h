@@ -12,7 +12,7 @@
 #include "libinterpreter/execution_context.h"
 #include "libinterpreter/value.h"
 
-class ExecutionVisitor {
+class ExecutionVisitor : public BaseVisitor<Value> {
   private:
 
     std::vector<Value> value_list;
@@ -26,22 +26,9 @@ class ExecutionVisitor {
     ExecutionContext& context_;
     std::vector<std::vector<Value> *> rule_bindings;
 
-
     ExecutionVisitor(ExecutionContext& context, Driver& driver);
 
-    void visit_specification(AstNode *spec) { UNUSED(spec); }
-    void visit_init(AstNode *init) { UNUSED(init); }
-    void visit_body_elements(AstListNode *body_elements) { UNUSED(body_elements); }
-    void visit_derived_def_pre(FunctionDefNode *def) {}
-    void visit_function_def(FunctionDefNode *def) { UNUSED(def); }
-
-    void visit_derived_def(FunctionDefNode *def, Value&) {}
-    void visit_rule(RuleNode *rule) { UNUSED(rule); }
-    void visit_statement(AstNode *stmt) { UNUSED(stmt); }
-    void visit_seqblock(UnaryNode *seqblock) { UNUSED(seqblock); }
-    void visit_parblock(UnaryNode *parblock) { UNUSED(parblock); }
     void visit_assert(UnaryNode* assert, Value& val);
-    void visit_statements(AstListNode *stmts) { UNUSED(stmts); }
     void visit_update(UpdateNode *update, Value& func_val, Value& expr_v);
     void visit_call_pre(CallNode *call);
     void visit_call_pre(CallNode *call, Value& expr);
@@ -84,6 +71,10 @@ void AstWalker<ExecutionVisitor, Value>::walk_parblock(UnaryNode* parblock);
 
 
 class ExecutionWalker : public AstWalker<ExecutionVisitor, Value> {
+  private:
+    void init_function(Function* func);
+    void init_function(Function* func, std::unordered_map<ArgumentsKey, Value>& function_map);
+
   public:
     ExecutionWalker(ExecutionVisitor& v) : AstWalker<ExecutionVisitor, Value>(v) {}
     void run();

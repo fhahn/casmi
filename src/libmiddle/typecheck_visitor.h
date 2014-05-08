@@ -10,7 +10,7 @@
 #include "libsyntax/types.h"
 #include "libsyntax/driver.h"
 
-class TypecheckVisitor {
+class TypecheckVisitor : public BaseVisitor<Type*> {
   private:
     void check_type_valid(const yy::location& location, const Type& type);
 
@@ -25,19 +25,13 @@ class TypecheckVisitor {
     bool forall_head;
     TypecheckVisitor(Driver& driver);
 
-    void visit_specification(AstNode *spec) { UNUSED(spec); }
     void visit_init(AstNode *init) { UNUSED(init); }
-    void visit_body_elements(AstListNode *body_elements) { UNUSED(body_elements); }
     void visit_function_def(FunctionDefNode *def,
                             const std::vector<std::pair<Type*, Type*>>& initializers);
     void visit_derived_def_pre(FunctionDefNode *def);
     void visit_derived_def(FunctionDefNode *def, Type* expr);
 
     void visit_rule(RuleNode *rule);
-    void visit_statement(AstNode *stmt) { UNUSED(stmt); }
-    void visit_seqblock(UnaryNode *seqblock) { UNUSED(seqblock); }
-    void visit_parblock(UnaryNode *parblock) { UNUSED(parblock); }
-    void visit_statements(AstListNode *stmts) { UNUSED(stmts); }
     void visit_ifthenelse(IfThenElseNode *node, Type* cond);
     void visit_assert(UnaryNode *assert, Type* t);
     void visit_update(UpdateNode *update, Type* func, Type* expr);
