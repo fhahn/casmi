@@ -333,5 +333,52 @@ template<class T, class V> class AstWalker {
     }
 };
 
+template<class T> class BaseVisitor {
+  public:
+    void visit_specification(AstNode*) {}
+    void visit_init(AstNode*) {}
+    void visit_body_elements(AstListNode*) {}
+    void visit_function_def(FunctionDefNode*, const std::vector<std::pair<T,T>>&) {}
+    void visit_derived_def_pre(FunctionDefNode*) {}
+    void visit_derived_def(FunctionDefNode*, T) {}
+    void visit_rule(RuleNode*) {}
+    void visit_statements(AstListNode*) {}
+    void visit_statement(AstNode*) {}
+    void visit_ifthenelse(IfThenElseNode*, T) {}
+    T visit_assert(UnaryNode*, T) {}
+    void visit_seqblock(UnaryNode*) {}
+    void visit_parblock(UnaryNode*) {}
+    T visit_update(UpdateNode*, T, T) {}
+    T visit_call_pre(CallNode*) {}
+    T visit_call_pre(CallNode*, T) {}
+    T visit_call(CallNode*, std::vector<T>&) {}
+    void visit_call_post(CallNode*) {}
+    T visit_print(PrintNode*, std::vector<T>&) {}
+
+    void visit_let(LetNode*, T) {}
+    void visit_let_post(LetNode*) {}
+    void visit_pop(PopNode*) { }
+    void visit_push(PushNode*, T , T)  { }
+    void visit_case(CaseNode*, const T, const std::vector<T>&) { }
+
+    void visit_forall_pre(ForallNode*) { }
+    void visit_forall_post(ForallNode*) { }
+
+    T visit_expression(Expression*, T, T) {}
+    T visit_expression_single(Expression*, T) {}
+    T visit_int_atom(IntAtom*) {}
+    T visit_float_atom(FloatAtom*) {}
+    T visit_undef_atom(UndefAtom*) { }
+    T visit_function_atom(FunctionAtom *, const std::vector<T> &) {}
+    T visit_builtin_atom(BuiltinAtom *, const std::vector<T> &) {}
+    void visit_derived_function_atom_pre(FunctionAtom*, const std::vector<T> &) {}
+    T visit_derived_function_atom(FunctionAtom*, T) {}
+    T visit_self_atom(SelfAtom*) {}
+    T visit_rule_atom(RuleAtom*) {}
+    T visit_boolean_atom(BooleanAtom*) {}
+    T visit_string_atom(StringAtom*) {}
+    T visit_list_atom(ListAtom*, std::vector<T> &) { }
+    T visit_number_range_atom(NumberRangeAtom*) { }
+};
 
 #endif
