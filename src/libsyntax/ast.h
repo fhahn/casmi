@@ -53,6 +53,7 @@ enum NodeType {
   PUSH,
   CASE,
   FORALL,
+  ITERATE,
 };
 
 const std::string& type_to_str(NodeType t);

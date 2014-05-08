@@ -69,6 +69,14 @@ void AstWalker<ExecutionVisitor, Value>::walk_seqblock(UnaryNode* seqblock);
 template <>
 void AstWalker<ExecutionVisitor, Value>::walk_parblock(UnaryNode* parblock);
 
+template <>
+void AstWalker<ExecutionVisitor, Value>::walk_case(CaseNode *node);
+
+template <>
+void AstWalker<ExecutionVisitor, Value>::walk_forall(ForallNode *node);
+
+template <>
+void AstWalker<ExecutionVisitor, Value>::walk_iterate(UnaryNode *node);
 
 class ExecutionWalker : public AstWalker<ExecutionVisitor, Value> {
   private:

@@ -53,6 +53,7 @@ class AstDumpVisitor {
 
     void visit_forall_pre(ForallNode *node) { throw "not implemented"; }
     void visit_forall_post(ForallNode *node) { throw "not implemented"; }
+    void visit_iterate(UnaryNode*) { throw "not implemented"; }
 
     bool visit_expression(Expression *expr, bool, bool);
     bool visit_expression_single(Expression *expr, bool);

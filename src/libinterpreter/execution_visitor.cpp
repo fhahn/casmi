@@ -445,6 +445,33 @@ void AstWalker<ExecutionVisitor, Value>::walk_forall(ForallNode *node) {
   }
 }
 
+DEFINE_CASM_UPDATESET_EMPTY
+
+template <>
+void AstWalker<ExecutionVisitor, Value>::walk_iterate(UnaryNode *node) {
+  bool forked = false;
+  bool running = true;
+
+  while (running) {
+    if (visitor.context_.updateset.pseudostate % 2 == 1) {
+      CASM_UPDATESET_FORK_PAR(&visitor.context_.updateset);
+      forked = true;
+    }
+
+    CASM_UPDATESET_FORK_SEQ(&visitor.context_.updateset);
+    walk_statement(node->child_);
+
+    if (CASM_UPDATESET_EMPTY(&visitor.context_.updateset)) {
+      running = false;
+    }
+    visitor.context_.merge_seq(visitor.driver_);
+    if (forked) {
+      visitor.context_.merge_par();
+    }
+  }
+}
+
+
 bool ExecutionWalker::init_function(const std::string& name, std::set<std::string>& visited) {
   if (visitor.driver_.init_dependencies.count(name) != 0) {
     visited.insert(name);
