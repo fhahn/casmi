@@ -111,7 +111,7 @@
 
 %type <AstNode*> INIT_SYNTAX BODY_ELEMENT SPECIFICATION RULE_SYNTAX STATEMENT
 %type <UnaryNode*> PARBLOCK_SYNTAX KW_PARBLOCK_SYNTAX SEQBLOCK_SYNTAX
-%type <UnaryNode*> ASSERT_SYNTAX KW_SEQBLOCK_SYNTAX
+%type <UnaryNode*> ASSERT_SYNTAX KW_SEQBLOCK_SYNTAX ITERATE_SYNTAX
 %type <AstListNode*> BODY_ELEMENTS STATEMENTS
 %type <AtomNode*> NUMBER VALUE NUMBER_RANGE
 %type <std::pair<ExpressionBase*, ExpressionBase*>> INITIALIZER
@@ -517,7 +517,7 @@ STATEMENT: ASSERT_SYNTAX { $$ = $1; }
          | PUSH_SYNTAX { $$ = $1; }
          | POP_SYNTAX { $$ = $1; }
          | FORALL_SYNTAX { $$ = $1; }
-         | ITERATE_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
+         | ITERATE_SYNTAX { $$ = $1; }
          | SKIP  { $$ = new AstNode(NodeType::SKIP); }
          | IDENTIFIER  { driver.error(@$, "this call syntax is obsolete, use `call "+$1+"`"); }
          | INTERN EXPRESSION_LIST  { $$ = new AstNode(NodeType::STATEMENT); }
@@ -676,8 +676,8 @@ FORALL_SYNTAX: FORALL IDENTIFIER IN EXPRESSION DO STATEMENT {
              }
              ;
 
-ITERATE_SYNTAX: ITERATE STATEMENT
-          ;
+ITERATE_SYNTAX: ITERATE STATEMENT { $$ = new UnaryNode(@$, NodeType::ITERATE, $2); }
+              ;
 
 
 %%

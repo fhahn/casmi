@@ -128,6 +128,12 @@ template<class T, class V> class AstWalker {
           walk_forall(reinterpret_cast<ForallNode*>(stmt));
           break;
         }
+        case NodeType::ITERATE: {
+          walk_iterate(reinterpret_cast<UnaryNode*>(stmt));
+          visitor.visit_iterate(reinterpret_cast<UnaryNode*>(stmt));
+          walk_statement(reinterpret_cast<UnaryNode*>(stmt)->child_);
+          break;
+        }
         case NodeType::CASE: {
           walk_case(reinterpret_cast<CaseNode*>(stmt));
           break;
@@ -223,6 +229,11 @@ template<class T, class V> class AstWalker {
       visitor.visit_forall_pre(node);
       walk_statement(node->statement);
       visitor.visit_forall_post(node);
+    }
+
+    void walk_iterate(UnaryNode* node) {
+      visitor.visit_iterate(node);
+      walk_statement(node->child_);
     }
 
     void walk_case(CaseNode *node) {
@@ -363,6 +374,8 @@ template<class T> class BaseVisitor {
 
     void visit_forall_pre(ForallNode*) { }
     void visit_forall_post(ForallNode*) { }
+
+    void visit_iterate(UnaryNode*) { }
 
     T visit_expression(Expression*, T, T) { return T(); }
     T visit_expression_single(Expression*, T) { return T(); }
