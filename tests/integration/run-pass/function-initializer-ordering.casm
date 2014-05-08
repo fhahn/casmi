@@ -1,0 +1,8 @@
+CASM foo
+
+function foo: -> Int initially { 99 }
+function bar: -> Int initially { foo }
+
+rule main = if bar = 99 then program(self) := undef
+
+init main

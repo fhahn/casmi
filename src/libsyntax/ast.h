@@ -221,6 +221,7 @@ class FunctionAtom : public BaseFunctionAtom {
     };
 
     SymbolType symbol_type;
+    bool initialized;
 
     union {
       Function *symbol;

@@ -1,7 +1,8 @@
+#include "libmiddle/function_cycle_visitor.h"
 #include "libmiddle/typecheck_visitor.h"
 
 
-TypecheckVisitor::TypecheckVisitor(Driver& driver) : driver_(driver), rule_binding_types(), rule_binding_offsets(), forall_head(false) {}
+TypecheckVisitor::TypecheckVisitor(Driver& driver) : driver_(driver), rule_binding_types(), rule_binding_offsets(), forall_head(false) { }
 
 void TypecheckVisitor::check_type_valid(const yy::location& location, const Type& type) {
   if (type == TypeType::ENUM &&
@@ -9,8 +10,8 @@ void TypecheckVisitor::check_type_valid(const yy::location& location, const Type
     driver_.error(location,
                   "unknown type "+type.enum_name+"");
   }
-
 }
+
 void TypecheckVisitor::visit_function_def(FunctionDefNode *def,
                                           const std::vector<std::pair<Type*, Type*>>& initializers) {
 
@@ -68,6 +69,11 @@ void TypecheckVisitor::visit_function_def(FunctionDefNode *def,
    
     }
   }
+
+  InitCycleVisitor v;
+  AstWalker<InitCycleVisitor, bool> walker(v);
+  walker.walk_function_def(def);
+  driver_.init_dependencies[def->sym->name] = walker.visitor.dependency_names;
 }
 
 void TypecheckVisitor::visit_derived_def_pre(FunctionDefNode *def) {

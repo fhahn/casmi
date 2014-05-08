@@ -4,9 +4,8 @@ CASM foo
 // cycle in initilizer dependencies
 
 function foo: Int -> Int initially { 1 -> foo(1) }
+//~^ initializer dependency cycle detected: foo => foo
 
 init initR
 
-rule initR = seqblock
-	program(self) := undef
-endseqblock
+rule initR = skip

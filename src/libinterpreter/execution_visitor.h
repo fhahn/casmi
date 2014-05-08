@@ -72,11 +72,11 @@ void AstWalker<ExecutionVisitor, Value>::walk_parblock(UnaryNode* parblock);
 
 class ExecutionWalker : public AstWalker<ExecutionVisitor, Value> {
   private:
-    void init_function(Function* func);
-    void init_function(Function* func, std::unordered_map<ArgumentsKey, Value>& function_map);
+    std::set<std::string> initialized;
+    bool init_function(const std::string& name, std::set<std::string>& visited);
 
   public:
-    ExecutionWalker(ExecutionVisitor& v) : AstWalker<ExecutionVisitor, Value>(v) {}
+    ExecutionWalker(ExecutionVisitor& v) : AstWalker<ExecutionVisitor, Value>(v), initialized() {}
     void run();
 };
 #endif //CASMI_LIBINTERPRETER_EXEC_VISITOR
