@@ -1,0 +1,16 @@
+CASM foo
+
+
+rule main = {
+    print BVadd_result(32, 13, 2.0)
+    //~^ type of 3 argument of `BVadd_result` is Float but should be Int
+
+    print BVsb(32, 13, 2)
+    //~^ number of provided arguments does not match definition of `BVsb`
+
+    let x : Float = BVor(32, 13, 2) in skip
+    //~^  type of let conflicts with type of expression
+
+}
+
+init main

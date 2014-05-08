@@ -22,6 +22,13 @@ namespace builtins {
   const Value boolean2int(const Value& arg);
   const Value int2boolean(const Value& arg);
   const Value enum2int(const Value& arg);
+
+  namespace shared {
+    struct Int {
+      uint64_t value;
+      uint8_t defined;
+    };
+  }
 };
 
 #endif

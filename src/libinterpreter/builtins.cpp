@@ -225,3 +225,23 @@ const Value builtins::enum2int(const Value& arg) {
 
   return std::move(Value((INT_T)arg.value.enum_val->id));
 }
+
+
+namespace builtins {
+namespace shared {
+  // the CASM runtime heavily depens on macros, whatever you think of it ... 
+  // here we need to provide all definitions ...
+  #define TRUE                    1
+  #define FALSE                   0
+  #define ARG(TYPE, NAME)             TYPE* NAME
+  #define SARG(VAR) #VAR              " {0x%lx,%u}"
+  #define PARG(TYPE, VAR)             (uint64_t)VAR->value, VAR->defined
+  #define CASM_RT(FORMAT, ARGS...)        /* printf-able */
+  #define CASM_INFO(FORMAT, ARGS...)      /* printf-able */
+
+  // create concrete variants of the shareds
+  #define CASM_CALL_SHARED(NAME, VALUE, ARGS...)  NAME(VALUE, ##ARGS)
+  #define DEFINE_CASM_SHARED(NAME, VALUE, ARGS...) void NAME(VALUE, ##ARGS)
+  #include "librt/pp_casm_shared.h"
+}
+}

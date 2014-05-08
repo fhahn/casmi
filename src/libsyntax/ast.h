@@ -13,6 +13,8 @@
 
 #include "libinterpreter/value.h"
 
+#include "shared_glue.h"
+
 enum NodeType {
   ASSERT,
   UNDEF_ATOM,
@@ -249,6 +251,7 @@ class BuiltinAtom: public BaseFunctionAtom {
       INT2BOOLEAN,
       ENUM2INT,
       INT2ENUM,
+      SHARED_BUILTIN_IDS
     } id;
 
     std::vector<Type*> types;
