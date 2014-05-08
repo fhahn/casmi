@@ -39,7 +39,27 @@ def create_typecheck_defines(builtins):
     builtin_typechecks.append("{ assert(0); } \n")
     define_typechecks = "\n\n#define SHARED_BUILTINS_TYPECHECK \\\n{}\n".format(
             "".join(builtin_typechecks))
+
     return "".join([define_builtin_ids, define_builtin_names, define_typechecks])
+
+def create_dispatch_define(builtins):
+    cases = []
+    for b in builtins:
+        arg_ind = 0;
+        lines = []
+        lines.append("case BuiltinAtom::Id::{}:".format(b[0].upper()))
+        for arg in b[2:]:
+            lines.append("  arg{0:} = {{ (uint64_t) arguments[{0:}].value.ival, 1 }};".format(str(arg_ind)))
+            arg_ind += 1
+
+        lines.append("  {}(&ret, ".format(b[0])+", ".join(["&arg"+str(i) for i in range(0, arg_ind)])+");")
+        lines.append("  break;")
+  
+        case_template ="".join(len(lines)*["    {:<60}\\\n"])
+        case = case_template.format(*lines)
+        cases.append(case)
+
+    return "\n\n#define SHARED_DISPATCH \\\n"+"".join(cases)
 
 
 if __name__ == '__main__':
@@ -51,4 +71,6 @@ if __name__ == '__main__':
         ]
 
     with open(sys.argv[2], "wt") as f:
-        f.write(create_typecheck_defines(builtins))
+        res = create_typecheck_defines(builtins)
+        res += create_dispatch_define(builtins)
+        f.write(res)

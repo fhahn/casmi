@@ -39,7 +39,7 @@ const Value builtins::dispatch(BuiltinAtom::Id atom_id,  ExecutionContext ctxt,
     case BuiltinAtom::Id::ENUM2INT:
       return std::move(enum2int(arguments[0]));
 
-     default: assert(0);
+    default: return std::move(shared::dispatch(atom_id, arguments));
   }
 }
 
@@ -229,6 +229,8 @@ const Value builtins::enum2int(const Value& arg) {
 
 namespace builtins {
 namespace shared {
+  #include "shared_glue.h"
+
   // the CASM runtime heavily depens on macros, whatever you think of it ... 
   // here we need to provide all definitions ...
   #define TRUE                    1
@@ -243,5 +245,24 @@ namespace shared {
   #define CASM_CALL_SHARED(NAME, VALUE, ARGS...)  NAME(VALUE, ##ARGS)
   #define DEFINE_CASM_SHARED(NAME, VALUE, ARGS...) void NAME(VALUE, ##ARGS)
   #include "librt/pp_casm_shared.h"
+
+  const Value dispatch(BuiltinAtom::Id builtin_id, 
+                       const std::vector<Value>& arguments) {
+    Int ret;
+    Int arg0;
+    Int arg1;
+    Int arg2;
+    Int arg3;
+    Int arg4;
+    switch (builtin_id) {
+      SHARED_DISPATCH
+    }
+
+    if (ret.defined == TRUE) {
+      return std::move(Value((INT_T)ret.value));
+    } else {
+      return std::move(Value());
+    }
+  }
 }
 }

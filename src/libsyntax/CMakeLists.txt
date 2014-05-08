@@ -20,6 +20,14 @@ ADD_CUSTOM_COMMAND(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/grammer.yy
                    OUTPUTS ${CMAKE_CURRENT_BINARY_DIR}/parser.cpp
 )
 
+ADD_CUSTOM_COMMAND(PRE_BUILD
+                   SOURCE ${CMAKE_SOURCE_DIR}/src/librt/pp_casm_shared.h
+                   COMMAND python 
+                   ARGS ${CMAKE_SOURCE_DIR}/src/etc/shared_glue.py
+                        ${CMAKE_SOURCE_DIR}/src/librt/pp_casm_shared.h
+                        ${CMAKE_BINARY_DIR}/src/shared_glue.h
+                   OUTPUT ${CMAKE_BINARY_DIR}/src/shared_glue.h
+)
 
 SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/parser.cpp GENERATED)
 SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/lexer.cpp GENERATED)
@@ -34,7 +42,7 @@ add_library(parser
   symbols.cpp
   types.cpp
   ast_dump_visitor.cpp
-  ${SHARED_GLUE_HEADER}
+  ${CMAKE_BINARY_DIR}/src/shared_glue.h
 )
 
 target_link_libraries(parser y util)
