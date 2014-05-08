@@ -1,3 +1,5 @@
+SET_SOURCE_FILES_PROPERTIES(${SHARED_GLUE_HEADER} GENERATED)
+
 add_library(interpreter
   execution_visitor.cpp
   execution_context.cpp
