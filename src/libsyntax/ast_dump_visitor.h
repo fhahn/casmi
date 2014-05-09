@@ -38,6 +38,7 @@ class AstDumpVisitor {
     bool visit_assert(UnaryNode *assert, bool);
     void visit_seqblock(UnaryNode *seqblock);
     void visit_parblock(UnaryNode *parblock);
+    void visit_update_pre(UpdateNode*) { }
     bool visit_update(UpdateNode *update, bool, bool);
     bool visit_call_pre(CallNode *call);
     bool visit_call_pre(CallNode *call, bool);

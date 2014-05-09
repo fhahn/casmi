@@ -127,6 +127,12 @@ void TypecheckVisitor::visit_assert(UnaryNode *assert, Type* val) {
   }
 }
 
+void TypecheckVisitor::visit_update_pre(UpdateNode *update) {
+  //DEBUG("link "<<update->func->type_.unify_links_to_str());
+  DEBUG("\nEXPR "<<update->func->type_.to_str());
+  update->func->type_.unify(&update->expr_->type_);
+}
+
 void TypecheckVisitor::visit_update(UpdateNode *update, Type* func_t, Type* expr_t) {
   if (update->func->symbol && update->func->symbol->is_static) {
     driver_.error(update->location, "cannot update static function `"+update->func->name+"`");
@@ -516,9 +522,16 @@ Type* TypecheckVisitor::visit_builtin_atom(BuiltinAtom *atom,
       }
     }
 
+
     if (*atom->types[0] == TypeType::LIST) {
       atom->type_.unify(atom->types[0]->internal_type);
+      
+    } else if (atom->type_ == TypeType::LIST) {
+        atom->types[0]->t = TypeType::LIST;
+        atom->types[0]->internal_type = new Type(atom->type_);
+        atom->types[0]->unify(expr_results[0]);
     } else {
+
       ExpressionBase *ind_expr = atom->arguments->at(1);
       if (ind_expr->node_type_ == NodeType::INT_ATOM) {
         INT_T ind = reinterpret_cast<IntAtom*>(ind_expr)->val_;
