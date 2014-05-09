@@ -1,0 +1,11 @@
+CASM foo
+
+derived foo:Int = "hallo"
+//~^ type of derived expression was `String` but should be `Int`
+
+
+rule main = {|
+    program(self) := undef
+|}
+
+init main

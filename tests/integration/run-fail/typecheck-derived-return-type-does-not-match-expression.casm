@@ -1,0 +1,11 @@
+CASM foo
+
+derived foo:Int = []
+//~^ type of derived expression was `Tuple ()` but should be `Int`
+
+
+rule main = {|
+    program(self) := undef
+|}
+
+init main

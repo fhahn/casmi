@@ -1,6 +1,7 @@
 // error annotation @3
 
 derived a = []
+//~^ type of derived expression is unknown because type of expression is Tuple ()
 
 rule main = {
   program( self ) := undef

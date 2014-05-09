@@ -89,19 +89,15 @@ void TypecheckVisitor::visit_derived_def(FunctionDefNode *def, Type* expr) {
   rule_binding_types.pop_back();
   rule_binding_offsets.pop_back();
 
-  if (*def->sym->return_type_ == TypeType::UNKNOWN) {
-    if (*expr == TypeType::UNKNOWN) {
-      driver_.error(def->location, std::string("type of derived expression is ")+
-                                   "unknown because type of expression is `undef`");
-   
-    }
-    // TODO unify
-    def->sym->return_type_ = expr;
-  } else if (*def->sym->return_type_ != *expr && *expr != TypeType::UNDEF) {
+  if (!def->sym->return_type_->unify(expr)) {
     driver_.error(def->location, "type of derived expression was `"+
                                  expr->to_str()+"` but should be `"+
                                  def->sym->return_type_->to_str()+"`");
+  } else if (!def->sym->return_type_->is_complete()) {
+    driver_.error(def->location, std::string("type of derived expression is ")+
+                                 "unknown because type of expression is "+expr->to_str());
   }
+
 }
 
 void TypecheckVisitor::visit_rule(RuleNode *rule) {
