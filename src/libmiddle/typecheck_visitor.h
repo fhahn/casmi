@@ -35,7 +35,6 @@ class TypecheckVisitor : public BaseVisitor<Type*> {
     void visit_rule(RuleNode *rule);
     void visit_ifthenelse(IfThenElseNode *node, Type* cond);
     void visit_assert(UnaryNode *assert, Type* t);
-    void visit_update_pre(UpdateNode *update);
     void visit_update(UpdateNode *update, Type* func, Type* expr);
     void visit_call_pre(CallNode *call);
     void visit_call_pre(CallNode *call, Type* expr);
