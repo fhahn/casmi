@@ -513,12 +513,10 @@ Type* TypecheckVisitor::visit_builtin_atom(BuiltinAtom *atom,
       if (all_equal) {
         atom->types[0]->t = TypeType::LIST;
         atom->types[0]->internal_type = new Type(first);
-      }
+      } 
     }
 
-    if (*atom->types[0] == TypeType::LIST) {
-      atom->type_.unify(atom->types[0]->internal_type);
-    } else {
+    if (*atom->types[0] == TypeType::TUPLE) {
       ExpressionBase *ind_expr = atom->arguments->at(1);
       if (ind_expr->node_type_ == NodeType::INT_ATOM) {
         INT_T ind = reinterpret_cast<IntAtom*>(ind_expr)->val_;
@@ -547,6 +545,9 @@ Type* TypecheckVisitor::visit_builtin_atom(BuiltinAtom *atom,
                       "second argument of nth must be an Int constant for tuples but was `"+
                       type_to_str(ind_expr->node_type_)+"`");
       }
+    } else {
+      atom->type_.unify(atom->types[0]->internal_type);
+      expr_results[0]->unify(&atom->type_);
     }
   } else {
     // TODO check unifying
@@ -598,6 +599,23 @@ Type* TypecheckVisitor::visit_rule_atom(RuleAtom *atom) {
 Type* TypecheckVisitor::visit_list_atom(ListAtom *atom, std::vector<Type*> &vals) {
   atom->type_.t = TypeType::TUPLE_OR_LIST;
   atom->type_.tuple_types = vals;
+
+  if (vals.size() > 0) {
+    Type first = *(vals[0]);
+    bool all_known = first.is_complete();
+    bool all_equal = true;
+    for (size_t i=1; i < vals.size(); i++) {
+      all_known = all_known && vals[i]->is_complete();
+      if (first != *vals[i]) {
+        all_equal = false;
+        break;
+      }
+    }
+    if (!all_equal && all_known) {
+      atom->type_.t = TypeType::TUPLE;
+    } 
+  }
+
   return &atom->type_;
 }
 
