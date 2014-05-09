@@ -165,12 +165,13 @@ template<class T, class V> class AstWalker {
     }
 
     void walk_update(UpdateNode *update) {
+      V func_t = walk_function_atom(update->func);
+      visitor.visit_update_pre(update);
       V expr_t = walk_expression_base(update->expr_);
 
       // we must walk the expression before walking update->func because it 
       // sets the list of arguments and we do not want the update->expr_ to
       // overwrite the value_list
-      V func_t = walk_function_atom(update->func);
       visitor.visit_update(update, func_t, expr_t);
     }
 
@@ -359,6 +360,7 @@ template<class T> class BaseVisitor {
     T visit_assert(UnaryNode*, T) { return T(); }
     void visit_seqblock(UnaryNode*) {}
     void visit_parblock(UnaryNode*) {}
+    void visit_update_pre(UpdateNode*) { }
     T visit_update(UpdateNode*, T, T) { return T(); }
     T visit_call_pre(CallNode*) { return T(); }
     T visit_call_pre(CallNode*, T) { return T(); }
