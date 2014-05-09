@@ -1,0 +1,20 @@
+// error annotation @8
+
+rule main = {
+  let x = [] in
+  let y = undef in {
+    case y of
+      x: skip
+      2: skip
+      //~^ type of case expression (Tuple ()) and label (Int) do not match
+      3: skip
+      //~^ type of case expression (Tuple ()) and label (Int) do not match
+      4: skip
+      //~^ type of case expression (Tuple ()) and label (Int) do not match
+      default: skip
+    endcase
+  }
+
+  program( self ) := undef
+}
+init main
