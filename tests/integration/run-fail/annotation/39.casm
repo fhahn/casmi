@@ -1,7 +1,7 @@
 // error annotation @3
 
 derived a = undef
-//~^ type of derived expression is unknown because type of expression is `undef`
+//~^ type of derived expression is unknown because type of expression is Unknown
 
 rule main = {
   program( self ) := undef
