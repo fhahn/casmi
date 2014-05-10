@@ -1,0 +1,32 @@
+/*
+ * Recursion in CoreASM
+ */ 
+
+CASM Fibonacci
+
+
+init InitRule
+
+rule InitRule = 
+	let n = 1500 in 
+		seqblock
+		print "Fibonacci(" + n + ") using dynamic programming: " 
+		call fibo_d(n)
+		print "=" + fibo(n)
+		program(self) := undef
+		endseqblock
+
+function fibo : Int -> Int
+
+rule fibo_d(x:Int) = 
+	iterate
+		if fibo(x) = undef then { 
+			if x < 0 then fibo(x) := 0
+			else if x < 2 then fibo(x) := x
+			else seqblock
+				call fibo_d(x-2)
+				call fibo_d(x-1)
+				fibo(x) := fibo(x-2) + fibo(x-1)
+			endseqblock
+		}
+
