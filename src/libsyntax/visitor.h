@@ -138,6 +138,9 @@ template<class T, class V> class AstWalker {
           walk_case(reinterpret_cast<CaseNode*>(stmt));
           break;
         }
+        case NodeType::UPDATE_DUMPS:
+          walk_update_dumps(reinterpret_cast<UpdateNode*>(stmt));
+          break;
         default:
             throw RuntimeException(
               std::string("Invalid node type: ")+
@@ -173,6 +176,17 @@ template<class T, class V> class AstWalker {
       V func_t = walk_function_atom(update->func);
       visitor.visit_update(update, func_t, expr_t);
     }
+
+    void walk_update_dumps(UpdateNode *update) {
+      V expr_t = walk_expression_base(update->expr_);
+
+      // we must walk the expression before walking update->func because it 
+      // sets the list of arguments and we do not want the update->expr_ to
+      // overwrite the value_list
+      V func_t = walk_function_atom(update->func);
+      visitor.visit_update_dumps(update, func_t, expr_t);
+    }
+
 
     void walk_call(CallNode *call) {
       if (call->ruleref == nullptr) {
@@ -360,6 +374,7 @@ template<class T> class BaseVisitor {
     void visit_seqblock(UnaryNode*) {}
     void visit_parblock(UnaryNode*) {}
     T visit_update(UpdateNode*, T, T) { return T(); }
+    T visit_update_dumps(UpdateNode *u, T v1, T v2) { return visit_update(u, v1, v2); }
     T visit_call_pre(CallNode*) { return T(); }
     T visit_call_pre(CallNode*, T) { return T(); }
     T visit_call(CallNode*, std::vector<T>&) { return T(); }

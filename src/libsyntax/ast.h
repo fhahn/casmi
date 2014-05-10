@@ -37,6 +37,7 @@ enum NodeType {
   SPECIFICATION,
   EXPRESSION,
   UPDATE,
+  UPDATE_DUMPS,
   STATEMENT,
   STATEMENTS,
   SKIP,
@@ -115,10 +116,15 @@ class RuleNode: public UnaryNode {
     const std::string name;
     std::vector<Type*> arguments;
     std::map<std::string, size_t> binding_offsets;
+    const std::vector<std::pair<std::string, std::vector<std::string>>> dump_list;
 
     RuleNode(yy::location& loc, AstNode *child, const std::string &name);
     RuleNode(yy::location& loc, AstNode *child, const std::string &name,
         std::vector<Type*>& args);
+    RuleNode(yy::location& loc, AstNode *child, const std::string &name,
+        std::vector<Type*>& args,
+        const std::vector<std::pair<std::string, std::vector<std::string>>>& dump_list);
+
 };
 
 

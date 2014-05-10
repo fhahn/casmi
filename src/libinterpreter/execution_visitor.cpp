@@ -69,6 +69,31 @@ casm_update *ExecutionVisitor::add_update(const Value& val, size_t sym_id, const
   return up;
 }
 
+void ExecutionVisitor::visit_update_dumps(UpdateNode *update, Value &func_val, Value& expr_v) {
+  const std::string& filter = driver_.function_trace_map[update->func->symbol->id];
+  if (context_.filter_enabled(filter)) {
+    std::cout << filter << ": " << update->func->symbol->name ;
+
+    auto iter = value_list.begin();
+    if (iter != value_list.end()) {
+      std::cout <<"("<< (*iter).to_str();
+      iter++;
+    }
+
+    while (iter != value_list.end()) {
+      std::cout << ", " << (*iter).to_str();
+      iter++;
+    }
+    if (value_list.size() > 0) {
+      std::cout << ")";
+    }
+
+    std::cout << " = "<< expr_v.to_str() << std::endl;
+  }
+
+  visit_update(update, func_val, expr_v);
+}
+
 void ExecutionVisitor::visit_update(UpdateNode *update, Value &func_val, Value& expr_v) {
   UNUSED(func_val);
 

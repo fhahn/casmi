@@ -144,6 +144,8 @@
 %type <ForallNode*> FORALL_SYNTAX
 %type <std::vector<std::string>> IDENTIFIER_LIST IDENTIFIER_LIST_NO_COMMA
 %type <Enum*> ENUM_SYNTAX;
+%type <std::vector<std::pair<std::string, std::vector<std::string>>>> DUMPSPEC_LIST
+%type <std::pair<std::string, std::vector<std::string>>> DUMPSPEC
 
 
 %start SPECIFICATION
@@ -485,18 +487,27 @@ RULE_SYNTAX: RULE IDENTIFIER "=" STATEMENT { $$ = new RuleNode(@$, $4, $2); }
               { $$ = new RuleNode(@$, $7, $2, $4); }
 /* again, with dump specification */
            | RULE IDENTIFIER DUMPS DUMPSPEC_LIST "=" STATEMENT
-              { $$ = new RuleNode(@$, $6, $2); }
+              {
+                  std::vector<Type*> tmp;
+                  $$ = new RuleNode(@$, $6, $2, tmp, $4);
+              }
            | RULE IDENTIFIER "(" ")" DUMPS DUMPSPEC_LIST "=" STATEMENT
-              { $$ = new RuleNode(@$, $8, $2); }
+              {
+                std::vector<Type*> tmp;
+                $$ = new RuleNode(@$, $8, $2, tmp, $6);
+              }
            | RULE IDENTIFIER "(" PARAM_LIST ")" DUMPS DUMPSPEC_LIST "=" STATEMENT
-              { $$ = new RuleNode(@$, $9, $2); }
+              {
+                std::vector<Type*> tmp;
+                $$ = new RuleNode(@$, $9, $2, tmp, $7);
+              }
            ;
 
-DUMPSPEC_LIST: DUMPSPEC_LIST "," DUMPSPEC
-             | DUMPSPEC 
+DUMPSPEC_LIST: DUMPSPEC_LIST "," DUMPSPEC { $$ = std::move($1); $$.push_back($3); }
+             | DUMPSPEC { $$ = std::vector<std::pair<std::string,std::vector<std::string>>>(); $$.push_back(std::move($1)); }
              ;
 
-DUMPSPEC: "(" IDENTIFIER_LIST ")" ARROW IDENTIFIER
+DUMPSPEC: "(" IDENTIFIER_LIST ")" ARROW IDENTIFIER { $$ = std::pair<std::string, std::vector<std::string>>($5, $2); }
         ;
 
 STATEMENT: ASSERT_SYNTAX { $$ = $1; }
