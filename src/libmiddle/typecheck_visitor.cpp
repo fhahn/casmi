@@ -107,6 +107,18 @@ void TypecheckVisitor::visit_rule(RuleNode *rule) {
   }
   rule_binding_types.push_back(foo);
   rule_binding_offsets.push_back(&rule->binding_offsets);
+
+  for  (auto& pair : rule->dump_list) {
+    for (const std::string& identifier : pair.second) {
+      Function *sym = driver_.function_table.get_function(identifier);
+      if (sym) {
+        driver_.function_trace_map.emplace(sym->id, pair.first);
+      } else {
+        driver_.error(rule->location, std::string("names in dumplist must be function identifiers")+
+                                     " but `"+identifier+"` is not a function");
+      }
+    } 
+  }
 }
 
 void TypecheckVisitor::visit_ifthenelse(IfThenElseNode *node, Type* cond) {
@@ -145,6 +157,11 @@ void TypecheckVisitor::visit_update(UpdateNode *update, Type* func_t, Type* expr
 
   update->type_ = update->func->type_;
   DEBUG("Type of update "<<update->type_.to_str() << " func: "<<update->func->type_.to_str() << " expr: "<<update->expr_->type_.to_str());
+
+  if (update->func->symbol && driver_.function_trace_map.count(update->func->symbol->id) > 0) {
+    update->node_type_ = NodeType::UPDATE_DUMPS;
+  }
+
 }
 
 void TypecheckVisitor::visit_call_pre(CallNode *call) {

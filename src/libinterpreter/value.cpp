@@ -71,6 +71,7 @@ Value::Value(TypeType t, casm_update* u) {
       } else {
         type = TypeType::UNDEF; 
       }
+      break;
     case TypeType::STRING:
       if (u->value != 0) {
         type = TypeType::STRING;

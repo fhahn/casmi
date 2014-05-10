@@ -15,6 +15,7 @@ class TypecheckVisitor : public BaseVisitor<Type*> {
     void check_type_valid(const yy::location& location, const Type& type);
 
 
+
   public:
     Driver& driver_;
     void check_numeric_operator(const yy::location& loc,  Type *type,

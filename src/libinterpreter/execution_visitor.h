@@ -30,6 +30,7 @@ class ExecutionVisitor : public BaseVisitor<Value> {
 
     void visit_assert(UnaryNode* assert, Value& val);
     void visit_update(UpdateNode *update, Value& func_val, Value& expr_v);
+    void visit_update_dumps(UpdateNode *update, Value& func_val, Value& expr_v);
     void visit_call_pre(CallNode *call);
     void visit_call_pre(CallNode *call, Value& expr);
     void visit_call(CallNode *call, std::vector<Value> &arguments);
@@ -48,6 +49,7 @@ class ExecutionVisitor : public BaseVisitor<Value> {
     Value visit_float_atom(FloatAtom *atom) { return std::move(Value(atom->val_)); }
     Value visit_undef_atom(UndefAtom *atom) { UNUSED(atom); return std::move(Value()); }
     Value visit_function_atom(FunctionAtom *atom, std::vector<Value> &expr_results);
+
     Value visit_builtin_atom(BuiltinAtom *atom, std::vector<Value> &expr_results);
     void visit_derived_function_atom_pre(FunctionAtom *atom, std::vector<Value>& arguments);
     Value visit_derived_function_atom(FunctionAtom *atom, Value& expr);

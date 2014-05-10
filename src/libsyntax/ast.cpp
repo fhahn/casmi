@@ -577,14 +577,23 @@ bool UnaryNode::equals(AstNode *other) {
 
 
 RuleNode::RuleNode(yy::location& loc, AstNode *child, const std::string& name)
-  :  UnaryNode(loc, NodeType::RULE, child), name(std::move(name)), arguments(), binding_offsets() {}
+  :  UnaryNode(loc, NodeType::RULE, child), name(std::move(name)), arguments(),
+     binding_offsets(), dump_list() {}
 
 RuleNode::RuleNode(yy::location& loc,
                    AstNode *child,
                    const std::string &name,
                    std::vector<Type*>& args)
   : UnaryNode(loc, NodeType::RULE, child), name(std::move(name)),
-    arguments(std::move(args)), binding_offsets(std::move(binding_offsets)) {}
+    arguments(std::move(args)), binding_offsets(std::move(binding_offsets)),
+    dump_list() {}
+
+RuleNode::RuleNode(yy::location& loc, AstNode *child, const std::string &name,
+        std::vector<Type*>& args,
+        const std::vector<std::pair<std::string, std::vector<std::string>>>& dump_list)
+    : UnaryNode(loc, NodeType::RULE, child), name(std::move(name)),
+      arguments(std::move(args)), binding_offsets(std::move(binding_offsets)),
+      dump_list(std::move(dump_list)) {}
 
 
 CallNode::CallNode(yy::location& loc, const std::string& rule_name, ExpressionBase *ruleref)
