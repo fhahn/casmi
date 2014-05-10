@@ -1,0 +1,47 @@
+CASM bubblesort
+
+function array : Int -> Int
+function changes : -> Boolean
+function i : -> Int initially { -1 }
+
+
+init initR
+
+rule bubblesort = 
+case i of 
+	-1: 	{
+		changes := false
+		i := 0
+		}
+	30:
+		{
+		if not changes then {
+			forall j in [0..30] do 
+				print j + "=" + array(j)
+			program(self) := undef
+		}
+		i := -1
+		}
+
+	default:
+		{
+		if array(i) > array(i+1) then {
+			if not changes then {
+				changes := true
+				array(i) := array(i+1)
+				array(i+1) := array(i)
+			}
+		}
+		i := i + 1
+		}
+endcase
+
+rule initR = {
+	forall j in [0..28] do {
+		array(j) := (j + 1)
+	}
+	array(30) := 0
+	array(29) := 0
+	program(self) := @bubblesort
+}
+
