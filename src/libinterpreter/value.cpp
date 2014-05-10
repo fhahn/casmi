@@ -88,6 +88,14 @@ Value::Value(TypeType t, casm_update* u) {
         type = TypeType::UNDEF;
       }
       break;
+    case TypeType::BOOLEAN: 
+      if (u->value != 0) {
+        type = TypeType::BOOLEAN;
+        value.bval = (bool) u->value;
+      } else {
+        type = TypeType::UNDEF;
+      }
+      break;
     default: throw RuntimeException("Unsupported type in apply");
   }
 }
@@ -137,6 +145,8 @@ uint64_t Value::to_uint64_t() const {
     case TypeType::TUPLE_OR_LIST: 
     case TypeType::LIST:
       return (uint64_t) value.list;
+    case TypeType::BOOLEAN:
+      return (uint64_t) value.bval;
     default: throw RuntimeException("Unsupported type in Value.to_uint64_t");
   }
 }

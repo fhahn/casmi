@@ -1,0 +1,11 @@
+CASM foo
+
+function a: -> Boolean
+
+rule main = {
+    a := true
+    if a then
+        program(self) := undef
+}
+
+init main
