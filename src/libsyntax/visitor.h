@@ -130,8 +130,6 @@ template<class T, class V> class AstWalker {
         }
         case NodeType::ITERATE: {
           walk_iterate(reinterpret_cast<UnaryNode*>(stmt));
-          visitor.visit_iterate(reinterpret_cast<UnaryNode*>(stmt));
-          walk_statement(reinterpret_cast<UnaryNode*>(stmt)->child_);
           break;
         }
         case NodeType::CASE: {

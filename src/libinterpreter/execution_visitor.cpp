@@ -477,22 +477,23 @@ void AstWalker<ExecutionVisitor, Value>::walk_iterate(UnaryNode *node) {
   bool forked = false;
   bool running = true;
 
-  while (running) {
-    if (visitor.context_.updateset.pseudostate % 2 == 1) {
-      CASM_UPDATESET_FORK_PAR(&visitor.context_.updateset);
-      forked = true;
-    }
-
+  if (visitor.context_.updateset.pseudostate % 2 == 0) {
     CASM_UPDATESET_FORK_SEQ(&visitor.context_.updateset);
-    walk_statement(node->child_);
+    forked = true;
+  }
 
+  while (running) {
+    CASM_UPDATESET_FORK_PAR(&visitor.context_.updateset);
+
+    walk_statement(node->child_);
     if (CASM_UPDATESET_EMPTY(&visitor.context_.updateset)) {
       running = false;
     }
+    visitor.context_.merge_par();
+  }
+
+  if (forked) {
     visitor.context_.merge_seq(visitor.driver_);
-    if (forked) {
-      visitor.context_.merge_par();
-    }
   }
 }
 
