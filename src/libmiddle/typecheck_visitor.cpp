@@ -194,7 +194,7 @@ void TypecheckVisitor::visit_call(CallNode *call, std::vector<Type*>& argument_r
                                   std::to_string(args_provided)+" where provided");
   } else {
     for (size_t i=0; i < args_defined; i++) {
-      if (*call->rule->arguments[i] != *argument_results[i]) {
+      if (!call->rule->arguments[i]->unify(argument_results[i])) {
         driver_.error(call->arguments->at(i)->location,
                       "argument "+std::to_string(i+1)+" of rule `"+ call->rule_name+
                       "` must be `"+call->rule->arguments[i]->to_str()+"` but was `"+
@@ -206,8 +206,6 @@ void TypecheckVisitor::visit_call(CallNode *call, std::vector<Type*>& argument_r
 
 void TypecheckVisitor::visit_call_post(CallNode *call) {
   UNUSED(call);
-  rule_binding_types.pop_back();
-  rule_binding_offsets.pop_back();
 }
 
 void TypecheckVisitor::visit_let(LetNode *node, Type* v) {
@@ -670,3 +668,31 @@ void AstWalker<TypecheckVisitor, Type*>::walk_forall(ForallNode *node) {
   visitor.rule_binding_types.back()->pop_back();
   visitor.rule_binding_offsets.back()->erase(node->identifier);
 }
+
+template <>
+void AstWalker<TypecheckVisitor, Type*>::walk_call(CallNode *call) {
+  // basically the same as in AstWalker, but we do not walk the rule here as
+  // this could lead to an endless recursion
+  if (call->ruleref == nullptr) {
+    visitor.visit_call_pre(call);
+  } else {
+    Type *v = walk_expression_base(call->ruleref);
+    visitor.visit_call_pre(call, v);
+  }
+
+  // we must evaluate all arguments, to set correct offset for bindings
+  std::vector<Type*> argument_results;
+  if (call->arguments != nullptr) {
+    for (ExpressionBase *e: *call->arguments) {
+      argument_results.push_back(walk_expression_base(e));
+    }
+  }
+  if (call->rule != nullptr) {
+    visitor.visit_call(call, argument_results);
+    //walk_rule(call->rule);
+    visitor.visit_call_post(call);
+  } else {
+    DEBUG("rule not set!");
+  }
+}
+
