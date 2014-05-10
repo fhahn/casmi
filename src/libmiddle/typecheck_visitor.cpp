@@ -670,3 +670,31 @@ void AstWalker<TypecheckVisitor, Type*>::walk_forall(ForallNode *node) {
   visitor.rule_binding_types.back()->pop_back();
   visitor.rule_binding_offsets.back()->erase(node->identifier);
 }
+
+template <>
+void AstWalker<TypecheckVisitor, Type*>::walk_call(CallNode *call) {
+  // basically the same as in AstWalker, but we do not walk the rule here as
+  // this could lead to an endless recursion
+  if (call->ruleref == nullptr) {
+    visitor.visit_call_pre(call);
+  } else {
+    Type *v = walk_expression_base(call->ruleref);
+    visitor.visit_call_pre(call, v);
+  }
+
+  // we must evaluate all arguments, to set correct offset for bindings
+  std::vector<Type*> argument_results;
+  if (call->arguments != nullptr) {
+    for (ExpressionBase *e: *call->arguments) {
+      argument_results.push_back(walk_expression_base(e));
+    }
+  }
+  if (call->rule != nullptr) {
+    visitor.visit_call(call, argument_results);
+    //walk_rule(call->rule);
+    visitor.visit_call_post(call);
+  } else {
+    DEBUG("rule not set!");
+  }
+}
+
