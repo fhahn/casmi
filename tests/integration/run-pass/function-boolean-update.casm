@@ -1,11 +1,16 @@
 CASM foo
 
-function a: -> Boolean
+function a: Int -> Boolean initially { 0 -> false, 1 -> true }
 
 rule main = {
-    a := true
-    if a then
+    a(0) := true
+    a(1) := false
+    if a(0) and not a(1) then
         program(self) := undef
+    else {
+        assert not a(0)
+        assert a(1)
+    }
 }
 
 init main

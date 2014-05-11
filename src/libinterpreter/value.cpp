@@ -53,48 +53,28 @@ Value::Value(TypeType t, casm_update* u) {
       type = TypeType::UNDEF;
       break;
     case TypeType::RULEREF:
-      if (u->value != 0) {
-        type = TypeType::RULEREF; 
-        value.rule = reinterpret_cast<RuleNode*>(u->value);
-      } else {
-        type = TypeType::UNDEF; 
-      }
+      type = TypeType::RULEREF; 
+      value.rule = reinterpret_cast<RuleNode*>(u->value);
       break;
     case TypeType::INT:
       type = TypeType::INT;
       value.ival = (int64_t)u->value;
       break;
     case TypeType::ENUM:
-      if (u->value != 0) {
-        type = TypeType::ENUM; 
-        value.enum_val = reinterpret_cast<enum_value_t*>(u->value);
-      } else {
-        type = TypeType::UNDEF; 
-      }
+      type = TypeType::ENUM; 
+      value.enum_val = reinterpret_cast<enum_value_t*>(u->value);
       break;
     case TypeType::STRING:
-      if (u->value != 0) {
-        type = TypeType::STRING;
-        value.string = reinterpret_cast<std::string*>(u->value);
-      } else {
-        type = TypeType::UNDEF;
-      }
+      type = TypeType::STRING;
+      value.string = reinterpret_cast<std::string*>(u->value);
       break;
     case TypeType::LIST:
-      if (u->value != 0) {
-        type = TypeType::LIST;
-        value.list = reinterpret_cast<List*>(u->value);
-      } else {
-        type = TypeType::UNDEF;
-      }
+      type = TypeType::LIST;
+      value.list = reinterpret_cast<List*>(u->value);
       break;
     case TypeType::BOOLEAN: 
-      if (u->value != 0) {
-        type = TypeType::BOOLEAN;
-        value.bval = (bool) u->value;
-      } else {
-        type = TypeType::UNDEF;
-      }
+      type = TypeType::BOOLEAN;
+      value.bval = (bool) u->value;
       break;
     default: throw RuntimeException("Unsupported type in apply");
   }
