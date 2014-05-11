@@ -47,8 +47,9 @@ if __name__ == '__main__':
                 sys.stdout.write(" took %lf s\n" % (time))
                 results[vm] = time
 
-        for k, v in iteritems(results):
-            if k != vms[0]:
-                # compare other casm solutions to new casmi
-                factor = v / results[vms[0]]
-                print("\t'%s' is %lf faster than 'new casmi'" % (k[0], factor))
+
+            for k, v in iteritems(results):
+                if k != vms[0]:
+                    # compare other casm solutions to new casmi
+                    factor = v / results[vms[0]]
+                    print("\t'%s' is %lf faster than '%s'" % (vms[0][0], factor, k[0]))
