@@ -85,13 +85,4 @@ class Type {
 };
 
 
-class FunctionInfo {
-  private:
-    std::vector<Type> *arguments_;
-    Type return_type_;
-
-  public:
-    FunctionInfo(std::vector<Type> *args, Type return_type);
-};
-
 #endif

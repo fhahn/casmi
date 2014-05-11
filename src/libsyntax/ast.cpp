@@ -213,7 +213,7 @@ RuleAtom::RuleAtom(yy::location& loc, const std::string&& name) :
 
 RuleAtom::~RuleAtom() {}
 
-bool RuleAtom::equals(AstNode *other) {
+bool RuleAtom::equals(AstNode*) {
   throw "NOT IMPLEMENTED";
 }
 
@@ -225,7 +225,7 @@ StringAtom::StringAtom(yy::location& loc, std::string&& string) :
 
 StringAtom::~StringAtom() {}
 
-bool StringAtom::equals(AstNode *other) {
+bool StringAtom::equals(AstNode*) {
   throw "NOT IMPLEMENTED";
 }
 
@@ -382,7 +382,7 @@ BuiltinAtom::BuiltinAtom(yy::location& loc, const std::string name,
 
 BuiltinAtom::~BuiltinAtom() {}
 
-bool BuiltinAtom::equals(AstNode *other) {
+bool BuiltinAtom::equals(AstNode*) {
   throw "BuiltinAtom::equals() not implemented";
 }
 

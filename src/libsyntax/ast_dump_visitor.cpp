@@ -158,7 +158,7 @@ bool AstDumpVisitor::visit_float_atom(FloatAtom *atom) {
 }
 
 bool AstDumpVisitor::visit_function_atom(FunctionAtom *atom,
-    const std::vector<bool> &expr_results) {
+    const std::vector<bool>&) {
   dump_node(atom, std::string("FunctionAtom:"+atom->name));
   return true;
 }
@@ -174,7 +174,7 @@ bool AstDumpVisitor::visit_rule_atom(RuleAtom *atom) {
 }
 
 bool AstDumpVisitor::visit_boolean_atom(BooleanAtom *atom) {
-  dump_node(atom, std::string("BooleanAtom: "+atom->value));
+  dump_node(atom, std::string("BooleanAtom: "+std::to_string(atom->value)));
   return true;
 }
 

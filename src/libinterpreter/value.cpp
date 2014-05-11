@@ -388,18 +388,14 @@ BottomList* List::collect() {
     BottomList *result = list->right->collect();
     result->values.push_back(std::move(list->current_head));
     return result;
-  }
-
-  if (is_skip()) {
+  } else if (is_skip()) {
     SkipList *list = reinterpret_cast<SkipList*>(this);
     BottomList *result = list->bottom->collect();
     for (size_t i=list->skip; i > 0; i--) {
       result->values.pop_back();
     }
     return result;
-  }
-
-  if (is_bottom()) {
+  } else if (is_bottom()) {
     BottomList* list = reinterpret_cast<BottomList*>(this);
     if (list->usage_count <= 1) {
       list->usage_count = 1;
@@ -421,6 +417,8 @@ BottomList* List::collect() {
       }
       return copy;
     }
+  } else {
+    assert(0);
   }
 }
 
