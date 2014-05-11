@@ -2,6 +2,7 @@
 #include "libmiddle/typecheck_visitor.h"
 
 
+
 TypecheckVisitor::TypecheckVisitor(Driver& driver) : driver_(driver), rule_binding_types(), rule_binding_offsets(), forall_head(false) { }
 
 void TypecheckVisitor::check_type_valid(const yy::location& location, const Type& type) {
@@ -135,7 +136,7 @@ void TypecheckVisitor::visit_assert(UnaryNode *assert, Type* val) {
   }
 }
 
-void TypecheckVisitor::visit_update(UpdateNode *update, Type* func_t, Type* expr_t) {
+void TypecheckVisitor::visit_update(UpdateNode *update, Type*, Type*) {
   if (update->func->symbol && update->func->symbol->is_static) {
     driver_.error(update->location, "cannot update static function `"+update->func->name+"`");
   }
@@ -341,7 +342,7 @@ void TypecheckVisitor::check_numeric_operator(const yy::location& loc,
 }
 
 
-Type* TypecheckVisitor::visit_expression(Expression *expr, Type* left_val, Type* right_val) {
+Type* TypecheckVisitor::visit_expression(Expression *expr, Type*, Type*) {
   DEBUG("EXPR T1 "<<expr->left_->type_.to_str() << " T2: "<<expr->right_->type_.to_str());
   if (expr->left_ && expr->right_ && !expr->left_->type_.unify(&expr->right_->type_)) {
       driver_.error(expr->location, "type of expressions did not match: "+
@@ -357,7 +358,7 @@ Type* TypecheckVisitor::visit_expression(Expression *expr, Type* left_val, Type*
     case Expression::Operation::DIV:
     case Expression::Operation::MOD:
     case Expression::Operation::RAT_DIV:
-      check_numeric_operator(expr->location, left_val, expr->op);
+      check_numeric_operator(expr->location, &expr->left_->type_, expr->op);
       // TODO Check unifying
       expr->type_.unify(&expr->left_->type_);
       break;
@@ -371,7 +372,7 @@ Type* TypecheckVisitor::visit_expression(Expression *expr, Type* left_val, Type*
     case Expression::Operation::GREATER:
     case Expression::Operation::LESSEREQ:
     case Expression::Operation::GREATEREQ:
-      check_numeric_operator(expr->location, left_val, expr->op);
+      check_numeric_operator(expr->location, &expr->left_->type_, expr->op);
       expr->type_.unify(Type(TypeType::BOOLEAN));
       break;
 
@@ -391,7 +392,7 @@ Type* TypecheckVisitor::visit_expression(Expression *expr, Type* left_val, Type*
   return &expr->type_;
 }
 
-Type* TypecheckVisitor::visit_expression_single(Expression *expr, Type* val) {
+Type* TypecheckVisitor::visit_expression_single(Expression *expr, Type*) {
   switch (expr->op) {
     case Expression::Operation::NOT:
       if (!expr->left_->type_.unify(new Type(TypeType::BOOLEAN))) {
@@ -590,7 +591,7 @@ void TypecheckVisitor::visit_derived_function_atom_pre(FunctionAtom *atom, std::
   rule_binding_offsets.push_back(&atom->symbol->binding_offsets);
 }
 
-Type* TypecheckVisitor::visit_derived_function_atom(FunctionAtom *atom,
+Type* TypecheckVisitor::visit_derived_function_atom(FunctionAtom*,
                                                     Type* expr) {
   delete rule_binding_types.back();
   rule_binding_types.pop_back();
