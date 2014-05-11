@@ -1,0 +1,93 @@
+CASM quicksort
+
+function stack : -> List(Tuple(Int, Int)) //initially { [] }
+function array : Int -> Int //initially { 0->9, 1->2, 2->10, 3->7, 4->8, 5->1, 6->6, 7->3, 8->4, 9->5}
+function p : -> Int //initially { undef }
+function pivot : -> Int
+function ll : -> Int
+function rr : -> Int
+function l : -> Int
+function r : -> Int
+function need_pop : -> Boolean
+function need_partition : -> Boolean
+
+rule partition_one_step =
+seqblock
+	iterate
+		if array(ll) < array(pivot) then ll := ll + 1
+	iterate 
+		if array(rr) >= array(pivot) and ll < rr then rr := rr - 1
+	if ll < rr then {
+		array(ll) := array(rr)
+		array(rr) := array(ll)
+	} else 
+		need_partition := false
+endseqblock
+
+rule partition =
+if pivot = undef then {
+	pivot := r
+	rr := r - 1
+	ll := l
+	need_partition := true
+} else
+	if need_partition then
+		call partition_one_step
+	else {
+		p := ll
+		if pivot != ll then {
+			array(pivot) := array(ll)
+			array(ll) := array(pivot)
+		}
+	}
+
+rule quicksort_once =
+	if p = undef then
+		call partition
+	else	
+	seqblock
+		if l < p-1 then 
+			push [l,p-1] into stack
+		if p+1 < r then 
+			push [p+1,r] into stack
+		need_pop := true
+	endseqblock
+
+rule quicksort =
+	if need_pop then {
+		let top = nth(stack, 1) in
+			if top != undef then {
+				stack := tail(stack)
+				l := nth(top, 1)
+				r := nth(top, 2)
+				pivot := undef
+				p := undef
+				need_pop := false
+			} else {
+				forall i in [0..29] do {
+					assert array(i) <= array(i+1)
+					print array(i)
+				}
+				print "----------------"
+				//program(self) := @initR
+				program(self) := undef
+			}
+	}
+	else
+		call quicksort_once
+
+init initR
+
+rule initR = {
+	forall i in [0..30] do {
+		array(i) := 30 - i
+	}
+	p := undef
+	{|
+		stack := []
+		push [0,30] into stack
+	|}
+	need_pop := true
+	program(self) := @quicksort
+}
+
