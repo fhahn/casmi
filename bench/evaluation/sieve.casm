@@ -1,0 +1,41 @@
+CASM sieve
+
+// primzahlen sieb nach 
+
+init initR
+
+function array : Int -> Int
+function i : -> Int
+function j : -> Int
+
+rule initR =
+{|
+	forall k in [0..1000] do
+		array(k) := k
+/*
+	program(self) := sieve
+|}
+
+rule sieve = 
+{|
+*/	i := 2
+	iterate	
+		if i * i <= 1000 then
+		{|
+		j := i 
+		iterate
+			if i * j <= 1000 then
+			{
+				array(i*j) := undef
+				j := j + 1
+			}
+			i := i + 1
+		|}
+
+	forall k in [0..1000] do
+		if array(k) != undef then
+			print array(k) + " " 
+
+	program(self) := undef
+|}
+
