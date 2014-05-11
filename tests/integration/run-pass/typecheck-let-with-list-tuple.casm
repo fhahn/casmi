@@ -1,0 +1,14 @@
+CASM foo
+
+
+function a: -> List(Tuple(Int, Int))
+
+rule main = {
+    let top = nth(a, 1) in
+        let y = nth(top, 1) in skip
+
+
+    program(self) := undef
+}
+
+init main
