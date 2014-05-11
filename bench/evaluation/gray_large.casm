@@ -1,0 +1,83 @@
+CASM Gray
+
+derived nrbits = 16
+
+function inputnr: -> Int
+function input  : Int -> Boolean
+function output1 : Int -> Boolean
+function output2 : Int -> Boolean
+
+
+init initR
+
+// gray = bin XOR (bin >> 1)
+rule gray1(digit : Int) = {
+	if digit < nrbits-1 then
+		output1(digit) := input(digit) xor input(digit+1)
+	else
+		output1(digit) := input(digit)
+}
+
+// idea: bit 0 cycles through 0,1,1,0; bit 1 cycles through 0,0,1,1,1,1,0,0 (double the cycle)
+rule gray2(digit : Int) = 
+	case (inputnr/pow(2,digit)) % 4 of
+	0: output2(digit) := false
+	1: output2(digit) := true
+	2: output2(digit) := true
+	3: output2(digit) := false
+	endcase
+
+
+rule initR = 
+	if false then {
+		program(self) := @main	
+	} else 	{
+		inputnr := 0
+		program(self) := @main2
+	}
+
+rule main =
+seqblock
+	call gray1(0)
+	call gray2(0)
+	program(self) := undef
+endseqblock
+
+// all 4 bit numbers and their gray encoding
+rule main2 = {
+	if inputnr < pow(2,nrbits) then
+	seqblock
+		forall i in [0..15] do	{
+			input(i) := Int2Boolean((inputnr / pow(2,i)) % 2)
+		}
+		forall i in [0..15] do	{
+			call gray1(i)
+			call gray2(i)
+		}
+		inputnr := inputnr + 1
+		print inputnr + "=" + 
+Boolean2Int(output1(0)) + Boolean2Int(output1(1)) + Boolean2Int(output1(2)) + Boolean2Int(output1(3)) + Boolean2Int(output1(4)) + Boolean2Int(output1(5))+ Boolean2Int(output1(6)) + Boolean2Int(output1(7)) +
+Boolean2Int(output1(8)) + Boolean2Int(output1(9)) + Boolean2Int(output1(10)) + Boolean2Int(output1(11)) + Boolean2Int(output1(12)) + Boolean2Int(output1(13))+ Boolean2Int(output1(14)) + Boolean2Int(output1(15)) 
++ ", " 
+		+ Boolean2Int(output2(0)) + Boolean2Int(output2(1)) + Boolean2Int(output2(2)) + Boolean2Int(output2(3))+ Boolean2Int(output2(4)) + Boolean2Int(output2(5))+ Boolean2Int(output2(6))+ Boolean2Int(output2(7)) +
+		Boolean2Int(output2(8)) + Boolean2Int(output2(9)) + Boolean2Int(output2(10)) + Boolean2Int(output2(11))+ Boolean2Int(output2(12)) + Boolean2Int(output2(13))+ Boolean2Int(output2(14))+ Boolean2Int(output2(15)) 
+		assert output1(0) = output2(0)
+		assert output1(1) = output2(1)
+		assert output1(2) = output2(2)
+		assert output1(3) = output2(3)
+		assert output1(4) = output2(4)
+		assert output1(5) = output2(5)
+		assert output1(6) = output2(6)
+		assert output1(7) = output2(7)
+		assert output1(8) = output2(8)
+		assert output1(9) = output2(9)
+		assert output1(10) = output2(10)
+		assert output1(11) = output2(11)
+		assert output1(12) = output2(12)
+		assert output1(13) = output2(13)
+		assert output1(14) = output2(14)
+		assert output1(15) = output2(15)
+	endseqblock
+	else
+		program(self) := undef
+}
