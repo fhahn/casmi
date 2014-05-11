@@ -1,7 +1,5 @@
 #include "libutil/exceptions.h"
 
-#include "librt/pp_hashmap.h"
-
 #include "libinterpreter/execution_context.h"
 
 ExecutionContext::ExecutionContext(const SymbolTable& st, RuleNode *init) : debuginfo_filters(), symbol_table(std::move(st)), temp_lists() {
