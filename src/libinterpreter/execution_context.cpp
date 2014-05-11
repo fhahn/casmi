@@ -8,7 +8,7 @@ ExecutionContext::ExecutionContext(const SymbolTable& st, RuleNode *init) : debu
   updateset.set =  pp_hashmap_new(&updateset_data_, 1024*10, "main updateset");
 
   // use 10 MB for stack
-  pp_mem_new(&pp_stack, 1024 * 1024 * 100, "mem for stack stuff");
+  pp_mem_new(&pp_stack, 1024 * 1024 * 1024, "mem for stack stuff");
 
   if (init->child_ && init->child_->node_type_ == NodeType::PARBLOCK) {
     updateset.pseudostate = 1;
@@ -100,7 +100,7 @@ void ExecutionContext::apply_updates() {
 
   // free allocated updateset data
   pp_mem_free(&updateset_data_);
-  pp_mem_free(&pp_stack);
+  //pp_mem_free(&pp_stack);
 
   updateset.set->head->previous = NULL;
   updateset.set->head->next     = updateset.set->tail;
