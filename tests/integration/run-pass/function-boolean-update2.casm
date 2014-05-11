@@ -1,0 +1,16 @@
+CASM Gray
+
+function input  : Int -> Boolean
+
+
+init main
+
+rule main = {|
+    forall i in [0..7] do {
+        input(i) := false
+    }
+    forall i in [0..7] do   {
+        assert input(i) = false
+    }
+    program(self) := undef
+|}
