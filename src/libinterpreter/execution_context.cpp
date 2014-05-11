@@ -74,9 +74,6 @@ void ExecutionContext::apply_updates() {
     i = i->previous;
   }
 
-  // free allocated updateset data
-  pp_mem_free(&updateset_data_);
-
   for (Value* v : to_fold) {
     BottomList *new_l = v->value.list->collect();
     if (new_l->check_allocated_and_set_to_false()) {
@@ -99,6 +96,11 @@ void ExecutionContext::apply_updates() {
     temp_lists[del] = std::move(temp_lists.back());
     temp_lists.pop_back();
   }
+
+
+  // free allocated updateset data
+  pp_mem_free(&updateset_data_);
+  pp_mem_free(&pp_stack);
 
   updateset.set->head->previous = NULL;
   updateset.set->head->next     = updateset.set->tail;
