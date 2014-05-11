@@ -175,11 +175,11 @@ void ExecutionVisitor::visit_print(PrintNode *node, const std::vector<Value> &ar
   std::cout << std::endl;
 }
 
-void ExecutionVisitor::visit_let(LetNode *node, Value& v) {
+void ExecutionVisitor::visit_let(LetNode*, Value& v) {
   rule_bindings.back()->push_back(v);
 }
 
-void ExecutionVisitor::visit_let_post(LetNode *node) {
+void ExecutionVisitor::visit_let_post(LetNode*) {
   rule_bindings.back()->pop_back();
 }
 
@@ -229,10 +229,6 @@ void ExecutionVisitor::visit_pop(PopNode *node, const Value& val) {
     throw ex;
   }
   DEBUG("POPed "<<to_res.to_str() << " from "<<val.to_str() << " -> "<<from_res.to_str());
-}
-
-void ExecutionVisitor::visit_case(CaseNode *node, const Value& val) {
-  
 }
 
 Value ExecutionVisitor::visit_expression(Expression *expr, Value &left_val, Value &right_val) {
@@ -301,11 +297,11 @@ Value ExecutionVisitor::visit_builtin_atom(BuiltinAtom *atom, std::vector<Value>
   return builtins::dispatch(atom->id, context_, expr_results);
 }
 
-void ExecutionVisitor::visit_derived_function_atom_pre(FunctionAtom *atom, std::vector<Value>& arguments) {
+void ExecutionVisitor::visit_derived_function_atom_pre(FunctionAtom*, std::vector<Value>& arguments) {
   rule_bindings.push_back(&arguments);
 }
 
-Value ExecutionVisitor::visit_derived_function_atom(FunctionAtom *atom, Value& expr) {
+Value ExecutionVisitor::visit_derived_function_atom(FunctionAtom*, Value& expr) {
   rule_bindings.pop_back();
   return expr;
 }

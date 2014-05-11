@@ -560,6 +560,3 @@ bool Type::is_complete() const {
   }
   return true;
 }
-
-FunctionInfo::FunctionInfo(std::vector<Type> *args, Type return_type) :
-    arguments_(args), return_type_(return_type) {}
