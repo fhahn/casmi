@@ -66,7 +66,7 @@ Type::Type(TypeType t) : t(t), internal_type(nullptr), unify_with_left(nullptr),
   }
 }
 
-Type::Type(Type *other) : t(other->t), internal_type(nullptr), unify_with_left(nullptr), unify_with_right(nullptr), constraints(), tuple_types(), enum_name(other->enum_name)  {
+Type::Type(Type *other) : t(other->t), internal_type(nullptr), unify_with_left(nullptr), unify_with_right(nullptr), constraints(), tuple_types(other->tuple_types), enum_name(other->enum_name)  {
   if (other->internal_type != nullptr) {
     internal_type = new Type(other->internal_type);
   } else {
@@ -75,7 +75,7 @@ Type::Type(Type *other) : t(other->t), internal_type(nullptr), unify_with_left(n
 }
 
 
-Type::Type(const Type& other) : t(other.t), internal_type(other.internal_type), unify_with_left(nullptr), unify_with_right(nullptr), constraints(), tuple_types(), enum_name(other.enum_name)  {
+Type::Type(const Type& other) : t(other.t), internal_type(other.internal_type), unify_with_left(nullptr), unify_with_right(nullptr), constraints(), tuple_types(other.tuple_types), enum_name(other.enum_name)  {
 }
 
 Type::Type(TypeType enum_type, const std::string& name) : unify_with_left(nullptr), unify_with_right(nullptr), constraints(), tuple_types(), enum_name(std::move(name))  {

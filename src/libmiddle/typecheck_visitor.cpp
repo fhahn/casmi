@@ -145,9 +145,9 @@ void TypecheckVisitor::visit_update(UpdateNode *update, Type* func_t, Type* expr
   //DEBUG("link "<<update->func->type_.unify_links_to_str());
   //DEBUG("link "<<update->expr_->type_.unify_links_to_str());
   if (!update->func->type_.unify(&update->expr_->type_)) {
-    driver_.error(update->location, "type `"+func_t->to_str()+"` of `"+
+    driver_.error(update->location, "type `"+update->func->type_.get_most_general_type()->to_str()+"` of `"+
                                     update->func->name+"` does not match type `"+
-                                    update->expr_->type_.to_str()+"` of expression");
+                                    update->expr_->type_.get_most_general_type()->to_str()+"` of expression");
   }
 
   if (update->func->symbol_type == FunctionAtom::SymbolType::PARAMETER) {
@@ -497,8 +497,7 @@ Type* TypecheckVisitor::visit_builtin_atom(BuiltinAtom *atom,
     for (size_t i=0; i < atom->types.size(); i++) {
 
      Type *argument_t = atom->types[i];
-      DEBUG("UNIFY ARGS "<< atom->name << " "<<expr_results[i]->to_str() << " "<<argument_t);
-      DEBUG(argument_t->unify_links_to_str());
+      DEBUG("UNIFY ARGS "<< atom->name << " "<<expr_results[i]->to_str() << " "<<argument_t->to_str());
  
       if (!expr_results[i]->unify(argument_t)) {
         driver_.error(atom->arguments->at(i)->location,
@@ -506,8 +505,7 @@ Type* TypecheckVisitor::visit_builtin_atom(BuiltinAtom *atom,
                       "` is "+expr_results[i]->to_str()+" but should be "+
                       argument_t->to_str());
       }
-      DEBUG("UNIFY ARG done "<< atom->name << " "<<expr_results[i]->to_str() <<"\n");
-      expr_results[i]->unify_links_to_str();
+      DEBUG("UNIFY ARG done "<< atom->name << " "<<argument_t->to_str() <<"\n");
     }
   }
 
@@ -557,8 +555,10 @@ Type* TypecheckVisitor::visit_builtin_atom(BuiltinAtom *atom,
                       type_to_str(ind_expr->node_type_)+"`");
       }
     } else {
+      DEBUG("NTH RETURN TYPE "<<atom->type_.to_str() << " " << atom->types[0]->to_str());
       atom->type_.unify(atom->types[0]->internal_type);
       expr_results[0]->unify(&atom->type_);
+      atom->type_.unify(atom->return_type);
     }
   } else {
     // TODO check unifying
