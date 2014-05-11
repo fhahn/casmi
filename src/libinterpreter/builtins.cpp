@@ -231,6 +231,8 @@ namespace builtins {
 namespace shared {
   #include "shared_glue.h"
 
+  IGNORE_VARIADIC_WARNINGS
+
   // the CASM runtime heavily depens on macros, whatever you think of it ... 
   // here we need to provide all definitions ...
   #define TRUE                    1
@@ -241,10 +243,13 @@ namespace shared {
   #define CASM_RT(FORMAT, ARGS...)        /* printf-able */
   #define CASM_INFO(FORMAT, ARGS...)      /* printf-able */
 
+
   // create concrete variants of the shareds
   #define CASM_CALL_SHARED(NAME, VALUE, ARGS...)  NAME(VALUE, ##ARGS)
   #define DEFINE_CASM_SHARED(NAME, VALUE, ARGS...) void NAME(VALUE, ##ARGS)
   #include "librt/pp_casm_shared.h"
+
+  REENABLE_VARIADIC_WARNINGS
 
   const Value dispatch(BuiltinAtom::Id builtin_id, 
                        const std::vector<Value>& arguments) {

@@ -10,9 +10,12 @@
 #include "libinterpreter/builtins.h"
 #include "libinterpreter/operators.h"
 
+IGNORE_VARIADIC_WARNINGS
 
 DEFINE_CASM_UPDATESET_FORK_PAR
 DEFINE_CASM_UPDATESET_FORK_SEQ
+
+REENABLE_VARIADIC_WARNINGS
 
 
 std::hash<Value> hasher;
