@@ -1,0 +1,39 @@
+CASM test
+
+init main
+
+rule main = {
+    let x = 4/10 in 
+        assert asInt(x) = 0
+    let x = 10/5 in 
+        assert asInt(x) = 2
+
+    let x = 0.4 in 
+        assert asInt(x) = 0
+    let x = 2.0 in 
+        assert asInt(x) = 2
+
+    let x = 4/10 in 
+        assert asFloat(x) = 0.4
+    let x = 10/5 in 
+        assert asFloat(x) = 2.0
+
+    let x = 0 in 
+        assert asRational(x) = 0r
+    let x = 0 in 
+        assert asRational(x) = 0/100
+    let x = 2 in 
+        assert asRational(x) = 2r
+    let x = 2 in 
+        assert asRational(x) = 100/50
+
+    let x = 0.4 in 
+        assert asRational(x) = 4/10
+    let x = 2.0 in 
+        assert asRational(x) = 2r
+
+    let x = 1.3 in 
+        assert asRational(x) = 13/10
+
+    program(self) := undef
+}

@@ -23,6 +23,10 @@ namespace builtins {
   const Value int2boolean(const Value& arg);
   const Value enum2int(const Value& arg);
 
+  const Value asint(const Value& arg);
+  const Value asfloat(const Value& arg);
+  const Value asrational(const Value& arg);
+
   namespace shared {
     struct Int {
       uint64_t value;
