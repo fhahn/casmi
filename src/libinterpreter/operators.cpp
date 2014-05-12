@@ -13,6 +13,8 @@
   switch (lhs.type) {                                             \
     case TypeType::INT:                                           \
       return std::move(Value(lhs.value.ival op rhs.value.ival));   \
+    case TypeType::FLOAT:                                           \
+      return std::move(Value(lhs.value.fval op rhs.value.fval));   \
     case TypeType::RATIONAL:                                           \
       return std::move(Value(&(*lhs.value.rat op *rhs.value.rat)));   \
     default: assert(0);                                           \
@@ -27,6 +29,8 @@
   switch (lhs.type) {                                             \
     case TypeType::INT:                                           \
       return std::move(Value(lhs.value.ival op rhs.value.ival));   \
+    case TypeType::FLOAT:                                           \
+      return std::move(Value(lhs.value.fval op rhs.value.fval));   \
     default: assert(0);                                           \
   }                                                               \
 }
@@ -107,7 +111,13 @@ const Value operators::div(const Value& lhs, const Value& rhs) {
 }
 
 const Value operators::mod(const Value& lhs, const Value& rhs) {
-  CREATE_NUMERICAL_OPERATION(%, lhs, rhs);
+  if (lhs.is_undef() || rhs.is_undef()) {                                    \
+    return Value();                                                          \
+  }                 
+  if (lhs.type == TypeType::INT) {
+    return std::move(Value(lhs.value.ival % rhs.value.ival));
+  }
+  return std::move(Value());
 }
 
 const Value operators::rat_div(const Value& lhs, const Value& rhs) {
