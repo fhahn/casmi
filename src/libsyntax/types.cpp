@@ -129,6 +129,7 @@ const std::string Type::to_str() const {
   switch (t) {
     case TypeType::INT: return "Int";
     case TypeType::FLOAT: return "Float";
+    case TypeType::RATIONAL: return "Rational";
     case TypeType::UNDEF: return "Undef";
     case TypeType::BOOLEAN: return "Boolean";
     case TypeType::RULEREF: return "RuleRef";

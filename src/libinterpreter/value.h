@@ -17,6 +17,8 @@ class TailList;
 class BottomList;
 class List;
 
+struct rational_t;
+
 class Value {
   public:
     TypeType type;
@@ -28,6 +30,7 @@ class Value {
       std::string *string;
       List *list;
       const enum_value_t *enum_val;
+      const rational_t *rat;
     } value;
 
     Value();
@@ -38,6 +41,7 @@ class Value {
     Value(std::string *string);
     Value(const Type& t, List *list);
     Value(const enum_value_t *enum_val);
+    Value(const rational_t *val);
     Value(Value& other);
     Value(const Value& other);
     Value(Value&& other);
@@ -54,6 +58,24 @@ class Value {
     const std::string to_str() const;
 };
 
+struct rational_t {
+  int64_t numerator;
+  int64_t denominator;
+
+  rational_t();
+  rational_t(int64_t num, int64_t denom);
+  rational_t(const rational_t& other);
+
+  bool operator==(const rational_t& other) const;
+  const rational_t& operator+(const rational_t& other) const;
+  const rational_t& operator-(const rational_t& other) const;
+  const rational_t& operator*(const rational_t& other) const;
+  const rational_t& operator/(const rational_t& other) const;
+  const rational_t& operator%(const rational_t& other) const;
+
+  const std::string to_str() const;
+  void commonize();
+};
 
 class List {
   public:

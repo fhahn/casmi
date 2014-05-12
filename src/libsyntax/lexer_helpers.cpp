@@ -45,3 +45,25 @@ FLOAT_T convert_to_float(const char* val, Driver &driver, yy::location loc) {
   }
   return res;
 }
+
+
+rational_t convert_to_rational(char* val, Driver &driver, yy::location loc) {
+  char *numerator_start = val;
+  char *denominator_start = nullptr;
+
+  uint32_t len = strlen(val);
+  for (uint32_t i=0; i < len; i++) {
+    if (val[i] == '/') {
+      val[i] = 0;
+      denominator_start = &val[i+1];
+    }
+  }
+
+  int64_t numerator = convert_to_long(numerator_start, 10, driver, loc);
+  int64_t denominator = 1;
+  if (denominator_start) {
+    denominator = convert_to_long(denominator_start, 10, driver, loc);
+  }
+
+  return { numerator, denominator };
+}

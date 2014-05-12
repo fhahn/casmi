@@ -332,12 +332,24 @@ void TypecheckVisitor::check_numeric_operator(const yy::location& loc,
   if (*type == TypeType::UNKNOWN) {
     DEBUG("Add numeric constraints");
     type->constraints.push_back(new Type(TypeType::INT));
-    type->constraints.push_back(new Type(TypeType::FLOAT));
-  } else if (*type != TypeType::INT && *type != TypeType::FLOAT && *type != TypeType::UNDEF) {
-    driver_.error(loc,
-                  "operands of operator `"+operator_to_str(op)+
-                  "` must be `Int` or `Float` but were `"+
-                  type->to_str()+"`");
+    if (op != Expression::Operation::MOD || op == Expression::Operation::RAT_DIV) {
+      type->constraints.push_back(new Type(TypeType::RATIONAL));
+      type->constraints.push_back(new Type(TypeType::FLOAT));
+    }
+  } else {
+    if (op == Expression::Operation::MOD || op == Expression::Operation::RAT_DIV) {
+      if (*type != TypeType::INT) {
+      driver_.error(loc,
+                    "operands of operator `"+operator_to_str(op)+
+                    "` must be Int but were "+type->to_str());
+      }
+     
+    } else if (*type != TypeType::INT && *type != TypeType::FLOAT && *type != TypeType::RATIONAL) {
+      driver_.error(loc,
+                    "operands of operator `"+operator_to_str(op)+
+                    "` must be Int, Float or Rational but were "+
+                    type->to_str());
+    }
   }
 }
 

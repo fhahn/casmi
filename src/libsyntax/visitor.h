@@ -325,7 +325,10 @@ template<class T, class V> class AstWalker {
         case NodeType::FLOAT_ATOM: {
           return visitor.visit_float_atom(reinterpret_cast<FloatAtom*>(atom));
         }
-        case NodeType::UNDEF_ATOM: { 
+        case NodeType::RATIONAL_ATOM: {
+          return visitor.visit_rational_atom(reinterpret_cast<RationalAtom*>(atom));
+        }
+         case NodeType::UNDEF_ATOM: { 
           return visitor.visit_undef_atom(reinterpret_cast<UndefAtom*>(atom));
         }
         case NodeType::BUILTIN_ATOM:
@@ -394,6 +397,7 @@ template<class T> class BaseVisitor {
     T visit_expression_single(Expression*, T) { return T(); }
     T visit_int_atom(IntAtom*) { return T(); }
     T visit_float_atom(FloatAtom*) { return T(); }
+    T visit_rational_atom(RationalAtom*) { return T(); }
     T visit_undef_atom(UndefAtom*) { return T(); }
     T visit_function_atom(FunctionAtom *, const std::vector<T> &) { return T(); }
     T visit_builtin_atom(BuiltinAtom *, const std::vector<T> &) { return T(); }

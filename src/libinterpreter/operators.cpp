@@ -12,9 +12,23 @@
   switch (lhs.type) {                                             \
     case TypeType::INT:                                           \
       return std::move(Value(lhs.value.ival op rhs.value.ival));   \
+    case TypeType::RATIONAL:                                           \
+      return std::move(Value(&(*lhs.value.rat op *rhs.value.rat)));   \
     default: assert(0);                                           \
   }                                                               \
-} 
+}
+
+#define CREATE_NUMERICAL_CMP_OPERATION(op, lhs, rhs)  {                   \
+  if (lhs.is_undef() || rhs.is_undef()) {                                    \
+    return Value();                                                          \
+  }                                                                          \
+                                                                             \
+  switch (lhs.type) {                                             \
+    case TypeType::INT:                                           \
+      return std::move(Value(lhs.value.ival op rhs.value.ival));   \
+    default: assert(0);                                           \
+  }                                                               \
+}
 
 #define CREATE_LOGICAL_OPERATION(op, lhs, rhs)  {                   \
  \
@@ -141,17 +155,17 @@ const Value operators::neq(const Value& lhs, const Value& rhs) {
 }
 
 const Value operators::lesser(const Value& lhs, const Value& rhs) {
-  CREATE_NUMERICAL_OPERATION(<, lhs, rhs);
+  CREATE_NUMERICAL_CMP_OPERATION(<, lhs, rhs);
 }
 
 const Value operators::greater(const Value& lhs, const Value& rhs) {
-  CREATE_NUMERICAL_OPERATION(>, lhs, rhs);
+  CREATE_NUMERICAL_CMP_OPERATION(>, lhs, rhs);
 }
 
 const Value operators::lessereq(const Value& lhs, const Value& rhs) {
-  CREATE_NUMERICAL_OPERATION(<=, lhs, rhs);
+  CREATE_NUMERICAL_CMP_OPERATION(<=, lhs, rhs);
 }
 
 const Value operators::greatereq(const Value& lhs, const Value& rhs) {
-  CREATE_NUMERICAL_OPERATION(>=, lhs, rhs);
+  CREATE_NUMERICAL_CMP_OPERATION(>=, lhs, rhs);
 }

@@ -25,6 +25,7 @@ enum class TypeType {
   TUPLE,
   TUPLE_OR_LIST,
   ENUM,
+  RATIONAL,
 };
 
 class Type;
