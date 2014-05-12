@@ -65,6 +65,10 @@ Value::Value(TypeType t, casm_update* u) {
       type = TypeType::INT;
       value.ival = (int64_t)u->value;
       break;
+    case TypeType::FLOAT:
+      type = TypeType::FLOAT;
+      value.fval = (int64_t)u->value;
+      break;
     case TypeType::ENUM:
       type = TypeType::ENUM; 
       value.enum_val = reinterpret_cast<enum_value_t*>(u->value);
@@ -122,6 +126,8 @@ uint64_t Value::to_uint64_t() const {
   switch (type) {
     case TypeType::INT:
       return value.ival;
+    case TypeType::FLOAT:
+      return value.fval;
     case TypeType::SELF:
     case TypeType::UNDEF: // are UNDEF and SELF the same here?
       return 0;
