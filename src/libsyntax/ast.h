@@ -267,6 +267,9 @@ class BuiltinAtom: public BaseFunctionAtom {
       INT2BOOLEAN,
       ENUM2INT,
       INT2ENUM,
+      ASINT,
+      ASFLOAT,
+      ASRATIONAL,
       SHARED_BUILTIN_IDS
     } id;
 
