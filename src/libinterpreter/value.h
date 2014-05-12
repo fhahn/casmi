@@ -74,7 +74,6 @@ struct rational_t {
   const rational_t& operator%(const rational_t& other) const;
 
   const std::string to_str() const;
-  void commonize();
 };
 
 class List {
