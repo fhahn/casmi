@@ -369,10 +369,14 @@ Type* TypecheckVisitor::visit_expression(Expression *expr, Type*, Type*) {
     case Expression::Operation::MUL:
     case Expression::Operation::DIV:
     case Expression::Operation::MOD:
-    case Expression::Operation::RAT_DIV:
       check_numeric_operator(expr->location, &expr->left_->type_, expr->op);
       // TODO Check unifying
       expr->type_.unify(&expr->left_->type_);
+      break;
+    case Expression::Operation::RAT_DIV:
+      check_numeric_operator(expr->location, &expr->left_->type_, expr->op);
+      // TODO Check unifying
+      expr->type_.unify(Type(TypeType::RATIONAL));
       break;
 
     case Expression::Operation::EQ:

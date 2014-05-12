@@ -3,6 +3,7 @@
 #include <sstream>
 
 #include "libinterpreter/operators.h"
+#include "libinterpreter/execution_context.h"
 
 #define CREATE_NUMERICAL_OPERATION(op, lhs, rhs)  {                   \
   if (lhs.is_undef() || rhs.is_undef()) {                                    \
@@ -114,6 +115,14 @@ const Value operators::rat_div(const Value& lhs, const Value& rhs) {
     return Value();
   }
   switch (lhs.type) {
+    case TypeType::INT: {
+      rational_t *result = (rational_t*) pp_mem_alloc(
+        &(ExecutionContext::value_stack), sizeof(rational_t)
+      );
+      result->numerator = lhs.value.ival;
+      result->denominator = rhs.value.ival;
+      return std::move(Value(result));
+    }
     default: assert(0);
   }
 }
