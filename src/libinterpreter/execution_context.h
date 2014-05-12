@@ -60,6 +60,7 @@ class ExecutionContext {
     casm_updateset updateset;
     pp_mem pp_stack;
     std::vector<List*> temp_lists;
+    static pp_mem value_stack;
 
     ExecutionContext(const SymbolTable& st, RuleNode *init);
 

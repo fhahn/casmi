@@ -20,6 +20,7 @@ enum NodeType {
   UNDEF_ATOM,
   INT_ATOM,
   FLOAT_ATOM,
+  RATIONAL_ATOM,
   SELF_ATOM,
   STRING_ATOM,
   RULE_ATOM,
@@ -179,6 +180,13 @@ class FloatAtom : public AtomNode {
     FloatAtom(yy::location& loc, FLOAT_T val);
     virtual ~FloatAtom();
     bool equals(AstNode *other);
+};
+
+class RationalAtom : public AtomNode {
+  public:
+    const rational_t val_;
+
+    RationalAtom(yy::location& loc, const rational_t& rat);
 };
 
 

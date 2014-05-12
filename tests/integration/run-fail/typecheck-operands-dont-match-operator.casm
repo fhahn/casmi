@@ -4,32 +4,32 @@ init main
 
 rule main = {
     assert true + true
-    //~^ operands of operator `+` must be `Int` or `Float` but were `Boolean`
+    //~^ operands of operator `+` must be Int, Float or Rational but were Boolean
 
     assert true - true
-    //~^ operands of operator `-` must be `Int` or `Float` but were `Boolean`
+    //~^ operands of operator `-` must be Int, Float or Rational but were Boolean
 
     assert true * true
-    //~^ operands of operator `*` must be `Int` or `Float` but were `Boolean`
+    //~^ operands of operator `*` must be Int, Float or Rational but were Boolean
 
     assert true / true
-    //~^ operands of operator `/` must be `Int` or `Float` but were `Boolean`
+    //~^ operands of operator `/` must be Int, Float or Rational but were Boolean
 
     assert true % true
-    //~^ operands of operator `%` must be `Int` or `Float` but were `Boolean`
+    //~^ operands of operator `%` must be Int but were Boolean
 
     assert true div true
-    //~^ operands of operator `div` must be `Int` or `Float` but were `Boolean`
+    //~^ operands of operator `div` must be Int but were Boolean
 
     assert true < true
-    //~^ operands of operator `<` must be `Int` or `Float` but were `Boolean`
+    //~^ operands of operator `<` must be Int, Float or Rational but were Boolean
 
     assert true > true
-    //~^ operands of operator `>` must be `Int` or `Float` but were `Boolean`
+    //~^ operands of operator `>` must be Int, Float or Rational but were Boolean
 
     assert true <= true
-    //~^ operands of operator `<=` must be `Int` or `Float` but were `Boolean`
+    //~^ operands of operator `<=` must be Int, Float or Rational but were Boolean
 
     assert true >= true
-    //~^ operands of operator `>=` must be `Int` or `Float` but were `Boolean`
+    //~^ operands of operator `>=` must be Int, Float or Rational but were Boolean
 }

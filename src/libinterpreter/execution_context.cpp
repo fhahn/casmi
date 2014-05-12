@@ -2,6 +2,9 @@
 
 #include "libinterpreter/execution_context.h"
 
+
+pp_mem ExecutionContext::value_stack;
+
 ExecutionContext::ExecutionContext(const SymbolTable& st, RuleNode *init) : debuginfo_filters(), symbol_table(std::move(st)), temp_lists() {
   // use 10 MB for updateset data
   pp_mem_new(&updateset_data_, 1024 * 1024 * 100, "mem for main updateset");
@@ -9,6 +12,7 @@ ExecutionContext::ExecutionContext(const SymbolTable& st, RuleNode *init) : debu
 
   // use 10 MB for stack
   pp_mem_new(&pp_stack, 1024 * 1024 * 1024, "mem for stack stuff");
+  pp_mem_new(&value_stack, 1024 * 1024 * 1024, "mem for value stuff");
 
   if (init->child_ && init->child_->node_type_ == NodeType::PARBLOCK) {
     updateset.pseudostate = 1;

@@ -122,6 +122,7 @@
 %type <INT_T> INTCONST
 %type <FLOAT_T> FLOATCONST
 %type <std::string> STRCONST
+%type <rational_t> RATIONALCONST
 %type <Function*> FUNCTION_DEFINITION DERIVED_SYNTAX
 %type <BaseFunctionAtom*> FUNCTION_SYNTAX 
 %type <std::pair<std::vector<Type*>, Type*>> FUNCTION_SIGNATURE
@@ -391,9 +392,12 @@ NUMBER: "+" INTCONST %prec UPLUS { $$ = new IntAtom(@$, $2); }
       | "+" FLOATCONST %prec UPLUS { $$ = new FloatAtom(@$, $2); }
       | "-" FLOATCONST %prec UMINUS { $$ = new FloatAtom(@$, (-1) * $2); }
       | FLOATCONST { $$ = new FloatAtom(@$, $1); }
-      | "+" RATIONALCONST %prec UPLUS { $$ = new IntAtom(@$, 0); }
-      | "-" RATIONALCONST %prec UMINUS { $$ = new IntAtom(@$, 0); }
-      | RATIONALCONST { $$ = new IntAtom(@$, 0); }
+      | "+" RATIONALCONST %prec UPLUS { $$ = new RationalAtom(@$, $2); }
+      | "-" RATIONALCONST %prec UMINUS {
+          $2.numerator *= -1;
+          $$ = new RationalAtom(@$, $2);
+        }
+      | RATIONALCONST { $$ = new RationalAtom(@$, $1); }
       ;
 
 RULEREF: "@" IDENTIFIER { $$ = $2; }

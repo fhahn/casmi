@@ -148,8 +148,15 @@ objdump { return yy::casmi_parser::make_OBJDUMP(loc); }
             FLOAT_T val = convert_to_float(yytext, driver, loc);
             return yy::casmi_parser::make_FLOATCONST(val, loc);
           }
-[0-9]+[/][0-9]+ { return yy::casmi_parser::make_RATIONALCONST(loc); }
-[0-9]+r { return yy::casmi_parser::make_RATIONALCONST(loc); }
+[0-9]+[/][0-9]+ { 
+            rational_t val = convert_to_rational(yytext, driver, loc);
+            return yy::casmi_parser::make_RATIONALCONST(val, loc); 
+}
+[0-9]+r {
+          yytext[strlen(yytext)-1] = 0;
+          rational_t val = convert_to_rational(yytext, driver, loc);
+          return yy::casmi_parser::make_RATIONALCONST(val, loc);
+        }
 
 [ \t\r]+ loc.step();/* ignore spaces */
 

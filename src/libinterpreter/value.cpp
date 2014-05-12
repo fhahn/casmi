@@ -5,6 +5,7 @@
 #include "libsyntax/ast.h"
 
 #include "libinterpreter/value.h"
+#include "libinterpreter/execution_context.h"
 
 Value::Value() : type(TypeType::UNDEF) {}
 
@@ -36,6 +37,10 @@ Value::Value(const enum_value_t *enum_val) : type(TypeType::ENUM) {
   value.enum_val = enum_val;
 }
 
+Value::Value(const rational_t *rat) : type(TypeType::RATIONAL) {
+  value.rat = rat;
+}
+
 Value::Value(Value& other) : type(other.type), value(other.value) {}
 
 Value::Value(const Value& other) : type(other.type), value(other.value) {}
@@ -63,6 +68,10 @@ Value::Value(TypeType t, casm_update* u) {
     case TypeType::ENUM:
       type = TypeType::ENUM; 
       value.enum_val = reinterpret_cast<enum_value_t*>(u->value);
+      break;
+    case TypeType::RATIONAL:
+      type = TypeType::RATIONAL; 
+      value.rat = reinterpret_cast<const rational_t*>(u->value);
       break;
     case TypeType::STRING:
       type = TypeType::STRING;
@@ -96,6 +105,7 @@ bool Value::operator==(const Value &other) const {
     case TypeType::FLOAT: return value.fval == other.value.fval;
     case TypeType::BOOLEAN: return value.bval == other.value.bval;
     case TypeType::ENUM: return value.enum_val == other.value.enum_val;
+    case TypeType::RATIONAL: return *value.rat == *other.value.rat;
     case TypeType::STRING: return *value.string == *other.value.string;
     case TypeType::TUPLE:
     case TypeType::TUPLE_OR_LIST:
@@ -119,6 +129,8 @@ uint64_t Value::to_uint64_t() const {
       return (uint64_t) value.rule;
     case TypeType::ENUM:
       return (uint64_t) value.enum_val;
+    case TypeType::RATIONAL:
+      return (uint64_t) value.rat;
     case TypeType::STRING: 
       return (uint64_t) value.string;
     case TypeType::TUPLE: 
@@ -149,6 +161,8 @@ const std::string Value::to_str() const {
       return std::move("@"+value.rule->name);
     case TypeType::ENUM:
       return *value.enum_val->name;
+    case TypeType::RATIONAL:
+      return value.rat->to_str();
     case TypeType::STRING:
       return *value.string;
     case TypeType::TUPLE:
@@ -166,6 +180,91 @@ const std::string Value::to_str() const {
   }
 }
 
+rational_t::rational_t() {}
+
+rational_t::rational_t(int64_t num, int64_t denom) {
+  numerator = num;
+  denominator = denom;
+  commonize();
+}
+
+rational_t::rational_t(const rational_t& other) : numerator(other.numerator),
+    denominator(other.denominator) {}
+
+bool rational_t::operator==(const rational_t& other) const {
+  return numerator == other.numerator && denominator == other.denominator;
+}
+
+const rational_t& rational_t::operator+(const rational_t& other) const {
+  rational_t *result = (rational_t*) pp_mem_alloc(
+      &(ExecutionContext::value_stack), sizeof(rational_t)
+  );
+
+  result->numerator = (numerator * other.denominator) + (other.numerator * denominator);
+  result->denominator = denominator * other.denominator;
+  result->commonize();
+  return *result;
+}
+
+const rational_t& rational_t::operator-(const rational_t& other) const {
+  rational_t *result = (rational_t*) pp_mem_alloc(
+      &(ExecutionContext::value_stack), sizeof(rational_t)
+  );
+
+  result->numerator = (numerator * other.denominator) - (other.numerator * denominator);
+  result->denominator = denominator * other.denominator;
+  result->commonize();
+  return *result;
+}
+
+const rational_t& rational_t::operator*(const rational_t& other) const {
+  rational_t *result = (rational_t*) pp_mem_alloc(
+      &(ExecutionContext::value_stack), sizeof(rational_t)
+  );
+
+  result->numerator = numerator * other.numerator;
+  result->denominator = denominator * other.denominator;
+  result->commonize();
+  return *result;
+}
+
+const rational_t& rational_t::operator/(const rational_t& other) const {
+  rational_t *result = (rational_t*) pp_mem_alloc(
+      &(ExecutionContext::value_stack), sizeof(rational_t)
+  );
+
+  result->numerator = numerator * other.denominator;
+  result->denominator = denominator * other.numerator;
+  result->commonize();
+  return *result;
+}
+
+const rational_t& rational_t::operator%(const rational_t& other) const {
+  // rational modulo is not supported by CASM
+  return *this;
+}
+
+const std::string rational_t::to_str() const {
+  if (denominator == 1) {
+    return std::to_string(numerator);
+  } else {
+    return std::to_string(numerator) + "/" + std::to_string(denominator);
+  }
+  return "";
+}
+
+
+void rational_t::commonize() {
+  if (numerator == 0) {
+    denominator = 1;
+  } else if ( denominator > numerator && (denominator % numerator) == 0) {
+    denominator = denominator / numerator;
+    numerator = 1;
+  } else if ((numerator % denominator) == 0) {
+    numerator = numerator / denominator;
+    denominator = 1;
+  }
+}
 
 List::List(ListType t) : list_type(t) {}
 
@@ -486,6 +585,8 @@ namespace std {
       }
       case TypeType::ENUM:
         return (size_t) key.value.enum_val->id;
+      case TypeType::RATIONAL:
+        return (size_t) key.value.rat->numerator + key.value.rat->denominator;
       default: throw RuntimeException("Unsupported type in std::hash<Value>()");
     }
   }

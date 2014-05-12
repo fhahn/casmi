@@ -169,6 +169,10 @@ bool FloatAtom::equals(AstNode *other) {
   return val_ == other_cast->val_;
 }
 
+RationalAtom::RationalAtom(yy::location& loc, const rational_t& val) :
+        AtomNode(loc, NodeType::RATIONAL_ATOM, Type(TypeType::RATIONAL)), val_(val) {
+}
+
 
 UndefAtom::UndefAtom(yy::location& loc) :
         AtomNode(loc, NodeType::UNDEF_ATOM, Type(TypeType::UNKNOWN)) {}

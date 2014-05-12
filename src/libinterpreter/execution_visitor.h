@@ -46,6 +46,7 @@ class ExecutionVisitor : public BaseVisitor<Value> {
     Value visit_expression_single(Expression *expr, Value& val);
     Value visit_int_atom(IntAtom *atom) { return std::move(Value(atom->val_)); }
     Value visit_float_atom(FloatAtom *atom) { return std::move(Value(atom->val_)); }
+    Value visit_rational_atom(RationalAtom *atom) { return std::move(Value(&atom->val_)); }
     Value visit_undef_atom(UndefAtom *atom) { UNUSED(atom); return std::move(Value()); }
     Value visit_function_atom(FunctionAtom *atom, std::vector<Value> &expr_results);
 
