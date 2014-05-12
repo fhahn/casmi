@@ -1,0 +1,12 @@
+CASM foo
+
+init main
+
+rule main = {
+    let x = [] in {
+        assert x + 1 = 1
+        //~^ type of expressions did not match: Tuple () != Int
+    }
+        
+    program(self) := undef
+}
