@@ -380,7 +380,35 @@ BuiltinAtom::BuiltinAtom(yy::location& loc, const std::string name,
 
     types = { a1 };
     id = Id::INT2ENUM;
- } else 
+  } else if (name == "asInt") {
+    Type *a1 = new Type(TypeType::UNKNOWN);
+    a1->constraints.push_back(new Type(TypeType::INT));
+    a1->constraints.push_back(new Type(TypeType::FLOAT));
+    a1->constraints.push_back(new Type(TypeType::RATIONAL));
+    return_type = new Type(TypeType::INT);
+
+    types = { a1 };
+    id = Id::ASINT;
+  } else if (name == "asFloat") {
+    Type *a1 = new Type(TypeType::UNKNOWN);
+    a1->constraints.push_back(new Type(TypeType::INT));
+    a1->constraints.push_back(new Type(TypeType::FLOAT));
+    a1->constraints.push_back(new Type(TypeType::RATIONAL));
+    return_type = new Type(TypeType::FLOAT);
+
+    types = { a1 };
+    id = Id::ASFLOAT;
+  } else if (name == "asRational") {
+    Type *a1 = new Type(TypeType::UNKNOWN);
+    a1->constraints.push_back(new Type(TypeType::INT));
+    a1->constraints.push_back(new Type(TypeType::FLOAT));
+    a1->constraints.push_back(new Type(TypeType::RATIONAL));
+    return_type = new Type(TypeType::RATIONAL);
+
+    types = { a1 };
+    id = Id::ASRATIONAL;
+ 
+  } else
   SHARED_BUILTINS_TYPECHECK
 }
 

@@ -16,6 +16,9 @@ static std::map<const std::string, bool> builtin_names = {
   {"Int2Boolean", true},
   {"Enum2Int", true},
   {"Int2Enum", true},
+  {"asInt", true},
+  {"asFloat", true},
+  {"asRational", true},
   SHARED_BUILTIN_NAMES
 };
 
