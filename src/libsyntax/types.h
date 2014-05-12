@@ -34,6 +34,10 @@ class Type;
 class Type {
   private:
     bool eq(const Type& other) const;
+    bool unify_list(Type *other);
+    bool unify_tuple(Type *other);
+    bool unify_tuple_or_list(Type *other);
+    bool unify_enum(Type *other);
 
   public:
     TypeType t;
