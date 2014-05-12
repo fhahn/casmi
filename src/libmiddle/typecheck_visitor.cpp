@@ -358,8 +358,8 @@ Type* TypecheckVisitor::visit_expression(Expression *expr, Type*, Type*) {
   DEBUG("EXPR T1 "<<expr->left_->type_.to_str() << " T2: "<<expr->right_->type_.to_str());
   if (expr->left_ && expr->right_ && !expr->left_->type_.unify(&expr->right_->type_)) {
       driver_.error(expr->location, "type of expressions did not match: "+
-                                     expr->left_->type_.to_str()+" != "+
-                                     expr->right_->type_.to_str());
+                                     expr->left_->type_.get_most_general_type()->to_str()+" != "+
+                                     expr->right_->type_.get_most_general_type()->to_str());
   }
 
   DEBUG("EXPR DONE T1 "<<expr->left_->type_.to_str() << " T2: "<<expr->right_->type_.to_str());

@@ -1,0 +1,15 @@
+CASM foo
+
+function stop: -> Boolean initially { false }
+function a: -> Rational
+
+init main
+
+rule main = {
+    a := 1/2
+    stop := true
+    if stop then {
+        assert a = 3/6
+        program(self) := undef
+    }
+}

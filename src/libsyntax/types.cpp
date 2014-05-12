@@ -89,6 +89,7 @@ Type::Type(TypeType enum_type, const std::string& name) : unify_with_left(nullpt
 Type::Type(const std::string& type_name) : internal_type(nullptr), unify_with_left(nullptr), unify_with_right(nullptr), constraints(), tuple_types() {
   if (type_name == "Int") { t = TypeType::INT; }
   else if (type_name == "Float") { t = TypeType::FLOAT; }
+  else if (type_name == "Rational") { t = TypeType::RATIONAL; }
   else if (type_name == "Undef") { t = TypeType::UNDEF; }
   else if (type_name == "Boolean") { t = TypeType::BOOLEAN; }
   else if (type_name == "RuleRef") { t = TypeType::RULEREF; }
@@ -250,6 +251,10 @@ bool Type::unify_list(Type *other) {
     }
     return result;
   } else if (other->t == TypeType::UNKNOWN) {
+    if (other->constraints.size() > 0) {
+      // constraints cover only basic types at the moment
+      return false;
+    }
     other->internal_type = new Type(TypeType::UNKNOWN);
     other->t = TypeType::LIST;
     return internal_type->unify(other->internal_type);
@@ -275,6 +280,10 @@ bool Type::unify_tuple(Type *other) {
       return result;
     } 
   } else if (other->t == TypeType::UNKNOWN) {
+    if (other->constraints.size() > 0) {
+      // constraints cover only basic types at the moment
+      return false;
+    }
     other->t = t;
     other->tuple_types = tuple_types;
     return true;
@@ -304,6 +313,10 @@ bool Type::unify_tuple_or_list(Type *other) {
       return false;
     }
   } else if (other->t == TypeType::UNKNOWN) {
+    if (other->constraints.size() > 0) {
+      // constraints cover only basic types at the moment
+      return false;
+    }
     other->t = t;
     other->tuple_types = tuple_types;
     return true;
@@ -320,6 +333,10 @@ bool Type::unify_enum(Type *other) {
     }
     return enum_name == other->enum_name;
   } else if (other->t == TypeType::UNKNOWN) {
+    if (other->constraints.size() > 0) {
+      // constraints cover only basic types at the moment
+      return false;
+    }
     other->t = TypeType::ENUM;
     other->enum_name = enum_name;
     return true;
