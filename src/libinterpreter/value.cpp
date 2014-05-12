@@ -240,20 +240,19 @@ const rational_t& rational_t::operator%(const rational_t& other) const {
 }
 
 int64_t gcd(int64_t a, int64_t b) {
-  if (a == b) {
-    return a;
-  } 
-  if (a > b) {
-    return gcd(a-b, b);
+  int64_t tmp;
+
+  while (b != 0) {
+    tmp = b;
+    b = a % b;
+    a = tmp;
   }
-  if (a < b) {
-    return gcd(a, b-a);
-  }
+  return a;
 }
 
 const std::string rational_t::to_str() const {
   if (numerator == 0) {
-    return "";
+    return "0";
   }
   int64_t divisor = gcd(numerator, denominator);
   int64_t num = numerator / divisor;

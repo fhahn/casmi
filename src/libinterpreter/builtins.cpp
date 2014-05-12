@@ -1,3 +1,4 @@
+#include <cmath>
 #include <cassert>
 #include <sstream>
 
@@ -38,6 +39,15 @@ const Value builtins::dispatch(BuiltinAtom::Id atom_id,  ExecutionContext ctxt,
 
     case BuiltinAtom::Id::ENUM2INT:
       return std::move(enum2int(arguments[0]));
+
+    case BuiltinAtom::Id::ASINT:
+      return std::move(asint(arguments[0]));
+
+    case BuiltinAtom::Id::ASFLOAT:
+      return std::move(asfloat(arguments[0]));
+
+    case BuiltinAtom::Id::ASRATIONAL:
+      return std::move(asrational(arguments[0]));
 
     default: return std::move(shared::dispatch(atom_id, arguments));
   }
@@ -226,6 +236,108 @@ const Value builtins::enum2int(const Value& arg) {
   return std::move(Value((INT_T)arg.value.enum_val->id));
 }
 
+const Value builtins::asint(const Value& arg) {
+  if (arg.is_undef()) {
+    return std::move(arg);
+  }
+
+  switch (arg.type) {
+    case TypeType::INT:
+      return std::move(Value(arg.value.ival));
+    case TypeType::FLOAT:
+      return std::move(Value((INT_T)arg.value.fval));
+    case TypeType::RATIONAL:
+      return std::move(Value((INT_T)(arg.value.rat->numerator / arg.value.rat->denominator)));
+    default: assert(0);
+  }
+}
+
+const Value builtins::asfloat(const Value& arg) {
+  if (arg.is_undef()) {
+    return std::move(arg);
+  }
+
+  switch (arg.type) {
+    case TypeType::INT:
+      return std::move(Value((FLOAT_T) arg.value.ival));
+    case TypeType::FLOAT:
+      return std::move(Value(arg.value.fval));
+    case TypeType::RATIONAL:
+      return std::move(Value(((FLOAT_T)arg.value.rat->numerator) / arg.value.rat->denominator));
+    default: assert(0);
+  }
+}
+
+
+void get_numerator_denominator(double x, int64_t *num, int64_t *denom) {
+  // thanks to
+  // http://stackoverflow.com/a/96035/781502
+  uint64_t m[2][2];
+  double startx = x;
+  int64_t maxden = 10000000000;
+  int64_t ai;
+
+  /* initialize matrix */
+  m[0][0] = m[1][1] = 1;
+  m[0][1] = m[1][0] = 0;
+
+  /* loop finding terms until denom gets too big */
+  while (m[1][0] *  ( ai = (int64_t)x ) + m[1][1] <= maxden) {
+      long t;
+      t = m[0][0] * ai + m[0][1];
+      m[0][1] = m[0][0];
+      m[0][0] = t;
+      t = m[1][0] * ai + m[1][1];
+      m[1][1] = m[1][0];
+      m[1][0] = t;
+      if(x==(double)ai) break;     // AF: division by zero
+      x = 1/(x - (double) ai);
+      if(x>(double)0x7FFFFFFF) break;  // AF: representation failure
+  }
+
+  /* now remaining x is between 0 and 1/ai */
+  /* approx as either 0 or 1/m where m is max that will fit in maxden */
+  /* first try zero */
+
+  double error1 = startx - ((double) m[0][0] / (double) m[1][0]);
+
+  *num = m[0][0];
+  *denom =  m[1][0];
+
+  /* now try other possibility */
+  ai = (maxden - m[1][1]) / m[1][0];
+  m[0][0] = m[0][0] * ai + m[0][1];
+  m[1][0] = m[1][0] * ai + m[1][1];
+  double error2 = startx - ((double) m[0][0] / (double) m[1][0]);
+
+  if (abs(error1) > abs(error2)) {
+    *num = m[0][0];
+    *denom =  m[1][0];
+  }
+}
+
+const Value builtins::asrational(const Value& arg) {
+  if (arg.is_undef()) {
+    return std::move(arg);
+  }
+
+  rational_t *result = (rational_t*) pp_mem_alloc(
+      &(ExecutionContext::value_stack), sizeof(rational_t)
+  );
+  switch (arg.type) {
+    case TypeType::INT:
+      result->numerator = arg.value.ival;
+      result->denominator = 1;
+      return std::move(Value(result));
+    case TypeType::FLOAT:
+      get_numerator_denominator(arg.value.fval, &result->numerator, &result->denominator);
+      return std::move(Value(result));
+    case TypeType::RATIONAL:
+      return std::move(Value(arg.value.rat));
+    default: assert(0);
+  }
+}
+
 
 namespace builtins {
 namespace shared {
@@ -261,6 +373,7 @@ namespace shared {
     Int arg4;
     switch (builtin_id) {
       SHARED_DISPATCH
+      default: assert(0);
     }
 
     if (ret.defined == TRUE) {
