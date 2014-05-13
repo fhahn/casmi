@@ -1,9 +1,40 @@
+from datetime import datetime
+import re
 import os
 import subprocess
 import sys
 
 
+NUM_RUNS = 3
+
 bench_path = os.path.dirname(os.path.abspath(__file__))
+
+CASMI_PATH = os.path.join(bench_path, "../../rel_build/bin/casmi")
+
+
+def dump_run(bench_name, vm, time):
+
+    p = subprocess.Popen(["git", "log", "-n", "1"], stdout=subprocess.PIPE)
+    (out, _) = p.communicate()
+    commit_id = out.splitlines()[0].decode("utf-8").replace("commit ", "")
+
+    p = subprocess.Popen(["strings", "-a", vm[1]], stdout=subprocess.PIPE)
+    (out, _) = p.communicate()
+    
+    compiler = "unknown"
+    
+    clang_re = re.compile("clang version ([0-9].[0-9])")
+    match = clang_re.search(out.decode("utf-8"))
+    if match:
+        compiler = "clang-"+match.groups()[0]
+
+
+    with open(os.path.join(bench_path, "bench.log"), "a") as f:
+        f.write("{} ; {} ; {} ; {} ; {} ; {} ; {}\n".format(
+            str(datetime.now()), commit_id, compiler, vm[0], bench_name,
+            str(time), str(NUM_RUNS)))
+
+
 
 def iteritems(d):
     """Factor-out Py2-to-3 differences in dictionary item iterator methods"""
@@ -13,8 +44,6 @@ def iteritems(d):
         return d.items()
 
 def run_script(vm_info, script_path):
-    sys.stdout.write("\t {} ...".format(vm_info[0]))
-    sys.stdout.flush()
     p = subprocess.Popen([vm_info[1], script_path], stdout=subprocess.PIPE)
     (outstr, errstr) = p.communicate()
     if p.returncode != 0:
@@ -26,11 +55,9 @@ if __name__ == '__main__':
     import timeit
 
     vms = [
-        ("new casmi", os.path.join(bench_path, "../../rel_build/bin/casmi")),
+        ("new casmi", CASMI_PATH),
         ("old casmi", os.path.expanduser('~/Desktop/casm')),
     ]
-
-    results = {}
 
     for root, dirs, files in os.walk(bench_path):
         for bench_file in files:
@@ -40,12 +67,16 @@ if __name__ == '__main__':
             results = {}
             file_path = os.path.join(root, bench_file);
             for vm in vms:
+                sys.stdout.write("\t {} ...".format(vm[0]))
+                sys.stdout.flush()
+
                 def run():
                     run_script(vm, file_path)
-                time = timeit.timeit('run()'.format(vm, file_path), setup="from __main__ import run", number=1)
+                time = timeit.timeit('run()'.format(vm, file_path), setup="from __main__ import run", number=NUM_RUNS)
 
                 sys.stdout.write(" took %lf s\n" % (time))
                 results[vm] = time
+                dump_run(bench_file, vm, time)
 
 
             for k, v in iteritems(results):
