@@ -9,8 +9,6 @@ NUM_RUNS = 3
 
 bench_path = os.path.dirname(os.path.abspath(__file__))
 
-CASMI_PATH = os.path.join(bench_path, "../../rel_build/bin/casmi")
-
 
 def dump_run(bench_name, vm, time):
 
@@ -20,14 +18,21 @@ def dump_run(bench_name, vm, time):
 
     p = subprocess.Popen(["strings", "-a", vm[1]], stdout=subprocess.PIPE)
     (out, _) = p.communicate()
-    
+
     compiler = "unknown"
-    
+
     clang_re = re.compile("clang version ([0-9].[0-9])")
     match = clang_re.search(out.decode("utf-8"))
     if match:
         compiler = "clang-"+match.groups()[0]
+    else:
+        p = subprocess.Popen(["objdump", "-s", "--section", ".comment", vm[1]], stdout=subprocess.PIPE)
+        (out, _) = p.communicate()
+        gcc_re = re.compile("\(GNU\) ([0-9].[0-9])")
+        match = gcc_re.search(out.decode("utf-8"))
 
+        if match:
+            compiler = "gcc-"+match.groups()[0]
 
     with open(os.path.join(bench_path, "bench.log"), "a") as f:
         f.write("{} ; {} ; {} ; {} ; {} ; {} ; {}\n".format(
@@ -55,7 +60,7 @@ if __name__ == '__main__':
     import timeit
 
     vms = [
-        ("new casmi", CASMI_PATH),
+        ("new casmi", sys.argv[1]),
         ("old casmi", os.path.expanduser('~/Desktop/casm')),
     ]
 
