@@ -9,7 +9,7 @@
 
 #include "libinterpreter/value.h"
 
-#include "librt/rt.h"
+#include "libcasmrt/rt.h"
 
 #define UPDATESET_SIZE 65535
 

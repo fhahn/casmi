@@ -21,4 +21,4 @@
 build
 
 # ignore runtime for now
-src/librt
+src/libcasmrt/pp_*.h

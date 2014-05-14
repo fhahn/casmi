@@ -6,7 +6,7 @@
 #include "libsyntax/symbols.h"
 #include "libutil/exceptions.h"
 
-#include "librt/rt.h"
+#include "libcasmrt/rt.h"
 
 struct enum_value_t;
 
