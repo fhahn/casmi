@@ -7,7 +7,8 @@ set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${casmi_BINARY_DIR}/bin )
 set( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${casmi_BINARY_DIR}/lib )
 set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${casmi_BINARY_DIR}/lib )
 
-set( CMAKE_CXX_FLAGS "-std=c++11 -pedantic -Wall -Wextra -O3 -D_XOPEN_SOURCE=500 -D_BSD_SOURCE" )
+# when -pendantic is used, -Wvariadic-macros cannot be disabled in gcc
+set( CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wextra -O3 -D_XOPEN_SOURCE=500 -D_BSD_SOURCE" )
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DCASMI_DEBUG")
 
