@@ -38,7 +38,7 @@ def create_typecheck_defines(builtins):
 
     builtin_typechecks.append("{ assert(0); } \n")
     define_typechecks = "\n\n#define SHARED_BUILTINS_TYPECHECK \\\n{}\n".format(
-            "".join(builtin_typechecks))
+            "".join(builtin_typechecks))[:-2]
 
     return "".join([define_builtin_ids, define_builtin_names, define_typechecks])
 
@@ -59,7 +59,7 @@ def create_dispatch_define(builtins):
         case = case_template.format(*lines)
         cases.append(case)
 
-    return "\n\n#define SHARED_DISPATCH \\\n"+"".join(cases)
+    return "\n\n#define SHARED_DISPATCH \\\n"+"".join(cases)[:-2]
 
 
 if __name__ == '__main__':
@@ -74,3 +74,4 @@ if __name__ == '__main__':
         res = create_typecheck_defines(builtins)
         res += create_dispatch_define(builtins)
         f.write(res)
+        f.write("\n")
