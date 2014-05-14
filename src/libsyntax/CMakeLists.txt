@@ -21,10 +21,10 @@ ADD_CUSTOM_COMMAND(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/grammer.yy
 )
 
 ADD_CUSTOM_COMMAND(PRE_BUILD
-                   SOURCE ${CMAKE_SOURCE_DIR}/src/librt/pp_casm_shared.h
+                   SOURCE ${CMAKE_SOURCE_DIR}/src/libcasmrt/pp_casm_shared.h
                    COMMAND python 
                    ARGS ${CMAKE_SOURCE_DIR}/src/etc/shared_glue.py
-                        ${CMAKE_SOURCE_DIR}/src/librt/pp_casm_shared.h
+                        ${CMAKE_SOURCE_DIR}/src/libcasmrt/pp_casm_shared.h
                         ${CMAKE_BINARY_DIR}/src/shared_glue.h
                    OUTPUT ${CMAKE_BINARY_DIR}/src/shared_glue.h
 )

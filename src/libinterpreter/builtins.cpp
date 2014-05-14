@@ -359,7 +359,7 @@ namespace shared {
   // create concrete variants of the shareds
   #define CASM_CALL_SHARED(NAME, VALUE, ARGS...)  NAME(VALUE, ##ARGS)
   #define DEFINE_CASM_SHARED(NAME, VALUE, ARGS...) void NAME(VALUE, ##ARGS)
-  #include "librt/pp_casm_shared.h"
+  #include "libcasmrt/pp_casm_shared.h"
 
   REENABLE_VARIADIC_WARNINGS
 

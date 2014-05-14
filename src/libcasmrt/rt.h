@@ -3,9 +3,9 @@
 
 IGNORE_VARIADIC_WARNINGS
 
-#include "librt/pp_casm_misc.h"
-#include "librt/pp_hashmap.h"
-#include "librt/pp_casm_updateset_linkedhash.h"
+#include "libcasmrt/pp_casm_misc.h"
+#include "libcasmrt/pp_hashmap.h"
+#include "libcasmrt/pp_casm_updateset_linkedhash.h"
 
 #define CASM_DBG 0
 
