@@ -41,8 +41,6 @@ Value::Value(const rational_t *rat) : type(TypeType::RATIONAL) {
   value.rat = rat;
 }
 
-Value::Value(Value& other) : type(other.type), value(other.value) {}
-
 Value::Value(const Value& other) : type(other.type), value(other.value) {}
 
 Value::Value(Value&& other) noexcept : type(other.type), value(other.value) {}
@@ -92,6 +90,9 @@ Value::Value(TypeType t, casm_update* u) {
     default: throw RuntimeException("Unsupported type in apply");
   }
 }
+
+
+Value::Value(uint32_t symbol, bool) : symbol(symbol) {}
 
 Value& Value::operator=(const Value& other) {
   value = other.value;
