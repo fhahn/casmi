@@ -4,7 +4,7 @@
 
 #include "libinterpreter/builtins.h"
 
-const Value builtins::dispatch(BuiltinAtom::Id atom_id,  ExecutionContext ctxt,
+const Value builtins::dispatch(BuiltinAtom::Id atom_id,  ExecutionContext& ctxt,
                                const std::vector<Value>& arguments) {
   switch (atom_id) {
     case BuiltinAtom::Id::POW:

@@ -16,9 +16,16 @@
 
 struct ArgumentsKey {
   uint64_t* p;
-  size_t size;
+  uint16_t size;
+  bool dynamic;
 
-  inline bool operator==(const ArgumentsKey other) const {
+
+  ArgumentsKey(uint64_t *args, uint16_t s, bool dyn);
+  ArgumentsKey(const ArgumentsKey& other);
+  ArgumentsKey(ArgumentsKey&& other) noexcept;
+  ~ArgumentsKey();
+
+  inline bool operator==(const ArgumentsKey& other) const {
     if(other.size == size) {
       for(size_t i = 0; i < size; i++) {
         if (other.p[i] != p[i]) {

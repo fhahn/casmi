@@ -2,6 +2,32 @@
 
 #include "libinterpreter/execution_context.h"
 
+ArgumentsKey::ArgumentsKey(uint64_t *args, uint16_t s, bool dyn) : size(s), dynamic(dyn){
+  if (dynamic) {
+    p = new uint64_t[size];
+    for (uint16_t i = 0; i < size; i++) {
+      p[i] = args[i];
+    }
+  } else {
+    p = args;
+  }
+}
+
+ArgumentsKey::ArgumentsKey(const ArgumentsKey& other) : p(other.p), size(other.size), dynamic(other.dynamic) {
+}
+
+ArgumentsKey::ArgumentsKey(ArgumentsKey&& other) noexcept {
+  p = other.p;
+  size = other.size;
+  dynamic = other.dynamic;
+  other.dynamic = false;
+}
+
+ArgumentsKey::~ArgumentsKey() {
+  if (dynamic) {
+    delete[] p;
+  }
+}
 
 pp_mem ExecutionContext::value_stack;
 
@@ -11,7 +37,7 @@ ExecutionContext::ExecutionContext(const SymbolTable& st, RuleNode *init) : debu
   updateset.set =  pp_hashmap_new(&updateset_data_, 1024*10, "main updateset");
 
   // use 10 MB for stack
-  pp_mem_new(&pp_stack, 1024 * 1024 * 1024, "mem for stack stuff");
+  pp_mem_new(&pp_stack, 1024 * 1024, "mem for stack stuff");
   pp_mem_new(&value_stack, 1024 * 1024 * 1024, "mem for value stuff");
 
   if (init->child_ && init->child_->node_type_ == NodeType::PARBLOCK) {
@@ -40,15 +66,13 @@ void ExecutionContext::apply_updates() {
   while( i != updateset.set->head ) {
     u = (casm_update*)i->value;
 
-    CASM_RT("update function %lu, %p = %p, %u", u->func, u, (void*)u->value, u->defined);
-
     auto& function_map = functions[u->func];
 
     DEBUG("APPLY args "<<u->num_args << " arg "<<u->args[0] << " " << u->args[1]<<" func "<<function_map.first->name);
 
     // TODO handle tuples
     if (function_map.first->return_type_->t == TypeType::LIST) {
-      Value& list = function_map.second[{u->args, u->num_args}];
+      Value& list = function_map.second[ArgumentsKey(u->args, u->num_args, false)];
       if (u->defined == 0) {
         // set list to undef
         if (!list.is_undef()) {
@@ -68,9 +92,9 @@ void ExecutionContext::apply_updates() {
     } else {
       Value v(function_map.first->return_type_->t, u);
       if (v.type == TypeType::UNDEF) {
-        function_map.second.erase({u->args, u->num_args});
+        function_map.second.erase(ArgumentsKey(u->args, u->num_args, false));
       } else {
-        function_map.second[{u->args, u->num_args}] = v;
+        function_map.second[ArgumentsKey(u->args, u->num_args, true)] = v;
       }
     }
 
@@ -104,7 +128,7 @@ void ExecutionContext::apply_updates() {
 
   // free allocated updateset data
   pp_mem_free(&updateset_data_);
-  //pp_mem_free(&pp_stack);
+  pp_mem_free(&pp_stack);
 
   updateset.set->head->previous = NULL;
   updateset.set->head->next     = updateset.set->tail;
@@ -207,7 +231,7 @@ void ExecutionContext::merge_seq(Driver& driver) {
 
 void ExecutionContext::set_function(Function *sym, uint64_t args[], Value& val) {
   auto function_map = functions[sym->id];
-  function_map.second.insert(std::pair<ArgumentsKey, Value>({&args[0], sym->argument_count()}, val));
+  function_map.second.insert(std::pair<ArgumentsKey, Value>(ArgumentsKey(&args[0], sym->argument_count(), true), val));
 }
 
 static Value undef = Value();
@@ -231,7 +255,7 @@ Value& ExecutionContext::get_function_value(Function *sym, uint64_t args[]) {
   auto& function_map = functions[sym->id];
   try {
       DEBUG("get "<<sym->id << " " << sym->name<<" size:"<<sym->arguments_.size() << " args "<<args[0] << " Fun size "<< function_map.second.size());
-    Value &v = function_map.second.at({&args[0], sym->arguments_.size()});
+    Value &v = function_map.second.at(ArgumentsKey(&args[0], sym->arguments_.size(), false));
     int64_t state = (updateset.pseudostate % 2 == 0) ? state = updateset.pseudostate-1:
                                                        state = updateset.pseudostate;
     for (; state > 0; state -= 2) {
