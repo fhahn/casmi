@@ -6,6 +6,7 @@ add_library(interpreter
   value.cpp
   operators.cpp
   builtins.cpp
+  symbolic.cpp
   ${SHARED_GLUE_HEADER}
 )
 
