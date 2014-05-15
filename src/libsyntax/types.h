@@ -20,12 +20,13 @@ enum class TypeType {
   UNKNOWN,
   INVALID,
   NO_TYPE,
-  UNDEF,
   LIST,
   TUPLE,
   TUPLE_OR_LIST,
   ENUM,
   RATIONAL,
+  UNDEF,    // only possible during execution in Value.type
+  SYMBOL,   // only possible during execution in Value.type
 };
 
 class Type;

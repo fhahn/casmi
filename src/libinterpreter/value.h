@@ -23,6 +23,7 @@ class Value {
   public:
     TypeType type;
     union {
+      uint32_t symbol;
       INT_T ival;
       FLOAT_T fval;
       bool bval;
@@ -33,6 +34,8 @@ class Value {
       const rational_t *rat;
     } value;
 
+    uint32_t symbol;
+
     Value();
     Value(INT_T ival);
     Value(FLOAT_T fval);
@@ -42,10 +45,10 @@ class Value {
     Value(const Type& t, List *list);
     Value(const enum_value_t *enum_val);
     Value(const rational_t *val);
-    Value(Value& other);
     Value(const Value& other);
     Value(Value&& other) noexcept;
     Value(TypeType type, casm_update* update);
+    Value(uint32_t symbol, bool);
 
     Value& operator=(const Value& other);
     bool operator==(const Value &other) const;
