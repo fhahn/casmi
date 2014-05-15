@@ -140,93 +140,54 @@ void ExecutionContext::apply_updates() {
 }
 
 void ExecutionContext::merge_par() {
-        /*pp_measure_start(&updateset->time_merge[CASM_MODE_PAR]);*/
+  updateset.pseudostate--;
 
-        //CASM_RT("updateset merge par");
+  pp_hashmap_bucket* j = updateset.set->tail->previous;
+  pp_hashmap_bucket* i;
 
-        /*casm_updateset_print_debug(updateset, "pre-merge");
-         */
+  while( j != updateset.set->head ) {
+      i = j;
+      j = j->previous;
 
-        updateset.pseudostate--;
+      if( (uint16_t)i->key <= updateset.pseudostate ) break;
 
-        //CASM_RT("merge-par:");
+      pp_hashmap_delete(updateset.set, i);
 
-        pp_hashmap_bucket* j = updateset.set->tail->previous;
-        pp_hashmap_bucket* i;
+      pp_hashmap_set(updateset.set, i->key-1, i->value);
 
-        while( j != updateset.set->head ) {
-            i = j;
-            j = j->previous;
+  }
 
-            if( (uint16_t)i->key <= updateset.pseudostate ) break;
-
-            pp_hashmap_delete(updateset.set, i);
-
-            pp_hashmap_set(updateset.set, i->key-1, i->value);
-
-            // CASM_RT("%p: %p @ %lx --> %lx", i, i->value, i->key, i->key-1);
-
-            /*i = i->previous;*/
-        }
-
-        //CASM_RT("merge-END");
-
-        /* pp_measure_stop(&updateset->time_merge[CASM_MODE_PAR]); */
-
-        /*casm_updateset_print_debug(updateset, "post-merge");*/
 }
 
 void ExecutionContext::merge_seq(Driver& driver) {
-        /*pp_measure_start(&updateset->time_merge[CASM_MODE_SEQ]);*/
+  updateset.pseudostate--;
 
-        //CASM_RT("updateset merge seq");
+  pp_hashmap_bucket* j = updateset.set->tail->previous;
+  pp_hashmap_bucket* i;
+  casm_update* u;
+  casm_update* v;
 
-        /*casm_updateset_print_debug(updateset, "pre-merge");
-         */
+  while( j != updateset.set->head ) {
+      i = j;
+      j = j->previous;
 
-        updateset.pseudostate--;
+      if( (uint16_t)i->key <= updateset.pseudostate ) break;
 
-        //CASM_RT("merge-seq");
+      pp_hashmap_delete(updateset.set, i);
 
-        pp_hashmap_bucket* j = updateset.set->tail->previous;
-        pp_hashmap_bucket* i;
-        casm_update* u;
-        casm_update* v;
+      if( (v = (casm_update*) pp_hashmap_set(updateset.set, i->key-1, i->value)) != NULL ) {
+          u = (casm_update*)i->value;
 
-        while( j != updateset.set->head ) {
-            i = j;
-            j = j->previous;
-
-            //CASM_RT("%p: %p @ %lx ...", i, i->value, i->key);
-
-            if( (uint16_t)i->key <= updateset.pseudostate ) break;
-
-            pp_hashmap_delete(updateset.set, i);
-
-            if( (v = (casm_update*) pp_hashmap_set(updateset.set, i->key-1, i->value)) != NULL ) {
-                u = (casm_update*)i->value;
-
-                for (size_t i=0; i < u->num_args; i++) {
-                  if (u->args[i] != v->args[i]) {
-                    return;
-                  }
-                }
-                driver.error(*reinterpret_cast<yy::location*>(u->line), "conflict merging updatesets");
-                throw RuntimeException("merge error");
+          for (size_t i=0; i < u->num_args; i++) {
+            if (u->args[i] != v->args[i]) {
+              return;
             }
-
-            //CASM_RT("%p: %p @ %lx --> %lx", i, i->value, i->key, i->key-1);
-
-            /*i = i->previous;*/
-        }
-
-        //CASM_RT("merge-END");
-
-        /*pp_measure_stop(&updateset->time_merge[CASM_MODE_SEQ]); */
-
-        /*casm_updateset_print_debug(updateset, "post-merge");*/
-    }
-
+          }
+          driver.error(*reinterpret_cast<yy::location*>(u->line), "conflict merging updatesets");
+          throw RuntimeException("merge error");
+      }
+  }
+}
 
 
 void ExecutionContext::set_function(Function *sym, uint64_t args[], Value& val) {
@@ -240,9 +201,7 @@ static Value tmp;
 
 bool args_eq(uint64_t args1[], uint64_t args2[], size_t len) {
 
-  DEBUG("LEN "<<len);
   for (size_t i=0; i < len; i++) {
-    DEBUG("args1 "<<args1[i]<<"args2 "<<args2[i]);
     if (args1[i] != args2[i]) {
       return false;
     }
