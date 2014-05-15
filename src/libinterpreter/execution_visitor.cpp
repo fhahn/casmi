@@ -53,10 +53,10 @@ casm_update *ExecutionVisitor::add_update(const Value& val, size_t sym_id, const
   up->num_args = arguments.size();
 
   auto& function_map = context_.functions[sym_id];
-  if (function_map.second.count({up->args, up->num_args}) == 0) {
-    function_map.second.emplace(ArgumentsKey{up->args, up->num_args}, Value());
+  if (function_map.second.count(ArgumentsKey(up->args, up->num_args, false)) == 0) {
+    function_map.second.emplace(ArgumentsKey(up->args, up->num_args, true), Value());
   }
-  Value& ref = function_map.second[{up->args, up->num_args}];
+  Value& ref = function_map.second[ArgumentsKey(up->args, up->num_args, false)];
   casm_update* v = (casm_update*)casm_updateset_add(&(context_.updateset),
                                                     (void*) &ref,
                                                     (void*) up);
@@ -513,12 +513,15 @@ bool ExecutionWalker::init_function(const std::string& name, std::set<std::strin
   }
 
   std::vector<uint64_t*> initializer_args;
-  auto function_map = std::unordered_map<ArgumentsKey, Value>();
 
   Function *func = visitor.context_.symbol_table.get_function(name);
   if (!func) {
     return true;
   }
+
+  visitor.context_.functions[func->id] = std::move(std::pair<Function*, std::unordered_map<ArgumentsKey, Value>>(func,std::unordered_map<ArgumentsKey, Value>()));
+  auto& function_map = visitor.context_.functions[func->id].second;
+
   if (func->intitializers_ != nullptr) {
     for (std::pair<ExpressionBase*, ExpressionBase*> init : *func->intitializers_) {
       size_t num_args = 0; 
@@ -540,16 +543,17 @@ bool ExecutionWalker::init_function(const std::string& name, std::set<std::strin
         args[0] = 0;
       }
 
-      if (function_map.count({&args[0], num_args}) != 0) {
+      if (function_map.count(ArgumentsKey(&args[0], num_args, false)) != 0) {
         yy::location loc = init.first ? init.first->location+init.second->location : init.second->location;
         visitor.driver_.error(loc, "function `"+func->name+"("+args_to_str(args, num_args)+")` already initialized");
         throw RuntimeException("function already initialized");
       }
-      function_map.emplace(std::pair<ArgumentsKey, Value>({&args[0], num_args}, walk_expression_base(init.second)));
+      DEBUG("BEGIN INSERT "<<name);
+      function_map.emplace(std::pair<ArgumentsKey, Value>(std::move(ArgumentsKey(&args[0], num_args, true)), walk_expression_base(init.second)));
+      DEBUG("END INSERT "<<name);
       initializer_args.push_back(args);
     }
   }
-  visitor.context_.functions[func->id] = std::pair<Function*, std::unordered_map<ArgumentsKey, Value>>(func, function_map);
 
   initialized.insert(name);
   return true;

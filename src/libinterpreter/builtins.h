@@ -7,7 +7,7 @@
 #include "libinterpreter/value.h"
 
 namespace builtins {
-  const Value dispatch(BuiltinAtom::Id atom_id, ExecutionContext ctxt,
+  const Value dispatch(BuiltinAtom::Id atom_id, ExecutionContext& ctxt,
                        const std::vector<Value>& arguments);
 
   const Value pow(const Value& base, const Value& power);
