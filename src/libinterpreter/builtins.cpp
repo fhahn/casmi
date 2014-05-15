@@ -81,7 +81,7 @@ const Value builtins::hex(const Value& arg) {
 }
 
 const Value builtins::nth(const Value& list_arg, const Value& index ) {
-  if (list_arg.is_undef()) {
+  if (list_arg.is_undef() || index.is_undef()) {
     return Value();
   }
 

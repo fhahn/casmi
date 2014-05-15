@@ -44,7 +44,7 @@ class Value {
     Value(const rational_t *val);
     Value(Value& other);
     Value(const Value& other);
-    Value(Value&& other);
+    Value(Value&& other) noexcept;
     Value(TypeType type, casm_update* update);
 
     Value& operator=(const Value& other);
