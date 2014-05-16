@@ -92,7 +92,9 @@ Value::Value(TypeType t, casm_update* u) {
 }
 
 
-Value::Value(uint32_t symbol, bool) : symbol(symbol) {}
+Value::Value(TypeType t, uint32_t symbol) : type(t) {
+  value.symbol = symbol;
+}
 
 Value& Value::operator=(const Value& other) {
   value = other.value;
