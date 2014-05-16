@@ -9,6 +9,7 @@
 #include "libinterpreter/execution_visitor.h"
 #include "libinterpreter/builtins.h"
 #include "libinterpreter/operators.h"
+#include "libinterpreter/symbolic.h"
 
 IGNORE_VARIADIC_WARNINGS
 
@@ -105,6 +106,10 @@ void ExecutionVisitor::visit_update(UpdateNode *update, Value &func_val, Value& 
     up->line = (uint64_t) &update->location;
     value_list.clear();
     DEBUG("UPADTE "<<update->func->name<<" num args "<<up->num_args << " arg[0] "<<up->args[0]<< " val "<<expr_v.to_str());
+
+    if (context_.symbolic && update->func->symbol->is_symbolic) {
+      symbolic::dump_update(update->func->name, expr_v);
+    }
   } catch (const RuntimeException& ex) {
     // TODO this is probably not the cleanest solutions
     driver_.error(update->location,
