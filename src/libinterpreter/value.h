@@ -2,6 +2,8 @@
 #define CASMI_LIBINTERPRETER_VALUE_H
 
 
+#include "macros.h"
+
 #include "libsyntax/types.h"
 #include "libsyntax/symbols.h"
 #include "libutil/exceptions.h"
@@ -34,8 +36,6 @@ class Value {
       const rational_t *rat;
     } value;
 
-    uint32_t symbol;
-
     Value();
     Value(INT_T ival);
     Value(FLOAT_T fval);
@@ -48,7 +48,7 @@ class Value {
     Value(const Value& other);
     Value(Value&& other) noexcept;
     Value(TypeType type, casm_update* update);
-    Value(uint32_t symbol, bool);
+    Value(TypeType t, uint32_t symbol);
 
     Value& operator=(const Value& other);
     bool operator==(const Value &other) const;

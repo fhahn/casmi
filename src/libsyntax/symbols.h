@@ -6,7 +6,6 @@
 #include <map>
 #include <vector>
 
-#include "libsyntax/ast.h"
 #include "libsyntax/types.h"
 #include "libsyntax/location.hh" // reuse bison's location class
 

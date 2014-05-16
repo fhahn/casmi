@@ -1,6 +1,8 @@
+#include "macros.h"
 #include "libutil/exceptions.h"
 
 #include "libinterpreter/execution_context.h"
+#include "libinterpreter/symbolic.h"
 
 ArgumentsKey::ArgumentsKey(uint64_t *args, uint16_t s, bool dyn) : size(s), dynamic(dyn){
   if (dynamic) {
@@ -234,6 +236,14 @@ Value& ExecutionContext::get_function_value(Function *sym, uint64_t args[]) {
 
   } catch (const std::out_of_range &e) {
     DEBUG("NOT FOUND");
+    if (symbolic && sym->is_symbolic) {
+      function_map.second.emplace(
+          ArgumentsKey(&args[0], sym->arguments_.size(), false),
+          Value(sym->return_type_->t, symbolic::next_symbol_id()));
+      Value& v = function_map.second[ArgumentsKey(&args[0], sym->arguments_.size(), false)];
+      symbolic::dump_create_value(sym->name, v);
+      return v;
+    }
     undef.type = TypeType::UNDEF;
     return undef;
   }

@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include "libsyntax/ast.h"
 #include "libsyntax/symbols.h"
 #include "shared_glue.h"
 

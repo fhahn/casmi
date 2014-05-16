@@ -69,6 +69,7 @@ class Binding;
 
 class List;
 class TempList;
+class BottomList;
 
 // Forward delclarations for this file
 class Expression;
