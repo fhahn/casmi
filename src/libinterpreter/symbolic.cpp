@@ -25,15 +25,29 @@ namespace symbolic {
   }
 
   void dump_create_value(const std::string& name, const Value& v) {
-    std::cout << "tff(symbolNext, type, sym" << v.value.symbol << ": $int)."
+    std::cout << "tff(symbolNext, type, sym" << v.value.ival<< ": $int)."
               << std::endl;
     std::cout << "fof(id"<<next_fof_id() << ",hypothesis,st" << name << "(1,sym"
-              << v.value.symbol<<")).%CREATE: " << name << std::endl;
+              << v.value.ival<<")).%CREATE: " << name << std::endl;
   }
 
   void dump_update(const std::string& name, const Value& v) {
     std::cout << "fof(id" << next_fof_id() << ",hypothesis,st" << name 
-              << "(" << get_timestamp() << ",sym" << v.value.symbol 
+              << "(" << get_timestamp() << ",sym" << v.value.ival
               << ")).%UPDATE: " << name << std::endl;
+  }
+
+  void dump_final(const std::vector<std::pair<Function*,
+      std::unordered_map<ArgumentsKey, Value> >>& functions) {
+
+    uint32_t i = 0;
+    for (auto& pair : functions) {
+      for (auto& value_pair : pair.second) {
+       std::cout << "fof(final" << i << ",hypothesis,st" << pair.first->name
+                 << "(0,sym" << value_pair.second.value.ival
+                 << ")).%FINAL: " << pair.first->name << std::endl;
+      }
+      i += 1;
+    }
   }
 }
