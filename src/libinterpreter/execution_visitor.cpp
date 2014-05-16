@@ -73,7 +73,7 @@ casm_update *ExecutionVisitor::add_update(const Value& val, size_t sym_id, const
   return up;
 }
 
-void ExecutionVisitor::visit_update_dumps(UpdateNode *update, Value &func_val, Value& expr_v) {
+void ExecutionVisitor::visit_update_dumps(UpdateNode *update, Value& expr_v) {
   const std::string& filter = driver_.function_trace_map[update->func->symbol->id];
   if (context_.filter_enabled(filter)) {
     std::cout << filter << ": " << update->func->symbol->name ;
@@ -95,12 +95,10 @@ void ExecutionVisitor::visit_update_dumps(UpdateNode *update, Value &func_val, V
     std::cout << " = "<< expr_v.to_str() << std::endl;
   }
 
-  visit_update(update, func_val, expr_v);
+  visit_update(update, expr_v);
 }
 
-void ExecutionVisitor::visit_update(UpdateNode *update, Value &func_val, Value& expr_v) {
-  UNUSED(func_val);
-
+void ExecutionVisitor::visit_update(UpdateNode *update, Value& expr_v) {
   try {
     casm_update *up = add_update(expr_v, update->func->symbol->id, value_list);
     up->line = (uint64_t) &update->location;
@@ -263,10 +261,7 @@ Value ExecutionVisitor::visit_function_atom(FunctionAtom *atom, std::vector<Valu
 
       uint64_t args[num_args];
       args[0] = 0;
-
       pack_values_in_array(expr_results, args);
-      // TODO handle function access and function write differently
-      value_list.swap(expr_results);
 
       Value v = Value(context_.get_function_value(atom->symbol, args));
       DEBUG("visit_atom "<<atom->symbol->name<<" "<<v.to_str() <<" size "<<value_list.size());
@@ -501,6 +496,33 @@ void AstWalker<ExecutionVisitor, Value>::walk_iterate(UnaryNode *node) {
   }
 }
 
+template <>
+void AstWalker<ExecutionVisitor, Value>::walk_update(UpdateNode *node) {
+  Value expr_t = walk_expression_base(node->expr_);
+  
+  visitor.value_list.clear();
+  if (node->func->arguments) {
+    for (ExpressionBase* e : *node->func->arguments) {
+      visitor.value_list.push_back(walk_expression_base(e));
+    }
+  }
+
+  visitor.visit_update(node, expr_t);
+}
+
+template <>
+void AstWalker<ExecutionVisitor, Value>::walk_update_dumps(UpdateNode *node) {
+  Value expr_t = walk_expression_base(node->expr_);
+  
+  visitor.value_list.clear();
+  if (node->func->arguments) {
+    for (ExpressionBase* e : *node->func->arguments) {
+      visitor.value_list.push_back(walk_expression_base(e));
+    }
+  }
+
+  visitor.visit_update_dumps(node, expr_t);
+}
 
 bool ExecutionWalker::init_function(const std::string& name, std::set<std::string>& visited) {
   if (visitor.driver_.init_dependencies.count(name) != 0) {

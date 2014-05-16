@@ -15,13 +15,12 @@
 class ExecutionVisitor : public BaseVisitor<Value> {
   private:
 
-    std::vector<Value> value_list;
-     std::vector<Value> main_bindings;
-
-  casm_update *add_update(const Value& val, size_t sym_id,
+    std::vector<Value> main_bindings;
+    casm_update *add_update(const Value& val, size_t sym_id,
                           const std::vector<Value> &arguments);
 
   public:
+    std::vector<Value> value_list;
     Driver& driver_;
     ExecutionContext& context_;
     std::vector<std::vector<Value> *> rule_bindings;
@@ -29,8 +28,8 @@ class ExecutionVisitor : public BaseVisitor<Value> {
     ExecutionVisitor(ExecutionContext& context, Driver& driver);
 
     void visit_assert(UnaryNode* assert, Value& val);
-    void visit_update(UpdateNode *update, Value& func_val, Value& expr_v);
-    void visit_update_dumps(UpdateNode *update, Value& func_val, Value& expr_v);
+    void visit_update(UpdateNode *update, Value& expr_v);
+    void visit_update_dumps(UpdateNode *update, Value& expr_v);
     void visit_call_pre(CallNode *call);
     void visit_call_pre(CallNode *call, Value& expr);
     void visit_call(CallNode *call, std::vector<Value> &arguments);
