@@ -13,6 +13,7 @@ namespace symbolic {
 
 
   void dump_create_value(const std::string& name, const Value& v);
+  void dump_update(const std::string& name, const Value& v);
 };
 
 #endif

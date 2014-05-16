@@ -30,4 +30,10 @@ namespace symbolic {
     std::cout << "fof(id"<<next_fof_id() << ",hypothesis,st" << name << "(1,sym"
               << v.value.symbol<<")).%CREATE: " << name << std::endl;
   }
+
+  void dump_update(const std::string& name, const Value& v) {
+    std::cout << "fof(id" << next_fof_id() << ",hypothesis,st" << name 
+              << "(" << get_timestamp() << ",sym" << v.value.symbol 
+              << ")).%UPDATE: " << name << std::endl;
+  }
 }
