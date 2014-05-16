@@ -46,6 +46,7 @@ casm_update *ExecutionVisitor::add_update(const Value& val, size_t sym_id, const
 
   up->value = (void*) val.to_uint64_t();
   up->defined = (val.is_undef()) ? 0 : 1;
+  up->symbolic = val.is_symbolic();
   up->func = sym_id;
   // TODO: Do we need line here?
   //up->line = (uint64_t) loc.lines;
@@ -634,9 +635,13 @@ void ExecutionWalker::run() {
     steps += 1;
   }
 
-  if (steps > 1) {
-    std::cout << steps <<" steps later..."<<std::endl;
+  if (visitor.context_.symbolic) {
+    symbolic::dump_final(visitor.context_.functions);
   } else {
-    std::cout << steps <<" step later..."<<std::endl;
+    if (steps > 1) {
+      std::cout << steps <<" steps later..."<<std::endl;
+    } else {
+      std::cout << steps <<" step later..."<<std::endl;
+    }
   }
 }

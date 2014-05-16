@@ -25,7 +25,6 @@ class Value {
   public:
     TypeType type;
     union {
-      uint32_t symbol;
       INT_T ival;
       FLOAT_T fval;
       bool bval;
@@ -57,6 +56,7 @@ class Value {
     uint64_t to_uint64_t() const;
 
     bool is_undef() const;
+    bool is_symbolic() const;
 
     const std::string to_str() const;
 };

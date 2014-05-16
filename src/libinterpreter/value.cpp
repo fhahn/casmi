@@ -51,6 +51,13 @@ Value::Value(TypeType t, casm_update* u) {
     return;
   }
 
+  if (u->symbolic) {
+    type = TypeType::SYMBOL;
+    value.ival= (uint64_t) u->value;
+    return;
+  }
+
+
   switch (t) {
     case TypeType::UNDEF:
       type = TypeType::UNDEF;
@@ -93,7 +100,7 @@ Value::Value(TypeType t, casm_update* u) {
 
 
 Value::Value(TypeType t, uint32_t symbol) : type(t) {
-  value.symbol = symbol;
+  value.ival = symbol;
 }
 
 Value& Value::operator=(const Value& other) {
@@ -148,12 +155,18 @@ uint64_t Value::to_uint64_t() const {
       return (uint64_t) value.list;
     case TypeType::BOOLEAN:
       return (uint64_t) value.bval;
+    case TypeType::SYMBOL:
+      return (uint64_t) value.ival;
     default: throw RuntimeException("Unsupported type in Value.to_uint64_t");
   }
 }
 
 bool Value::is_undef() const {
   return type == TypeType::UNDEF;
+}
+
+bool Value::is_symbolic() const {
+  return type == TypeType::SYMBOL;
 }
 
 const std::string Value::to_str() const {
@@ -185,6 +198,8 @@ const std::string Value::to_str() const {
       } else {
         return "false";
       }
+    case TypeType::SYMBOL:
+      return "sym"+std::to_string(value.ival);
     default: throw RuntimeException("Unsupported type in Value.to_str() ");
   }
 }

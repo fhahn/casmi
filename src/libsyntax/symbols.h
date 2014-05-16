@@ -125,7 +125,6 @@ class SymbolTable {
         table_.at(sym->name);
         return false;
       } catch (const std::out_of_range& e) {
-        DEBUG("Add symbol "+sym->name);
         table_[sym->name] = sym;
         return true;
       }
