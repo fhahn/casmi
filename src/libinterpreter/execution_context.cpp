@@ -31,13 +31,16 @@ ArgumentsKey::~ArgumentsKey() {
 
 pp_mem ExecutionContext::value_stack;
 
-ExecutionContext::ExecutionContext(const SymbolTable& st, RuleNode *init) : debuginfo_filters(), symbol_table(std::move(st)), temp_lists() {
+ExecutionContext::ExecutionContext(const SymbolTable& st, RuleNode *init,
+    const bool symbolic): debuginfo_filters(), symbol_table(std::move(st)),
+    temp_lists(), symbolic(symbolic) {
+
   // use 10 MB for updateset data
-  pp_mem_new(&updateset_data_, 1024 * 1024 * 100, "mem for main updateset");
+  pp_mem_new(&updateset_data_, 10 * 1024 * 1024, "mem for updateset hashmap");
   updateset.set =  pp_hashmap_new(&updateset_data_, 1024*10, "main updateset");
 
-  // use 10 MB for stack
-  pp_mem_new(&pp_stack, 1024 * 1024, "mem for stack stuff");
+  // use 1 MB for stack
+  pp_mem_new(&pp_stack, 1024 * 1024, "mem for temporary updates");
   pp_mem_new(&value_stack, 1024 * 1024 * 1024, "mem for value stuff");
 
   if (init->child_ && init->child_->node_type_ == NodeType::PARBLOCK) {
