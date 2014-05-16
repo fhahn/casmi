@@ -28,6 +28,7 @@ enum OptionValues {
   DUMP_AST = (1 << 1),
   PARSE_ONLY = (1 << 2),
   DEBUGINFO_FILTER = (1 << 3),
+  SYMBOLIC = (1 << 4),
   ERROR = (1 << 9)
 };
 
@@ -45,6 +46,7 @@ struct arguments parse_cmd_args(int argc, char *argv[]) {
        {"dump-ast", no_argument, &dump_ast, 1},
        {"parse-only", no_argument, &parse_only, 1},
        {"debuginfo-filter", required_argument, 0, 'd'},
+       {"symbolic", no_argument, 0, 's'},
        {0, 0, 0, 0}
   };
 
@@ -54,7 +56,7 @@ struct arguments parse_cmd_args(int argc, char *argv[]) {
 
   struct arguments opts;
 
-  while ((opt = getopt_long(argc, argv, "hd:",
+  while ((opt = getopt_long(argc, argv, "hd:s",
                             long_options, &option_index)) != -1) {
     switch(opt) {
       case 0:
@@ -70,6 +72,9 @@ struct arguments parse_cmd_args(int argc, char *argv[]) {
       case 'd':
         flags |= OptionValues::DEBUGINFO_FILTER;
         opts.debuginfo_filter = optarg;
+        break;
+      case 's':
+        flags |= OptionValues::SYMBOLIC;
         break;
       case '?':
         flags |= OptionValues::ERROR;
@@ -95,6 +100,8 @@ void print_help() {
   std::cout << "  -h, --help" << "\t\t" << "shows command line options" << std::endl;
   std::cout << "  --dump-ast" << "\t\t" << "dumps the AST as dot graph" << std::endl;
   std::cout << "  --parse-only" << "\t\t" << "only parse the input, does not run typechecking" << std::endl;
+  std::cout << "  --debuginfo-filter FILTERS" << "\t\t" << "comma separated list with filter names to enable"<< std::endl;
+  std::cout << "  -s, --symbolic" << "\t\t" << "enable symbolic mode" << std::endl;
 }
 
 int main (int argc, char *argv[]) {
@@ -154,7 +161,8 @@ int main (int argc, char *argv[]) {
       if (!driver.ok()) {
         res = EXIT_FAILURE;
       } else {
-        ExecutionContext ctx(driver.function_table, driver.get_init_rule());
+        ExecutionContext ctx(driver.function_table, driver.get_init_rule(),
+            (opts.flags & OptionValues::SYMBOLIC) != 0);
 
         if ((opts.flags & OptionValues::DEBUGINFO_FILTER) != 0) {
           ctx.set_debuginfo_filter(opts.debuginfo_filter);
@@ -166,10 +174,10 @@ int main (int argc, char *argv[]) {
           walker.run();
           res = EXIT_SUCCESS;
         } catch (const RuntimeException& ex) {
-          std::cerr << "Abort after runtime exception: "<< ex.what();
+          std::cerr << "Abort after runtime exception: "<< ex.what() << std::endl;;
           res = EXIT_FAILURE;
         } catch (char * e) {
-          std::cerr << "Abort after catching a string: "<< e;
+          std::cerr << "Abort after catching a string: "<< e << std::endl;
           res = EXIT_FAILURE;
         }
       }

@@ -68,8 +68,9 @@ class ExecutionContext {
     pp_mem pp_stack;
     std::vector<List*> temp_lists;
     static pp_mem value_stack;
+    const bool symbolic;
 
-    ExecutionContext(const SymbolTable& st, RuleNode *init);
+    ExecutionContext(const SymbolTable& st, RuleNode *init, const bool symbolic);
 
     void apply_updates();
     void merge_par();
