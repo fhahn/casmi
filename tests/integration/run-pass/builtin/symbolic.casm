@@ -1,4 +1,4 @@
-// symbolic
+// cmdline "-s"
 CASM symbolic
 
 function (symbolic) a: -> Int

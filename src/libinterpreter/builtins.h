@@ -27,6 +27,8 @@ namespace builtins {
   const Value asfloat(const Value& arg);
   const Value asrational(const Value& arg);
 
+  const Value symbolic(const Value& arg);
+
   namespace shared {
     struct Int {
       uint64_t value;

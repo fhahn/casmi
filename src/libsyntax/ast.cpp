@@ -407,7 +407,11 @@ BuiltinAtom::BuiltinAtom(yy::location& loc, const std::string name,
 
     types = { a1 };
     id = Id::ASRATIONAL;
- 
+  } else if (name == "symbolic") {
+    Type *a1 = new Type(TypeType::UNKNOWN);
+    return_type = new Type(TypeType::BOOLEAN);
+    types = { a1 };
+    id = Id::SYMBOLIC;
   } else
   SHARED_BUILTINS_TYPECHECK
 }
