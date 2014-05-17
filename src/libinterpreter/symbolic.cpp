@@ -42,6 +42,9 @@ namespace symbolic {
 
     uint32_t i = 0;
     for (auto& pair : functions) {
+      if (!pair.first->is_symbolic) {
+        continue;
+      }
       for (auto& value_pair : pair.second) {
        std::cout << "fof(final" << i << ",hypothesis,st" << pair.first->name
                  << "(0,sym" << value_pair.second.value.ival
