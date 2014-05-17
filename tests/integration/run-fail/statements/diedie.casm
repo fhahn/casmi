@@ -1,0 +1,7 @@
+CASM foo
+
+init initR
+
+rule initR =
+    diedie
+    //~^ `diedie` executed

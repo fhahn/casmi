@@ -1,0 +1,5 @@
+init main
+
+rule main =
+    diedie "DIEEE"
+    //~^ DIEEE

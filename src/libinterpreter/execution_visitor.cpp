@@ -182,6 +182,15 @@ void ExecutionVisitor::visit_print(PrintNode *node, const std::vector<Value> &ar
   std::cout << std::endl;
 }
 
+void ExecutionVisitor::visit_diedie(DiedieNode *node, const Value& msg) {
+  if (node->msg) {
+    driver_.error(node->location, *msg.value.string);
+  } else {
+    driver_.error(node->location, "`diedie` executed");
+  }
+    throw RuntimeException("diedie");
+}
+
 void ExecutionVisitor::visit_let(LetNode*, Value& v) {
   rule_bindings.back()->push_back(v);
 }

@@ -209,6 +209,13 @@ void TypecheckVisitor::visit_call_post(CallNode *call) {
   UNUSED(call);
 }
 
+void TypecheckVisitor::visit_diedie(DiedieNode *node, Type* msg) {
+  if (node->msg && !node->msg->type_.unify(TypeType::STRING)) {
+    driver_.error(node->msg->location,
+                  "expression of `diedie` must be a String but was "+msg->to_str());
+  }
+}
+
 void TypecheckVisitor::visit_let(LetNode *node, Type* v) {
   if (node->type_ == TypeType::ENUM &&
       !driver_.function_table.get_enum(node->type_.enum_name)) {

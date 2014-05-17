@@ -147,6 +147,7 @@
 %type <Enum*> ENUM_SYNTAX;
 %type <std::vector<std::pair<std::string, std::vector<std::string>>>> DUMPSPEC_LIST
 %type <std::pair<std::string, std::vector<std::string>>> DUMPSPEC
+%type <DiedieNode*> DIEDIE_SYNTAX
 
 
 %start SPECIFICATION
@@ -516,7 +517,7 @@ DUMPSPEC: "(" IDENTIFIER_LIST ")" ARROW IDENTIFIER { $$ = std::pair<std::string,
 
 STATEMENT: ASSERT_SYNTAX { $$ = $1; }
          | ASSURE_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
-         | DIEDIE_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
+         | DIEDIE_SYNTAX { $$ = $1; }
          | IMPOSSIBLE_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
          | DEBUGINFO_SYNTAX { $$ = $1; }
          | PRINT_SYNTAX { $$ = $1; }
@@ -544,8 +545,8 @@ ASSERT_SYNTAX: ASSERT EXPRESSION { $$ = new UnaryNode(@$, NodeType::ASSERT, $2);
 ASSURE_SYNTAX: ASSURE EXPRESSION
              ;
 
-DIEDIE_SYNTAX: DIEDIE EXPRESSION
-             | DIEDIE
+DIEDIE_SYNTAX: DIEDIE EXPRESSION { $$ = new DiedieNode(@$, $2); }
+             | DIEDIE { $$ = new DiedieNode(@$, nullptr); }
              ;
 
 /* when symbolic execution:

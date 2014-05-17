@@ -139,6 +139,15 @@ template<class T, class V> class AstWalker {
         case NodeType::UPDATE_DUMPS:
           walk_update_dumps(reinterpret_cast<UpdateNode*>(stmt));
           break;
+        case NodeType::DIEDIE: {
+            DiedieNode *node = reinterpret_cast<DiedieNode*>(stmt);
+            if (node->msg) {
+              visitor.visit_diedie(node, walk_expression_base(node->msg));
+            } else {
+              visitor.visit_diedie(node, V());
+            }
+          }
+          break;
         default:
             throw RuntimeException(
               std::string("Invalid node type: ")+
@@ -381,6 +390,7 @@ template<class T> class BaseVisitor {
     T visit_call(CallNode*, std::vector<T>&) { return T(); }
     void visit_call_post(CallNode*) {}
     T visit_print(PrintNode*, std::vector<T>&) { return T(); }
+    void visit_diedie(DiedieNode*, const T&) {}
 
     void visit_let(LetNode*, T) {}
     void visit_let_post(LetNode*) {}
