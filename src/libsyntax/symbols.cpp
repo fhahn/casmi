@@ -20,6 +20,7 @@ static std::map<const std::string, bool> builtin_names = {
   {"asInt", true},
   {"asFloat", true},
   {"asRational", true},
+  {"symbolic", true},
   SHARED_BUILTIN_NAMES
 };
 

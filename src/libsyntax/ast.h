@@ -272,6 +272,7 @@ class BuiltinAtom: public BaseFunctionAtom {
       ASINT,
       ASFLOAT,
       ASRATIONAL,
+      SYMBOLIC,
       SHARED_BUILTIN_IDS
     } id;
 

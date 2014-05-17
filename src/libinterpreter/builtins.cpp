@@ -49,6 +49,9 @@ const Value builtins::dispatch(BuiltinAtom::Id atom_id,  ExecutionContext& ctxt,
     case BuiltinAtom::Id::ASRATIONAL:
       return std::move(asrational(arguments[0]));
 
+    case BuiltinAtom::Id::SYMBOLIC:
+      return std::move(symbolic(arguments[0]));
+
     default: return std::move(shared::dispatch(atom_id, arguments));
   }
 }
@@ -335,6 +338,14 @@ const Value builtins::asrational(const Value& arg) {
     case TypeType::RATIONAL:
       return std::move(Value(arg.value.rat));
     default: assert(0);
+  }
+}
+
+const Value builtins::symbolic(const Value& arg) {
+  if (arg.type == TypeType::SYMBOL) {
+    return std::move(Value(true));
+  } else {
+    return std::move(Value(false));
   }
 }
 
