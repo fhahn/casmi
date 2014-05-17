@@ -650,3 +650,5 @@ LetNode::LetNode(yy::location& loc, Type type, const std::string& identifier,
             ExpressionBase *expr, AstNode *stmt) 
     : AstNode(loc, NodeType::LET, type), identifier(identifier), expr(expr), stmt(stmt) {}
 
+DiedieNode::DiedieNode(yy::location& loc, ExpressionBase *msg)
+    : AstNode(loc, NodeType::DIEDIE), msg(msg) {}

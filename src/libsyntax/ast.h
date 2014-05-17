@@ -56,6 +56,7 @@ enum NodeType {
   CASE,
   FORALL,
   ITERATE,
+  DIEDIE,
 };
 
 const std::string& type_to_str(NodeType t);
@@ -444,6 +445,13 @@ class LetNode: public AstNode {
 
     LetNode(yy::location& loc, Type type, const std::string& identifier,
             ExpressionBase *expr, AstNode *stmt);
+};
+
+class DiedieNode : public AstNode {
+  public:
+    ExpressionBase *msg;
+
+    DiedieNode(yy::location& loc, ExpressionBase *msg);
 };
 
 
