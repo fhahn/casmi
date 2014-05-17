@@ -45,4 +45,4 @@ add_library(parser
   ${SHARED_GLUE_HEADER}
 )
 
-target_link_libraries(parser y util)
+target_link_libraries(parser util)
