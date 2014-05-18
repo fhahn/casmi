@@ -238,10 +238,10 @@ Value& ExecutionContext::get_function_value(Function *sym, uint64_t args[]) {
     DEBUG("NOT FOUND");
     if (symbolic && sym->is_symbolic) {
       function_map.second.emplace(
-          ArgumentsKey(&args[0], sym->arguments_.size(), false),
+          ArgumentsKey(&args[0], sym->arguments_.size(), true),
           Value(TypeType::SYMBOL, symbolic::next_symbol_id()));
       Value& v = function_map.second[ArgumentsKey(&args[0], sym->arguments_.size(), false)];
-      symbolic::dump_create_value(sym->name, v);
+      symbolic::dump_create(sym, &args[0], v);
       return v;
     }
     undef.type = TypeType::UNDEF;

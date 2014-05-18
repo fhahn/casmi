@@ -1,0 +1,11 @@
+// cmdline "-s"
+
+function(symbolic) b : Int -> Int initially { 1 -> 1, 2 -> 2 }
+
+init main
+
+rule main = {
+    assert symbolic( b(1) ) = false
+    assert symbolic( b(3) )
+    program(self) := undef
+}
