@@ -27,34 +27,53 @@ namespace symbolic {
     return current_time;
   }
 
-  void dump_create_value(const std::string& name, const Value& v) {
-    std::cout << "tff(symbolNext, type, sym" << v.value.ival<< ": $int)."
-              << std::endl;
-    std::cout << "fof(id"<<next_fof_id() << ",hypothesis,st" << name << "(1,sym"
-              << v.value.ival<<")).%CREATE: " << name << std::endl;
-  }
-
-  void dump_update(const std::string& name, const Value& v) {
-    std::cout << "fof(id" << next_fof_id() << ",hypothesis,st" << name 
-              << "(" << get_timestamp() << ",sym" << v.value.ival
-              << ")).%UPDATE: " << name << std::endl;
-  }
-
-  std::string arguments_key_to_string(const ArgumentsKey& k, Function *func) {
+  std::string arguments_to_string(const Function *func, const uint64_t args[],
+                                  bool strip=false) {
     std::stringstream ss;
-
-    ss << ",";
+    ss << ',';
 
     for (uint32_t i = 0; i < func->arguments_.size(); i++) {
       switch (func->arguments_[i]->t) {
         case TypeType::INT:
-          ss << (INT_T) k.p[i];
+          ss << (INT_T) args[i];
           break;
         default: assert(0);
       }
-      ss << ",";
+      ss << ',';
     }
+    // Strip leading and trailing comma if requested
+    if (strip) {
+      return ss.str().substr(1, ss.str().size()-2);
+    } else {
+      return ss.str();
+    }
+  }
+
+
+  std::string location_to_string(const Function *func, const uint64_t args[],
+                                 const Value& val, uint32_t time) {
+    std::stringstream ss;
+    ss << "st" << func->name << "(" << time
+       << arguments_to_string(func, args) << val.to_str()
+       << ")";
     return ss.str();
+  }
+
+
+  void dump_create(const Function *func, const uint64_t args[], const Value& v) {
+    std::cout << "tff(symbolNext, type, sym" << v.value.ival<< ": $int)."
+              << std::endl;
+    std::cout << "fof(id"<<next_fof_id() << ",hypothesis,"
+              << location_to_string(func, args, v, get_timestamp())
+              << ").%CREATE: " << func->name
+              << '(' << arguments_to_string(func, args, true) << ')' << std::endl;
+  }
+
+  void dump_update(const Function *func, const uint64_t args[], const Value& v) {
+    std::cout << "fof(id" << next_fof_id() << ",hypothesis,"
+              << location_to_string(func, args, v, get_timestamp())
+              << ").%UPDATE: " << func->name
+              << '(' << arguments_to_string(func, args, true) << ')' << std::endl;
   }
 
   void dump_final(const std::vector<std::pair<Function*,
@@ -66,10 +85,11 @@ namespace symbolic {
         continue;
       }
       for (auto& value_pair : pair.second) {
-        std::cout << "fof(final" << i << ",hypothesis,st" << pair.first->name
-                 << "(0" << arguments_key_to_string(value_pair.first, pair.first)
-                 << value_pair.second.to_str()
-                 << ")).%FINAL: " << pair.first->name << std::endl;
+        std::cout << "fof(final" << i << ",hypothesis,"
+                 << location_to_string(pair.first, value_pair.first.p, value_pair.second, 0)
+                 << ").%FINAL: " << pair.first->name << '(' 
+                 << arguments_to_string(pair.first, value_pair.first.p, true)
+                 << ')' << std::endl;
       }
       i += 1;
     }
