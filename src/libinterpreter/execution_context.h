@@ -16,43 +16,44 @@
 
 struct ArgumentsKey {
   uint64_t* p;
-  uint16_t size;
   bool dynamic;
 
 
-  ArgumentsKey(uint64_t *args, uint16_t s, bool dyn);
+  ArgumentsKey(uint64_t *args, uint16_t size, bool dyn);
   ArgumentsKey(const ArgumentsKey& other);
   ArgumentsKey(ArgumentsKey&& other) noexcept;
   ~ArgumentsKey();
+};
 
-  inline bool operator==(const ArgumentsKey& other) const {
-    if(other.size == size) {
-      for(size_t i = 0; i < size; i++) {
-        if (other.p[i] != p[i]) {
-          DEBUG(other.p[i] << " != "<<p[i] << " at "<<i);
+
+
+namespace std {
+
+  template <> struct hash<ArgumentsKey> {
+    std::vector<Type*> types;
+
+    size_t operator()(const ArgumentsKey &key) const {
+      size_t h = 0;
+      for(uint16_t i = 0; i < types.size(); i++) {
+        h ^= hash_uint64_value(types[i], key.p[i]);
+      }
+      return h;
+    }
+  };
+
+  template <> struct equal_to<ArgumentsKey> {
+    std::vector<Type*> types;
+
+    bool operator()(const ArgumentsKey &lhs, const ArgumentsKey &rhs) const {
+      for(uint16_t i = 0; i < types.size(); i++) {
+        if (!eq_uint64_value(types[i], lhs.p[i], rhs.p[i])) {
           return false;
         }
       }
       return true;
-    } else {
-      return false;
-    }
-  }
-};
-
-
-namespace std {
-  template <> struct hash<ArgumentsKey> {
-
-    size_t operator()(const ArgumentsKey &key) const {
-        size_t h = 0;
-        hash<uint64_t> hasher;
-        for(size_t i = 0; i < key.size; i++) {
-          h ^= hasher(key.p[i]);
-        }
-        return h;
     }
   };
+
 }
 
 

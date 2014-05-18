@@ -189,16 +189,14 @@ class SkipList : public List {
     SkipList(size_t skip, BottomList *btm);
 };
 
+size_t hash_uint64_value(const Type *type, uint64_t val);
+bool eq_uint64_value(const Type *type, uint64_t lhs, uint64_t rhs);
 
 namespace std {
 
   template <> struct hash<HeadList>;
 
   template <> struct hash<Value> {
-    static std::hash<std::string> str_hasher;
-    static std::hash<HeadList> head_list_hasher;
-    static std::hash<BottomList> perm_list_hasher;
-
     size_t operator()(const Value &key) const;
   };
 

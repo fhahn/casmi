@@ -1,3 +1,6 @@
+#include <cassert>
+#include <sstream>
+
 #include "libinterpreter/symbolic.h"
 
 namespace symbolic {
@@ -37,6 +40,23 @@ namespace symbolic {
               << ")).%UPDATE: " << name << std::endl;
   }
 
+  std::string arguments_key_to_string(const ArgumentsKey& k, Function *func) {
+    std::stringstream ss;
+
+    ss << ",";
+
+    for (uint32_t i = 0; i < func->arguments_.size(); i++) {
+      switch (func->arguments_[i]->t) {
+        case TypeType::INT:
+          ss << (INT_T) k.p[i];
+          break;
+        default: assert(0);
+      }
+      ss << ",";
+    }
+    return ss.str();
+  }
+
   void dump_final(const std::vector<std::pair<Function*,
       std::unordered_map<ArgumentsKey, Value> >>& functions) {
 
@@ -46,8 +66,9 @@ namespace symbolic {
         continue;
       }
       for (auto& value_pair : pair.second) {
-       std::cout << "fof(final" << i << ",hypothesis,st" << pair.first->name
-                 << "(0,sym" << value_pair.second.value.ival
+        std::cout << "fof(final" << i << ",hypothesis,st" << pair.first->name
+                 << "(0" << arguments_key_to_string(value_pair.first, pair.first)
+                 << value_pair.second.to_str()
                  << ")).%FINAL: " << pair.first->name << std::endl;
       }
       i += 1;

@@ -580,11 +580,70 @@ bool BottomList::check_allocated_and_set_to_false() {
 
 SkipList::SkipList(size_t skip, BottomList *btm) : List(ListType::SKIP), skip(skip), bottom(btm) {}
 
-namespace std {
+static std::hash<std::string> str_hasher;
+static std::hash<HeadList> head_list_hasher;
+static std::hash<BottomList> perm_list_hasher;
 
-  std::hash<std::string> hash<Value>::str_hasher;
-  std::hash<HeadList> hash<Value>::head_list_hasher;
-  std::hash<BottomList> hash<Value>::perm_list_hasher;
+
+size_t hash_uint64_value(const Type *type, uint64_t val) {
+  switch (type->t) {
+    case TypeType::INT:
+      return val;
+    case TypeType::SELF:
+    case TypeType::UNDEF: // are UNDEF and SELF the same here?
+      return 0;
+    case TypeType::RULEREF:
+      return val;
+    case TypeType::STRING: 
+      return (uint64_t) str_hasher(*reinterpret_cast<std::string*>(val));
+    case TypeType::TUPLE: 
+    case TypeType::TUPLE_OR_LIST: 
+      assert(0);
+    case TypeType::LIST: {
+      size_t h = 0; 
+      List *list = reinterpret_cast<List*>(val);
+      for (auto iter=list->begin(); iter!=list->end(); iter++) {
+        h += hash_uint64_value(type->internal_type, (*iter).to_uint64_t());
+      }
+      return h;
+    }
+    case TypeType::ENUM:
+      return (size_t) reinterpret_cast<enum_value_t*>(val)->id;
+    case TypeType::RATIONAL: {
+      rational_t *rat = reinterpret_cast<rational_t*>(val);
+      return (size_t) rat->numerator + rat->denominator;
+    }
+    default: assert(0);
+  }
+}
+
+bool eq_uint64_value(const Type *type, uint64_t lhs, uint64_t rhs) {
+  switch (type->t) {
+    case TypeType::SELF: return true;
+    case TypeType::INT:
+    case TypeType::FLOAT:
+    case TypeType::BOOLEAN:
+      return lhs == rhs;
+    case TypeType::STRING:
+      return *reinterpret_cast<std::string*>(lhs) ==
+             *reinterpret_cast<std::string*>(rhs); 
+    case TypeType::TUPLE:
+    case TypeType::TUPLE_OR_LIST:
+    case TypeType::LIST:
+      return *reinterpret_cast<List*>(lhs) ==
+             *reinterpret_cast<List*>(rhs); 
+    case TypeType::ENUM:
+      return reinterpret_cast<enum_value_t*>(lhs)->id ==
+             reinterpret_cast<enum_value_t*>(rhs)->id; 
+    case TypeType::RATIONAL:
+      return *reinterpret_cast<rational_t*>(lhs) ==
+             *reinterpret_cast<rational_t*>(rhs); 
+    default: assert(0);
+  }
+}
+
+
+namespace std {
 
   size_t hash<Value>::operator()(const Value &key) const {
     switch (key.type) {
