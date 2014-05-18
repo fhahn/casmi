@@ -4,7 +4,7 @@
 #include "libinterpreter/execution_context.h"
 #include "libinterpreter/symbolic.h"
 
-ArgumentsKey::ArgumentsKey(uint64_t *args, uint16_t s, bool dyn) : size(s), dynamic(dyn){
+ArgumentsKey::ArgumentsKey(uint64_t *args, uint16_t size, bool dyn) : dynamic(dyn) {
   if (dynamic) {
     p = new uint64_t[size];
     for (uint16_t i = 0; i < size; i++) {
@@ -15,12 +15,11 @@ ArgumentsKey::ArgumentsKey(uint64_t *args, uint16_t s, bool dyn) : size(s), dyna
   }
 }
 
-ArgumentsKey::ArgumentsKey(const ArgumentsKey& other) : p(other.p), size(other.size), dynamic(other.dynamic) {
+ArgumentsKey::ArgumentsKey(const ArgumentsKey& other) : p(other.p), dynamic(other.dynamic) {
 }
 
 ArgumentsKey::ArgumentsKey(ArgumentsKey&& other) noexcept {
   p = other.p;
-  size = other.size;
   dynamic = other.dynamic;
   other.dynamic = false;
 }

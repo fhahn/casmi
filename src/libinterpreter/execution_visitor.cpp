@@ -19,11 +19,9 @@ DEFINE_CASM_UPDATESET_FORK_SEQ
 REENABLE_VARIADIC_WARNINGS
 
 
-std::hash<Value> hasher;
-
 void pack_values_in_array(const std::vector<Value> &value_list, uint64_t array[]) {
   for (size_t i=0; i < value_list.size(); i++) {
-    array[i] = hasher(value_list[i]);
+    array[i] = value_list[i].to_uint64_t();
   }
 }
 
@@ -556,7 +554,7 @@ bool ExecutionWalker::init_function(const std::string& name, std::set<std::strin
     return true;
   }
 
-  visitor.context_.functions[func->id] = std::move(std::pair<Function*, std::unordered_map<ArgumentsKey, Value>>(func,std::unordered_map<ArgumentsKey, Value>()));
+  visitor.context_.functions[func->id] = std::move(std::pair<Function*, std::unordered_map<ArgumentsKey, Value>>(func,std::unordered_map<ArgumentsKey, Value>(0, {func->arguments_}, {func->arguments_})));
   auto& function_map = visitor.context_.functions[func->id].second;
 
   if (func->intitializers_ != nullptr) {
