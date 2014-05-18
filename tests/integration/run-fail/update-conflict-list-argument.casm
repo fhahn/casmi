@@ -1,0 +1,11 @@
+function a : List(Int) -> Int
+
+init main
+
+rule main = {
+    a([0]) := 1
+    a([0]) := 1
+    //~^  update conflict in parallel block for function `a`
+
+    program(self) := undef
+}

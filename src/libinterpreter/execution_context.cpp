@@ -182,8 +182,9 @@ void ExecutionContext::merge_seq(Driver& driver) {
       if( (v = (casm_update*) pp_hashmap_set(updateset.set, i->key-1, i->value)) != NULL ) {
           u = (casm_update*)i->value;
 
-          for (size_t i=0; i < u->num_args; i++) {
-            if (u->args[i] != v->args[i]) {
+          Function *func = functions[u->func].first;
+          for (size_t i=0; i < func->arguments_.size(); i++) {
+            if (!eq_uint64_value(func->arguments_[i], u->args[i], v->args[i])) {
               return;
             }
           }

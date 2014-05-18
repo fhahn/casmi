@@ -1,0 +1,13 @@
+function a : List(Int) -> Int
+
+init main
+
+rule main = {
+    a([0]) := 1
+    {|
+        a([0]) := 1
+        //~^ conflict merging updatesets
+    |}
+
+    program(self) := undef
+}
