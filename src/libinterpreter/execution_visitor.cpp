@@ -63,7 +63,7 @@ casm_update *ExecutionVisitor::add_update(const Value& val, size_t sym_id, const
   if (v != nullptr) {
     // Check if values match
     for (int i=0; i < up->num_args; i++) {
-      if (up->args[i] != v->args[i]) {
+      if (!eq_uint64_value(function_map.first->arguments_[i], up->args[i], v->args[i])) {
         return up;
       }
     }
