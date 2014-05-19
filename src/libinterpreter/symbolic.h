@@ -15,9 +15,12 @@ namespace symbolic {
   void advance_timestamp();
   uint32_t get_timestamp();
 
-  void dump_create(const Function *func, const uint64_t args[], const Value& v);
-  void dump_update(const Function *func, const uint64_t args[], const Value& v);
-  void dump_final(const std::vector<std::pair<const Function*,
+  void dump_create(std::vector<std::string>& trace, const Function *func,
+      const uint64_t args[], const Value& v);
+  void dump_update(std::vector<std::string>& trace, const Function *func,
+      const uint64_t args[], const Value& v);
+  void dump_final(std::vector<std::string>& trace,
+      const std::vector<std::pair<const Function*, 
       std::unordered_map<ArgumentsKey, Value> >>& functions);
 };
 

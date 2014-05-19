@@ -105,7 +105,7 @@ void ExecutionVisitor::visit_update(UpdateNode *update, Value& expr_v) {
     DEBUG("UPADTE "<<update->func->name<<" num args "<<up->num_args << " arg[0] "<<up->args[0]<< " val "<<expr_v.to_str());
 
     if (context_.symbolic && update->func->symbol->is_symbolic) {
-      symbolic::dump_update(update->func->symbol, up->args, expr_v);
+      symbolic::dump_update(context_.trace, update->func->symbol, up->args, expr_v);
     }
   } catch (const RuntimeException& ex) {
     // TODO this is probably not the cleanest solutions
@@ -643,7 +643,10 @@ void ExecutionWalker::run() {
   }
 
   if (visitor.context_.symbolic) {
-    symbolic::dump_final(visitor.context_.functions);
+    symbolic::dump_final(visitor.context_.trace, visitor.context_.functions);
+    for (const std::string& s : visitor.context_.trace) {
+      std::cout << s;
+    }
   } else {
     if (steps > 1) {
       std::cout << steps <<" steps later..."<<std::endl;
