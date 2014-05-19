@@ -17,7 +17,7 @@ namespace symbolic {
 
   void dump_create(const Function *func, const uint64_t args[], const Value& v);
   void dump_update(const Function *func, const uint64_t args[], const Value& v);
-  void dump_final(const std::vector<std::pair<Function*,
+  void dump_final(const std::vector<std::pair<const Function*,
       std::unordered_map<ArgumentsKey, Value> >>& functions);
 };
 
