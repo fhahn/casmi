@@ -4,6 +4,10 @@
 #include "libinterpreter/execution_context.h"
 #include "libinterpreter/symbolic.h"
 
+#define UPDATESET_DATA_SIZE 10 * 1024 * 1024
+#define UPDATESET_SIZE 10 * 1024
+#define TEMP_STACK_SIZE 1024 * 1024
+
 
 ArgumentsKey::ArgumentsKey(uint64_t *args, uint16_t size, bool dyn) : dynamic(dyn) {
   if (dynamic) {
@@ -37,12 +41,10 @@ ExecutionContext::ExecutionContext(const SymbolTable& st, RuleNode *init,
     const bool symbolic): debuginfo_filters(), symbol_table(std::move(st)),
     temp_lists(), symbolic(symbolic) {
 
-  // use 10 MB for updateset data
-  pp_mem_new(&updateset_data_, 10 * 1024 * 1024, "mem for updateset hashmap");
-  updateset.set =  pp_hashmap_new(&updateset_data_, 1024*10, "main updateset");
+  pp_mem_new(&updateset_data_, UPDATESET_DATA_SIZE, "mem for updateset hashmap");
+  updateset.set =  pp_hashmap_new(&updateset_data_, UPDATESET_SIZE, "main updateset");
 
-  // use 1 MB for stack
-  pp_mem_new(&pp_stack, 1024 * 1024, "mem for temporary updates");
+  pp_mem_new(&pp_stack, TEMP_STACK_SIZE, "mem for temporary updates");
   pp_mem_new(&value_stack, 1024 * 1024 * 1024, "mem for value stuff");
 
   if (init->child_ && init->child_->node_type_ == NodeType::PARBLOCK) {
