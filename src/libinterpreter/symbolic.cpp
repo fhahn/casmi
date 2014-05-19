@@ -76,7 +76,7 @@ namespace symbolic {
               << '(' << arguments_to_string(func, args, true) << ')' << std::endl;
   }
 
-  void dump_final(const std::vector<std::pair<Function*,
+  void dump_final(const std::vector<std::pair<const Function*,
       std::unordered_map<ArgumentsKey, Value> >>& functions) {
 
     uint32_t i = 0;

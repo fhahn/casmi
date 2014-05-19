@@ -4,6 +4,7 @@
 #include "libinterpreter/execution_context.h"
 #include "libinterpreter/symbolic.h"
 
+
 ArgumentsKey::ArgumentsKey(uint64_t *args, uint16_t size, bool dyn) : dynamic(dyn) {
   if (dynamic) {
     p = new uint64_t[size];
@@ -50,7 +51,7 @@ ExecutionContext::ExecutionContext(const SymbolTable& st, RuleNode *init,
     updateset.pseudostate = 0;
   }
 
-  functions = std::vector<std::pair<Function*, std::unordered_map<ArgumentsKey, Value>>>(symbol_table.size());
+  functions = std::vector<std::pair<const Function*, std::unordered_map<ArgumentsKey, Value>>>(symbol_table.size());
   Function *program_sym = symbol_table.get_function("program");
   // TODO location is wrong here
   program_sym->intitializers_ = new std::vector<std::pair<ExpressionBase*, ExpressionBase*>>();
@@ -58,6 +59,11 @@ ExecutionContext::ExecutionContext(const SymbolTable& st, RuleNode *init,
   init_atom->rule = init;
   program_sym->intitializers_->push_back(std::pair<ExpressionBase*, ExpressionBase*>(new SelfAtom(init->location), init_atom));
 
+}
+
+ExecutionContext::ExecutionContext(const ExecutionContext& other) : 
+     debuginfo_filters(other.debuginfo_filters), symbol_table(other.symbol_table),
+     symbolic(other.symbolic) {
 }
 
 void ExecutionContext::apply_updates() {
@@ -182,7 +188,7 @@ void ExecutionContext::merge_seq(Driver& driver) {
       if( (v = (casm_update*) pp_hashmap_set(updateset.set, i->key-1, i->value)) != NULL ) {
           u = (casm_update*)i->value;
 
-          Function *func = functions[u->func].first;
+          const Function *func = functions[u->func].first;
           for (size_t i=0; i < func->arguments_.size(); i++) {
             if (!eq_uint64_value(func->arguments_[i], u->args[i], v->args[i])) {
               return;

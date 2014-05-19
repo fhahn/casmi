@@ -63,7 +63,7 @@ class ExecutionContext {
     std::map<const std::string, bool> debuginfo_filters;
 
   public:
-    std::vector<std::pair<Function*, std::unordered_map<ArgumentsKey, Value> >> functions;
+    std::vector<std::pair<const Function*, std::unordered_map<ArgumentsKey, Value> >> functions;
     const SymbolTable symbol_table;
     casm_updateset updateset;
     pp_mem pp_stack;
@@ -72,6 +72,7 @@ class ExecutionContext {
     const bool symbolic;
 
     ExecutionContext(const SymbolTable& st, RuleNode *init, const bool symbolic);
+    ExecutionContext(const ExecutionContext& other);
 
     void apply_updates();
     void merge_par();
