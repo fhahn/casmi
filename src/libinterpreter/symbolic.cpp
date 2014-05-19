@@ -60,38 +60,45 @@ namespace symbolic {
   }
 
 
-  void dump_create(const Function *func, const uint64_t args[], const Value& v) {
-    std::cout << "tff(symbolNext, type, sym" << v.value.ival<< ": $int)."
-              << std::endl;
-    std::cout << "fof(id"<<next_fof_id() << ",hypothesis,"
-              << location_to_string(func, args, v, get_timestamp())
-              << ").%CREATE: " << func->name
-              << '(' << arguments_to_string(func, args, true) << ')' << std::endl;
+  void dump_create(std::vector<std::string>& trace, const Function *func,
+      const uint64_t args[], const Value& v) {
+    std::stringstream ss;
+    ss << "tff(symbolNext, type, sym" << v.value.ival<< ": $int)."
+       << std::endl;
+    ss << "fof(id"<<next_fof_id() << ",hypothesis,"
+       << location_to_string(func, args, v, get_timestamp())
+       << ").%CREATE: " << func->name
+       << '(' << arguments_to_string(func, args, true) << ')' << std::endl;
+    trace.push_back(ss.str());
   }
 
-  void dump_update(const Function *func, const uint64_t args[], const Value& v) {
-    std::cout << "fof(id" << next_fof_id() << ",hypothesis,"
-              << location_to_string(func, args, v, get_timestamp())
-              << ").%UPDATE: " << func->name
-              << '(' << arguments_to_string(func, args, true) << ')' << std::endl;
+  void dump_update(std::vector<std::string>& trace, const Function *func,
+      const uint64_t args[], const Value& v) {
+    std::stringstream ss;
+    ss << "fof(id" << next_fof_id() << ",hypothesis,"
+       << location_to_string(func, args, v, get_timestamp())
+       << ").%UPDATE: " << func->name
+       << '(' << arguments_to_string(func, args, true) << ')' << std::endl;
+    trace.push_back(ss.str());
   }
 
-  void dump_final(const std::vector<std::pair<const Function*,
+  void dump_final(std::vector<std::string>& trace, const std::vector<std::pair<const Function*,
       std::unordered_map<ArgumentsKey, Value> >>& functions) {
-
+    std::stringstream ss;
     uint32_t i = 0;
     for (auto& pair : functions) {
       if (!pair.first->is_symbolic) {
         continue;
       }
       for (auto& value_pair : pair.second) {
-        std::cout << "fof(final" << i << ",hypothesis,"
-                 << location_to_string(pair.first, value_pair.first.p, value_pair.second, 0)
-                 << ").%FINAL: " << pair.first->name << '(' 
-                 << arguments_to_string(pair.first, value_pair.first.p, true)
-                 << ')' << std::endl;
+        ss << "fof(final" << i << ",hypothesis,"
+           << location_to_string(pair.first, value_pair.first.p, value_pair.second, 0)
+           << ").%FINAL: " << pair.first->name << '(' 
+           << arguments_to_string(pair.first, value_pair.first.p, true)
+           << ')' << std::endl;
       }
       i += 1;
     }
+    trace.push_back(ss.str());
   }
 }

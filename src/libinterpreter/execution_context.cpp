@@ -39,7 +39,7 @@ pp_mem ExecutionContext::value_stack;
 
 ExecutionContext::ExecutionContext(const SymbolTable& st, RuleNode *init,
     const bool symbolic): debuginfo_filters(), symbol_table(std::move(st)),
-    temp_lists(), symbolic(symbolic) {
+    temp_lists(), symbolic(symbolic), trace(), path_names() {
 
   pp_mem_new(&updateset_data_, UPDATESET_DATA_SIZE, "mem for updateset hashmap");
   updateset.set =  pp_hashmap_new(&updateset_data_, UPDATESET_SIZE, "main updateset");
@@ -65,7 +65,7 @@ ExecutionContext::ExecutionContext(const SymbolTable& st, RuleNode *init,
 
 ExecutionContext::ExecutionContext(const ExecutionContext& other) : 
      debuginfo_filters(other.debuginfo_filters), symbol_table(other.symbol_table),
-     symbolic(other.symbolic) {
+     symbolic(other.symbolic), trace(other.trace), path_names(other.path_names) {
 
   // TODO copy updates!
   pp_mem_new(&updateset_data_, UPDATESET_DATA_SIZE, "mem for updateset hashmap");
@@ -256,7 +256,7 @@ Value& ExecutionContext::get_function_value(Function *sym, uint64_t args[]) {
           ArgumentsKey(&args[0], sym->arguments_.size(), true),
           Value(TypeType::SYMBOL, symbolic::next_symbol_id()));
       Value& v = function_map.second[ArgumentsKey(&args[0], sym->arguments_.size(), false)];
-      symbolic::dump_create(sym, &args[0], v);
+      symbolic::dump_create(trace, sym, &args[0], v);
       return v;
     }
     undef.type = TypeType::UNDEF;
