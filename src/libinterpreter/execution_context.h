@@ -11,8 +11,6 @@
 
 #include "libcasmrt/rt.h"
 
-#define UPDATESET_SIZE 65535
-
 
 struct ArgumentsKey {
   uint64_t* p;
