@@ -90,5 +90,6 @@ class ExecutionWalker : public AstWalker<ExecutionVisitor, Value> {
   public:
     ExecutionWalker(ExecutionVisitor& v) : AstWalker<ExecutionVisitor, Value>(v), initialized() {}
     void run();
+    void run_continue();
 };
 #endif //CASMI_LIBINTERPRETER_EXEC_VISITOR

@@ -39,7 +39,7 @@ pp_mem ExecutionContext::value_stack;
 
 ExecutionContext::ExecutionContext(const SymbolTable& st, RuleNode *init,
     const bool symbolic): debuginfo_filters(), symbol_table(std::move(st)),
-    temp_lists(), symbolic(symbolic), trace(), path_names() {
+    temp_lists(), symbolic(symbolic), trace(), path_name() {
 
   pp_mem_new(&updateset_data_, UPDATESET_DATA_SIZE, "mem for updateset hashmap");
   updateset.set =  pp_hashmap_new(&updateset_data_, UPDATESET_SIZE, "main updateset");
@@ -64,14 +64,50 @@ ExecutionContext::ExecutionContext(const SymbolTable& st, RuleNode *init,
 }
 
 ExecutionContext::ExecutionContext(const ExecutionContext& other) : 
-     debuginfo_filters(other.debuginfo_filters), symbol_table(other.symbol_table),
-     symbolic(other.symbolic), trace(other.trace), path_names(other.path_names) {
+     debuginfo_filters(other.debuginfo_filters), functions(other.symbol_table.size()),
+     symbol_table(other.symbol_table), symbolic(other.symbolic), trace(other.trace), path_name(other.path_name) {
 
-  // TODO copy updates!
+  for (const auto& pair : other.functions) {
+    functions[pair.first->id] = std::move(std::pair<const Function*, std::unordered_map<ArgumentsKey, Value>>(pair.first, std::unordered_map<ArgumentsKey, Value>(0, {pair.first->arguments_}, {pair.first->arguments_})));
+  }
   pp_mem_new(&updateset_data_, UPDATESET_DATA_SIZE, "mem for updateset hashmap");
   updateset.set =  pp_hashmap_new(&updateset_data_, UPDATESET_SIZE, "main updateset");
+  updateset.pseudostate = other.updateset.pseudostate;
 
   pp_mem_new(&pp_stack, TEMP_STACK_SIZE, "mem for temporary updates");
+
+  std::vector<casm_update*> updates;
+
+  pp_hashmap_bucket* i = other.updateset.set->tail->previous;
+  casm_update* u;
+
+  while( i != other.updateset.set->head ) {
+    DEBUG("\nCOPY\n");
+    u = (casm_update*)i->value;
+    casm_update* copy = (casm_update*) pp_mem_alloc(&pp_stack, sizeof(casm_update));
+    copy->value = u->value;
+    copy->defined = u->defined;
+    copy->symbolic = u->symbolic;
+    copy->func = u->func;
+    // TODO: Do we need line here?
+    //up->line = (uint64_t) loc.lines;
+
+    for (uint16_t i=0; i < u->num_args; i++) {
+      copy->args[i] = u->args[i];
+    }
+    copy->num_args = u->num_args;
+
+    updates.push_back(copy);
+    i = i->previous;
+  }
+
+  for (casm_update* up : updates) {
+    auto& function_map = functions[up->func];
+    Value& ref = function_map.second[ArgumentsKey(up->args, up->num_args, false)];
+    casm_update* v = (casm_update*)casm_updateset_add(&updateset,
+                                                  (void*)&ref,
+                                                  (void*)up);
+  }
 
 }
 

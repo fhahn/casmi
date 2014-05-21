@@ -69,7 +69,7 @@ class ExecutionContext {
     static pp_mem value_stack;
     const bool symbolic;
     std::vector<std::string> trace;
-    std::vector<std::string> path_names;
+    std::string path_name;
 
     ExecutionContext(const SymbolTable& st, RuleNode *init, const bool symbolic);
     ExecutionContext(const ExecutionContext& other);

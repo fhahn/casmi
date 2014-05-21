@@ -53,6 +53,7 @@ casm_update *ExecutionVisitor::add_update(const Value& val, size_t sym_id, const
   up->num_args = arguments.size();
 
   auto& function_map = context_.functions[sym_id];
+  DEBUG("MAP S "<<function_map.second.size());
   if (function_map.second.count(ArgumentsKey(up->args, up->num_args, false)) == 0) {
     function_map.second.emplace(ArgumentsKey(up->args, up->num_args, true), Value());
   }
@@ -386,7 +387,30 @@ template <>
 void AstWalker<ExecutionVisitor, Value>::walk_ifthenelse(IfThenElseNode* node) {
   Value cond = walk_expression_base(node->condition_);
 
-  if (cond.value.bval) {
+  if (cond.is_symbolic()) {
+
+    ExecutionContext fork_ctx(visitor.context_);
+    DEBUG("START FORK WALKER");
+    fork_ctx.path_name += "I";
+
+    ExecutionVisitor fork_visitor(fork_ctx, visitor.driver_);
+    fork_visitor.continuations = visitor.continuations; 
+    fork_visitor.forks = visitor.forks;
+
+    ExecutionWalker fork_walker(fork_visitor);
+    fork_walker.walk_statement(node->then_, false);
+    fork_walker.current = current;
+    fork_walker.current++;
+    fork_walker.current_end = current_end;
+
+    fork_walker.run_continue();
+    symbolic::dump_final(fork_ctx.trace, fork_ctx.functions);
+
+    if (node->else_) {
+      walk_statement(node->else_, false);
+    }
+    visitor.context_.path_name += "E";
+  } else if (cond.value.bval) {
     walk_statement(node->then_, false);
   } else if (node->else_) {
     walk_statement(node->else_, false);
@@ -654,6 +678,7 @@ void ExecutionWalker::run() {
 
   if (visitor.context_.symbolic) {
     symbolic::dump_final(visitor.context_.trace, visitor.context_.functions);
+    std::cout << std::endl << "forklog: " << visitor.context_.path_name << std::endl;
     for (const std::string& s : visitor.context_.trace) {
       std::cout << s;
     }
@@ -663,5 +688,33 @@ void ExecutionWalker::run() {
     } else {
       std::cout << steps <<" step later..."<<std::endl;
     }
+  }
+}
+
+void ExecutionWalker::run_continue() {
+  walk_statements_continue();
+  visitor.context_.apply_updates();
+
+  uint64_t args[10] = {0};
+  Function *program_sym = visitor.context_.symbol_table.get_function("program");
+  while(true) {
+    Value& program_val = visitor.context_.get_function_value(program_sym, args);
+    DEBUG(program_val.to_str());
+    if (program_val.type == TypeType::UNDEF) {
+      break;
+    }
+    walk_rule(program_val.value.rule);
+    DEBUG("APPLY");
+    visitor.context_.apply_updates();
+  }
+
+  if (visitor.context_.symbolic) {
+    symbolic::dump_final(visitor.context_.trace, visitor.context_.functions);
+    std::cout << std::endl << "forklog: " << visitor.context_.path_name << std::endl;
+    for (const std::string& s : visitor.context_.trace) {
+      std::cout << s;
+    }
+  } else {
+    std::cout << " unknown number of steps later..."<<std::endl;
   }
 }
