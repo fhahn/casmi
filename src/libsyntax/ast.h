@@ -395,6 +395,9 @@ class ForallNode: public AstNode {
     const std::string identifier;
     ExpressionBase *in_expr;
     AstNode *statement;
+    bool evaluated;
+    Value v;
+    size_t last_index;
 
     ForallNode(yy::location& loc, const std::string& ident, ExpressionBase *expr, AstNode *stmt);
     virtual ~ForallNode();

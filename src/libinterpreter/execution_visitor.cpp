@@ -197,6 +197,13 @@ void ExecutionVisitor::visit_seqblock_post() {
   forks.pop_back();
 }
 
+void ExecutionVisitor::visit_forall_post() {
+  if (forks.back()) {
+    context_.merge_par();
+  }
+  forks.pop_back();
+}
+
 void ExecutionVisitor::visit_print(PrintNode *node, const std::vector<Value> &arguments) {
   if (node->filter.size() > 0 ) {
     if (context_.filter_enabled(node->filter)) {
@@ -415,38 +422,43 @@ void AstWalker<ExecutionVisitor, Value>::walk_case(CaseNode *node) {
 
 template <>
 void AstWalker<ExecutionVisitor, Value>::walk_forall(ForallNode *node) {
-  bool forked = false;
-  Value in_list = walk_expression_base(node->in_expr);
 
-  if (visitor.context_.updateset.pseudostate % 2 == 1) {
-    CASM_UPDATESET_FORK_PAR(&visitor.context_.updateset);
-    forked = true;
+  if (!node->evaluated) {
+    node->v = walk_expression_base(node->in_expr);
+    node->evaluated = true;
+
+    if (visitor.context_.updateset.pseudostate % 2 == 1) {
+      CASM_UPDATESET_FORK_PAR(&visitor.context_.updateset);
+      visitor.forks.push_back(true);
+    } else {
+      visitor.forks.push_back(true);
+    }
   }
 
   switch (node->in_expr->type_.t) {
     case TypeType::LIST: {
-      List *l =  in_list.value.list;
+      List *l =  node->v.value.list;
 
       for (auto iter = l->begin(); iter != l->end(); iter++) {
         visitor.rule_bindings.back()->push_back(*iter);
-        walk_statement(node->statement, false);
+        walk_statement(node->statement, true);
         visitor.rule_bindings.back()->pop_back();
       }
       break;
     }
     case TypeType::INT: {
-      INT_T end =  in_list.value.ival;
+      INT_T end =  node->v.value.ival;
 
       if (end > 0) {
         for (INT_T i = 0; i < end; i++) {
           visitor.rule_bindings.back()->push_back(Value(i));
-          walk_statement(node->statement, false);
+          walk_statement(node->statement, true);
           visitor.rule_bindings.back()->pop_back();
         }
       } else {
         for (INT_T i = 0; end < i; i--) {
           visitor.rule_bindings.back()->push_back(Value(i));
-          walk_statement(node->statement, false);
+          walk_statement(node->statement, true);
           visitor.rule_bindings.back()->pop_back();
         }
       }
@@ -472,10 +484,6 @@ void AstWalker<ExecutionVisitor, Value>::walk_forall(ForallNode *node) {
       break;
     }
     default: assert(0);
-  }
-
-  if (forked) {
-    visitor.context_.merge_par();
   }
 }
 

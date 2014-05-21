@@ -18,9 +18,9 @@ class ExecutionVisitor : public BaseVisitor<Value> {
     std::vector<Value> main_bindings;
     casm_update *add_update(const Value& val, size_t sym_id,
                           const std::vector<Value> &arguments);
-    std::vector<bool> forks;
 
   public:
+    std::vector<bool> forks;
     std::vector<Value> value_list;
     Driver& driver_;
     ExecutionContext& context_;
@@ -42,6 +42,8 @@ class ExecutionVisitor : public BaseVisitor<Value> {
     void visit_parblock_post();
     void visit_seqblock(UnaryNode*);
     void visit_seqblock_post();
+
+    void visit_forall_post();
 
     void visit_let(LetNode *node, Value& v);
     void visit_let_post(LetNode *node);

@@ -49,7 +49,6 @@ class AstDumpVisitor : public BaseVisitor<bool> {
     void visit_push(PushNode*, bool, bool)  { throw "Not implemented"; }
     void visit_case(CaseNode*, const bool, const std::vector<bool>&) { throw "not implemented case astdump"; }
 
-    void visit_forall_post(ForallNode*) { throw "not implemented"; }
     void visit_iterate(UnaryNode*) { throw "not implemented"; }
 
     bool visit_expression(Expression *expr, bool, bool);

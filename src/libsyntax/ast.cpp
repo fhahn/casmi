@@ -573,7 +573,7 @@ bool PopNode::equals(AstNode *other) {
 
 ForallNode::ForallNode(yy::location& loc, const std::string& ident,
                        ExpressionBase *expr, AstNode *stmt) 
-    : AstNode(loc, NodeType::FORALL), identifier(std::move(ident)), in_expr(expr), statement(stmt) {}
+    : AstNode(loc, NodeType::FORALL), identifier(std::move(ident)), in_expr(expr), statement(stmt), evaluated(false) {}
 ForallNode::~ForallNode() {
   delete in_expr;
   delete statement;
