@@ -27,17 +27,21 @@ namespace symbolic {
     return current_time;
   }
 
-  std::string arguments_to_string(const Function *func, const uint64_t args[],
-                                  bool strip=false) {
+  std::string arguments_to_string(const Function *func, const uint64_t args[], 
+                                  uint16_t sym_args, bool strip=false) {
     std::stringstream ss;
     ss << ',';
 
     for (uint32_t i = 0; i < func->arguments_.size(); i++) {
-      switch (func->arguments_[i]->t) {
-        case TypeType::INT:
-          ss << (INT_T) args[i];
-          break;
-        default: assert(0);
+      if ((sym_args & (1 << i)) != 0) {
+        ss << "sym" << (INT_T) args[i];
+      } else {
+        switch (func->arguments_[i]->t) {
+          case TypeType::INT:
+            ss << (INT_T) args[i];
+            break;
+          default: assert(0);
+        }
       }
       ss << ',';
     }
@@ -51,34 +55,34 @@ namespace symbolic {
 
 
   std::string location_to_string(const Function *func, const uint64_t args[],
-                                 const Value& val, uint32_t time) {
+                                 uint16_t sym_args, const Value& val, uint32_t time) {
     std::stringstream ss;
     ss << "st" << func->name << "(" << time
-       << arguments_to_string(func, args) << val.to_str()
+       << arguments_to_string(func, args, sym_args) << val.to_str()
        << ")";
     return ss.str();
   }
 
 
   void dump_create(std::vector<std::string>& trace, const Function *func,
-      const uint64_t args[], const Value& v) {
+      const uint64_t args[], uint16_t sym_args, const Value& v) {
     std::stringstream ss;
     ss << "tff(symbolNext, type, sym" << v.value.ival<< ": $int)."
        << std::endl;
     ss << "fof(id"<<next_fof_id() << ",hypothesis,"
-       << location_to_string(func, args, v, get_timestamp())
+       << location_to_string(func, args, sym_args, v, get_timestamp())
        << ").%CREATE: " << func->name
-       << '(' << arguments_to_string(func, args, true) << ')' << std::endl;
+       << '(' << arguments_to_string(func, args, sym_args, true) << ')' << std::endl;
     trace.push_back(ss.str());
   }
 
   void dump_update(std::vector<std::string>& trace, const Function *func,
-      const uint64_t args[], const Value& v) {
+      const uint64_t args[], uint16_t sym_args, const Value& v) {
     std::stringstream ss;
     ss << "fof(id" << next_fof_id() << ",hypothesis,"
-       << location_to_string(func, args, v, get_timestamp())
+       << location_to_string(func, args, sym_args, v, get_timestamp())
        << ").%UPDATE: " << func->name
-       << '(' << arguments_to_string(func, args, true) << ')' << std::endl;
+       << '(' << arguments_to_string(func, args, sym_args, true) << ')' << std::endl;
     trace.push_back(ss.str());
   }
 
@@ -92,9 +96,9 @@ namespace symbolic {
       }
       for (auto& value_pair : pair.second) {
         ss << "fof(final" << i << ",hypothesis,"
-           << location_to_string(pair.first, value_pair.first.p, value_pair.second, 0)
+           << location_to_string(pair.first, value_pair.first.p, value_pair.first.sym_args, value_pair.second, 0)
            << ").%FINAL: " << pair.first->name << '(' 
-           << arguments_to_string(pair.first, value_pair.first.p, true)
+           << arguments_to_string(pair.first, value_pair.first.p, value_pair.first.sym_args, true)
            << ')' << std::endl;
       }
       i += 1;

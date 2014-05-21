@@ -613,6 +613,8 @@ size_t hash_uint64_value(const Type *type, uint64_t val) {
       rational_t *rat = reinterpret_cast<rational_t*>(val);
       return (size_t) rat->numerator + rat->denominator;
     }
+    case TypeType::SYMBOL:
+      return val;
     default: assert(0);
   }
 }

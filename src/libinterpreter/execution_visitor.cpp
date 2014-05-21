@@ -19,10 +19,15 @@ DEFINE_CASM_UPDATESET_FORK_SEQ
 REENABLE_VARIADIC_WARNINGS
 
 
-void pack_values_in_array(const std::vector<Value> &value_list, uint64_t array[]) {
+uint16_t pack_values_in_array(const std::vector<Value> &value_list, uint64_t array[]) {
+  uint16_t sym_args = 0;
   for (size_t i=0; i < value_list.size(); i++) {
     array[i] = value_list[i].to_uint64_t();
+    if (value_list[i].is_symbolic()) {
+      sym_args = sym_args | (1 << i);
+    }
   }
+  return sym_args;
 }
 
 
@@ -48,15 +53,15 @@ casm_update *ExecutionVisitor::add_update(const Value& val, size_t sym_id, const
   up->func = sym_id;
   // TODO: Do we need line here?
   //up->line = (uint64_t) loc.lines;
-  pack_values_in_array(arguments, up->args);
+  up->sym_args = pack_values_in_array(arguments, up->args);
 
   up->num_args = arguments.size();
 
   auto& function_map = context_.functions[sym_id];
-  if (function_map.second.count(ArgumentsKey(up->args, up->num_args, false)) == 0) {
-    function_map.second.emplace(ArgumentsKey(up->args, up->num_args, true), Value());
+  if (function_map.second.count(ArgumentsKey(up->args, up->num_args, false, up->sym_args)) == 0) {
+    function_map.second.emplace(ArgumentsKey(up->args, up->num_args, true, up->sym_args), Value());
   }
-  Value& ref = function_map.second[ArgumentsKey(up->args, up->num_args, false)];
+  Value& ref = function_map.second[ArgumentsKey(up->args, up->num_args, false, up->sym_args)];
   casm_update* v = (casm_update*)casm_updateset_add(&(context_.updateset),
                                                     (void*) &ref,
                                                     (void*) up);
@@ -105,7 +110,7 @@ void ExecutionVisitor::visit_update(UpdateNode *update, Value& expr_v) {
     DEBUG("UPADTE "<<update->func->name<<" num args "<<up->num_args << " arg[0] "<<up->args[0]<< " val "<<expr_v.to_str());
 
     if (context_.symbolic && update->func->symbol->is_symbolic) {
-      symbolic::dump_update(context_.trace, update->func->symbol, up->args, expr_v);
+      symbolic::dump_update(context_.trace, update->func->symbol, up->args, up->sym_args, expr_v);
     }
   } catch (const RuntimeException& ex) {
     // TODO this is probably not the cleanest solutions
@@ -269,9 +274,9 @@ Value ExecutionVisitor::visit_function_atom(FunctionAtom *atom, std::vector<Valu
 
       uint64_t args[num_args];
       args[0] = 0;
-      pack_values_in_array(expr_results, args);
+      uint16_t sym_args = pack_values_in_array(expr_results, args);
 
-      Value v = Value(context_.get_function_value(atom->symbol, args));
+      Value v = Value(context_.get_function_value(atom->symbol, args, sym_args));
       DEBUG("visit_atom "<<atom->symbol->name<<" "<<v.to_str() <<" size "<<value_list.size());
       return v;
     }
@@ -578,13 +583,13 @@ bool ExecutionWalker::init_function(const std::string& name, std::set<std::strin
         args[0] = 0;
       }
 
-      if (function_map.count(ArgumentsKey(&args[0], num_args, false)) != 0) {
+      if (function_map.count(ArgumentsKey(&args[0], num_args, false, 0)) != 0) {
         yy::location loc = init.first ? init.first->location+init.second->location : init.second->location;
         visitor.driver_.error(loc, "function `"+func->name+"("+args_to_str(args, num_args)+")` already initialized");
         throw RuntimeException("function already initialized");
       }
       DEBUG("BEGIN INSERT "<<name);
-      function_map.emplace(std::pair<ArgumentsKey, Value>(std::move(ArgumentsKey(&args[0], num_args, true)), walk_expression_base(init.second)));
+      function_map.emplace(std::pair<ArgumentsKey, Value>(std::move(ArgumentsKey(&args[0], num_args, true, 0)), walk_expression_base(init.second)));
       DEBUG("END INSERT "<<name);
       initializer_args.push_back(args);
     }
@@ -632,7 +637,7 @@ void ExecutionWalker::run() {
   uint64_t args[10] = {0};
   size_t steps = 0;
   while(true) {
-    Value& program_val = visitor.context_.get_function_value(program_sym, args);
+    Value& program_val = visitor.context_.get_function_value(program_sym, args, 0);
     DEBUG(program_val.to_str());
     if (program_val.type == TypeType::UNDEF) {
       break;

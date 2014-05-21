@@ -9,7 +9,8 @@
 #define TEMP_STACK_SIZE 1024 * 1024
 
 
-ArgumentsKey::ArgumentsKey(uint64_t *args, uint16_t size, bool dyn) : dynamic(dyn) {
+ArgumentsKey::ArgumentsKey(uint64_t *args, uint16_t size, bool dyn,
+    uint16_t syms) : dynamic(dyn), sym_args(syms) {
   if (dynamic) {
     p = new uint64_t[size];
     for (uint16_t i = 0; i < size; i++) {
@@ -20,13 +21,15 @@ ArgumentsKey::ArgumentsKey(uint64_t *args, uint16_t size, bool dyn) : dynamic(dy
   }
 }
 
-ArgumentsKey::ArgumentsKey(const ArgumentsKey& other) : p(other.p), dynamic(other.dynamic) {
+ArgumentsKey::ArgumentsKey(const ArgumentsKey& other) : p(other.p),
+    dynamic(other.dynamic), sym_args(other.sym_args) {
 }
 
 ArgumentsKey::ArgumentsKey(ArgumentsKey&& other) noexcept {
   p = other.p;
   dynamic = other.dynamic;
   other.dynamic = false;
+  sym_args = other.sym_args;
 }
 
 ArgumentsKey::~ArgumentsKey() {
@@ -91,7 +94,7 @@ void ExecutionContext::apply_updates() {
 
     // TODO handle tuples
     if (function_map.first->return_type_->t == TypeType::LIST) {
-      Value& list = function_map.second[ArgumentsKey(u->args, u->num_args, false)];
+      Value& list = function_map.second[ArgumentsKey(u->args, u->num_args, false, u->sym_args)];
       if (u->defined == 0) {
         // set list to undef
         if (!list.is_undef()) {
@@ -111,9 +114,9 @@ void ExecutionContext::apply_updates() {
     } else {
       Value v(function_map.first->return_type_->t, u);
       if (v.type == TypeType::UNDEF) {
-        function_map.second.erase(ArgumentsKey(u->args, u->num_args, false));
+        function_map.second.erase(ArgumentsKey(u->args, u->num_args, false, u->sym_args));
       } else {
-        function_map.second[ArgumentsKey(u->args, u->num_args, true)] = v;
+        function_map.second[ArgumentsKey(u->args, u->num_args, true, u->sym_args)] = v;
       }
     }
 
@@ -209,12 +212,6 @@ void ExecutionContext::merge_seq(Driver& driver) {
   }
 }
 
-
-void ExecutionContext::set_function(Function *sym, uint64_t args[], Value& val) {
-  auto function_map = functions[sym->id];
-  function_map.second.insert(std::pair<ArgumentsKey, Value>(ArgumentsKey(&args[0], sym->argument_count(), true), val));
-}
-
 static Value undef = Value();
 
 static Value tmp;
@@ -229,12 +226,12 @@ bool args_eq(uint64_t args1[], uint64_t args2[], size_t len) {
   return true;
 }
 
-Value& ExecutionContext::get_function_value(Function *sym, uint64_t args[]) {
+Value& ExecutionContext::get_function_value(Function *sym, uint64_t args[], uint16_t sym_args) {
   // TODO move should be used here
   auto& function_map = functions[sym->id];
   try {
       DEBUG("get "<<sym->id << " " << sym->name<<" size:"<<sym->arguments_.size() << " args "<<args[0] << " Fun size "<< function_map.second.size());
-    Value &v = function_map.second.at(ArgumentsKey(&args[0], sym->arguments_.size(), false));
+    Value &v = function_map.second.at(ArgumentsKey(&args[0], sym->arguments_.size(), false, sym_args));
     int64_t state = (updateset.pseudostate % 2 == 0) ? state = updateset.pseudostate-1:
                                                        state = updateset.pseudostate;
     for (; state > 0; state -= 2) {
@@ -253,10 +250,10 @@ Value& ExecutionContext::get_function_value(Function *sym, uint64_t args[]) {
     DEBUG("NOT FOUND");
     if (symbolic && sym->is_symbolic) {
       function_map.second.emplace(
-          ArgumentsKey(&args[0], sym->arguments_.size(), true),
+          ArgumentsKey(&args[0], sym->arguments_.size(), true, sym_args),
           Value(TypeType::SYMBOL, symbolic::next_symbol_id()));
-      Value& v = function_map.second[ArgumentsKey(&args[0], sym->arguments_.size(), false)];
-      symbolic::dump_create(trace, sym, &args[0], v);
+      Value& v = function_map.second[ArgumentsKey(&args[0], sym->arguments_.size(), false, sym_args)];
+      symbolic::dump_create(trace, sym, &args[0], sym_args, v);
       return v;
     }
     undef.type = TypeType::UNDEF;

@@ -11,13 +11,14 @@
 
 #include "libcasmrt/rt.h"
 
+static Type symbol_type(TypeType::SYMBOL);
 
 struct ArgumentsKey {
   uint64_t* p;
   bool dynamic;
+  uint16_t sym_args;
 
-
-  ArgumentsKey(uint64_t *args, uint16_t size, bool dyn);
+  ArgumentsKey(uint64_t *args, uint16_t size, bool dyn, uint16_t sym_args);
   ArgumentsKey(const ArgumentsKey& other);
   ArgumentsKey(ArgumentsKey&& other) noexcept;
   ~ArgumentsKey();
@@ -33,7 +34,11 @@ namespace std {
     size_t operator()(const ArgumentsKey &key) const {
       size_t h = 0;
       for(uint16_t i = 0; i < types.size(); i++) {
-        h ^= hash_uint64_value(types[i], key.p[i]);
+        if ((key.sym_args & (1 << i)) != 0) {
+          h ^= hash_uint64_value(&symbol_type, key.p[i]);
+        } else {
+          h ^= hash_uint64_value(types[i], key.p[i]);
+        }
       }
       return h;
     }
@@ -78,8 +83,7 @@ class ExecutionContext {
     void merge_par();
     void merge_seq(Driver& driver);
 
-    void set_function(Function *sym, uint64_t args[], Value& val);
-    Value& get_function_value(Function *sym, uint64_t args[]);
+    Value& get_function_value(Function *sym, uint64_t args[], uint16_t sym_args);
 
     bool set_debuginfo_filter(const std::string& filters);
     bool filter_enabled(const std::string& filter);
