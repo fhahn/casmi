@@ -18,6 +18,7 @@ class ExecutionVisitor : public BaseVisitor<Value> {
     std::vector<Value> main_bindings;
     casm_update *add_update(const Value& val, size_t sym_id,
                           const std::vector<Value> &arguments);
+    std::vector<bool> forks;
 
   public:
     std::vector<Value> value_list;
@@ -36,6 +37,11 @@ class ExecutionVisitor : public BaseVisitor<Value> {
     void visit_call_post(CallNode *call);
     void visit_print(PrintNode *node, const std::vector<Value> &arguments);
     void visit_diedie(DiedieNode *node, const Value& msg);
+
+    void visit_parblock(UnaryNode*);
+    void visit_parblock_post();
+    void visit_seqblock(UnaryNode*);
+    void visit_seqblock_post();
 
     void visit_let(LetNode *node, Value& v);
     void visit_let_post(LetNode *node);
@@ -64,12 +70,6 @@ class ExecutionVisitor : public BaseVisitor<Value> {
 // Specialize if-then-else for ExecutionVisitor
 template <>
 void AstWalker<ExecutionVisitor, Value>::walk_ifthenelse(IfThenElseNode* node);
-
-template <>
-void AstWalker<ExecutionVisitor, Value>::walk_seqblock(UnaryNode* seqblock);
-
-template <>
-void AstWalker<ExecutionVisitor, Value>::walk_parblock(UnaryNode* parblock);
 
 template <>
 void AstWalker<ExecutionVisitor, Value>::walk_case(CaseNode *node);

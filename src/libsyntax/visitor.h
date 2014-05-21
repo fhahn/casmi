@@ -6,12 +6,25 @@
 
 class AstNode;
 
+struct continuation_record_t {
+  AstNode *caller;
+  std::vector<AstNode*>::iterator next;
+  std::vector<AstNode*>::iterator end;
+};
+
 template<class T, class V> class AstWalker {
   public:
     T& visitor;
 
+    std::vector<AstNode*>::iterator current;
+    std::vector<AstNode*>::iterator current_end;
 
-    AstWalker(T& v) : visitor(v) {}
+
+    AstWalker(T& v) : visitor(v) {
+      std::vector<AstNode*> tmp;
+      current = tmp.end();
+      current_end = tmp.end();
+    }
 
     void walk_specification(AstNode *spec) {
       if (spec->node_type_ == NodeType::BODY_ELEMENTS) {
@@ -79,15 +92,17 @@ template<class T, class V> class AstWalker {
 
     void walk_rule(RuleNode *rule) {
       visitor.visit_rule(rule);
-      walk_statement(rule->child_);
+      walk_statement(rule->child_, true);
     }
 
-    void walk_statement(AstNode *stmt) {
+    void walk_statement(AstNode *stmt, bool single) {
       switch(stmt->node_type_) {
         case NodeType::SEQBLOCK:
+          visitor.continuations.push_back({stmt, current++, current_end});
           walk_seqblock(reinterpret_cast<UnaryNode*>(stmt));
           break;
         case NodeType::PARBLOCK:
+          visitor.continuations.push_back({stmt, current++, current_end});
           walk_parblock(reinterpret_cast<UnaryNode*>(stmt));
           break;
         case NodeType::UPDATE:
@@ -105,6 +120,7 @@ template<class T, class V> class AstWalker {
           break;
         }
         case NodeType::CALL: {
+          visitor.continuations.push_back({stmt, current++, current_end});
           walk_call(reinterpret_cast<CallNode*>(stmt));
           break;
         }
@@ -113,6 +129,7 @@ template<class T, class V> class AstWalker {
           break;
         }
         case NodeType::LET: {
+          visitor.continuations.push_back({stmt, current++, current_end});
           walk_let(reinterpret_cast<LetNode*>(stmt));
           break;
         }
@@ -125,6 +142,7 @@ template<class T, class V> class AstWalker {
           break;
         }
         case NodeType::FORALL: {
+          visitor.continuations.push_back({stmt, current++, current_end});
           walk_forall(reinterpret_cast<ForallNode*>(stmt));
           break;
         }
@@ -154,6 +172,27 @@ template<class T, class V> class AstWalker {
               type_to_str(stmt->node_type_)+
               std::string(" at ")+
               stmt->location_str());
+        }
+      if (single) {
+        walk_return();
+      }
+    }
+
+    void walk_return() {
+      if (visitor.continuations.size() > 0) {
+        continuation_record_t cont = visitor.continuations.back();
+        visitor.continuations.pop_back();
+        switch (cont.caller->node_type_) {
+          case NodeType::CALL:
+            visitor.visit_call_post(reinterpret_cast<CallNode*>(cont.caller));
+            break;
+          case NodeType::PARBLOCK:
+            visitor.visit_parblock_post();
+            break;
+          case NodeType::SEQBLOCK:
+            visitor.visit_seqblock_post();
+            break;
+        }
       }
     }
 
@@ -170,8 +209,9 @@ template<class T, class V> class AstWalker {
     void walk_statements(AstListNode *stmts) {
       visitor.visit_statements(stmts);
       for (auto stmt: stmts->nodes) {
-        walk_statement(stmt);
+        walk_statement(stmt, false);
       }
+      walk_return();
     }
 
     void walk_update(UpdateNode *update) {
@@ -212,8 +252,8 @@ template<class T, class V> class AstWalker {
       }
       if (call->rule != nullptr) {
         visitor.visit_call(call, argument_results);
+        DEBUG("\n CALL \n");
         walk_rule(call->rule);
-        visitor.visit_call_post(call);
       } else {
         DEBUG("rule not set!");
       }
@@ -230,7 +270,7 @@ template<class T, class V> class AstWalker {
     void walk_let(LetNode *node) {
       V v = walk_expression_base(node->expr);
       visitor.visit_let(node, v);
-      walk_statement(node->stmt);
+      walk_statement(node->stmt, true);
       visitor.visit_let_post(node);
     }
 
@@ -248,13 +288,13 @@ template<class T, class V> class AstWalker {
     void walk_forall(ForallNode *node) {
       walk_expression_base(node->in_expr);
       visitor.visit_forall_pre(node);
-      walk_statement(node->statement);
+      walk_statement(node->statement, true);
       visitor.visit_forall_post(node);
     }
 
     void walk_iterate(UnaryNode* node) {
       visitor.visit_iterate(node);
-      walk_statement(node->child_);
+      walk_statement(node->child_, false);
     }
 
     void walk_case(CaseNode *node) {
@@ -264,7 +304,7 @@ template<class T, class V> class AstWalker {
         if (pair.first) {
           case_labels.push_back(walk_atom(pair.first));
         }
-        walk_statement(pair.second);
+        walk_statement(pair.second, false);
       }
       visitor.visit_case(node, walk_expression_base(node->expr), case_labels);
     }
@@ -289,9 +329,9 @@ template<class T, class V> class AstWalker {
     void walk_ifthenelse(IfThenElseNode *n) {
       V cond = walk_expression_base(n->condition_);
       visitor.visit_ifthenelse(n, cond);
-      walk_statement(n->then_);
+      walk_statement(n->then_, false);
       if (n->else_) {
-        walk_statement(n->else_);
+        walk_statement(n->else_, false);
       }
     }
 
@@ -370,6 +410,8 @@ template<class T, class V> class AstWalker {
 
 template<class T> class BaseVisitor {
   public:
+    std::vector<continuation_record_t> continuations;
+
     void visit_specification(AstNode*) {}
     void visit_init(AstNode*) {}
     void visit_body_elements(AstListNode*) {}
@@ -382,7 +424,9 @@ template<class T> class BaseVisitor {
     void visit_ifthenelse(IfThenElseNode*, T) {}
     T visit_assert(UnaryNode*, T) { return T(); }
     void visit_seqblock(UnaryNode*) {}
+    void visit_seqblock_post() {}
     void visit_parblock(UnaryNode*) {}
+    void visit_parblock_post() {}
     T visit_update(UpdateNode*, T, T) { return T(); }
     T visit_update_dumps(UpdateNode *u, T v1, T v2) { return visit_update(u, v1, v2); }
     T visit_call_pre(CallNode*) { return T(); }

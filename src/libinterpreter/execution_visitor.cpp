@@ -27,7 +27,7 @@ void pack_values_in_array(const std::vector<Value> &value_list, uint64_t array[]
 
 
 ExecutionVisitor::ExecutionVisitor(ExecutionContext &ctxt, Driver& driver)
-    : driver_(driver), context_(ctxt) {
+    : forks(), driver_(driver), context_(ctxt) {
   rule_bindings.push_back(&main_bindings);
 }
 
@@ -163,6 +163,38 @@ void ExecutionVisitor::visit_call(CallNode *call, std::vector<Value> &argument_r
 void ExecutionVisitor::visit_call_post(CallNode *call) {
   UNUSED(call);
   rule_bindings.pop_back();
+}
+
+void ExecutionVisitor::visit_parblock(UnaryNode*) {
+  if (context_.updateset.pseudostate % 2 == 1) {
+    forks.push_back(true);
+    CASM_UPDATESET_FORK_PAR(&context_.updateset);
+  } else {
+    forks.push_back(false);
+  }
+}
+
+void ExecutionVisitor::visit_parblock_post() {
+  if (forks.back()) {
+    context_.merge_par();
+  }
+  forks.pop_back();
+}
+
+void ExecutionVisitor::visit_seqblock(UnaryNode*) {
+  if (context_.updateset.pseudostate % 2 == 0) {
+    forks.push_back(true);
+    CASM_UPDATESET_FORK_SEQ(&context_.updateset);
+  } else {
+    forks.push_back(false);
+  }
+}
+
+void ExecutionVisitor::visit_seqblock_post() {
+  if (forks.back()) {
+    context_.merge_seq(driver_);
+  }
+  forks.pop_back();
 }
 
 void ExecutionVisitor::visit_print(PrintNode *node, const std::vector<Value> &arguments) {
@@ -348,39 +380,9 @@ void AstWalker<ExecutionVisitor, Value>::walk_ifthenelse(IfThenElseNode* node) {
   Value cond = walk_expression_base(node->condition_);
 
   if (cond.value.bval) {
-    walk_statement(node->then_);
+    walk_statement(node->then_, false);
   } else if (node->else_) {
-    walk_statement(node->else_);
-  }
-}
-
-template <>
-void AstWalker<ExecutionVisitor, Value>::walk_seqblock(UnaryNode* seqblock) {
-  bool forked = false;
-  if (visitor.context_.updateset.pseudostate % 2 == 0) {
-    CASM_UPDATESET_FORK_SEQ(&visitor.context_.updateset);
-    forked = true;
-  }
-  visitor.visit_seqblock(seqblock);
-  walk_statements(reinterpret_cast<AstListNode*>(seqblock->child_));
-
-  if (forked) {
-    visitor.context_.merge_seq(visitor.driver_);
-  }
-}
-
-template <>
-void AstWalker<ExecutionVisitor, Value>::walk_parblock(UnaryNode* parblock) {
-  bool forked = false;
-  if (visitor.context_.updateset.pseudostate % 2 == 1) {
-    CASM_UPDATESET_FORK_PAR(&visitor.context_.updateset);
-    forked = true;
-  }
-  visitor.visit_seqblock(parblock);
-  walk_statements(reinterpret_cast<AstListNode*>(parblock->child_));
-
-  if (forked) {
-    visitor.context_.merge_par();
+    walk_statement(node->else_, false);
   }
 }
 
@@ -399,7 +401,7 @@ void AstWalker<ExecutionVisitor, Value>::walk_case(CaseNode *node) {
     // pair.first == nullptr for default:
     if (pair.first) {
       if (walk_atom(pair.first) == expr_v) {
-        walk_statement(pair.second);
+        walk_statement(pair.second, false);
         return;
       }
     } else {
@@ -407,7 +409,7 @@ void AstWalker<ExecutionVisitor, Value>::walk_case(CaseNode *node) {
     }
   }
   if (default_pair) {
-    walk_statement(default_pair->second);
+    walk_statement(default_pair->second, false);
   }
 }
 
@@ -427,7 +429,7 @@ void AstWalker<ExecutionVisitor, Value>::walk_forall(ForallNode *node) {
 
       for (auto iter = l->begin(); iter != l->end(); iter++) {
         visitor.rule_bindings.back()->push_back(*iter);
-        walk_statement(node->statement);
+        walk_statement(node->statement, false);
         visitor.rule_bindings.back()->pop_back();
       }
       break;
@@ -438,13 +440,13 @@ void AstWalker<ExecutionVisitor, Value>::walk_forall(ForallNode *node) {
       if (end > 0) {
         for (INT_T i = 0; i < end; i++) {
           visitor.rule_bindings.back()->push_back(Value(i));
-          walk_statement(node->statement);
+          walk_statement(node->statement, false);
           visitor.rule_bindings.back()->pop_back();
         }
       } else {
         for (INT_T i = 0; end < i; i--) {
           visitor.rule_bindings.back()->push_back(Value(i));
-          walk_statement(node->statement);
+          walk_statement(node->statement, false);
           visitor.rule_bindings.back()->pop_back();
         }
       }
@@ -461,7 +463,7 @@ void AstWalker<ExecutionVisitor, Value>::walk_forall(ForallNode *node) {
           Value v = Value(pair.second);
           v.type = TypeType::ENUM;
           visitor.rule_bindings.back()->push_back(std::move(v));
-          walk_statement(node->statement);
+          walk_statement(node->statement, false);
           visitor.rule_bindings.back()->pop_back();
         }
       } else {
@@ -492,7 +494,7 @@ void AstWalker<ExecutionVisitor, Value>::walk_iterate(UnaryNode *node) {
   while (running) {
     CASM_UPDATESET_FORK_PAR(&visitor.context_.updateset);
 
-    walk_statement(node->child_);
+    walk_statement(node->child_, false);
     if (CASM_UPDATESET_EMPTY(&visitor.context_.updateset)) {
       running = false;
     }

@@ -683,7 +683,7 @@ void AstWalker<TypecheckVisitor, Type*>::walk_forall(ForallNode *node) {
   );
   current_rule_binding_types->push_back(&node->type_);
 
-  walk_statement(node->statement);
+  walk_statement(node->statement, true);
 
   if (!node->type_.is_complete()) {
     visitor.driver_.error(node->location, "type inference for `"+node->identifier+"` failed");
