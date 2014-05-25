@@ -120,9 +120,12 @@ template<class T, class V> class AstWalker {
           split = true;
           break;
         }
-        case NodeType::UPDATE:
-          walk_update(reinterpret_cast<UpdateNode*>(stmt));
+        case NodeType::UPDATE: {
+          UpdateNode* up = reinterpret_cast<UpdateNode*>(stmt);
+          DEBUG("WALK UPDATE");
+          walk_update(up);
           break;
+        }
         case NodeType::ASSERT: {
           UnaryNode *assert = reinterpret_cast<UnaryNode*>(stmt);
           V v = walk_expression_base(reinterpret_cast<ExpressionBase*>(assert->child_));
@@ -159,7 +162,6 @@ template<class T, class V> class AstWalker {
           break;
         }
         case NodeType::FORALL: {
-          visitor.continuations.push_back({stmt, stmt_iter_type(current), stmt_iter_type(current_end)});
           walk_forall(reinterpret_cast<ForallNode*>(stmt));
           split = true;
           break;
@@ -215,7 +217,7 @@ template<class T, class V> class AstWalker {
             visitor.visit_let_post(reinterpret_cast<LetNode*>(cont.caller));
             break;
           case NodeType::FORALL:
-            visitor.visit_forall_post();
+            visitor.visit_forall_post(reinterpret_cast<ForallNode*>(cont.caller));
             break;
         }
         if (cont.next < cont.end) {
@@ -265,6 +267,7 @@ template<class T, class V> class AstWalker {
 
 
     void walk_update(UpdateNode *update) {
+      DEBUG("WALK UPPPP");
       V expr_t = walk_expression_base(update->expr_);
 
       // we must walk the expression before walking update->func because it 
@@ -312,8 +315,10 @@ template<class T, class V> class AstWalker {
     void walk_print(PrintNode *node) {
       std::vector<V> argument_results;
       for (ExpressionBase *e: node->atoms) {
-          argument_results.push_back(walk_expression_base(e));
-        }
+      DEBUG("VISIT_PRINT "<<e);
+        argument_results.push_back(walk_expression_base(e));
+      }
+      DEBUG("GO VISIT");
       visitor.visit_print(node, argument_results);
     }
 
@@ -337,6 +342,7 @@ template<class T, class V> class AstWalker {
     void walk_forall(ForallNode *node) {
       walk_expression_base(node->in_expr);
       visitor.visit_forall_pre(node);
+      visitor.continuations.push_back({node, ++stmt_iter_type(current), stmt_iter_type(current_end)});
       walk_statement(node->statement, true);
     }
 
@@ -399,6 +405,7 @@ template<class T, class V> class AstWalker {
           V expr = walk_expression_base(func_a->symbol->derived);
           return visitor.visit_derived_function_atom(func_a, expr);
         } else {
+      DEBUG("WALK ATOM");
            return visitor.visit_function_atom(func_a, expr_results);
         }
       }
@@ -491,7 +498,7 @@ template<class T> class BaseVisitor {
     void visit_case(CaseNode*, const T, const std::vector<T>&) { }
 
     void visit_forall_pre(ForallNode*) { }
-    void visit_forall_post() { }
+    void visit_forall_post(ForallNode*) { }
 
     void visit_iterate(UnaryNode*) { }
 

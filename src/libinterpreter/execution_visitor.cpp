@@ -100,6 +100,7 @@ void ExecutionVisitor::visit_update_dumps(UpdateNode *update, Value& expr_v) {
 
 void ExecutionVisitor::visit_update(UpdateNode *update, Value& expr_v) {
   try {
+    DEBUG("WALKII "<<expr_v.to_str() << " " << update->func->symbol);
     casm_update *up = add_update(expr_v, update->func->symbol->id, value_list);
     up->line = (uint64_t) &update->location;
     value_list.clear();
@@ -198,14 +199,19 @@ void ExecutionVisitor::visit_seqblock_post() {
   forks.pop_back();
 }
 
-void ExecutionVisitor::visit_forall_post() {
-  if (forks.back()) {
-    context_.merge_par();
+void ExecutionVisitor::visit_forall_post(ForallNode *node) {
+
+  rule_bindings.back()->pop_back();
+  if (!node->evaluated) {
+    if (forks.back()) {
+      context_.merge_par();
+    }
+    forks.pop_back();
   }
-  forks.pop_back();
 }
 
 void ExecutionVisitor::visit_print(PrintNode *node, const std::vector<Value> &arguments) {
+  DEBUG("PRINTOOO");
   if (node->filter.size() > 0 ) {
     if (context_.filter_enabled(node->filter)) {
       std::cout << node->filter << ": ";
@@ -298,8 +304,11 @@ Value ExecutionVisitor::visit_expression_single(Expression *expr, Value &val) {
 Value ExecutionVisitor::visit_function_atom(FunctionAtom *atom, std::vector<Value> &expr_results) {
   auto current_rule_bindings = rule_bindings.back();
   switch (atom->symbol_type) {
-    case FunctionAtom::SymbolType::PARAMETER:
-      return Value(current_rule_bindings->at(atom->offset));
+    case FunctionAtom::SymbolType::PARAMETER: {
+      Value v = Value(current_rule_bindings->at(atom->offset));
+      DEBUG("JUHUHU "<< v.to_str());
+      return v;
+    }
 
     case FunctionAtom::SymbolType::FUNCTION: {
       size_t num_args = 1;
@@ -447,18 +456,44 @@ void AstWalker<ExecutionVisitor, Value>::walk_case(CaseNode *node) {
 template <>
 void AstWalker<ExecutionVisitor, Value>::walk_forall(ForallNode *node) {
 
+  DEBUG("CALL FORALL");
+  bool eval = false;
   if (!node->evaluated) {
     node->v = walk_expression_base(node->in_expr);
     node->evaluated = true;
-
     if (visitor.context_.updateset.pseudostate % 2 == 1) {
       CASM_UPDATESET_FORK_PAR(&visitor.context_.updateset);
       visitor.forks.push_back(true);
     } else {
-      visitor.forks.push_back(true);
+      visitor.forks.push_back(false);
     }
+  } else {
+    DEBUG("FORALL evaluated");
+    eval = true;
   }
-
+  switch (node->in_expr->type_.t) {
+    case TypeType::LIST: {
+      if (!eval) {
+        List *l =  node->v.value.list;
+        node->current_iter = l->begin();
+        node->end_iter = l->end();
+      }
+      if (node->current_iter != node->end_iter) {
+        visitor.rule_bindings.back()->push_back(*(node->current_iter));
+        DEBUG("VAL "<<visitor.rule_bindings.back()->back().to_str());
+        visitor.continuations.push_back({node, stmt_iter_type(current), stmt_iter_type(current_end)});
+        node->current_iter++;
+        walk_statement(node->statement, true);
+      } else {
+        visitor.continuations.push_back({node, ++stmt_iter_type(current), stmt_iter_type(current_end)});
+        node->evaluated = false;
+        walk_return();
+      }
+      break;
+    }
+    default: assert(0);
+  }
+  /*
   switch (node->in_expr->type_.t) {
     case TypeType::LIST: {
       List *l =  node->v.value.list;
@@ -509,6 +544,7 @@ void AstWalker<ExecutionVisitor, Value>::walk_forall(ForallNode *node) {
     }
     default: assert(0);
   }
+  */
 }
 
 DEFINE_CASM_UPDATESET_EMPTY
@@ -540,6 +576,7 @@ void AstWalker<ExecutionVisitor, Value>::walk_iterate(UnaryNode *node) {
 
 template <>
 void AstWalker<ExecutionVisitor, Value>::walk_update(UpdateNode *node) {
+  DEBUG("WALKII");
   Value expr_t = walk_expression_base(node->expr_);
   
   visitor.value_list.clear();
@@ -689,6 +726,7 @@ void ExecutionWalker::run() {
       std::cout << steps <<" step later..."<<std::endl;
     }
   }
+  DEBUG("\nDONE11\n");
 }
 
 void ExecutionWalker::run_continue() {
@@ -717,4 +755,5 @@ void ExecutionWalker::run_continue() {
   } else {
     std::cout << " unknown number of steps later..."<<std::endl;
   }
+  DEBUG("\nDONE\n");
 }

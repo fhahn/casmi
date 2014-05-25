@@ -20,7 +20,6 @@
 2014-05-15 00:37:06.098398 ; 57d8dbfa8af3415b6d5635a10ad7f41ae6d2e674 ; unknown ; old casmi ; temp-list-no-update.casm ; 22.74980876599875 ; 3
 2014-05-15 00:37:06.148511 ; 57d8dbfa8af3415b6d5635a10ad7f41ae6d2e674 ; clang-3.4 ; new casmi ; chained-list-no-shared.casm ; 0.04008452899870463 ; 3
 2014-05-15 00:37:06.988221 ; 57d8dbfa8af3415b6d5635a10ad7f41ae6d2e674 ; unknown ; old casmi ; chained-list-no-shared.casm ; 0.562724243998673 ; 3
-<<<<<<< Updated upstream
 2014-05-21 10:13:31.996679 ; 312d7e3d49d5669e74fd4ce3fe149ced50f8de11 ; clang-3.4 ; new casmi ; bubblesort.casm ; 0.029515082998841535 ; 3
 2014-05-21 10:13:32.843866 ; 312d7e3d49d5669e74fd4ce3fe149ced50f8de11 ; unknown ; old casmi ; bubblesort.casm ; 0.14527876200008905 ; 3
 2014-05-21 10:13:33.427074 ; 312d7e3d49d5669e74fd4ce3fe149ced50f8de11 ; clang-3.4 ; new casmi ; bubblesort_large.casm ; 0.5745522150027682 ; 3
@@ -267,3 +266,25 @@
 2014-05-18 12:08:24.019205 ; eae46ba7421670700ac73ba14234175b3ee202db ; unknown ; old casmi ; temp-list-no-update.casm ; 22.828439077995426 ; 3
 2014-05-18 12:08:24.058520 ; eae46ba7421670700ac73ba14234175b3ee202db ; clang-3.4 ; new casmi ; chained-list-no-shared.casm ; 0.0281164269981673 ; 3
 2014-05-18 12:08:24.925213 ; eae46ba7421670700ac73ba14234175b3ee202db ; unknown ; old casmi ; chained-list-no-shared.casm ; 0.5936652419986785 ; 3
+2014-05-21 22:13:05.557095 ; 312d7e3d49d5669e74fd4ce3fe149ced50f8de11 ; clang-3.4 ; new casmi ; bubblesort.casm ; 0.018133126010070555 ; 3
+2014-05-21 22:13:06.112164 ; 312d7e3d49d5669e74fd4ce3fe149ced50f8de11 ; unknown ; old casmi ; bubblesort.casm ; 0.1432637469988549 ; 3
+2014-05-21 22:13:06.676306 ; 312d7e3d49d5669e74fd4ce3fe149ced50f8de11 ; clang-3.4 ; new casmi ; bubblesort_large.casm ; 0.5552831469976809 ; 3
+2014-05-21 22:13:13.570195 ; 312d7e3d49d5669e74fd4ce3fe149ced50f8de11 ; unknown ; old casmi ; bubblesort_large.casm ; 6.6179215039883275 ; 3
+2014-05-21 22:13:13.586555 ; 312d7e3d49d5669e74fd4ce3fe149ced50f8de11 ; clang-3.4 ; new casmi ; fibonacci.casm ; 0.0053111480083316565 ; 3
+2014-05-21 22:13:13.915373 ; 312d7e3d49d5669e74fd4ce3fe149ced50f8de11 ; unknown ; old casmi ; fibonacci.casm ; 0.021305907997884788 ; 3
+2014-05-21 22:13:17.055650 ; 312d7e3d49d5669e74fd4ce3fe149ced50f8de11 ; clang-3.4 ; new casmi ; fibonacci_large.casm ; 3.130972176004434 ; 3
+2014-05-21 22:13:27.254188 ; 312d7e3d49d5669e74fd4ce3fe149ced50f8de11 ; unknown ; old casmi ; fibonacci_large.casm ; 9.922895638999762 ; 3
+2014-05-21 22:13:27.270701 ; 312d7e3d49d5669e74fd4ce3fe149ced50f8de11 ; clang-3.4 ; new casmi ; quicksort.casm ; 0.007223819004138932 ; 3
+2014-05-21 22:13:27.599253 ; 312d7e3d49d5669e74fd4ce3fe149ced50f8de11 ; unknown ; old casmi ; quicksort.casm ; 0.03176999799325131 ; 3
+2014-05-21 22:13:28.315848 ; 312d7e3d49d5669e74fd4ce3fe149ced50f8de11 ; clang-3.4 ; new casmi ; quicksort_large.casm ; 0.7075285690079909 ; 3
+2014-05-21 22:13:38.606172 ; 312d7e3d49d5669e74fd4ce3fe149ced50f8de11 ; unknown ; old casmi ; quicksort_large.casm ; 10.01225818299281 ; 3
+2014-05-21 22:13:38.652666 ; 312d7e3d49d5669e74fd4ce3fe149ced50f8de11 ; clang-3.4 ; new casmi ; gray.casm ; 0.03096575899689924 ; 3
+2014-05-21 22:13:39.186261 ; 312d7e3d49d5669e74fd4ce3fe149ced50f8de11 ; unknown ; old casmi ; gray.casm ; 0.2572767679957906 ; 3
+2014-05-21 22:13:48.404533 ; 312d7e3d49d5669e74fd4ce3fe149ced50f8de11 ; clang-3.4 ; new casmi ; gray_large.casm ; 9.20901227100694 ; 3
+2014-05-21 22:15:24.297491 ; ad8ab30e375b0d78cb40859fcde97953a676703a ; unknown ; old casmi ; gray_large.casm ; 95.61677755399432 ; 3
+2014-05-21 22:15:24.558754 ; ad8ab30e375b0d78cb40859fcde97953a676703a ; clang-3.4 ; new casmi ; sieve.casm ; 0.2519578170031309 ; 3
+2014-05-21 22:15:24.992893 ; ad8ab30e375b0d78cb40859fcde97953a676703a ; unknown ; old casmi ; sieve.casm ; 0.15712936800264288 ; 3
+2014-05-21 22:15:28.642192 ; ad8ab30e375b0d78cb40859fcde97953a676703a ; clang-3.4 ; new casmi ; temp-list-no-update.casm ; 3.639613688996178 ; 3
+2014-05-21 22:15:51.712328 ; ad8ab30e375b0d78cb40859fcde97953a676703a ; unknown ; old casmi ; temp-list-no-update.casm ; 22.794279109002673 ; 3
+2014-05-21 22:15:51.772340 ; ad8ab30e375b0d78cb40859fcde97953a676703a ; clang-3.4 ; new casmi ; chained-list-no-shared.casm ; 0.04561574499530252 ; 3
+2014-05-21 22:15:52.669288 ; ad8ab30e375b0d78cb40859fcde97953a676703a ; unknown ; old casmi ; chained-list-no-shared.casm ; 0.6206898189993808 ; 3

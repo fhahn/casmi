@@ -397,7 +397,8 @@ class ForallNode: public AstNode {
     AstNode *statement;
     bool evaluated;
     Value v;
-    size_t last_index;
+    List::const_iterator current_iter;
+    List::const_iterator end_iter;
 
     ForallNode(yy::location& loc, const std::string& ident, ExpressionBase *expr, AstNode *stmt);
     virtual ~ForallNode();

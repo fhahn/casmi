@@ -27,6 +27,7 @@ class ExecutionVisitor : public BaseVisitor<Value> {
     std::vector<std::vector<Value> *> rule_bindings;
 
     ExecutionVisitor(ExecutionContext& context, Driver& driver);
+    ~ExecutionVisitor() { DEBUG("YISTOR DEAD"); }
 
     void visit_assert(UnaryNode* assert, Value& val);
     void visit_update(UpdateNode *update, Value& expr_v);
@@ -43,7 +44,7 @@ class ExecutionVisitor : public BaseVisitor<Value> {
     void visit_seqblock(UnaryNode*);
     void visit_seqblock_post();
 
-    void visit_forall_post();
+    void visit_forall_post(ForallNode *node);
 
     void visit_let(LetNode *node, Value& v);
     void visit_let_post(LetNode *node);
@@ -89,6 +90,7 @@ class ExecutionWalker : public AstWalker<ExecutionVisitor, Value> {
 
   public:
     ExecutionWalker(ExecutionVisitor& v) : AstWalker<ExecutionVisitor, Value>(v), initialized() {}
+    ~ExecutionWalker() { DEBUG("JEAHHHH"); }
     void run();
     void run_continue();
 };

@@ -168,10 +168,11 @@ int main (int argc, char *argv[]) {
           ctx.set_debuginfo_filter(opts.debuginfo_filter);
         }
 
-        ExecutionVisitor visitor(ctx, driver);
-        ExecutionWalker walker(visitor);
+        ExecutionVisitor *visitor = new ExecutionVisitor(ctx, driver);
+        ExecutionWalker walker(*visitor);
         try {
           walker.run();
+          DEBUG("JUIHUHUHU");
           res = EXIT_SUCCESS;
         } catch (const RuntimeException& ex) {
           std::cerr << "Abort after runtime exception: "<< ex.what() << std::endl;;
@@ -180,7 +181,9 @@ int main (int argc, char *argv[]) {
           std::cerr << "Abort after catching a string: "<< e << std::endl;
           res = EXIT_FAILURE;
         }
+      DEBUG("BYE BYE");
       }
+      return res;
   }
   if (driver.result) {
     delete driver.result;

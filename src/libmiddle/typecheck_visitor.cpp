@@ -654,9 +654,19 @@ Type* TypecheckVisitor::visit_list_atom(ListAtom *atom, std::vector<Type*> &vals
   return &atom->type_;
 }
 
+void TypecheckVisitor::visit_forall_post(ForallNode *node) {
+  if (!node->type_.is_complete()) {
+    driver_.error(node->location, "type inference for `"+node->identifier+"` failed");
+  }
+
+  rule_binding_types.back()->pop_back();
+  rule_binding_offsets.back()->erase(node->identifier);
+}
+
 template <>
 void AstWalker<TypecheckVisitor, Type*>::walk_forall(ForallNode *node) {
 
+  visitor.continuations.push_back({node, ++stmt_iter_type(current), stmt_iter_type(current_end)});
   visitor.forall_head = true;
   walk_expression_base(node->in_expr);
   visitor.forall_head = false;
@@ -685,12 +695,6 @@ void AstWalker<TypecheckVisitor, Type*>::walk_forall(ForallNode *node) {
 
   walk_statement(node->statement, true);
 
-  if (!node->type_.is_complete()) {
-    visitor.driver_.error(node->location, "type inference for `"+node->identifier+"` failed");
-  }
-
-  visitor.rule_binding_types.back()->pop_back();
-  visitor.rule_binding_offsets.back()->erase(node->identifier);
 }
 
 template <>
