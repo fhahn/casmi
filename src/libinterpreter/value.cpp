@@ -603,7 +603,7 @@ size_t hash_uint64_value(const Type *type, uint64_t val) {
       size_t h = 0; 
       List *list = reinterpret_cast<List*>(val);
       for (auto iter=list->begin(); iter!=list->end(); iter++) {
-        h += hash_uint64_value(type->internal_type, (*iter).to_uint64_t());
+        h += hash_uint64_value(type->subtypes[0], (*iter).to_uint64_t());
       }
       return h;
     }

@@ -42,12 +42,11 @@ class Type {
 
   public:
     TypeType t;
-    Type *internal_type;
     Type *unify_with_left;
     Type *unify_with_right;
 
     std::vector<Type*> constraints;
-    std::vector<Type*> tuple_types;
+    std::vector<Type*> subtypes;
 
     std::string enum_name;
 

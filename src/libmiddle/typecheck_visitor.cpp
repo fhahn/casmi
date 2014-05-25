@@ -263,7 +263,7 @@ void TypecheckVisitor::visit_push(PushNode *node, Type *expr, Type *atom) {
     }
   }
 
-  if (!expr->unify(atom->internal_type)) {
+  if (!expr->unify(atom->subtypes[0])) {
     driver_.error(node->expr->location, 
                   "cannot push "+expr->get_most_general_type()->to_str()+" into "+atom->to_str());
   }
@@ -534,18 +534,18 @@ Type* TypecheckVisitor::visit_builtin_atom(BuiltinAtom *atom,
   }
 
   if (atom->name == "nth") {
-    if (*atom->types[0] == TypeType::TUPLE_OR_LIST && atom->types[0]->tuple_types.size() > 0) {
-      Type first = *atom->types[0]->tuple_types[0];
+    if (*atom->types[0] == TypeType::TUPLE_OR_LIST && atom->types[0]->subtypes.size() > 0 && atom->types[0]->subtypes[0]->t != TypeType::UNKNOWN) {
+      Type first = *atom->types[0]->subtypes[0];
       bool all_equal = true;
-      for (size_t i=1; i < atom->types[0]->tuple_types.size(); i++) {
-        if (first != *atom->types[0]->tuple_types[i]) {
+      for (size_t i=1; i < atom->types[0]->subtypes.size(); i++) {
+        if (first != *atom->types[0]->subtypes[i]) {
           all_equal = false;
           break;
         }
       }
       if (all_equal) {
         atom->types[0]->t = TypeType::LIST;
-        atom->types[0]->internal_type = new Type(first);
+        atom->types[0]->subtypes = {new Type(first)};
       } 
     }
 
@@ -565,8 +565,8 @@ Type* TypecheckVisitor::visit_builtin_atom(BuiltinAtom *atom,
         if (atom->types[0]->is_unknown() && atom->type_.is_unknown()) {
           return &atom->type_;
         }
-        if ((size_t) ind < (atom->types[0]->tuple_types.size()+1)) {
-          atom->type_.unify(atom->types[0]->tuple_types[ind-1]);
+        if ((size_t) ind < (atom->types[0]->subtypes.size()+1)) {
+          atom->type_.unify(atom->types[0]->subtypes[ind-1]);
         } else {
           driver_.error(atom->arguments->at(1)->location,
                         "index out of bounds for tuple, currently tuple only has "+
@@ -580,9 +580,10 @@ Type* TypecheckVisitor::visit_builtin_atom(BuiltinAtom *atom,
       }
     } else {
       DEBUG("NTH RETURN TYPE "<<atom->type_.to_str() << " " << atom->types[0]->to_str());
-      atom->type_.unify(atom->types[0]->internal_type);
+      atom->type_.unify(atom->types[0]->subtypes[0]);
       expr_results[0]->unify(&atom->type_);
       atom->type_.unify(atom->return_type);
+      DEBUG("JUHUHU");
     }
   } else {
     // TODO check unifying
@@ -633,7 +634,7 @@ Type* TypecheckVisitor::visit_rule_atom(RuleAtom *atom) {
 
 Type* TypecheckVisitor::visit_list_atom(ListAtom *atom, std::vector<Type*> &vals) {
   atom->type_.t = TypeType::TUPLE_OR_LIST;
-  atom->type_.tuple_types = vals;
+  atom->type_.subtypes = vals;
 
   if (vals.size() > 0) {
     Type first = *(vals[0]);
@@ -668,7 +669,7 @@ void AstWalker<TypecheckVisitor, Type*>::walk_forall(ForallNode *node) {
     node->type_.unify(&node->in_expr->type_);
     DEBUG("DONE UNIFY\n Type:"<<node->type_.enum_name << "|"<<node->in_expr->type_.to_str());
   } else if (node->in_expr->type_.unify(&list_t)) {
-    node->type_.unify(node->in_expr->type_.internal_type);
+    node->type_.unify(node->in_expr->type_.subtypes[0]);
   } else {
     visitor.driver_.error(node->location, "expression must be a List, an Int or enum, but is "
                                   +node->in_expr->type_.to_str());

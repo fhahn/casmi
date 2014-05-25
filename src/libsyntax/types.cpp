@@ -9,76 +9,70 @@
 #include "libsyntax/types.h"
 
 
-Type::Type(const std::string& type_name, std::vector<Type*>& internal_types) : unify_with_left(nullptr), unify_with_right(nullptr), constraints(), tuple_types(), enum_name() {
+Type::Type(const std::string& type_name, std::vector<Type*>& st) :
+    unify_with_left(nullptr), unify_with_right(nullptr), constraints(),
+    subtypes(st), enum_name() {
+
   if (type_name == "List") {
     t = TypeType::LIST;
 
-    if (internal_types.size() == 0) {
-      internal_type = new Type(TypeType::UNKNOWN);
-    } else if (internal_types.size() == 1) {
-      internal_type = internal_types[0];
-    } else {
+    if (subtypes.size() == 0) {
+      subtypes.push_back(new Type(TypeType::UNKNOWN));
+    } else if (subtypes.size() > 1) {
       t = TypeType::INVALID;
-      internal_type = nullptr;
     }
   } else if (type_name == "Tuple") {
-    if (internal_types.size() > 0) {
+    if (subtypes.size() > 0) {
       t = TypeType::TUPLE;
-      tuple_types = internal_types;
     } else {
-    DEBUG("INVALID");
       t = TypeType::INVALID;
     }
   }
 }
 
-Type::Type(TypeType typ, std::vector<Type*>& internal_types) : t(typ), unify_with_left(nullptr), unify_with_right(nullptr), constraints(), tuple_types(), enum_name() {
-  if (t == TypeType::LIST) {
-    if (internal_types.size() == 0) {
-      internal_type = new Type(TypeType::UNKNOWN);
-    } else if (internal_types.size() == 1) {
-      internal_type = internal_types[0];
-    } else {
-      t = TypeType::INVALID;
-      internal_type = nullptr;
-    }
+Type::Type(TypeType typ, std::vector<Type*>& st) : t(typ), unify_with_left(nullptr),
+    unify_with_right(nullptr), constraints(), subtypes(st), enum_name() {
 
-  } else if (t == TypeType::TUPLE_OR_LIST || t == TypeType::TUPLE) {
-    tuple_types = internal_types;
-  } else {
-    DEBUG("INVALID");
+  if (t == TypeType::LIST) {
+    t = TypeType::LIST;
+    if (subtypes.size() == 0) {
+      subtypes.push_back(new Type(TypeType::UNKNOWN));
+    } else if (subtypes.size() > 1) {
+      t = TypeType::INVALID;
+    }
+  } else if (t != TypeType::TUPLE_OR_LIST && t != TypeType::TUPLE) {
     t = TypeType::INVALID;
   }
 }
 
-Type::Type(TypeType typ, Type *int_typ) : t(typ), unify_with_left(nullptr), unify_with_right(nullptr), constraints(), tuple_types(), enum_name() {
+Type::Type(TypeType typ, Type *subtype) : t(typ), unify_with_left(nullptr), unify_with_right(nullptr), constraints(), subtypes(), enum_name() {
   if (t != TypeType::LIST && t != TypeType::TUPLE_OR_LIST) {
     t = TypeType::INVALID;
   }
-  internal_type = int_typ;
+  subtypes.push_back(subtype);
 }
 
-Type::Type() : t(TypeType::INVALID), internal_type(nullptr), unify_with_left(nullptr), unify_with_right(nullptr), constraints(), tuple_types(), enum_name() {}
+Type::Type() : t(TypeType::INVALID), unify_with_left(nullptr), unify_with_right(nullptr), constraints(), subtypes(), enum_name() {}
 
-Type::Type(TypeType t) : t(t), internal_type(nullptr), unify_with_left(nullptr), unify_with_right(nullptr), constraints(), tuple_types(), enum_name() {
+Type::Type(TypeType t) : t(t), unify_with_left(nullptr), unify_with_right(nullptr), constraints(), subtypes(), enum_name() {
   if (t == TypeType::LIST || t == TypeType::TUPLE) {
     t = TypeType::INVALID;
   }
 }
 
-Type::Type(Type *other) : t(other->t), internal_type(nullptr), unify_with_left(nullptr), unify_with_right(nullptr), constraints(), tuple_types(other->tuple_types), enum_name(other->enum_name)  {
-  if (other->internal_type != nullptr) {
-    internal_type = new Type(other->internal_type);
-  } else {
-    internal_type = nullptr;
+Type::Type(Type *other) : t(other->t), unify_with_left(nullptr),
+    unify_with_right(nullptr), constraints(), subtypes(), enum_name(other->enum_name)  {
+  for (Type* t : other->subtypes) {
+    subtypes.push_back(new Type(t));
   }
 }
 
 
-Type::Type(const Type& other) : t(other.t), internal_type(other.internal_type), unify_with_left(nullptr), unify_with_right(nullptr), constraints(), tuple_types(other.tuple_types), enum_name(other.enum_name)  {
+Type::Type(const Type& other) : t(other.t), unify_with_left(nullptr),
+    unify_with_right(nullptr), constraints(), subtypes(other.subtypes), enum_name(other.enum_name)  {
 }
 
-Type::Type(TypeType enum_type, const std::string& name) : unify_with_left(nullptr), unify_with_right(nullptr), constraints(), tuple_types(), enum_name(std::move(name))  {
+Type::Type(TypeType enum_type, const std::string& name) : unify_with_left(nullptr), unify_with_right(nullptr), constraints(), subtypes(), enum_name(std::move(name))  {
   if (enum_type == TypeType::ENUM) {
     t = enum_type;
   } else {
@@ -86,7 +80,8 @@ Type::Type(TypeType enum_type, const std::string& name) : unify_with_left(nullpt
   }
 }
 
-Type::Type(const std::string& type_name) : internal_type(nullptr), unify_with_left(nullptr), unify_with_right(nullptr), constraints(), tuple_types() {
+Type::Type(const std::string& type_name) : unify_with_left(nullptr),
+    unify_with_right(nullptr), constraints(), subtypes() {
   if (type_name == "Int") { t = TypeType::INT; }
   else if (type_name == "Float") { t = TypeType::FLOAT; }
   else if (type_name == "Rational") { t = TypeType::RATIONAL; }
@@ -107,8 +102,14 @@ bool Type::eq(const Type& other) const {
     return false;
   }
 
-  if (t == TypeType::LIST) {
-    return *internal_type == *other.internal_type;
+  if (subtypes.size() != other.subtypes.size()) {
+    return false;
+  }
+
+  for (uint32_t i=0; i < subtypes.size(); i++) {
+    if (*(subtypes[i]) != *(other.subtypes[i])) {
+      return false;
+    }
   }
 
   return true;
@@ -135,19 +136,24 @@ const std::string Type::to_str() const {
     case TypeType::BOOLEAN: return "Boolean";
     case TypeType::RULEREF: return "RuleRef";
     case TypeType::STRING: return "String";
-    case TypeType::LIST: return "List("+internal_type->to_str()+")";
+    case TypeType::LIST: 
+      if (subtypes.size() == 0) {
+        return "List(Unknown)";
+      } else {
+        return "List("+subtypes[0]->to_str()+")";
+      }
     case TypeType::UNKNOWN: return "Unknown";
     case TypeType::SELF: return "Self";
     case TypeType::TUPLE_OR_LIST: /*{
       std::string res = "TupleOrList (";
-      for (Type* t:tuple_types) {
+      for (Type* t:subtypes) {
         res += t->to_str() + ",";
       }
       return res + ")";
     } */
     case TypeType::TUPLE:{
       std::string res = "Tuple (";
-      for (Type* t:tuple_types) {
+      for (Type* t:subtypes) {
         res += t->to_str() + ",";
       }
       return res + ")";
@@ -222,19 +228,20 @@ bool Type::unify(Type other) {
 bool Type::unify_list(Type *other) {
   bool result = true;
   if(other->t == TypeType::LIST) {
-    return internal_type->unify(other->internal_type);
+    return subtypes[0]->unify(other->subtypes[0]);
   } else if(other->t == TypeType::TUPLE_OR_LIST) {
-    bool internal_complete = internal_type->is_complete();
-    for (Type* typ : other->tuple_types) {
-      result = result && typ->unify(internal_type);
+    bool internal_complete = subtypes[0]->is_complete();
+    if (other->subtypes.size() > 0 && other->subtypes[0]->t != TypeType::UNKNOWN) {
+      for (Type* typ : other->subtypes) {
+        result = result && typ->unify(subtypes[0]);
+      }
     }
     if (result) {
       other->t = TypeType::LIST;
-      other->internal_type = new Type(internal_type);
-      other->tuple_types.clear();
+      other->subtypes = { new Type(subtypes[0]) };
     } else {
       if (!internal_complete) {
-        internal_type->t = TypeType::UNKNOWN;
+        subtypes[0]->t = TypeType::UNKNOWN;
       }
     }
     return result;
@@ -242,12 +249,12 @@ bool Type::unify_list(Type *other) {
     if (!is_complete()) {
       return false;
     }
-    for (Type* typ : other->tuple_types) {
-      result = result && typ->unify(internal_type);
+    for (Type* typ : other->subtypes) {
+      result = result && typ->unify(subtypes[0]);
     }
     if (result) {
       t = TypeType::TUPLE;
-      tuple_types = other->tuple_types;
+      subtypes = other->subtypes;
     }
     return result;
   } else if (other->t == TypeType::UNKNOWN) {
@@ -255,9 +262,9 @@ bool Type::unify_list(Type *other) {
       // constraints cover only basic types at the moment
       return false;
     }
-    other->internal_type = new Type(TypeType::UNKNOWN);
+    other->subtypes = { new Type(TypeType::UNKNOWN) };
     other->t = TypeType::LIST;
-    return internal_type->unify(other->internal_type);
+    return subtypes[0]->unify(other->subtypes[0]);
  
   }
   return false;
@@ -267,15 +274,15 @@ bool Type::unify_tuple(Type *other) {
   if (other->t == TypeType::TUPLE_OR_LIST || other->t == TypeType::TUPLE) {
     bool result = true;
     other->t = TypeType::TUPLE;
-    if (tuple_types.size() == 0) {
-      tuple_types = other->tuple_types;
+    if (subtypes.size() == 0 || (subtypes.size() == 1 && subtypes[0]->t == TypeType::UNKNOWN)) {
+      subtypes = other->subtypes;
       return true;
-    } else if (other->tuple_types.size() == 0) {
-      other->tuple_types = tuple_types;
+    } else if (other->subtypes.size() == 0 || (other->subtypes.size() == 1 && other->subtypes[0]->t == TypeType::UNKNOWN)) {
+      other->subtypes = subtypes;
       return true;
-    } else if (tuple_types.size() == other->tuple_types.size()) {
-      for (size_t i=0; i<tuple_types.size(); i++) {
-        result = result && tuple_types[i]->unify(other->tuple_types[i]);
+    } else if (subtypes.size() == other->subtypes.size()) {
+      for (size_t i=0; i<subtypes.size(); i++) {
+        result = result && subtypes[i]->unify(other->subtypes[i]);
       }
       return result;
     } 
@@ -285,7 +292,7 @@ bool Type::unify_tuple(Type *other) {
       return false;
     }
     other->t = t;
-    other->tuple_types = tuple_types;
+    other->subtypes = subtypes;
     return true;
   }
 
@@ -297,16 +304,16 @@ bool Type::unify_tuple(Type *other) {
 
 bool Type::unify_tuple_or_list(Type *other) {
   if (other->t == TypeType::TUPLE_OR_LIST) {
-    if (tuple_types.size() == 0) {
-      tuple_types = other->tuple_types;
+    if (subtypes.size() == 0 || (subtypes.size() == 1 && subtypes[0]->t == TypeType::UNKNOWN)) {
+      subtypes = other->subtypes;
       return true;
-    } else if (other->tuple_types.size() == 0) {
-      other->tuple_types = tuple_types;
+    } else if (other->subtypes.size() == 0 || (other->subtypes.size() == 1 && other->subtypes[0]->t == TypeType::UNKNOWN)) {
+      other->subtypes = subtypes;
       return true;
-    } else if (tuple_types.size() == other->tuple_types.size()) {
+    } else if (subtypes.size() == other->subtypes.size()) {
       bool result = true;
-      for (size_t i=0; i<tuple_types.size(); i++) {
-        result = result && tuple_types[i]->unify(other->tuple_types[i]);
+      for (size_t i=0; i<subtypes.size(); i++) {
+        result = result && subtypes[i]->unify(other->subtypes[i]);
       }
       return result;
     } else {
@@ -318,7 +325,7 @@ bool Type::unify_tuple_or_list(Type *other) {
       return false;
     }
     other->t = t;
-    other->tuple_types = tuple_types;
+    other->subtypes = subtypes;
     return true;
   }
   return false;
@@ -409,10 +416,10 @@ bool Type::unify_nofollow(Type *other) {
 }
 
 bool Type::unify_left(Type *other) {
-  DEBUG("LEFT "<<other);
   if (other == nullptr) {
     return true;
   }
+  DEBUG("LEFFT "<< other << " "<<to_str() << " "<<other->to_str());
 
   
   bool result = unify_nofollow(other);
@@ -439,13 +446,16 @@ bool Type::unify_right(Type *other) {
 bool Type::is_unknown() const {
   if (t == TypeType::UNKNOWN) {
     return true;
-  } else if ((t == TypeType::TUPLE || t == TypeType::TUPLE_OR_LIST) && tuple_types.size() == 0) {
-    return true;
-  } 
+  } else if (t == TypeType::TUPLE || t == TypeType::TUPLE_OR_LIST) {
+    if (subtypes.size() == 0 || (subtypes.size() == 1 && subtypes[0]->t == TypeType::UNKNOWN)) {
+      return true;
+    }
+  }
   return false;
 }
 
 bool Type::unify(Type *other) {
+  DEBUG("START "<<to_str() << " "<<other->to_str());
   if (is_unknown() && other->is_unknown() ) {
     Type* left_link = this;
     while (left_link->unify_with_left != nullptr) {
@@ -503,15 +513,12 @@ bool Type::is_complete() const {
   if (t == TypeType::UNKNOWN) {
     return false;
   }
-  if (internal_type) {
-    return internal_type->is_complete();
-  }
-  if (t == TypeType::TUPLE || t == TypeType::TUPLE_OR_LIST) {
-    if (tuple_types.size() == 0) {
+  if (t == TypeType::LIST || t == TypeType::TUPLE || t == TypeType::TUPLE_OR_LIST) {
+    if (subtypes.size() == 0) {
       return false;
     } else {
       bool res = true;
-      for (Type* typ : tuple_types) {
+      for (Type* typ : subtypes) {
         res = res && typ->is_complete();
       }
       return res;

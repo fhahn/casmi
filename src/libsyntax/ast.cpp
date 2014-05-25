@@ -315,7 +315,7 @@ BuiltinAtom::BuiltinAtom(yy::location& loc, const std::string name,
     Type *a2 = new Type(TypeType::INT);
     return_type = new Type(TypeType::UNKNOWN);
 
-    a1->internal_type->unify(return_type);
+    a1->subtypes[0]->unify(return_type);
     types = { a1, a2 };
     id = Id::NTH;
   } else if (name == "cons"){
@@ -323,7 +323,7 @@ BuiltinAtom::BuiltinAtom(yy::location& loc, const std::string name,
     Type *a2 = new Type(TypeType::LIST, new Type(TypeType::UNKNOWN));
     return_type = new Type(TypeType::LIST, new Type(TypeType::UNKNOWN));
 
-    a1->unify(a2->internal_type);
+    a1->unify(a2->subtypes[0]);
     a2->unify(return_type);
     types = { a1, a2 };
     id = Id::CONS;
@@ -332,7 +332,7 @@ BuiltinAtom::BuiltinAtom(yy::location& loc, const std::string name,
     Type *a2 = new Type(TypeType::LIST, new Type(TypeType::UNKNOWN));
     return_type = new Type(TypeType::LIST, new Type(TypeType::UNKNOWN));
 
-    a1->unify(a2->internal_type);
+    a1->unify(a2->subtypes[0]);
     a2->unify(return_type);
     types = { a2, a1 };
     id = Id::APP;
@@ -352,7 +352,7 @@ BuiltinAtom::BuiltinAtom(yy::location& loc, const std::string name,
   } else if (name == "peek") {
     Type *a1 = new Type(TypeType::LIST, new Type(TypeType::UNKNOWN));
     return_type = new Type(TypeType::UNKNOWN);
-    a1->internal_type->unify(return_type);
+    a1->subtypes[0]->unify(return_type);
 
     types = { a1 };
     id = Id::PEEK;
@@ -556,7 +556,7 @@ bool PushNode::equals(AstNode *other) {
 
 PopNode::PopNode(yy::location& loc, FunctionAtom *to, FunctionAtom *from)
     : AstNode(loc, NodeType::POP), to(std::move(to)), from(from), from_type(TypeType::LIST, new Type(TypeType::UNKNOWN)) {
-  type_.unify(from_type.internal_type);
+  type_.unify(from_type.subtypes[0]);
 }
 
 PopNode::~PopNode() {
