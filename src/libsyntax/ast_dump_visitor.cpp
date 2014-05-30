@@ -130,6 +130,12 @@ bool AstDumpVisitor::visit_print(PrintNode *node, std::vector<bool>& argument_re
   return true;
 }
 
+void AstDumpVisitor::visit_let(LetNode *node, bool) {
+  dump_node(node, "Let "+node->identifier);
+  dump_link(node, node->expr);
+  dump_link(node, node->stmt);
+}
+
 bool AstDumpVisitor::visit_expression(Expression *expr, bool, bool) {
   dump_node(expr, "Expression:"+operator_to_str(expr->op));
   if (expr->left_ != nullptr) {

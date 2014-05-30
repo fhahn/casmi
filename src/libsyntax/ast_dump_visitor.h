@@ -44,7 +44,7 @@ class AstDumpVisitor : public BaseVisitor<bool> {
     void visit_call_post(CallNode *call) {UNUSED(call);}
     bool visit_print(PrintNode *node, std::vector<bool>& argument_results);
 
-    void visit_let(LetNode*, bool) { throw "not implemented"; }
+    void visit_let(LetNode*, bool);
     void visit_pop(PopNode*) { throw "Not implemented"; }
     void visit_push(PushNode*, bool, bool)  { throw "Not implemented"; }
     void visit_case(CaseNode*, const bool, const std::vector<bool>&) { throw "not implemented case astdump"; }

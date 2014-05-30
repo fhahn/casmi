@@ -36,7 +36,7 @@ template<class T, class V> class AstWalker {
             break; 
           } 
           case NodeType::INIT: {
-            visitor.visit_init(e);
+            visitor.visit_init(reinterpret_cast<UnaryNode*>(e));
             break;
           }
           default: {
