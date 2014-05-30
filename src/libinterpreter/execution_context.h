@@ -4,6 +4,8 @@
 #include <vector>
 #include <unordered_map>
 
+#include <ucontext.h>
+
 #include "libsyntax/symbols.h"
 #include "libsyntax/driver.h"
 
@@ -75,6 +77,8 @@ class ExecutionContext {
     const bool symbolic;
     std::vector<std::string> trace;
     std::vector<std::string> path_names;
+
+    std::vector<ucontext_t*> *contexts;
 
     ExecutionContext(const SymbolTable& st, RuleNode *init, const bool symbolic);
     ExecutionContext(const ExecutionContext& other);

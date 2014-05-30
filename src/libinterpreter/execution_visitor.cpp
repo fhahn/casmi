@@ -348,11 +348,30 @@ Value ExecutionVisitor::visit_number_range_atom(NumberRangeAtom *atom) {
   return Value(atom->type_, atom->list);
 }
 
+void walk_stat(AstWalker<ExecutionVisitor, Value> *w, AstNode *n) {
+  if (n) {
+    w->walk_statement(n);
+  }
+}
+
 template <>
 void AstWalker<ExecutionVisitor, Value>::walk_ifthenelse(IfThenElseNode* node) {
   Value cond = walk_expression_base(node->condition_);
 
-  if (cond.value.bval) {
+  if (cond.is_symbolic()) {
+    walk_statement(node->then_);
+
+    ucontext_t *ctx = new ucontext_t;
+    getcontext(ctx);
+    /* Initialise the iterator context. uc_link points to main_context1, the
+     * point to return to when the iterator finishes. */
+    char *stack = new char[SIGSTKSZ];
+    //fork_context.uc_link          = &main_context1;
+    ctx->uc_stack.ss_sp   = stack;
+    ctx->uc_stack.ss_size = sizeof(SIGSTKSZ);
+    makecontext(ctx, (void (*)(void)) walk_stat, 2, this, node->else_);
+    visitor.context_.contexts->push_back(ctx);
+  } else if (cond.value.bval) {
     walk_statement(node->then_);
   } else if (node->else_) {
     walk_statement(node->else_);
@@ -651,6 +670,11 @@ void ExecutionWalker::run() {
     symbolic::dump_final(visitor.context_.trace, visitor.context_.functions);
     for (const std::string& s : visitor.context_.trace) {
       std::cout << s;
+    }
+    if (visitor.context_.contexts->size() > 0) {
+      ucontext_t *ctx = visitor.context_.contexts->back();
+      visitor.context_.contexts->pop_back();
+      setcontext(ctx);
     }
   } else {
     if (steps > 1) {

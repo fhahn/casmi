@@ -42,7 +42,7 @@ pp_mem ExecutionContext::value_stack;
 
 ExecutionContext::ExecutionContext(const SymbolTable& st, RuleNode *init,
     const bool symbolic): debuginfo_filters(), symbol_table(std::move(st)),
-    temp_lists(), symbolic(symbolic), trace(), path_names() {
+    temp_lists(), symbolic(symbolic), trace(), path_names(), contexts(new std::vector<ucontext_t*>()) {
 
   pp_mem_new(&updateset_data_, UPDATESET_DATA_SIZE, "mem for updateset hashmap");
   updateset.set =  pp_hashmap_new(&updateset_data_, UPDATESET_SIZE, "main updateset");
