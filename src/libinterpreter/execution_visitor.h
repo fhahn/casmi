@@ -45,6 +45,7 @@ class ExecutionVisitor : public BaseVisitor<Value> {
     void visit_seqblock_post();
 
     void visit_forall_post(ForallNode *node);
+    void visit_iterate_post(UnaryNode *node);
 
     void visit_let(LetNode *node, Value& v);
     void visit_let_post(LetNode *node);

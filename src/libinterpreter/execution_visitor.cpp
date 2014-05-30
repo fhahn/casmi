@@ -15,6 +15,7 @@ IGNORE_VARIADIC_WARNINGS
 
 DEFINE_CASM_UPDATESET_FORK_PAR
 DEFINE_CASM_UPDATESET_FORK_SEQ
+DEFINE_CASM_UPDATESET_EMPTY
 
 REENABLE_VARIADIC_WARNINGS
 
@@ -200,7 +201,6 @@ void ExecutionVisitor::visit_seqblock_post() {
 }
 
 void ExecutionVisitor::visit_forall_post(ForallNode *node) {
-
   rule_bindings.back()->pop_back();
   if (!node->evaluated) {
     if (forks.back()) {
@@ -209,6 +209,24 @@ void ExecutionVisitor::visit_forall_post(ForallNode *node) {
     forks.pop_back();
   }
 }
+
+void ExecutionVisitor::visit_iterate_post(UnaryNode *node) {
+  DEBUG("ITEARTE POST \n");
+  if (CASM_UPDATESET_EMPTY(&context_.updateset)) {
+    DEBUG("EMPTY UPDATESET");
+    node->running = false;
+  }
+  if (!node->evaluated) {
+    if (forks.back()) {
+      DEBUG("MERGE ITERATE \n");
+      context_.merge_seq(driver_);
+    }
+    forks.pop_back();
+  } else {
+    context_.merge_par();
+  }
+}
+
 
 void ExecutionVisitor::visit_print(PrintNode *node, const std::vector<Value> &arguments) {
   DEBUG("PRINTOOO");
@@ -480,7 +498,7 @@ void AstWalker<ExecutionVisitor, Value>::walk_forall(ForallNode *node) {
       }
       if (node->current_iter != node->end_iter) {
         visitor.rule_bindings.back()->push_back(*(node->current_iter));
-        DEBUG("VAL "<<visitor.rule_bindings.back()->back().to_str());
+        DEBUG("VAL "<<visitor.rule_bindings.back()->size());
         visitor.continuations.push_back({node, stmt_iter_type(current), stmt_iter_type(current_end)});
         node->current_iter++;
         walk_statement(node->statement, true);
@@ -547,31 +565,33 @@ void AstWalker<ExecutionVisitor, Value>::walk_forall(ForallNode *node) {
   */
 }
 
-DEFINE_CASM_UPDATESET_EMPTY
 
 template <>
 void AstWalker<ExecutionVisitor, Value>::walk_iterate(UnaryNode *node) {
-  bool forked = false;
-  bool running = true;
+  DEBUG("HELLO ITEARTE\n");
 
-  if (visitor.context_.updateset.pseudostate % 2 == 0) {
-    CASM_UPDATESET_FORK_SEQ(&visitor.context_.updateset);
-    forked = true;
-  }
-
-  while (running) {
-    CASM_UPDATESET_FORK_PAR(&visitor.context_.updateset);
-
-    walk_statement(node->child_, false);
-    if (CASM_UPDATESET_EMPTY(&visitor.context_.updateset)) {
-      running = false;
+  if (!node->evaluated) {
+    if (visitor.context_.updateset.pseudostate % 2 == 0) {
+      CASM_UPDATESET_FORK_SEQ(&visitor.context_.updateset);
+      visitor.forks.push_back(true);
+    } else {
+      visitor.forks.push_back(false);
     }
-    visitor.context_.merge_par();
+    node->evaluated = true;
+    node->running = true;
   }
 
-  if (forked) {
-    visitor.context_.merge_seq(visitor.driver_);
+  if (node->running) {
+    DEBUG("ITERATE CONTINUE\n");
+    visitor.continuations.push_back({node, stmt_iter_type(current), stmt_iter_type(current_end)});
+  } else {
+    visitor.continuations.push_back({node, ++stmt_iter_type(current), stmt_iter_type(current_end)});
+    node->evaluated = false;
+    return walk_return();
   }
+
+  CASM_UPDATESET_FORK_PAR(&visitor.context_.updateset);
+  walk_statement(node->child_, true);
 }
 
 template <>

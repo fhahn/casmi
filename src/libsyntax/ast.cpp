@@ -596,6 +596,8 @@ bool CaseNode::equals(AstNode *other) {
 
 UnaryNode::UnaryNode(yy::location& loc, NodeType node_type, AstNode *child) : AstNode(loc, node_type) {
   child_ = child;
+  evaluated = false;
+  running = false;
 }
 
 UnaryNode::~UnaryNode() {

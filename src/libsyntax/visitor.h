@@ -103,18 +103,26 @@ template<class T, class V> class AstWalker {
     }
 
     bool walk_statement(AstNode *stmt, bool single) {
-      if (single) {
-        iterators_end();
-      }
+       if (single) {
+          iterators_end();
+        }
+
       bool split = false;
       switch(stmt->node_type_) {
         case NodeType::SEQBLOCK: {
+          if (single) {
+            iterators_end();
+          }
           visitor.continuations.push_back({stmt, ++stmt_iter_type(current), stmt_iter_type(current_end)});
           walk_seqblock(reinterpret_cast<UnaryNode*>(stmt));
           split = true;
           break;
         }
         case NodeType::PARBLOCK: {
+          if (single) {
+            iterators_end();
+          }
+
           visitor.continuations.push_back({stmt, ++stmt_iter_type(current), stmt_iter_type(current_end)});
           walk_parblock(reinterpret_cast<UnaryNode*>(stmt));
           split = true;
@@ -138,6 +146,7 @@ template<class T, class V> class AstWalker {
           break;
         }
         case NodeType::CALL: {
+ 
           visitor.continuations.push_back({stmt, ++stmt_iter_type(current), stmt_iter_type(current_end)});
           walk_call(reinterpret_cast<CallNode*>(stmt));
           split = true;
@@ -148,6 +157,10 @@ template<class T, class V> class AstWalker {
           break;
         }
         case NodeType::LET: {
+          if (single) {
+            iterators_end();
+          }
+
           visitor.continuations.push_back({stmt, ++stmt_iter_type(current), stmt_iter_type(current_end)});
           walk_let(reinterpret_cast<LetNode*>(stmt));
           split = true;
@@ -219,6 +232,8 @@ template<class T, class V> class AstWalker {
           case NodeType::FORALL:
             visitor.visit_forall_post(reinterpret_cast<ForallNode*>(cont.caller));
             break;
+          case NodeType::ITERATE:
+            visitor.visit_iterate_post(reinterpret_cast<UnaryNode*>(cont.caller));
         }
         if (cont.next < cont.end) {
           current = cont.next;
@@ -499,6 +514,7 @@ template<class T> class BaseVisitor {
 
     void visit_forall_pre(ForallNode*) { }
     void visit_forall_post(ForallNode*) { }
+    void visit_iterate_post(UnaryNode*) { }
 
     void visit_iterate(UnaryNode*) { }
 

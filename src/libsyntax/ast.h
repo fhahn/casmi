@@ -108,6 +108,9 @@ class UnaryNode: public AstNode {
   public:
     AstNode *child_;
 
+    bool evaluated;
+    bool running;
+
     UnaryNode(yy::location& loc, NodeType node_type, AstNode *child);
     virtual ~UnaryNode();
     virtual bool equals(AstNode *other);
