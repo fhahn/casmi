@@ -86,6 +86,14 @@ namespace symbolic {
     trace.push_back(ss.str());
   }
 
+  void dump_if(std::vector<std::string>& trace, const std::string &filename,
+      size_t lineno, const Value &sym, bool value) {
+    std::stringstream ss;
+    ss << "fof('id" << filename <<  ":" << lineno << "',hypothesis,"
+       << sym.to_str() << "=" << value << ")." << std::endl;
+    trace.push_back(ss.str());
+  }
+
   void dump_final(std::vector<std::string>& trace, const std::vector<std::pair<const Function*,
       std::unordered_map<ArgumentsKey, Value> >>& functions) {
     std::stringstream ss;

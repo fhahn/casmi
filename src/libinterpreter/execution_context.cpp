@@ -42,7 +42,7 @@ pp_mem ExecutionContext::value_stack;
 
 ExecutionContext::ExecutionContext(const SymbolTable& st, RuleNode *init,
     const bool symbolic): debuginfo_filters(), symbol_table(std::move(st)),
-    temp_lists(), symbolic(symbolic), trace(), path_names() {
+    temp_lists(), symbolic(symbolic), trace(), path_name("") {
 
   pp_mem_new(&updateset_data_, UPDATESET_DATA_SIZE, "mem for updateset hashmap");
   updateset.set =  pp_hashmap_new(&updateset_data_, UPDATESET_SIZE, "main updateset");
@@ -68,7 +68,7 @@ ExecutionContext::ExecutionContext(const SymbolTable& st, RuleNode *init,
 
 ExecutionContext::ExecutionContext(const ExecutionContext& other) : 
      debuginfo_filters(other.debuginfo_filters), symbol_table(other.symbol_table),
-     symbolic(other.symbolic), trace(other.trace), path_names(other.path_names) {
+     symbolic(other.symbolic), trace(other.trace), path_name(other.path_name) {
 
   // TODO copy updates!
   pp_mem_new(&updateset_data_, UPDATESET_DATA_SIZE, "mem for updateset hashmap");

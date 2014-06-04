@@ -2,6 +2,7 @@
 #define CASMI_LIBINTERPRETER_EXEC_VISITOR
 
 #include <utility>
+#include <sys/types.h>
 
 #include "macros.h"
 
@@ -19,7 +20,9 @@ class ExecutionVisitor : public BaseVisitor<Value> {
     casm_update *add_update(const Value& val, size_t sym_id,
                           const std::vector<Value> &arguments);
 
+
   public:
+    pid_t child_pid;
     std::vector<Value> value_list;
     Driver& driver_;
     ExecutionContext& context_;

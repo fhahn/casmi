@@ -2,6 +2,9 @@
 #include <cmath>
 #include <assert.h>
 #include <utility>
+#include <unistd.h>
+#include <sys/wait.h>
+
 
 #include "macros.h"
 #include "libutil/exceptions.h"
@@ -32,7 +35,7 @@ uint16_t pack_values_in_array(const std::vector<Value> &value_list, uint64_t arr
 
 
 ExecutionVisitor::ExecutionVisitor(ExecutionContext &ctxt, Driver& driver)
-    : driver_(driver), context_(ctxt) {
+    : child_pid(0), driver_(driver), context_(ctxt) {
   rule_bindings.push_back(&main_bindings);
 }
 
@@ -352,10 +355,30 @@ template <>
 void AstWalker<ExecutionVisitor, Value>::walk_ifthenelse(IfThenElseNode* node) {
   Value cond = walk_expression_base(node->condition_);
 
-  if (cond.value.bval) {
-    walk_statement(node->then_);
-  } else if (node->else_) {
-    walk_statement(node->else_);
+  if (cond.is_symbolic()) {
+    switch ((visitor.child_pid = fork())) {
+      case -1:
+        throw RuntimeException("Could not fork");
+      case 0:
+        visitor.context_.path_name += "I";
+        symbolic::dump_if(visitor.context_.trace, visitor.driver_.get_filename(),
+            node->condition_->location.begin.line, cond, true);
+        walk_statement(node->then_);
+        break;
+      default:
+        visitor.context_.path_name += "E";
+        symbolic::dump_if(visitor.context_.trace, visitor.driver_.get_filename(),
+            node->condition_->location.begin.line, cond, false);
+
+        if (node->else_) {
+          walk_statement(node->else_);
+        }
+    }
+  } else {
+    if (cond.value.bval) {
+    } else if (node->else_) {
+      walk_statement(node->else_);
+    }
   }
 }
 
@@ -648,6 +671,10 @@ void ExecutionWalker::run() {
   }
 
   if (visitor.context_.symbolic) {
+
+    int status;
+    waitpid(visitor.child_pid, &status, 0);
+    std::cout << std::endl << "forklog: " << visitor.context_.path_name << std::endl;
     symbolic::dump_final(visitor.context_.trace, visitor.context_.functions);
     for (const std::string& s : visitor.context_.trace) {
       std::cout << s;

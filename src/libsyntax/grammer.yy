@@ -28,7 +28,7 @@
   // Initialize the initial location.
   // Error messages are printed in Driver, I guess location does not 
   // need to know about the filename
-  //@$.begin.filename = @$.end.filename = &driver.filename_;
+  // @$.begin.filename = @$.end.filename = driver.get_filename_ptr();
 };
 
 %define parse.trace

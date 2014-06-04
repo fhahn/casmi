@@ -58,6 +58,7 @@ class Driver {
     // Dumplist map
     std::unordered_map<size_t, const std::string> function_trace_map;
 
+    const std::string& get_filename();
 };
 
 class StringDriver: public Driver {

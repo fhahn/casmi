@@ -128,6 +128,10 @@ RuleNode *Driver::get_init_rule() const {
   return rules_map_.at(init_name);
 }
 
+const std::string& Driver::get_filename() {
+  return filename_;
+}
+
 AstNode *StringDriver::parse (const std::string &str) {
   char tmpname[] = "/tmp/casmi_test_XXXXXX";
   int fd = mkstemp(&tmpname[0]);
