@@ -374,11 +374,10 @@ void AstWalker<ExecutionVisitor, Value>::walk_ifthenelse(IfThenElseNode* node) {
           walk_statement(node->else_);
         }
     }
-  } else {
-    if (cond.value.bval) {
-    } else if (node->else_) {
-      walk_statement(node->else_);
-    }
+  } else if (cond.value.bval) {
+    walk_statement(node->then_);
+  } else if (node->else_) {
+    walk_statement(node->else_);
   }
 }
 
