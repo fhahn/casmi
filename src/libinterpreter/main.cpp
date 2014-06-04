@@ -29,6 +29,7 @@ enum OptionValues {
   PARSE_ONLY = (1 << 2),
   DEBUGINFO_FILTER = (1 << 3),
   SYMBOLIC = (1 << 4),
+  FILEOUT = (1 << 5),
   ERROR = (1 << 9)
 };
 
@@ -47,6 +48,7 @@ struct arguments parse_cmd_args(int argc, char *argv[]) {
        {"parse-only", no_argument, &parse_only, 1},
        {"debuginfo-filter", required_argument, 0, 'd'},
        {"symbolic", no_argument, 0, 's'},
+       {"fileout", no_argument, 0, 'x'},
        {0, 0, 0, 0}
   };
 
@@ -56,7 +58,7 @@ struct arguments parse_cmd_args(int argc, char *argv[]) {
 
   struct arguments opts;
 
-  while ((opt = getopt_long(argc, argv, "hd:s",
+  while ((opt = getopt_long(argc, argv, "hd:sx",
                             long_options, &option_index)) != -1) {
     switch(opt) {
       case 0:
@@ -75,6 +77,9 @@ struct arguments parse_cmd_args(int argc, char *argv[]) {
         break;
       case 's':
         flags |= OptionValues::SYMBOLIC;
+        break;
+      case 'x':
+        flags |= OptionValues::FILEOUT;
         break;
       case '?':
         flags |= OptionValues::ERROR;
@@ -162,7 +167,8 @@ int main (int argc, char *argv[]) {
         res = EXIT_FAILURE;
       } else {
         ExecutionContext ctx(driver.function_table, driver.get_init_rule(),
-            (opts.flags & OptionValues::SYMBOLIC) != 0);
+            (opts.flags & OptionValues::SYMBOLIC) != 0,
+             (opts.flags & OptionValues::FILEOUT) != 0);
 
         if ((opts.flags & OptionValues::DEBUGINFO_FILTER) != 0) {
           ctx.set_debuginfo_filter(opts.debuginfo_filter);

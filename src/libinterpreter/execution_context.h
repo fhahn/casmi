@@ -73,10 +73,12 @@ class ExecutionContext {
     std::vector<List*> temp_lists;
     static pp_mem value_stack;
     const bool symbolic;
+    const bool fileout;
     std::vector<std::string> trace;
     std::string path_name;
 
-    ExecutionContext(const SymbolTable& st, RuleNode *init, const bool symbolic);
+    ExecutionContext(const SymbolTable& st, RuleNode *init, const bool symbolic,
+        const bool fileout);
     ExecutionContext(const ExecutionContext& other);
 
     void apply_updates();
