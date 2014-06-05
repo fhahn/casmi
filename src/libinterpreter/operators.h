@@ -6,7 +6,7 @@
 #include "libinterpreter/value.h"
 
 namespace operators {
-  const Value dispatch(Expression::Operation op, const Value& lhs, const Value& rhs);
+  const Value dispatch(ExpressionOperation op, const Value& lhs, const Value& rhs);
 
   const Value add(const Value& lhs, const Value& rhs);
   const Value sub(const Value& lhs, const Value& rhs);

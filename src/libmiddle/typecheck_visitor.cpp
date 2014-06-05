@@ -335,16 +335,16 @@ void TypecheckVisitor::visit_case(CaseNode *node, Type *expr, const std::vector<
 
 void TypecheckVisitor::check_numeric_operator(const yy::location& loc, 
                                             Type* type,
-                                            const Expression::Operation op) {
+                                            const ExpressionOperation op) {
   if (*type == TypeType::UNKNOWN) {
     DEBUG("Add numeric constraints");
     type->constraints.push_back(new Type(TypeType::INT));
-    if (op != Expression::Operation::MOD || op == Expression::Operation::RAT_DIV) {
+    if (op != ExpressionOperation::MOD || op == ExpressionOperation::RAT_DIV) {
       type->constraints.push_back(new Type(TypeType::RATIONAL));
       type->constraints.push_back(new Type(TypeType::FLOAT));
     }
   } else {
-    if (op == Expression::Operation::MOD || op == Expression::Operation::RAT_DIV) {
+    if (op == ExpressionOperation::MOD || op == ExpressionOperation::RAT_DIV) {
       if (*type != TypeType::INT) {
       driver_.error(loc,
                     "operands of operator `"+operator_to_str(op)+
@@ -371,37 +371,37 @@ Type* TypecheckVisitor::visit_expression(Expression *expr, Type*, Type*) {
 
   DEBUG("EXPR DONE T1 "<<expr->left_->type_.to_str() << " T2: "<<expr->right_->type_.to_str());
   switch (expr->op) {
-    case Expression::Operation::ADD:
-    case Expression::Operation::SUB:
-    case Expression::Operation::MUL:
-    case Expression::Operation::DIV:
-    case Expression::Operation::MOD:
+    case ExpressionOperation::ADD:
+    case ExpressionOperation::SUB:
+    case ExpressionOperation::MUL:
+    case ExpressionOperation::DIV:
+    case ExpressionOperation::MOD:
       check_numeric_operator(expr->location, &expr->left_->type_, expr->op);
       // TODO Check unifying
       expr->type_.unify(&expr->left_->type_);
       break;
-    case Expression::Operation::RAT_DIV:
+    case ExpressionOperation::RAT_DIV:
       check_numeric_operator(expr->location, &expr->left_->type_, expr->op);
       // TODO Check unifying
       expr->type_.unify(Type(TypeType::RATIONAL));
       break;
 
-    case Expression::Operation::EQ:
-    case Expression::Operation::NEQ:
+    case ExpressionOperation::EQ:
+    case ExpressionOperation::NEQ:
       expr->type_.unify(Type(TypeType::BOOLEAN));
       break;
 
-    case Expression::Operation::LESSER:
-    case Expression::Operation::GREATER:
-    case Expression::Operation::LESSEREQ:
-    case Expression::Operation::GREATEREQ:
+    case ExpressionOperation::LESSER:
+    case ExpressionOperation::GREATER:
+    case ExpressionOperation::LESSEREQ:
+    case ExpressionOperation::GREATEREQ:
       check_numeric_operator(expr->location, &expr->left_->type_, expr->op);
       expr->type_.unify(Type(TypeType::BOOLEAN));
       break;
 
-    case Expression::Operation::OR:
-    case Expression::Operation::XOR:
-    case Expression::Operation::AND:
+    case ExpressionOperation::OR:
+    case ExpressionOperation::XOR:
+    case ExpressionOperation::AND:
       if (!expr->left_->type_.unify(new Type(TypeType::BOOLEAN))) {
         driver_.error(expr->location,
                   "operands of operator `"+operator_to_str(expr->op)+
@@ -417,7 +417,7 @@ Type* TypecheckVisitor::visit_expression(Expression *expr, Type*, Type*) {
 
 Type* TypecheckVisitor::visit_expression_single(Expression *expr, Type*) {
   switch (expr->op) {
-    case Expression::Operation::NOT:
+    case ExpressionOperation::NOT:
       if (!expr->left_->type_.unify(new Type(TypeType::BOOLEAN))) {
         driver_.error(expr->location,
                   "operand of `not` must be Boolean but is "+expr->left_->type_.to_str());

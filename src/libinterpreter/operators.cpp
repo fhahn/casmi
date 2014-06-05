@@ -39,54 +39,54 @@
  \
 } 
 
-const Value operators::dispatch(Expression::Operation op, const Value& lhs, const Value& rhs) {
+const Value operators::dispatch(ExpressionOperation op, const Value& lhs, const Value& rhs) {
   switch (op) {
-    case Expression::Operation::ADD:
+    case ExpressionOperation::ADD:
       return std::move(operators::add(lhs, rhs));
 
-    case Expression::Operation::SUB: 
+    case ExpressionOperation::SUB: 
       return std::move(operators::sub(lhs, rhs));
 
-    case Expression::Operation::MUL:
+    case ExpressionOperation::MUL:
       return std::move(operators::mul(lhs, rhs));
 
-    case Expression::Operation::DIV:
+    case ExpressionOperation::DIV:
       return std::move(operators::div(lhs, rhs));
 
-    case Expression::Operation::MOD:
+    case ExpressionOperation::MOD:
       return std::move(operators::mod(lhs, rhs));
 
-    case Expression::Operation::RAT_DIV:
+    case ExpressionOperation::RAT_DIV:
       return std::move(operators::rat_div(lhs, rhs));
 
-    case Expression::Operation::EQ:
+    case ExpressionOperation::EQ:
       return std::move(operators::eq(lhs, rhs));
 
-    case Expression::Operation::NEQ: 
+    case ExpressionOperation::NEQ: 
       return std::move(operators::neq(lhs, rhs));
 
-    case Expression::Operation::AND: 
+    case ExpressionOperation::AND: 
       return std::move(operators::and_(lhs, rhs));
 
-    case Expression::Operation::OR: 
+    case ExpressionOperation::OR: 
       return std::move(operators::or_(lhs, rhs));
 
-    case Expression::Operation::XOR: 
+    case ExpressionOperation::XOR: 
       return std::move(operators::xor_(lhs, rhs));
 
-    case Expression::Operation::NOT: 
+    case ExpressionOperation::NOT: 
       return std::move(operators::not_(lhs));
 
-    case Expression::Operation::LESSER:
+    case ExpressionOperation::LESSER:
       return std::move(operators::lesser(lhs, rhs));
 
-    case Expression::Operation::GREATER:
+    case ExpressionOperation::GREATER:
       return std::move(operators::greater(lhs, rhs));
 
-    case Expression::Operation::LESSEREQ:
+    case ExpressionOperation::LESSEREQ:
       return std::move(operators::lessereq(lhs, rhs));
 
-    case Expression::Operation::GREATEREQ:
+    case ExpressionOperation::GREATEREQ:
       return std::move(operators::greatereq(lhs, rhs));
 
     default: assert(0);
@@ -138,6 +138,11 @@ const Value operators::rat_div(const Value& lhs, const Value& rhs) {
 }
 
 const Value operators::eq(const Value& lhs, const Value& rhs) {
+  if (lhs.is_symbolic()) {
+    DEBUG("JUHUHU");
+    return Value(new symbolic_condition(new Value(lhs), new Value(rhs), ExpressionOperation::EQ));
+  }
+
   return std::move(Value(lhs == rhs));
 }
 
@@ -170,6 +175,10 @@ const Value operators::not_(const Value& lhs) {
 }
 
 const Value operators::neq(const Value& lhs, const Value& rhs) {
+  if (lhs.is_symbolic()) {
+    DEBUG("JUHUHU0");
+    return Value(new symbolic_condition(new Value(lhs), new Value(rhs), ExpressionOperation::NEQ));
+  }
   return std::move(Value(lhs != rhs));
 }
 

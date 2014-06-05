@@ -56,7 +56,6 @@ namespace std {
       return true;
     }
   };
-
 }
 
 
@@ -76,6 +75,7 @@ class ExecutionContext {
     const bool fileout;
     std::vector<std::string> trace;
     std::string path_name;
+    std::vector<symbolic_condition*> path_conditions;
 
     ExecutionContext(const SymbolTable& st, RuleNode *init, const bool symbolic,
         const bool fileout);

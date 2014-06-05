@@ -27,6 +27,7 @@ enum class TypeType {
   RATIONAL,
   UNDEF,    // only possible during execution in Value.type
   SYMBOL,   // only possible during execution in Value.type
+  SYMBOL_COND,   // only possible during execution in Value.type
 };
 
 class Type;

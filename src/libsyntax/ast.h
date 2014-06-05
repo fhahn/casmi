@@ -324,39 +324,39 @@ class NumberRangeAtom : public AtomNode {
     NumberRangeAtom(yy::location& loc, IntAtom *start, IntAtom *end);
 };
 
+enum class ExpressionOperation {
+  ADD,
+  SUB,
+  MUL,
+  DIV,
+  MOD,
+  RAT_DIV,
+  EQ,
+  NEQ,
+  LESSER,
+  GREATER,
+  LESSEREQ,
+  GREATEREQ,
+  OR,
+  XOR,
+  AND,
+  NOT
+};
 
 class Expression : public ExpressionBase {
   public:
-    enum class Operation {
-      ADD,
-      SUB,
-      MUL,
-      DIV,
-      MOD,
-      RAT_DIV,
-      EQ,
-      NEQ,
-      LESSER,
-      GREATER,
-      LESSEREQ,
-      GREATEREQ,
-      OR,
-      XOR,
-      AND,
-      NOT
-    };
 
     ExpressionBase *left_;
     ExpressionBase *right_;
 
-    Operation op;
+    ExpressionOperation op;
 
-    Expression(yy::location& loc, ExpressionBase *left, ExpressionBase *right, Expression::Operation op);
+    Expression(yy::location& loc, ExpressionBase *left, ExpressionBase *right, ExpressionOperation op);
     virtual ~Expression();
     virtual bool equals(AstNode *other);
 };
 
-std::string operator_to_str(const Expression::Operation op);
+std::string operator_to_str(const ExpressionOperation op);
 
 class UpdateNode: public AstNode {
   public:

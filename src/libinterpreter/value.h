@@ -10,16 +10,20 @@
 
 #include "libcasmrt/rt.h"
 
+
 struct enum_value_t;
 
 class RuleNode;
+enum class ExpressionOperation;
 
 class HeadList;
 class TailList;
 class BottomList;
 class List;
 
+struct symbolic_condition;
 struct rational_t;
+
 
 class Value {
   public:
@@ -33,6 +37,7 @@ class Value {
       List *list;
       const enum_value_t *enum_val;
       const rational_t *rat;
+      symbolic_condition *cond;
     } value;
 
     Value();
@@ -44,6 +49,7 @@ class Value {
     Value(const Type& t, List *list);
     Value(const enum_value_t *enum_val);
     Value(const rational_t *val);
+    Value(symbolic_condition *val);
     Value(const Value& other);
     Value(Value&& other) noexcept;
     Value(TypeType type, casm_update* update);
@@ -59,6 +65,15 @@ class Value {
     bool is_symbolic() const;
 
     const std::string to_str() const;
+};
+
+struct symbolic_condition {
+  Value *lhs;
+  Value *rhs;
+  ExpressionOperation op;
+
+  symbolic_condition(Value *lhs, Value *rhs, ExpressionOperation op);
+  std::string to_str() const;
 };
 
 struct rational_t {

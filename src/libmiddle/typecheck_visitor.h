@@ -19,7 +19,7 @@ class TypecheckVisitor : public BaseVisitor<Type*> {
   public:
     Driver& driver_;
     void check_numeric_operator(const yy::location& loc,  Type *type,
-                                const Expression::Operation op);
+                                const ExpressionOperation op);
 
     std::vector<std::vector<Type*> *> rule_binding_types;
     std::vector<std::map<std::string, size_t> *> rule_binding_offsets;

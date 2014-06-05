@@ -41,6 +41,10 @@ Value::Value(const rational_t *rat) : type(TypeType::RATIONAL) {
   value.rat = rat;
 }
 
+Value::Value(symbolic_condition *cond) : type(TypeType::SYMBOL_COND) {
+  value.cond = cond;
+}
+
 Value::Value(const Value& other) : type(other.type), value(other.value) {}
 
 Value::Value(Value&& other) noexcept : type(other.type), value(other.value) {}
@@ -114,6 +118,22 @@ bool Value::operator==(const Value &other) const {
     return is_undef() && other.is_undef();
   }
 
+  if (is_symbolic()) {
+    if (other.is_symbolic()) {
+      return value.ival == other.value.ival;
+    } else {
+      return false;
+    }
+  }
+  if (other.is_symbolic()) {
+    if (is_symbolic()) {
+      return value.ival == other.value.ival;
+    } else {
+      return false;
+    }
+  }
+
+
   switch (type) {
     case TypeType::INT: return value.ival == other.value.ival;
     case TypeType::FLOAT: return value.fval == other.value.fval;
@@ -166,7 +186,7 @@ bool Value::is_undef() const {
 }
 
 bool Value::is_symbolic() const {
-  return type == TypeType::SYMBOL;
+  return type == TypeType::SYMBOL || type == TypeType::SYMBOL_COND;
 }
 
 const std::string Value::to_str() const {
@@ -200,8 +220,18 @@ const std::string Value::to_str() const {
       }
     case TypeType::SYMBOL:
       return "sym"+std::to_string(value.ival);
+    case TypeType::SYMBOL_COND:
+      return value.cond->to_str();
     default: throw RuntimeException("Unsupported type in Value.to_str() ");
   }
+}
+
+symbolic_condition::symbolic_condition(Value *lhs, Value *rhs,
+                                       ExpressionOperation op) : lhs(lhs), rhs(rhs), op(op) {}
+
+std::string symbolic_condition::to_str() const {
+  return lhs->to_str() +operator_to_str(op)+rhs->to_str();
+
 }
 
 rational_t::rational_t() {}

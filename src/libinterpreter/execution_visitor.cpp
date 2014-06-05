@@ -351,25 +351,64 @@ Value ExecutionVisitor::visit_number_range_atom(NumberRangeAtom *atom) {
   return Value(atom->type_, atom->list);
 }
 
+ExpressionOperation invert(ExpressionOperation op) {
+  switch (op) {
+    case ExpressionOperation::EQ: return ExpressionOperation::NEQ;
+    default: throw RuntimeException("Invert not implemented for operation");
+  }
+}
+
 template <>
 void AstWalker<ExecutionVisitor, Value>::walk_ifthenelse(IfThenElseNode* node) {
   Value cond = walk_expression_base(node->condition_);
 
   if (cond.is_symbolic()) {
+    symbolic_condition *sym_cond;
+    if (cond.type == TypeType::SYMBOL_COND) {
+      sym_cond = cond.value.cond;
+    } else {
+      sym_cond = new symbolic_condition(new Value(cond), new Value(true), ExpressionOperation::EQ);
+    }
+    bool found = false;
+    bool then = false;
+    for (symbolic_condition *saved_cond : visitor.context_.path_conditions) {
+      if (*(saved_cond->lhs) == *(sym_cond->lhs) && *(saved_cond->rhs) == *(sym_cond->rhs)) {
+        if (saved_cond->op == sym_cond->op) {
+          found = true;
+          then = true;
+          break;
+        } else if (saved_cond->op == invert(sym_cond->op)) {
+          found = true;
+          then = false;
+          break;
+        }
+      }
+    }
+    
+    if (found) {
+      if (then) {
+        walk_statement(node->then_);
+      } else if (node->else_) {
+        walk_statement(node->else_);
+      }
+      return;
+    }
     switch ((visitor.child_pid = fork())) {
       case -1:
         throw RuntimeException("Could not fork");
       case 0:
         visitor.context_.path_name += "I";
         symbolic::dump_if(visitor.context_.trace, visitor.driver_.get_filename(),
-            node->condition_->location.begin.line, cond, true);
+            node->condition_->location.begin.line, cond);
+        visitor.context_.path_conditions.push_back(sym_cond);
         walk_statement(node->then_);
         break;
       default:
+        sym_cond->op = invert(sym_cond->op);
         visitor.context_.path_name += "E";
         symbolic::dump_if(visitor.context_.trace, visitor.driver_.get_filename(),
-            node->condition_->location.begin.line, cond, false);
-
+            node->condition_->location.begin.line, cond);
+        visitor.context_.path_conditions.push_back(sym_cond);
         if (node->else_) {
           walk_statement(node->else_);
         }

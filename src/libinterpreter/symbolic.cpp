@@ -87,10 +87,10 @@ namespace symbolic {
   }
 
   void dump_if(std::vector<std::string>& trace, const std::string &filename,
-      size_t lineno, const Value &sym, bool value) {
+      size_t lineno, const Value &sym) {
     std::stringstream ss;
     ss << "fof('id" << filename <<  ":" << lineno << "',hypothesis,"
-       << sym.to_str() << "=" << value << ")." << std::endl;
+       << sym.to_str() << ")." << std::endl;
     trace.push_back(ss.str());
   }
 

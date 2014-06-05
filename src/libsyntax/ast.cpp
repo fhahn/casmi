@@ -448,7 +448,7 @@ NumberRangeAtom::NumberRangeAtom(yy::location& loc, IntAtom *start, IntAtom *end
 }
 
 Expression::Expression(yy::location& loc, ExpressionBase *left, ExpressionBase *right,
-                       Expression::Operation op)
+                       ExpressionOperation op)
                        : ExpressionBase(loc, NodeType::EXPRESSION, Type(TypeType::UNKNOWN)),
                          left_(left), right_(right), op(op) {
   // Propagate known types
@@ -492,27 +492,27 @@ bool Expression::equals(AstNode *other) {
   }
 }
 
-std::string operator_to_str(const Expression::Operation op) {
+std::string operator_to_str(const ExpressionOperation op) {
   switch(op) {
-    case Expression::Operation::ADD: return "+";
-    case Expression::Operation::SUB: return "-";
-    case Expression::Operation::MUL: return "*";
-    case Expression::Operation::DIV: return "/";
-    case Expression::Operation::MOD: return "%";
-    case Expression::Operation::RAT_DIV: return "div";
+    case ExpressionOperation::ADD: return "+";
+    case ExpressionOperation::SUB: return "-";
+    case ExpressionOperation::MUL: return "*";
+    case ExpressionOperation::DIV: return "/";
+    case ExpressionOperation::MOD: return "%";
+    case ExpressionOperation::RAT_DIV: return "div";
 
-    case Expression::Operation::EQ: return "=";
-    case Expression::Operation::NEQ: return "!=";
+    case ExpressionOperation::EQ: return "=";
+    case ExpressionOperation::NEQ: return "!=";
 
-    case Expression::Operation::AND: return "and";
-    case Expression::Operation::OR: return "or";
-    case Expression::Operation::XOR: return "xor";
-    case Expression::Operation::NOT: return "not";
+    case ExpressionOperation::AND: return "and";
+    case ExpressionOperation::OR: return "or";
+    case ExpressionOperation::XOR: return "xor";
+    case ExpressionOperation::NOT: return "not";
 
-    case Expression::Operation::LESSER: return "<";
-    case Expression::Operation::GREATER: return ">";
-    case Expression::Operation::LESSEREQ: return "<=";
-    case Expression::Operation::GREATEREQ: return ">=";
+    case ExpressionOperation::LESSER: return "<";
+    case ExpressionOperation::GREATER: return ">";
+    case ExpressionOperation::LESSEREQ: return "<=";
+    case ExpressionOperation::GREATEREQ: return ">=";
     default: return "unknown";
   }
 }

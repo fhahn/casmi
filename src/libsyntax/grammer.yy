@@ -437,37 +437,37 @@ EXPRESSION_LIST_NO_COMMA: EXPRESSION_LIST_NO_COMMA"," EXPRESSION
 
 
 EXPRESSION: EXPRESSION "+" EXPRESSION
-            { $$ = new Expression(@$, $1, $3, Expression::Operation::ADD); }
+            { $$ = new Expression(@$, $1, $3, ExpressionOperation::ADD); }
           | EXPRESSION "-" EXPRESSION
-            { $$ = new Expression(@$, $1, $3, Expression::Operation::SUB); }
+            { $$ = new Expression(@$, $1, $3, ExpressionOperation::SUB); }
           | EXPRESSION "*" EXPRESSION
-            { $$ = new Expression(@$, $1, $3, Expression::Operation::MUL); }
+            { $$ = new Expression(@$, $1, $3, ExpressionOperation::MUL); }
           | EXPRESSION "/" EXPRESSION
-            { $$ = new Expression(@$, $1, $3, Expression::Operation::DIV); }
+            { $$ = new Expression(@$, $1, $3, ExpressionOperation::DIV); }
           | EXPRESSION "%" EXPRESSION
-            { $$ = new Expression(@$, $1, $3, Expression::Operation::MOD); }
+            { $$ = new Expression(@$, $1, $3, ExpressionOperation::MOD); }
           | EXPRESSION RATIONAL_DIV EXPRESSION
-            { $$ = new Expression(@$, $1, $3, Expression::Operation::RAT_DIV); }
+            { $$ = new Expression(@$, $1, $3, ExpressionOperation::RAT_DIV); }
           | EXPRESSION NEQUAL EXPRESSION
-            { $$ = new Expression(@$, $1, $3, Expression::Operation::NEQ); }
+            { $$ = new Expression(@$, $1, $3, ExpressionOperation::NEQ); }
           | EXPRESSION "=" EXPRESSION
-            { $$ = new Expression(@$, $1, $3, Expression::Operation::EQ); }
+            { $$ = new Expression(@$, $1, $3, ExpressionOperation::EQ); }
           | EXPRESSION "<" EXPRESSION
-            { $$ = new Expression(@$, $1, $3, Expression::Operation::LESSER); }
+            { $$ = new Expression(@$, $1, $3, ExpressionOperation::LESSER); }
           | EXPRESSION ">" EXPRESSION
-            { $$ = new Expression(@$, $1, $3, Expression::Operation::GREATER); }
+            { $$ = new Expression(@$, $1, $3, ExpressionOperation::GREATER); }
           | EXPRESSION LESSEQ EXPRESSION
-            { $$ = new Expression(@$, $1, $3, Expression::Operation::LESSEREQ); }
+            { $$ = new Expression(@$, $1, $3, ExpressionOperation::LESSEREQ); }
           | EXPRESSION GREATEREQ EXPRESSION
-            { $$ = new Expression(@$, $1, $3, Expression::Operation::GREATEREQ); }
+            { $$ = new Expression(@$, $1, $3, ExpressionOperation::GREATEREQ); }
           | EXPRESSION OR EXPRESSION
-            { $$ = new Expression(@$, $1, $3, Expression::Operation::OR); }
+            { $$ = new Expression(@$, $1, $3, ExpressionOperation::OR); }
           | EXPRESSION XOR EXPRESSION
-            { $$ = new Expression(@$, $1, $3, Expression::Operation::XOR); }
+            { $$ = new Expression(@$, $1, $3, ExpressionOperation::XOR); }
           | EXPRESSION AND EXPRESSION
-            { $$ = new Expression(@$, $1, $3, Expression::Operation::AND); }
+            { $$ = new Expression(@$, $1, $3, ExpressionOperation::AND); }
           | NOT EXPRESSION
-            { $$ = new Expression(@$, $2, nullptr, Expression::Operation::NOT);}
+            { $$ = new Expression(@$, $2, nullptr, ExpressionOperation::NOT);}
           | ATOM  { $$ = $1; }
           ;
 
