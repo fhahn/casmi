@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <sstream>
 #include <cmath>
 #include <assert.h>
 #include <utility>
@@ -174,18 +175,25 @@ void ExecutionVisitor::visit_call_post(CallNode *call) {
 }
 
 void ExecutionVisitor::visit_print(PrintNode *node, const std::vector<Value> &arguments) {
+  std::stringstream ss;
   if (node->filter.size() > 0 ) {
     if (context_.filter_enabled(node->filter)) {
-      std::cout << node->filter << ": ";
+      ss << node->filter << ": ";
     } else {
       return;
     }
   }
 
   for (const Value& v: arguments) {
-    std::cout << v.to_str();
+    ss << v.to_str();
   }
-  std::cout << std::endl;
+  ss << std::endl;
+
+  if (context_.symbolic) {
+    context_.trace.push_back(ss.str());
+  } else {
+    std::cout << ss.str();
+  }
 }
 
 void ExecutionVisitor::visit_diedie(DiedieNode *node, const Value& msg) {
