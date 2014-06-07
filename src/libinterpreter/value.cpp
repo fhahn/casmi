@@ -230,8 +230,22 @@ symbolic_condition::symbolic_condition(Value *lhs, Value *rhs,
                                        ExpressionOperation op) : lhs(lhs), rhs(rhs), op(op) {}
 
 std::string symbolic_condition::to_str() const {
-  return lhs->to_str() +operator_to_str(op)+rhs->to_str();
-
+  switch (op) {
+    case ExpressionOperation::EQ:
+      return lhs->to_str()+"="+rhs->to_str();
+    case ExpressionOperation::NEQ:
+      return lhs->to_str()+"!="+rhs->to_str();
+    case ExpressionOperation::LESSEREQ:
+      return "$lessereq("+lhs->to_str()+","+rhs->to_str()+")";
+    case ExpressionOperation::LESSER:
+      return "$lesser("+lhs->to_str()+","+rhs->to_str()+")";
+    case ExpressionOperation::GREATER:
+      return "$greater("+lhs->to_str()+","+rhs->to_str()+")";
+    case ExpressionOperation::GREATEREQ:
+      return "$greatereq("+lhs->to_str()+","+rhs->to_str()+")";
+    default:
+      assert(0);
+  }
 }
 
 rational_t::rational_t() {}
