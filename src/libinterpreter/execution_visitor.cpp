@@ -707,9 +707,11 @@ void ExecutionWalker::run() {
   }
 
   if (visitor.context_.symbolic) {
-
     int status;
     waitpid(visitor.child_pid, &status, 0);
+    if (WEXITSTATUS(status) != 0) {
+      throw RuntimeException("error in child process");
+    }
     if (visitor.context_.fileout) {
       const std::string& filename = visitor.driver_.get_filename().substr(
           0, visitor.driver_.get_filename().rfind("."));
