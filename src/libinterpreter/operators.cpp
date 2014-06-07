@@ -35,6 +35,20 @@
   }                                                               \
 }
 
+#define CHECK_SYMBOLIC_CMP_OPERATION(op, lhs, rhs) {                         \
+ if (lhs.is_symbolic()) {                                                    \
+    return Value(new symbolic_condition(new Value(lhs),                      \
+                                        new Value(rhs),                      \
+                                        op));                                \
+  }                                                                          \
+ if (rhs.is_symbolic()) {                                                    \
+    return Value(new symbolic_condition(new Value(lhs),                      \
+                                        new Value(rhs),                      \
+                                        op));                                \
+  }                                                                          \
+}
+
+
 #define CREATE_LOGICAL_OPERATION(op, lhs, rhs)  {                   \
  \
 } 
@@ -60,9 +74,11 @@ const Value operators::dispatch(ExpressionOperation op, const Value& lhs, const 
       return std::move(operators::rat_div(lhs, rhs));
 
     case ExpressionOperation::EQ:
+      CHECK_SYMBOLIC_CMP_OPERATION(op, lhs, rhs);
       return std::move(operators::eq(lhs, rhs));
 
     case ExpressionOperation::NEQ: 
+      CHECK_SYMBOLIC_CMP_OPERATION(op, lhs, rhs);
       return std::move(operators::neq(lhs, rhs));
 
     case ExpressionOperation::AND: 
@@ -78,15 +94,19 @@ const Value operators::dispatch(ExpressionOperation op, const Value& lhs, const 
       return std::move(operators::not_(lhs));
 
     case ExpressionOperation::LESSER:
+      CHECK_SYMBOLIC_CMP_OPERATION(op, lhs, rhs);
       return std::move(operators::lesser(lhs, rhs));
 
     case ExpressionOperation::GREATER:
+      CHECK_SYMBOLIC_CMP_OPERATION(op, lhs, rhs);
       return std::move(operators::greater(lhs, rhs));
 
     case ExpressionOperation::LESSEREQ:
+      CHECK_SYMBOLIC_CMP_OPERATION(op, lhs, rhs);
       return std::move(operators::lessereq(lhs, rhs));
 
     case ExpressionOperation::GREATEREQ:
+      CHECK_SYMBOLIC_CMP_OPERATION(op, lhs, rhs);
       return std::move(operators::greatereq(lhs, rhs));
 
     default: assert(0);
@@ -138,11 +158,6 @@ const Value operators::rat_div(const Value& lhs, const Value& rhs) {
 }
 
 const Value operators::eq(const Value& lhs, const Value& rhs) {
-  if (lhs.is_symbolic()) {
-    DEBUG("JUHUHU");
-    return Value(new symbolic_condition(new Value(lhs), new Value(rhs), ExpressionOperation::EQ));
-  }
-
   return std::move(Value(lhs == rhs));
 }
 
@@ -175,10 +190,6 @@ const Value operators::not_(const Value& lhs) {
 }
 
 const Value operators::neq(const Value& lhs, const Value& rhs) {
-  if (lhs.is_symbolic()) {
-    DEBUG("JUHUHU0");
-    return Value(new symbolic_condition(new Value(lhs), new Value(rhs), ExpressionOperation::NEQ));
-  }
   return std::move(Value(lhs != rhs));
 }
 
