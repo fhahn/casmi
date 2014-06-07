@@ -85,7 +85,7 @@ TEST(TypeUnifyTest, unify_list_simple_2) {
   EXPECT_TRUE(t1.unify(&res));
   EXPECT_TRUE(t1.is_complete());
   EXPECT_TRUE(t1 == TypeType::LIST);
-  EXPECT_TRUE(*t1.internal_type == TypeType::INT);
+  EXPECT_TRUE(*t1.subtypes[0] == TypeType::INT);
 }
 
 TEST(TypeUnifyTest, unify_list_internal_type_1) {
@@ -100,7 +100,7 @@ TEST(TypeUnifyTest, unify_list_internal_type_1) {
   EXPECT_TRUE(t1.is_complete());
   EXPECT_TRUE(list_t.is_complete());
   EXPECT_TRUE(list_t == TypeType::LIST);
-  EXPECT_TRUE(*list_t.internal_type == TypeType::INT);
+  EXPECT_TRUE(*list_t.subtypes[0] == TypeType::INT);
 }
 
 TEST(TypeUnifyTest, unify_list_list_1) {
@@ -115,7 +115,7 @@ TEST(TypeUnifyTest, unify_list_list_1) {
   EXPECT_TRUE(t1.is_complete());
   EXPECT_TRUE(list_t.is_complete());
   EXPECT_TRUE(list_t == TypeType::LIST);
-  EXPECT_TRUE(*list_t.internal_type == TypeType::INT);
+  EXPECT_TRUE(*list_t.subtypes[0] == TypeType::INT);
 }
 
 TEST(TypeUnifyTest, unify_list_list_2) {
@@ -130,7 +130,7 @@ TEST(TypeUnifyTest, unify_list_list_2) {
   EXPECT_TRUE(t1.is_complete());
   EXPECT_TRUE(list_t.is_complete());
   EXPECT_TRUE(list_t == TypeType::LIST);
-  EXPECT_TRUE(*list_t.internal_type == TypeType::INT);
+  EXPECT_TRUE(*list_t.subtypes[0] == TypeType::INT);
 }
 
 TEST(TypeUnifyTest, unify_simple_constraints_1) {

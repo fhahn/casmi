@@ -18,6 +18,7 @@ struct ArgumentsKey {
   bool dynamic;
   uint16_t sym_args;
 
+  // size must be equal to the size specified in the function type
   ArgumentsKey(uint64_t *args, uint16_t size, bool dyn, uint16_t sym_args);
   ArgumentsKey(const ArgumentsKey& other);
   ArgumentsKey(ArgumentsKey&& other) noexcept;

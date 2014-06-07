@@ -14,24 +14,22 @@ class ExecutionContextTest: public ::testing::Test {
     virtual void SetUp() { }
 };
 
-// tests convert_to_long with a valid string, base 10
 TEST_F(ExecutionContextTest, test_argumentskey_with_unordered_map) {
-  std::unordered_map<ArgumentsKey, int> map;
+
+  Type t1(TypeType::INT);
+  std::vector<Type*> types = {&t1, &t1, &t1};
+
+  std::unordered_map<ArgumentsKey, int> map(0, {types}, {types});
 
   uint64_t data1[3] = {1,2,3};
-  map[{&data1[0], 3}] =  55;
+  map[ArgumentsKey(&data1[0], 3, false, 0)] =  55;
 
-  uint64_t val = map[{&data1[0], 3}];
+  uint64_t val = map[ArgumentsKey(&data1[0], 3, false, 0)];
   EXPECT_EQ(55, val);
 
-  ArgumentsKey k = {&data1[0], 2};
-  ASSERT_THROW(map.at(k), std::out_of_range);
-
   uint64_t data2[3] = {1,2,2};
-  k = {&data2[0], 3};
-  ASSERT_THROW(map.at(k), std::out_of_range);
+  ASSERT_THROW(map.at(ArgumentsKey(&data2[0], 3, false, 0)), std::out_of_range);
 
   uint64_t data3[3] = {1,2,3};
-  k = {&data3[0], 3};
-  EXPECT_EQ(55, map.at(k));
+  EXPECT_EQ(55, map.at(ArgumentsKey(&data3[0], 3, false, 0)));
 }

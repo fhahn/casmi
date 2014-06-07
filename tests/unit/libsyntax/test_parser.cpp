@@ -36,7 +36,7 @@ TEST_F(ParserTest, parse_simple) {
         new Expression(loc,
             new IntAtom(loc, 1),
             new IntAtom(loc, 2),
-            Expression::Operation::SUB)
+            ExpressionOperation::SUB)
   ));
 
   stmts->add(new UpdateNode(loc,
@@ -44,7 +44,7 @@ TEST_F(ParserTest, parse_simple) {
         new Expression(loc,
             new IntAtom(loc, 5),
             new IntAtom(loc, 10),
-            Expression::Operation::SUB)
+            ExpressionOperation::SUB)
   ));
 
   AstListNode *ast = new AstListNode(loc, NodeType::BODY_ELEMENTS);
@@ -72,8 +72,8 @@ TEST_F(ParserTest, parse_simple_symbols) {
 
   // TODO: Check why size of symbol table is 3
   // EXPECT_EQ(2, driver_.function_table.size());
-  EXPECT_EQ("x", driver_.function_table.get("x")->name());
-  EXPECT_EQ("y", driver_.function_table.get("y")->name());
+  EXPECT_EQ("x", driver_.function_table.get("x")->name);
+  EXPECT_EQ("y", driver_.function_table.get("y")->name);
 
   delete root;
 }
@@ -89,7 +89,7 @@ TEST_F(ParserTest, parser_test_function_symbol_with_multiple_params) {
   types.push_back(new Type(TypeType::INT));
   Function x("x", types, new Type(TypeType::INT), nullptr);
 
-  EXPECT_EQ(x.name(), driver_.function_table.get("x")->name());
+  EXPECT_EQ(x.name, driver_.function_table.get("x")->name);
 
   delete root;
 }
