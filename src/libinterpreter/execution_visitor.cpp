@@ -354,6 +354,7 @@ Value ExecutionVisitor::visit_number_range_atom(NumberRangeAtom *atom) {
 ExpressionOperation invert(ExpressionOperation op) {
   switch (op) {
     case ExpressionOperation::EQ: return ExpressionOperation::NEQ;
+    case ExpressionOperation::NEQ: return ExpressionOperation::EQ;
     default: throw RuntimeException("Invert not implemented for operation");
   }
 }
@@ -369,30 +370,19 @@ void AstWalker<ExecutionVisitor, Value>::walk_ifthenelse(IfThenElseNode* node) {
     } else {
       sym_cond = new symbolic_condition(new Value(cond), new Value(true), ExpressionOperation::EQ);
     }
-    bool found = false;
-    bool then = false;
-    for (symbolic_condition *saved_cond : visitor.context_.path_conditions) {
-      if (*(saved_cond->lhs) == *(sym_cond->lhs) && *(saved_cond->rhs) == *(sym_cond->rhs)) {
-        if (saved_cond->op == sym_cond->op) {
-          found = true;
-          then = true;
-          break;
-        } else if (saved_cond->op == invert(sym_cond->op)) {
-          found = true;
-          then = false;
-          break;
-        }
-      }
-    }
-    
-    if (found) {
-      if (then) {
+
+    switch (symbolic::check_condition(visitor.context_.path_conditions, sym_cond)) {
+      case symbolic::check_status_t::NOT_FOUND: break;
+      case symbolic::check_status_t::TRUE:
         walk_statement(node->then_);
-      } else if (node->else_) {
-        walk_statement(node->else_);
-      }
-      return;
+        return;
+      case symbolic::check_status_t::FALSE:;
+        if (node->else_) {
+          walk_statement(node->else_);
+        }
+        return;
     }
+
     switch ((visitor.child_pid = fork())) {
       case -1:
         throw RuntimeException("Could not fork");

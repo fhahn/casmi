@@ -24,6 +24,15 @@ namespace symbolic {
   void dump_final(std::vector<std::string>& trace,
       const std::vector<std::pair<const Function*, 
       std::unordered_map<ArgumentsKey, Value> >>& functions);
+
+  enum class check_status_t {
+    NOT_FOUND,
+    TRUE,
+    FALSE
+  };
+
+  check_status_t check_condition(std::vector<symbolic_condition*> known_condition,
+      const symbolic_condition *check);
 };
 
 #endif

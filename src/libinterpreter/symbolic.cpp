@@ -113,4 +113,68 @@ namespace symbolic {
     }
     trace.push_back(ss.str());
   }
+
+  check_status_t check_inclusion(const symbolic_condition& known, const symbolic_condition& check) {
+    switch (check.op) {
+      case ExpressionOperation::EQ:
+        if (known.op == ExpressionOperation::EQ) {
+          if (*known.rhs == *check.rhs) {
+            return check_status_t::TRUE;
+          } else {
+            return check_status_t::FALSE;
+          }
+        } else if (known.op == ExpressionOperation::NEQ) {
+          if(*known.rhs == *check.rhs) {
+            return check_status_t::FALSE;
+          } 
+        }
+        return check_status_t::NOT_FOUND;
+      case ExpressionOperation::NEQ:
+        if (known.op == ExpressionOperation::NEQ) {
+          if(*known.rhs == *check.rhs) {
+            return check_status_t::TRUE;
+          }
+        } else if (known.op == ExpressionOperation::EQ) {
+          if (*known.rhs == *check.rhs) {
+            return check_status_t::FALSE;
+          } else {
+            return check_status_t::TRUE;
+          }
+        }
+        return check_status_t::NOT_FOUND;
+
+      default:
+        assert(0);
+    }
+    return check_status_t::NOT_FOUND;
+  }
+
+  check_status_t check_condition(std::vector<symbolic_condition*> known_conditions,
+      const symbolic_condition *check) {
+
+    symbolic_condition cond(check->lhs, check->rhs, check->op);
+
+    if (check->lhs->type != TypeType::SYMBOL) {
+      if (check->rhs->type == TypeType::SYMBOL) {
+        cond = symbolic_condition(check->rhs, check->lhs, check->op);
+      } else {
+        throw RuntimeException("Invalid condition passed");
+      }
+    }
+
+    for (symbolic_condition *known_cond : known_conditions) {
+     check_status_t s = check_status_t::NOT_FOUND;
+      if (*(known_cond->lhs) == *(cond.lhs)) {
+        s = check_inclusion(*known_cond, cond);
+      } else if (*(known_cond->rhs) == *(cond.lhs)) {
+        s = check_inclusion(
+            symbolic_condition(known_cond->rhs, known_cond->lhs, known_cond->op),
+            cond);
+      }
+      if (s != check_status_t::NOT_FOUND) {
+        return s;
+      }
+    }
+    return check_status_t::NOT_FOUND;
+  }
 }
