@@ -363,6 +363,7 @@ ExpressionOperation invert(ExpressionOperation op) {
   switch (op) {
     case ExpressionOperation::EQ: return ExpressionOperation::NEQ;
     case ExpressionOperation::NEQ: return ExpressionOperation::EQ;
+    case ExpressionOperation::LESSEREQ: return ExpressionOperation::GREATER;
     default: throw RuntimeException("Invert not implemented for operation");
   }
 }

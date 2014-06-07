@@ -2,6 +2,7 @@
 #include <sstream>
 
 #include "libinterpreter/symbolic.h"
+#include "libinterpreter/operators.h"
 
 namespace symbolic {
   static uint32_t last_symbol_id = 0;
@@ -138,6 +139,46 @@ namespace symbolic {
           if (*known.rhs == *check.rhs) {
             return check_status_t::FALSE;
           } else {
+            return check_status_t::TRUE;
+          }
+        }
+        return check_status_t::NOT_FOUND;
+      case ExpressionOperation::LESSEREQ:
+        if (known.op == ExpressionOperation::EQ) {
+          Value res = operators::lessereq(*known.rhs, *check.rhs);
+          if (res.value.bval) {
+            return check_status_t::TRUE;
+          } else {
+            return check_status_t::FALSE;
+          }
+        } else if (known.op == ExpressionOperation::LESSEREQ) {
+          Value res = operators::lessereq(*check.rhs, *known.rhs);
+          if (res.value.bval) {
+            return check_status_t::TRUE;
+          }
+        } else if (known.op == ExpressionOperation::GREATER) {
+          Value res = operators::lessereq(*check.rhs, *known.rhs);
+          if (res.value.bval) {
+            return check_status_t::FALSE;
+          }
+        }
+        return check_status_t::NOT_FOUND;
+      case ExpressionOperation::GREATER:
+        if (known.op == ExpressionOperation::EQ) {
+          Value res = operators::greater(*known.rhs, *check.rhs);
+          if (res.value.bval) {
+            return check_status_t::TRUE;
+          } else {
+            return check_status_t::FALSE;
+          }
+        } else if (known.op == ExpressionOperation::LESSEREQ) {
+          Value res = operators::lessereq(*known.rhs, *check.rhs);
+          if (res.value.bval) {
+            return check_status_t::FALSE;
+          }
+        } else if (known.op == ExpressionOperation::GREATER) {
+          Value res = operators::greater(*check.rhs, *known.rhs);
+          if (res.value.bval) {
             return check_status_t::TRUE;
           }
         }
