@@ -72,8 +72,14 @@ namespace symbolic {
        << std::endl;
     ss << "fof(id"<<next_fof_id() << ",hypothesis,"
        << location_to_string(func, args, sym_args, v, get_timestamp())
-       << ").%CREATE: " << func->name
-       << '(' << arguments_to_string(func, args, sym_args, true) << ')' << std::endl;
+       << ").%CREATE: " << func->name;
+
+    if (func->arguments_.size() == 0) {
+       ss << arguments_to_string(func, args, sym_args, true);
+    } else {
+       ss << '(' << arguments_to_string(func, args, sym_args, true) << ')';
+    }
+    ss << std::endl;
     trace.push_back(ss.str());
   }
 
@@ -82,10 +88,15 @@ namespace symbolic {
      std::stringstream ss;
     ss << "fof(id" << next_fof_id() << ",hypothesis,"
        << location_to_string(func, args, sym_args, v, get_timestamp())
-       << ").\%SYMBOLIC: " << func->name
-       << '(' << arguments_to_string(func, args, sym_args, true) << ')' << std::endl;
+       << ").\%SYMBOLIC: " << func->name;
+
+    if (func->arguments_.size() == 0) {
+       ss << arguments_to_string(func, args, sym_args, true);
+    } else {
+       ss << '(' << arguments_to_string(func, args, sym_args, true) << ')';
+    }
+    ss << std::endl;
     trace.push_back(ss.str());
- 
   }
 
   void dump_update(std::vector<std::string>& trace, const Function *func,
@@ -93,8 +104,14 @@ namespace symbolic {
     std::stringstream ss;
     ss << "fof(id" << next_fof_id() << ",hypothesis,"
        << location_to_string(func, args, sym_args, v, get_timestamp())
-       << ").%UPDATE: " << func->name
-       << '(' << arguments_to_string(func, args, sym_args, true) << ')' << std::endl;
+       << ").%UPDATE: " << func->name;
+
+    if (func->arguments_.size() == 0) {
+       ss << arguments_to_string(func, args, sym_args, true);
+    } else {
+       ss << '(' << arguments_to_string(func, args, sym_args, true) << ')';
+    }
+    ss << std::endl;
     trace.push_back(ss.str());
   }
 
@@ -117,9 +134,13 @@ namespace symbolic {
       for (auto& value_pair : pair.second) {
         ss << "fof(final" << i << ",hypothesis,"
            << location_to_string(pair.first, value_pair.first.p, value_pair.first.sym_args, value_pair.second, 0)
-           << ").%FINAL: " << pair.first->name << '(' 
-           << arguments_to_string(pair.first, value_pair.first.p, value_pair.first.sym_args, true)
-           << ')' << std::endl;
+           << ").%FINAL: " << pair.first->name;
+          if (pair.first->arguments_.size() == 0) {
+             ss << arguments_to_string(pair.first, value_pair.first.p, value_pair.first.sym_args, true);
+          } else {
+             ss << '(' << arguments_to_string(pair.first, value_pair.first.p, value_pair.first.sym_args, true) << ')' ;
+          }
+          ss << std::endl;
       }
       i += 1;
     }
