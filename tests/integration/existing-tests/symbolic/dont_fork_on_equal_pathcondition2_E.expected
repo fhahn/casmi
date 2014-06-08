@@ -1,8 +1,0 @@
-tff(symbolNext, type, sym2: $int).
-fof(id0,hypothesis,stx(1,sym2)).%CREATE: x 
-fof('idutils/tests/symbolic/dont_fork_on_equal_pathcondition2.casm:14',hypothesis,$greater(sym2, 0)).
-% utils/tests/symbolic/dont_fork_on_equal_pathcondition2.casm:25 PC-LOOKUP sym2
-% utils/tests/symbolic/dont_fork_on_equal_pathcondition2.casm:28 PC-LOOKUP sym2
-> 0
-fof(id1,hypothesis,stx(2,sym2)).%SYMBOLIC: x 
-fof(final0,hypothesis,stx(0,sym2)).%FINAL: x 
