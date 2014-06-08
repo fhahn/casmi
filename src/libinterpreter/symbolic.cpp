@@ -68,8 +68,10 @@ namespace symbolic {
   void dump_create(std::vector<std::string>& trace, const Function *func,
       const uint64_t args[], uint16_t sym_args, const Value& v) {
     std::stringstream ss;
-    ss << "tff(symbolNext, type, sym" << v.value.ival<< ": $int)."
-       << std::endl;
+    if (v.is_symbolic()) {
+      ss << "tff(symbolNext, type, sym" << v.value.ival<< ": $int)."
+         << std::endl;
+    }
     ss << "fof(id"<<next_fof_id() << ",hypothesis,"
        << location_to_string(func, args, sym_args, v, 1)
        << ").%CREATE: " << func->name;

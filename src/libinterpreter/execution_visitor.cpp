@@ -659,6 +659,12 @@ bool ExecutionWalker::init_function(const std::string& name, std::set<std::strin
         throw RuntimeException("function already initialized");
       }
       DEBUG("BEGIN INSERT "<<name);
+
+      if (visitor.context_.symbolic && func->is_symbolic) {
+        symbolic::dump_create(visitor.context_.trace_creates, func,
+            &args[0], 0, walk_expression_base(init.second));
+      }
+
       function_map.emplace(std::pair<ArgumentsKey, Value>(std::move(ArgumentsKey(&args[0], num_args, true, 0)), walk_expression_base(init.second)));
       DEBUG("END INSERT "<<name);
       initializer_args.push_back(args);
