@@ -1,1 +1,0 @@
-foo=STATEMENTS(LET CONST(ident c0__,num 1),STATEMENTS(LET CONST(ident c1__,num 2),STATEMENTS(LET CONST(ident c2__,num 3),SEQBLOCK(STATEMENTS(UPDATE(ident bar,ident c2__),STATEMENTS(UPDATE(ident bar,ident c2__),STATEMENTS(UPDATE(LOOKUP(ident program,LIST(SELF,null)),UNDEF),null))),null))))

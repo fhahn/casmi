@@ -1,5 +1,0 @@
-foo=STATEMENTS(LET CONST(ident c0__,TRUE),STATEMENTS(LET CONST(ident c1__,FALSE),PARBLOCK(STATEMENTS(IF(ident c0__,ASSERT(ident c0__,null)),STATEMENTS(IF(ident c1__,ASSERT(ident c1__,null)),STATEMENTS(IF(ident c0__,ASSERT(ident c0__,null)),STATEMENTS(IF(ident c1__,ASSERT(ident c1__,null)),STATEMENTS(IF(ident c1__,ASSERT(ident c1__,null)),STATEMENTS(IF(ident c0__,ASSERT(ident c0__,null)),STATEMENTS(UPDATE(LOOKUP(ident program,LIST(SELF,null)),UNDEF),null))))))),null)))
-
-bar=SKIP
-
-baz=SKIP

@@ -1,3 +1,0 @@
-foo=PARBLOCK(STATEMENTS(STATEMENTS(PARBLOCK(STATEMENTS(LET(ident l0__,LET(null,LET(num 1,PARBLOCK(PRINT(LIST(*(num 1,ident l0__),null),null),null)))),null),null),null),STATEMENTS(STATEMENTS(PARBLOCK(STATEMENTS(LET(ident l1__,LET(null,LET(num 1,PARBLOCK(PRINT(LIST(*(num 2,ident l1__),null),null),null)))),null),null),null),STATEMENTS(UPDATE(LOOKUP(ident program,LIST(SELF,null)),UNDEF),null))),null)
-
-inline=PARBLOCK(STATEMENTS(LET(ident y,LET(null,LET(num 1,PARBLOCK(PRINT(LIST(*(ident x,ident y),null),null),null)))),null),null)

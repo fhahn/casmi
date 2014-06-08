@@ -1,1 +1,0 @@
-foo=STATEMENTS(LET CONST(ident c0__,num 2),STATEMENTS(LET CONST(ident c1__,num 11),PARBLOCK(STATEMENTS(UPDATE(ident bf,ident c0__),STATEMENTS(UPDATE(ident af,ident c1__),STATEMENTS(UPDATE(LOOKUP(ident program,LIST(SELF,null)),UNDEF),null))),null)))
