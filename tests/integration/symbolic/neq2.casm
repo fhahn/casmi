@@ -5,7 +5,7 @@ function (symbolic) b: -> Int
 function c: -> Int initially { 0 }
 
 rule main = {|
-  
+
   b := a
 
   if a != b then {

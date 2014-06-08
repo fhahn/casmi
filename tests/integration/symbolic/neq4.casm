@@ -4,8 +4,6 @@ function (symbolic) a: -> Int
 function (symbolic) b: -> Int
 
 rule main = {|
-  
-
   if a != undef then {
     b := 1
   } else {
@@ -15,4 +13,3 @@ rule main = {|
   program( self ) := undef
 |}
 init main
-

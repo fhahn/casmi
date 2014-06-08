@@ -82,8 +82,12 @@ const Value operators::dispatch(ExpressionOperation op, const Value& lhs, const 
       }
 
     case ExpressionOperation::NEQ: 
-      CHECK_SYMBOLIC_CMP_OPERATION(op, lhs, rhs);
-      return std::move(operators::neq(lhs, rhs));
+      if (lhs.is_symbolic() && rhs.is_symbolic()) {
+        return std::move(operators::neq(lhs, rhs));
+      } else {
+        CHECK_SYMBOLIC_CMP_OPERATION(op, lhs, rhs);
+        return std::move(operators::neq(lhs, rhs));
+      }
 
     case ExpressionOperation::AND: 
       return std::move(operators::and_(lhs, rhs));
