@@ -236,13 +236,13 @@ std::string symbolic_condition::to_str() const {
     case ExpressionOperation::NEQ:
       return lhs->to_str()+"!="+rhs->to_str();
     case ExpressionOperation::LESSEREQ:
-      return "$lesseq("+lhs->to_str()+","+rhs->to_str()+")";
+      return "$lesseq("+lhs->to_str()+", "+rhs->to_str()+")";
     case ExpressionOperation::LESSER:
-      return "$lesser("+lhs->to_str()+","+rhs->to_str()+")";
+      return "$less("+lhs->to_str()+", "+rhs->to_str()+")";
     case ExpressionOperation::GREATER:
-      return "$greater("+lhs->to_str()+","+rhs->to_str()+")";
+      return "$greater("+lhs->to_str()+", "+rhs->to_str()+")";
     case ExpressionOperation::GREATEREQ:
-      return "$greateq("+lhs->to_str()+","+rhs->to_str()+")";
+      return "$greatereq("+lhs->to_str()+", "+rhs->to_str()+")";
     default:
       assert(0);
   }

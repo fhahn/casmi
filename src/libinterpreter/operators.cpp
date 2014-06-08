@@ -36,12 +36,12 @@
 }
 
 #define CHECK_SYMBOLIC_CMP_OPERATION(op, lhs, rhs) {                         \
- if (lhs.is_symbolic()) {                                                    \
+ if (lhs.is_symbolic() && !rhs.is_undef()) {                                 \
     return Value(new symbolic_condition(new Value(lhs),                      \
                                         new Value(rhs),                      \
                                         op));                                \
   }                                                                          \
- if (rhs.is_symbolic()) {                                                    \
+ if (rhs.is_symbolic() && !lhs.is_undef()) {                                 \
     return Value(new symbolic_condition(new Value(lhs),                      \
                                         new Value(rhs),                      \
                                         op));                                \
