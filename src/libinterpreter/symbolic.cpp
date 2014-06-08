@@ -146,14 +146,14 @@ namespace symbolic {
         ss << "fof(final" << i << ",hypothesis,"
            << location_to_string(pair.first, value_pair.first.p, value_pair.first.sym_args, value_pair.second, 0)
            << ").%FINAL: " << pair.first->name;
-          if (pair.first->arguments_.size() == 0) {
-             ss << arguments_to_string(pair.first, value_pair.first.p, value_pair.first.sym_args, true);
-          } else {
-             ss << '(' << arguments_to_string(pair.first, value_pair.first.p, value_pair.first.sym_args, true) << ')' ;
-          }
-          ss << std::endl;
+        if (pair.first->arguments_.size() == 0) {
+          ss << arguments_to_string(pair.first, value_pair.first.p, value_pair.first.sym_args, true);
+        } else {
+          ss << '(' << arguments_to_string(pair.first, value_pair.first.p, value_pair.first.sym_args, true) << ')' ;
+        }
+        ss << std::endl;
+        i += 1;
       }
-      i += 1;
     }
     trace.push_back(ss.str());
   }

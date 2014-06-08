@@ -718,7 +718,6 @@ void ExecutionWalker::run() {
 
   Function *program_sym = visitor.context_.symbol_table.get_function("program");
   uint64_t args[10] = {0};
-  size_t steps = 0;
   while(true) {
     Value& program_val = visitor.context_.get_function_value(program_sym, args, 0);
     DEBUG(program_val.to_str());
@@ -727,7 +726,9 @@ void ExecutionWalker::run() {
     }
     walk_rule(program_val.value.rule);
     visitor.context_.apply_updates();
-    steps += 1;
+    // reuse symbolic counter as step counter, saves one counter in the main
+    // loop
+    symbolic::advance_timestamp();
   }
 
   if (visitor.context_.symbolic) {
@@ -761,10 +762,11 @@ void ExecutionWalker::run() {
       std::cout << std::endl;
     }
   } else {
-    if (steps > 1) {
-      std::cout << steps <<" steps later..."<<std::endl;
+    std::cout << (symbolic::get_timestamp()-2);
+    if ((symbolic::get_timestamp()-2) > 1) {
+      std::cout << " steps later..." << std::endl;
     } else {
-      std::cout << steps <<" step later..."<<std::endl;
+      std::cout << " step later..." << std::endl;
     }
   }
 }
