@@ -1,14 +1,14 @@
 forklog:I
 tff(symbolNext, type, sym2: $int).
 fof(id0,hypothesis,sta(1,sym2)).%CREATE: a
-fof('id../../tests/integration/symbolic/eq1.casm:9',hypothesis,sym2=2).
+fof('ideq1.casm:9',hypothesis,sym2=2).
 fof(id1,hypothesis,sta(2,sym2)).%SYMBOLIC: a
 fof(final0,hypothesis,sta(0,sym2)).%FINAL: a
 
 forklog:E
 tff(symbolNext, type, sym2: $int).
 fof(id0,hypothesis,sta(1,sym2)).%CREATE: a
-fof('id../../tests/integration/symbolic/eq1.casm:9',hypothesis,sym2!=2).
+fof('ideq1.casm:9',hypothesis,sym2!=2).
 fof(id1,hypothesis,sta(2,sym2)).%SYMBOLIC: a
 fof(final0,hypothesis,sta(0,sym2)).%FINAL: a
 

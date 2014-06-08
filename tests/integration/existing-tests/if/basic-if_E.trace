@@ -1,0 +1,7 @@
+forklog: E
+tff(symbolNext, type, sym1: $int).
+fof(id1,hypothesis,sta(1,sym1)).%CREATE: a()
+fof('idbasic-if.casm:11',hypothesis,sym1=0).
+fof(id2,hypothesis,stb(1,1)).%UPDATE: b()
+fof(final0,hypothesis,sta(0,sym1)).%FINAL: a()
+fof(final1,hypothesis,stb(0,1)).%FINAL: b()

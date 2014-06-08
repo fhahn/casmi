@@ -5,7 +5,8 @@ import re
 
 test_exe = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                         '../../build/bin/casmi')
-SYMBOLIC_PATH = '../../tests/integration/symbolic/'
+SYMBOLIC_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                        '../../tests/integration/symbolic/')
 RUN_PASS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                         '../../tests/integration/run-pass/')
 
@@ -52,7 +53,8 @@ def test_existing_parse(filename):
                                     HR))
 
 def test_symbolic(filename):
-    short_filename = filename.replace(SYMBOLIC_PATH, '')
+    filename = filename.replace('./', '')
+    short_filename = filename
     sys.stdout.write('\t[symbolic] '+short_filename)
     sys.stdout.flush()
     p1 = subprocess.Popen([test_exe,]+get_options(filename)+[filename,]+["-s"],
@@ -205,26 +207,45 @@ def run_tests(directory, test_fn, verbose=False):
 
     return (len(ok_results), len(fail_results))
 
+def run_existing_tests():
+    return run_tests(EXISTING_PARSE_PATH, test_existing_parse)
+
+def run_run_pass():
+    return run_tests(RUN_PASS_PATH, test_run_pass)
+
+def run_run_fail():
+    return run_tests(RUN_FAIL_PATH, test_run_fail)
+
+def run_symbolic():
+    currdir = os.path.abspath(os.path.curdir)
+
+    os.chdir(SYMBOLIC_PATH)
+
+    ok_count, fail_count = run_tests("./", test_symbolic)
+    os.chdir(currdir)
+    return ok_count, fail_count
+
 
 if __name__ == '__main__':
+    if len(sys.argv) == 1:
+        test_runners = [run_existing_tests, run_run_pass, run_run_fail, run_symbolic]
+    elif len(sys.argv) == 2:
+        if sys.argv[1] == "symbolic":
+            test_runners = [run_symbolic]
+        else:
+            print("invalid arg")
+            sys.exit(1)
+    else:
+        print("invalid arg")
+        sys.exit(1)
+
     ok_count_sum = 0
     fail_count_sum = 0
 
-    ok_count, fail_count = run_tests(EXISTING_PARSE_PATH, test_existing_parse)
-    ok_count_sum += ok_count
-    fail_count_sum += fail_count
- 
-    ok_count, fail_count = run_tests(RUN_PASS_PATH, test_run_pass)
-    ok_count_sum += ok_count
-    fail_count_sum += fail_count
-
-    ok_count, fail_count = run_tests(RUN_FAIL_PATH, test_run_fail)
-    ok_count_sum += ok_count
-    fail_count_sum += fail_count
-
-    ok_count, fail_count = run_tests(SYMBOLIC_PATH, test_symbolic)
-    ok_count_sum += ok_count
-    fail_count_sum += fail_count
+    for r in test_runners:
+        ok, fail = r()
+        ok_count_sum += ok
+        fail_count_sum += fail
 
     print('')
     print(HR)
