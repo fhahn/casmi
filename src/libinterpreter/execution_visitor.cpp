@@ -384,6 +384,8 @@ void AstWalker<ExecutionVisitor, Value>::walk_ifthenelse(IfThenElseNode* node) {
     switch (symbolic::check_condition(visitor.context_.path_conditions, sym_cond)) {
       case symbolic::check_status_t::NOT_FOUND: break;
       case symbolic::check_status_t::TRUE:
+        symbolic::dump_pathcond_match(visitor.context_.trace, visitor.driver_.get_filename(),
+            node->condition_->location.begin.line, cond, true);
         walk_statement(node->then_);
         return;
       case symbolic::check_status_t::FALSE:;

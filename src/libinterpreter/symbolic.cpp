@@ -115,6 +115,15 @@ namespace symbolic {
     trace.push_back(ss.str());
   }
 
+  void dump_pathcond_match(std::vector<std::string>& trace, const std::string &filename,
+      size_t lineno, const Value& sym, bool status) {
+    std::stringstream ss;
+    ss << "% " << filename << ":" << lineno << " PC-LOOKUP ("
+       << sym.to_str() << ") = " << status << std::endl;
+    trace.push_back(ss.str());
+ 
+  }
+
   void dump_if(std::vector<std::string>& trace, const std::string &filename,
       size_t lineno, const Value &sym) {
     std::stringstream ss;
