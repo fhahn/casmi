@@ -74,8 +74,12 @@ const Value operators::dispatch(ExpressionOperation op, const Value& lhs, const 
       return std::move(operators::rat_div(lhs, rhs));
 
     case ExpressionOperation::EQ:
-      CHECK_SYMBOLIC_CMP_OPERATION(op, lhs, rhs);
-      return std::move(operators::eq(lhs, rhs));
+      if (lhs.is_symbolic() && rhs.is_symbolic()) {
+        return std::move(operators::eq(lhs, rhs));
+      } else {
+        CHECK_SYMBOLIC_CMP_OPERATION(op, lhs, rhs);
+        return std::move(operators::eq(lhs, rhs));
+      }
 
     case ExpressionOperation::NEQ: 
       CHECK_SYMBOLIC_CMP_OPERATION(op, lhs, rhs);
