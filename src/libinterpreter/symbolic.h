@@ -17,6 +17,8 @@ namespace symbolic {
 
   void dump_create(std::vector<std::string>& trace, const Function *func,
       const uint64_t args[], uint16_t sym_args, const Value& v);
+  void dump_symbolic(std::vector<std::string>& trace, const Function *func,
+      const uint64_t args[], uint16_t sym_args, const Value& v);
   void dump_update(std::vector<std::string>& trace, const Function *func,
       const uint64_t args[], uint16_t sym_args, const Value& v);
   void dump_if(std::vector<std::string>& trace, const std::string &filename,

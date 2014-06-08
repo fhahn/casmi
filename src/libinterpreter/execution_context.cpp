@@ -81,18 +81,21 @@ ExecutionContext::ExecutionContext(const ExecutionContext& other) :
 }
 
 void ExecutionContext::apply_updates() {
-  //CASM_RT("updateset apply(updateset = %p)", &updateset);
-
   pp_hashmap_bucket* i = updateset.set->tail->previous;
   casm_update* u;
+
+  std::unordered_map<uint32_t, std::vector<ArgumentsKey>> updated_functions;
+  if (symbolic) {
+    for (uint32_t i = 1; i < functions.size(); i++) {
+      updated_functions[i] = std::vector<ArgumentsKey>();
+    }
+  }
 
   std::vector<Value*> to_fold;
   while( i != updateset.set->head ) {
     u = (casm_update*)i->value;
 
     auto& function_map = functions[u->func];
-
-    DEBUG("APPLY args "<<u->num_args << " arg "<<u->args[0] << " " << u->args[1]<<" func "<<function_map.first->name);
 
     // TODO handle tuples
     if (function_map.first->return_type_->t == TypeType::LIST) {
@@ -122,10 +125,39 @@ void ExecutionContext::apply_updates() {
       }
     }
 
+    if (symbolic) {
+      updated_functions[u->func].push_back(ArgumentsKey(u->args, u->num_args, true, u->sym_args));
+    }
+
     i->used = 0;
     i = i->previous;
   }
 
+  if (symbolic) {
+    for (uint32_t i = 1; i < functions.size(); i++) {
+      const auto& function_map = functions[i];
+      const auto& updated_keys = updated_functions[i];
+      if (!function_map.first->is_symbolic) {
+        continue;
+      }
+
+      std::equal_to<ArgumentsKey> eq = {function_map.first->arguments_};
+      for (const auto& pair : function_map.second) {
+        bool found = false;
+        for (const auto& k : updated_keys) {
+          if (eq(k, pair.first)) {
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          symbolic::dump_symbolic(trace, function_map.first, pair.first.p,
+              pair.first.sym_args, pair.second);
+        }
+      }
+    
+    }
+  }
   for (Value* v : to_fold) {
     BottomList *new_l = v->value.list->collect();
     if (new_l->check_allocated_and_set_to_false()) {

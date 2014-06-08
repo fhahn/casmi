@@ -77,6 +77,17 @@ namespace symbolic {
     trace.push_back(ss.str());
   }
 
+  void dump_symbolic(std::vector<std::string>& trace, const Function *func,
+      const uint64_t args[], uint16_t sym_args, const Value& v) {
+     std::stringstream ss;
+    ss << "fof(id" << next_fof_id() << ",hypothesis,"
+       << location_to_string(func, args, sym_args, v, get_timestamp())
+       << ").\%SYMBOLIC: " << func->name
+       << '(' << arguments_to_string(func, args, sym_args, true) << ')' << std::endl;
+    trace.push_back(ss.str());
+ 
+  }
+
   void dump_update(std::vector<std::string>& trace, const Function *func,
       const uint64_t args[], uint16_t sym_args, const Value& v) {
     std::stringstream ss;
