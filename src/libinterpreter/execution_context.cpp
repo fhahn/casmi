@@ -43,7 +43,7 @@ pp_mem ExecutionContext::value_stack;
 ExecutionContext::ExecutionContext(const SymbolTable& st, RuleNode *init,
     const bool symbolic, const bool fileout): debuginfo_filters(),
     symbol_table(std::move(st)), temp_lists(), symbolic(symbolic), fileout(fileout),
-    trace(), path_name(""), path_conditions() {
+    trace_creates(), trace(), path_name(""), path_conditions() {
 
   pp_mem_new(&updateset_data_, UPDATESET_DATA_SIZE, "mem for updateset hashmap");
   updateset.set =  pp_hashmap_new(&updateset_data_, UPDATESET_SIZE, "main updateset");
@@ -287,7 +287,7 @@ Value& ExecutionContext::get_function_value(Function *sym, uint64_t args[], uint
           ArgumentsKey(&args[0], sym->arguments_.size(), true, sym_args),
           Value(TypeType::SYMBOL, symbolic::next_symbol_id()));
       Value& v = function_map.second[ArgumentsKey(&args[0], sym->arguments_.size(), false, sym_args)];
-      symbolic::dump_create(trace, sym, &args[0], sym_args, v);
+      symbolic::dump_create(trace_creates, sym, &args[0], sym_args, v);
       return v;
     }
     undef.type = TypeType::UNDEF;

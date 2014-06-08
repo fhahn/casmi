@@ -74,6 +74,8 @@ class ExecutionContext {
     static pp_mem value_stack;
     const bool symbolic;
     const bool fileout;
+
+    std::vector<std::string> trace_creates;
     std::vector<std::string> trace;
     std::string path_name;
     std::vector<symbolic_condition*> path_conditions;

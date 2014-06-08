@@ -289,6 +289,7 @@ Value ExecutionVisitor::visit_function_atom(FunctionAtom *atom, std::vector<Valu
 
       Value v = Value(context_.get_function_value(atom->symbol, args, sym_args));
       DEBUG("visit_atom "<<atom->symbol->name<<" "<<v.to_str() <<" size "<<value_list.size());
+
       return v;
     }
     case FunctionAtom::SymbolType::ENUM: {
@@ -572,7 +573,11 @@ void AstWalker<ExecutionVisitor, Value>::walk_iterate(UnaryNode *node) {
 template <>
 void AstWalker<ExecutionVisitor, Value>::walk_update(UpdateNode *node) {
   Value expr_t = walk_expression_base(node->expr_);
-  
+  // this is used to dump %CREATE in trace if necessary
+  if (visitor.context_.symbolic && node->func->symbol->is_symbolic) {
+    walk_expression_base(node->func);
+  }
+
   visitor.value_list.clear();
   if (node->func->arguments) {
     for (ExpressionBase* e : *node->func->arguments) {
@@ -719,6 +724,9 @@ void ExecutionWalker::run() {
 
       std::ofstream out(filename+"_"+visitor.context_.path_name+".trace");
       out << "forklog:" << visitor.context_.path_name << std::endl;
+      for (const std::string& s : visitor.context_.trace_creates) {
+        out << s;
+      }
       symbolic::dump_final(visitor.context_.trace, visitor.context_.functions);
       for (const std::string& s : visitor.context_.trace) {
         out << s;
@@ -726,6 +734,9 @@ void ExecutionWalker::run() {
     } else {
       std::cout << "forklog:" << visitor.context_.path_name << std::endl;
       symbolic::dump_final(visitor.context_.trace, visitor.context_.functions);
+      for (const std::string& s : visitor.context_.trace_creates) {
+        std::cout << s;
+      }
       for (const std::string& s : visitor.context_.trace) {
         std::cout << s;
       }
