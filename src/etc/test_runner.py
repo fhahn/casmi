@@ -5,8 +5,7 @@ import re
 
 test_exe = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                         '../../build/bin/casmi')
-SYMBOLIC_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                        '../../tests/integration/symbolic/')
+SYMBOLIC_PATH = '../../tests/integration/symbolic/'
 RUN_PASS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                         '../../tests/integration/run-pass/')
 
