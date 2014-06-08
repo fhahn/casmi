@@ -718,17 +718,18 @@ void ExecutionWalker::run() {
           0, visitor.driver_.get_filename().rfind("."));
 
       std::ofstream out(filename+"_"+visitor.context_.path_name+".trace");
-      out << "forklog: " << visitor.context_.path_name << std::endl;
+      out << "forklog:" << visitor.context_.path_name << std::endl;
       symbolic::dump_final(visitor.context_.trace, visitor.context_.functions);
       for (const std::string& s : visitor.context_.trace) {
         out << s;
       }
     } else {
-      std::cout << std::endl << "forklog: " << visitor.context_.path_name << std::endl;
+      std::cout << "forklog:" << visitor.context_.path_name << std::endl;
       symbolic::dump_final(visitor.context_.trace, visitor.context_.functions);
       for (const std::string& s : visitor.context_.trace) {
         std::cout << s;
       }
+      std::cout << std::endl;
     }
   } else {
     if (steps > 1) {

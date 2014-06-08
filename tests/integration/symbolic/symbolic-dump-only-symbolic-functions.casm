@@ -1,5 +1,3 @@
-// cmdline "-s"
-
 function a : -> Int initially { 2 }
 function(symbolic) b : -> Int
 

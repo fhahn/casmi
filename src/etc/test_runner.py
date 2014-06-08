@@ -5,6 +5,8 @@ import re
 
 test_exe = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                         '../../build/bin/casmi')
+SYMBOLIC_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                        '../../tests/integration/symbolic/')
 RUN_PASS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                         '../../tests/integration/run-pass/')
 
@@ -40,6 +42,36 @@ def test_existing_parse(filename):
         return (True, '')
     else:
         print('\t[existing-parse] '+short_filename+' ... fail')
+        error = ("{}\n"
+                 "failed test {}\n"
+                 "output: {}\n"
+                 "{}\n"
+                )
+        return (False, error.format(HR,
+                                    filename,
+                                    err.decode(encoding='UTF-8'),
+                                    HR))
+
+def test_symbolic(filename):
+    short_filename = filename.replace(SYMBOLIC_PATH, '')
+    sys.stdout.write('\t[symbolic] '+short_filename)
+    sys.stdout.flush()
+    p1 = subprocess.Popen([test_exe,]+get_options(filename)+[filename,]+["-s"],
+                          stderr=subprocess.PIPE, stdout=subprocess.PIPE)
+    (stdout, err) = p1.communicate()
+    expected_path = filename.rsplit(".", 1)[0] + '.expected'
+    if p1.returncode == 0:
+        if os.path.exists(expected_path) and stdout.decode('utf8') != open(expected_path).read():
+            print("")
+            print("Expected:\n"+HR+"\n"+open(expected_path).read()+HR)
+            print("\nGot:\n"+HR+"\n"+stdout.decode('utf8')+HR)
+
+            sys.stdout.write(' ... fail (output did not match expected)\n')
+            return (False, 'output did not match expected')
+        sys.stdout.write(' ... ok\n')
+        return (True, '')
+    else:
+        sys.stdout.write(' ... fail\n')
         error = ("{}\n"
                  "failed test {}\n"
                  "output: {}\n"
@@ -190,7 +222,11 @@ if __name__ == '__main__':
     ok_count, fail_count = run_tests(RUN_FAIL_PATH, test_run_fail)
     ok_count_sum += ok_count
     fail_count_sum += fail_count
-    
+
+    ok_count, fail_count = run_tests(SYMBOLIC_PATH, test_symbolic)
+    ok_count_sum += ok_count
+    fail_count_sum += fail_count
+
     print('')
     print(HR)
     if fail_count_sum == 0:
