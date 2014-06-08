@@ -421,6 +421,10 @@ void AstWalker<ExecutionVisitor, Value>::walk_ifthenelse(IfThenElseNode* node) {
           walk_statement(node->else_);
         }
     }
+  } else if (cond.is_undef()) {
+    visitor.driver_.error(node->condition_->location,
+        "condition must be true or false but was undef");
+    throw RuntimeException("Condition is undef");
   } else if (cond.value.bval) {
     walk_statement(node->then_);
   } else if (node->else_) {
