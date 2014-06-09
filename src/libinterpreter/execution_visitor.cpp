@@ -382,7 +382,7 @@ void AstWalker<ExecutionVisitor, Value>::walk_ifthenelse(IfThenElseNode* node) {
     if (cond.type == TypeType::SYMBOL_COND) {
       sym_cond = cond.value.cond;
     } else {
-      sym_cond = new symbolic_condition(new Value(cond), new Value(true), ExpressionOperation::EQ);
+      sym_cond = new symbolic_condition(new Value(cond), new Value((INT_T)1), ExpressionOperation::EQ);
     }
 
     switch (symbolic::check_condition(visitor.context_.path_conditions, sym_cond)) {
@@ -405,18 +405,27 @@ void AstWalker<ExecutionVisitor, Value>::walk_ifthenelse(IfThenElseNode* node) {
     switch ((visitor.child_pid = fork())) {
       case -1:
         throw RuntimeException("Could not fork");
+
       case 0:
         visitor.context_.path_name += "I";
         symbolic::dump_if(visitor.context_.trace, visitor.driver_.get_filename(),
-            node->condition_->location.begin.line, cond);
+            node->condition_->location.begin.line, Value(sym_cond));
         visitor.context_.path_conditions.push_back(sym_cond);
         walk_statement(node->then_);
         break;
+
       default:
-        sym_cond->op = invert(sym_cond->op);
+        if (cond.type == TypeType::SYMBOL_COND) {
+          sym_cond->op = invert(sym_cond->op);
+        } else {
+          // needed to generate correct output for boolean functions as conditions
+          delete sym_cond;
+          sym_cond = new symbolic_condition(new Value(cond),
+              new Value((INT_T)0), ExpressionOperation::EQ);
+        }
         visitor.context_.path_name += "E";
         symbolic::dump_if(visitor.context_.trace, visitor.driver_.get_filename(),
-            node->condition_->location.begin.line, cond);
+            node->condition_->location.begin.line, Value(sym_cond));
         visitor.context_.path_conditions.push_back(sym_cond);
         if (node->else_) {
           walk_statement(node->else_);

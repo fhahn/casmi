@@ -118,11 +118,10 @@ void ExecutionContext::apply_updates() {
       }
     } else {
       Value v(function_map.first->return_type_->t, u);
-      if (v.type == TypeType::UNDEF) {
-        function_map.second.erase(ArgumentsKey(u->args, u->num_args, false, u->sym_args));
-      } else {
-        function_map.second[ArgumentsKey(u->args, u->num_args, true, u->sym_args)] = v;
-      }
+      // we could erase keys that store an undef value in concrete mode,
+      // but we need to know if a key was set to undef explicitly in symbolic
+      // mode
+      function_map.second[ArgumentsKey(u->args, u->num_args, true, u->sym_args)] = v;
     }
 
     if (symbolic) {
