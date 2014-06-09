@@ -442,9 +442,6 @@ void AstWalker<ExecutionVisitor, Value>::walk_ifthenelse(IfThenElseNode* node) {
           walk_statement(node->else_);
         }
       }
-
-
-
     }
   } else if (cond.is_undef()) {
     visitor.driver_.error(node->condition_->location,
@@ -496,21 +493,76 @@ void AstWalker<ExecutionVisitor, Value>::walk_pop(PopNode* node) {
 
 template <>
 void AstWalker<ExecutionVisitor, Value>::walk_case(CaseNode *node) {
-  Value expr_v = walk_expression_base(node->expr);
-  std::pair<AtomNode*, AstNode*> *default_pair = nullptr;
-  for (auto& pair : node->case_list) {
-    // pair.first == nullptr for default:
-    if (pair.first) {
-      if (walk_atom(pair.first) == expr_v) {
-        walk_statement(pair.second);
-        return;
+  Value cond = walk_expression_base(node->expr);
+
+  if (cond.is_symbolic()) {
+    for (uint32_t i=0; i < node->case_list.size(); i++) {
+      auto pair = node->case_list[i];
+      // pair.first == nullptr for default:
+      symbolic_condition *sym_cond;
+      if (pair.first) {
+        Value c = walk_atom(pair.first);
+        sym_cond = new symbolic_condition(new Value(cond), new Value(c),
+            ExpressionOperation::EQ);
+
+        switch (symbolic::check_condition(visitor.context_.path_conditions, sym_cond)) {
+          case symbolic::check_status_t::NOT_FOUND: break;
+          case symbolic::check_status_t::TRUE:
+            symbolic::dump_pathcond_match(visitor.context_.trace, visitor.driver_.get_filename(),
+                pair.first->location.begin.line, cond, true);
+            walk_statement(pair.second);
+            return;
+          default: break;
+        }
       }
-    } else {
-      default_pair = &pair;
+
+      pid_t pid = fork();
+      switch (pid) {
+        case -1:
+          throw RuntimeException("Could not fork");
+
+        case 0: {
+          if (pair.first) {
+            visitor.context_.path_name += std::to_string(i);
+            visitor.context_.path_conditions.push_back(sym_cond);
+            symbolic::dump_if(visitor.context_.trace, visitor.driver_.get_filename(),
+              pair.first->location.begin.line, Value(sym_cond));
+          } else {
+            visitor.context_.path_name += "D";
+          }
+          walk_statement(pair.second);
+          return;
+        }
+        default: {
+          // at the moment this limits parallelism, but ensures a deterministic
+          // trace output on stdout
+          int status;
+          if (waitpid(pid, &status, 0) == -1) {
+            throw RuntimeException("error waiting for child process");
+          }
+          if (WEXITSTATUS(status) != 0) {
+            throw RuntimeException("error in child process");
+          }
+        }
+      }
     }
-  }
-  if (default_pair) {
-    walk_statement(default_pair->second);
+    exit(0);
+  } else {
+    std::pair<AtomNode*, AstNode*> *default_pair = nullptr;
+    for (auto& pair : node->case_list) {
+      // pair.first == nullptr for default:
+      if (pair.first) {
+        if (walk_atom(pair.first) == cond) {
+          walk_statement(pair.second);
+          return;
+        }
+      } else {
+        default_pair = &pair;
+      }
+    }
+    if (default_pair) {
+      walk_statement(default_pair->second);
+    }
   }
 }
 

@@ -1,0 +1,22 @@
+forklog:0
+tff(symbolNext, type, sym2: $int).
+fof(id0,hypothesis,sta(1,sym2)).%CREATE: a
+fof('idcase-dont-fork-pc.casm:5',hypothesis,sym2=1).
+% case-dont-fork-pc.casm:5 PC-LOOKUP (sym2=1) = 1
+fof(id1,hypothesis,sta(2,1)).%UPDATE: a
+fof(final0,hypothesis,sta(0,1)).%FINAL: a
+
+forklog:1
+tff(symbolNext, type, sym2: $int).
+fof(id0,hypothesis,sta(1,sym2)).%CREATE: a
+fof('idcase-dont-fork-pc.casm:6',hypothesis,sym2=2).
+% case-dont-fork-pc.casm:6 PC-LOOKUP ($greater(sym2, 1)) = 1
+fof(id1,hypothesis,sta(2,2)).%UPDATE: a
+fof(final0,hypothesis,sta(0,2)).%FINAL: a
+
+forklog:D
+tff(symbolNext, type, sym2: $int).
+fof(id0,hypothesis,sta(1,sym2)).%CREATE: a
+fof(id1,hypothesis,sta(2,3)).%UPDATE: a
+fof(final0,hypothesis,sta(0,3)).%FINAL: a
+
