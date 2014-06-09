@@ -15,14 +15,12 @@
 
 class ExecutionVisitor : public BaseVisitor<Value> {
   private:
-
     std::vector<Value> main_bindings;
     casm_update *add_update(const Value& val, size_t sym_id,
                           const std::vector<Value> &arguments);
 
 
   public:
-    pid_t child_pid;
     std::vector<Value> value_list;
     Driver& driver_;
     ExecutionContext& context_;
@@ -86,10 +84,11 @@ void AstWalker<ExecutionVisitor, Value>::walk_iterate(UnaryNode *node);
 class ExecutionWalker : public AstWalker<ExecutionVisitor, Value> {
   private:
     std::set<std::string> initialized;
+
     bool init_function(const std::string& name, std::set<std::string>& visited);
 
   public:
-    ExecutionWalker(ExecutionVisitor& v) : AstWalker<ExecutionVisitor, Value>(v), initialized() {}
+    ExecutionWalker(ExecutionVisitor& v);
     void run();
 };
 #endif //CASMI_LIBINTERPRETER_EXEC_VISITOR

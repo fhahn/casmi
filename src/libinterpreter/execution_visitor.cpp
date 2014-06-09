@@ -37,7 +37,7 @@ uint16_t pack_values_in_array(const std::vector<Value> &value_list, uint64_t arr
 
 
 ExecutionVisitor::ExecutionVisitor(ExecutionContext &ctxt, Driver& driver)
-    : child_pid(0), driver_(driver), context_(ctxt) {
+    : driver_(driver), context_(ctxt) {
   rule_bindings.push_back(&main_bindings);
 }
 
@@ -402,7 +402,8 @@ void AstWalker<ExecutionVisitor, Value>::walk_ifthenelse(IfThenElseNode* node) {
         return;
     }
 
-    switch ((visitor.child_pid = fork())) {
+    pid_t pid = fork();
+    switch (pid) {
       case -1:
         throw RuntimeException("Could not fork");
 
@@ -414,7 +415,17 @@ void AstWalker<ExecutionVisitor, Value>::walk_ifthenelse(IfThenElseNode* node) {
         walk_statement(node->then_);
         break;
 
-      default:
+      default: {
+        // at the moment this limits parallelism, but ensures a deterministic
+        // trace output on stdout
+        int status;
+        if (waitpid(pid, &status, 0) == -1) {
+          throw RuntimeException("error waiting for child process");
+        }
+        if (WEXITSTATUS(status) != 0) {
+          throw RuntimeException("error in child process");
+        }
+
         if (cond.type == TypeType::SYMBOL_COND) {
           sym_cond->op = invert(sym_cond->op);
         } else {
@@ -430,6 +441,10 @@ void AstWalker<ExecutionVisitor, Value>::walk_ifthenelse(IfThenElseNode* node) {
         if (node->else_) {
           walk_statement(node->else_);
         }
+      }
+
+
+
     }
   } else if (cond.is_undef()) {
     visitor.driver_.error(node->condition_->location,
@@ -624,6 +639,10 @@ void AstWalker<ExecutionVisitor, Value>::walk_update_dumps(UpdateNode *node) {
   visitor.visit_update_dumps(node, expr_t);
 }
 
+ExecutionWalker::ExecutionWalker(ExecutionVisitor& v) 
+     : AstWalker<ExecutionVisitor, Value>(v), initialized() {
+}
+
 bool ExecutionWalker::init_function(const std::string& name, std::set<std::string>& visited) {
   if (visitor.driver_.init_dependencies.count(name) != 0) {
     visited.insert(name);
@@ -742,12 +761,6 @@ void ExecutionWalker::run() {
   }
 
   if (visitor.context_.symbolic) {
-    int status;
-    waitpid(visitor.child_pid, &status, 0);
-    if (WEXITSTATUS(status) != 0) {
-      throw RuntimeException("error in child process");
-    }
-
     FILE *out;
     if (visitor.context_.fileout) {
       const std::string& filename = visitor.driver_.get_filename().substr(
