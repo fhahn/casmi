@@ -1,8 +1,0 @@
-tff(symbolNext, type, sym2: $int).
-fof(id0,hypothesis,stfoo(1,1,sym2)).%CREATE: foo 1
-tff(symbolNext, type, sym3: $int).
-fof(id1,hypothesis,stbar(1,23,sym3)).%CREATE: bar 23
-fof(id2,hypothesis,stfoo(2,1,sym2)).%SYMBOLIC: foo 1
-fof(id3,hypothesis,stbar(2,23,sym3)).%SYMBOLIC: bar 23
-fof(final0,hypothesis,stfoo(0,1,sym2)).%FINAL: foo 1
-fof(final1,hypothesis,stbar(0,23,sym3)).%FINAL: bar 23
