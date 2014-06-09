@@ -100,14 +100,19 @@ void ExecutionContext::apply_updates() {
     // TODO handle tuples
     if (function_map.first->return_type_->t == TypeType::LIST) {
       Value& list = function_map.second[ArgumentsKey(u->args, u->num_args, false, u->sym_args)];
-      if (u->defined == 0) {
+      if (u->symbolic){
+        Value v(function_map.first->return_type_->t, u);
+        function_map.second[ArgumentsKey(u->args, u->num_args, true, u->sym_args)] = v;
+      } else if (u->defined == 0) {
+        DEBUG("HALLO");
         // set list to undef
         if (!list.is_undef()) {
           list.value.list->decrease_usage();
           list.type = TypeType::UNDEF;
         }
       } else {
-        if (!list.is_undef()) {
+        DEBUG("ballo");
+        if (!list.is_undef() && !list.is_symbolic()) {
           list.value.list->decrease_usage();
         } else {
           list.type = function_map.first->return_type_->t;

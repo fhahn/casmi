@@ -64,7 +64,7 @@ class Value {
     bool is_undef() const;
     bool is_symbolic() const;
 
-    const std::string to_str() const;
+    const std::string to_str(bool symbolic=false) const;
 };
 
 struct symbolic_condition {

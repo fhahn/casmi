@@ -52,7 +52,7 @@ namespace symbolic {
                                  uint16_t sym_args, const Value& val, uint32_t time) {
     std::stringstream ss;
     ss << "st" << func->name << "(" << time
-       << arguments_to_string(func, args, sym_args) << val.to_str()
+       << arguments_to_string(func, args, sym_args) << val.to_str(true)
        << ")";
     return ss.str();
   }
@@ -114,7 +114,7 @@ namespace symbolic {
       size_t lineno, const Value& sym, bool status) {
     std::stringstream ss;
     ss << "% " << filename << ":" << lineno << " PC-LOOKUP ("
-       << sym.to_str() << ") = " << status << std::endl;
+       << sym.to_str(true) << ") = " << status << std::endl;
     trace.push_back(ss.str());
  
   }
@@ -123,7 +123,7 @@ namespace symbolic {
       size_t lineno, const Value &sym) {
     std::stringstream ss;
     ss << "fof('id" << filename <<  ":" << lineno << "',hypothesis,"
-       << sym.to_str() << ")." << std::endl;
+       << sym.to_str(true) << ")." << std::endl;
     trace.push_back(ss.str());
   }
 
@@ -253,5 +253,33 @@ namespace symbolic {
       }
     }
     return check_status_t::NOT_FOUND;
+  }
+
+  uint32_t dump_listconst(std::vector<std::string>& trace, List *l) {
+    auto iter = l->begin();
+    auto end = l->end();
+    uint32_t sym_id = 0;
+    if (iter != end) {
+      sym_id = symbolic::next_symbol_id();
+      std::stringstream ss;
+      ss << "tff(symbolNext, type, sym" << sym_id << ": $int)."
+         << std::endl;
+      ss << "fof(id%u,hypothesis,fcons(eEmptyList," << (*iter).to_str(true)
+         << ",sym" << sym_id << "))." << std::endl;
+      iter++;
+      trace.push_back(ss.str());
+
+      for (;iter != end; iter++) {
+        std::stringstream ss;
+        uint32_t next_id = symbolic::next_symbol_id();
+        ss << "tff(symbolNext, type, sym" << next_id << ": $int)."
+           << std::endl;
+        ss << "fof(id%u,hypothesis,fcons(sym" << sym_id << "," << (*iter).to_str(true)
+           << ",sym" << next_id << "))." << std::endl;
+        sym_id = next_id;
+        trace.push_back(ss.str());
+      }
+    }
+    return sym_id;
   }
 }

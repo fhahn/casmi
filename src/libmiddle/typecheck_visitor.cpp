@@ -632,7 +632,7 @@ Type* TypecheckVisitor::visit_rule_atom(RuleAtom *atom) {
   return &atom->type_;
 }
 
-Type* TypecheckVisitor::visit_list_atom(ListAtom *atom, std::vector<Type*> &vals) {
+Type* TypecheckVisitor::visit_list_atom(ListAtom *atom, std::vector<Type*> &vals, bool) {
   atom->type_.t = TypeType::TUPLE_OR_LIST;
   atom->type_.subtypes = vals;
 

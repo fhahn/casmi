@@ -1,0 +1,10 @@
+function a: -> List(Int)
+
+init main
+
+rule main = {|
+  a := [1,2,3] 
+  assert not symbolic(a)
+  assert a = [1,2,3]
+  program(self) := undef
+|}

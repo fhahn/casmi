@@ -67,7 +67,7 @@ class AstDumpVisitor : public BaseVisitor<bool> {
     bool visit_rule_atom(RuleAtom *atom);
     bool visit_boolean_atom(BooleanAtom *atom);
     bool visit_string_atom(StringAtom *atom);
-    bool visit_list_atom(ListAtom*, std::vector<bool>&) { throw "not implemented"; }
+    bool visit_list_atom(ListAtom*, std::vector<bool>&, bool) { throw "not implemented"; }
     bool visit_number_range_atom(NumberRangeAtom*) { throw "not implemented"; }
 };
 

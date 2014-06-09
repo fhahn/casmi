@@ -1,0 +1,10 @@
+function (symbolic) a: -> List(Int)
+function (symbolic) b: -> List(Int)
+
+init main
+
+rule main = {
+  a := [1,2,3]
+  b := []
+  program(self) := undef
+}

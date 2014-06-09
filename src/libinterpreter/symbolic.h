@@ -33,6 +33,8 @@ namespace symbolic {
       const std::vector<std::pair<const Function*, 
       std::unordered_map<ArgumentsKey, Value> >>& functions);
 
+  uint32_t dump_listconst(std::vector<std::string>& trace, List *l);
+
   enum class check_status_t {
     NOT_FOUND,
     TRUE,

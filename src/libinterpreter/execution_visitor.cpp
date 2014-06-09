@@ -335,12 +335,20 @@ Value ExecutionVisitor::visit_derived_function_atom(FunctionAtom*, Value& expr) 
   return expr;
 }
 
-Value ExecutionVisitor::visit_list_atom(ListAtom *atom, std::vector<Value> &vals) {
+Value ExecutionVisitor::visit_list_atom(ListAtom *atom, std::vector<Value> &vals, bool symbolic) {
   BottomList *list = new BottomList(vals);
   // this could be faster if the list of expressions would be evaluated back to
   // front as well
   std::reverse(list->values.begin(), list->values.end());
   //context_.temp_lists.push_back(list);
+
+  DEBUG("LIST ATOM "<<symbolic);
+  if (symbolic) {
+    uint32_t sym_id = symbolic::dump_listconst(context_.trace_creates, list);
+    if (sym_id > 0) {
+      return Value(TypeType::SYMBOL, sym_id);
+    }
+  }
   return Value(atom->type_, list);
 }
 
@@ -661,10 +669,13 @@ void AstWalker<ExecutionVisitor, Value>::walk_iterate(UnaryNode *node) {
 
 template <>
 void AstWalker<ExecutionVisitor, Value>::walk_update(UpdateNode *node) {
-  Value expr_t = walk_expression_base(node->expr_);
   // this is used to dump %CREATE in trace if necessary
+  Value expr_t;
   if (visitor.context_.symbolic && node->func->symbol->is_symbolic) {
+    expr_t = walk_expression_base(node->expr_, true);
     walk_expression_base(node->func);
+  } else {
+    expr_t = walk_expression_base(node->expr_, false);
   }
 
   visitor.value_list.clear();

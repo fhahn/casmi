@@ -189,7 +189,7 @@ bool Value::is_symbolic() const {
   return type == TypeType::SYMBOL || type == TypeType::SYMBOL_COND;
 }
 
-const std::string Value::to_str() const {
+const std::string Value::to_str(bool symbolic) const {
   switch (type) {
     case TypeType::INT:
       return std::move(std::to_string(value.ival));
@@ -210,6 +210,14 @@ const std::string Value::to_str() const {
     case TypeType::TUPLE:
     case TypeType::TUPLE_OR_LIST:
     case TypeType::LIST: {
+        if (symbolic) {
+          std::string tmp = value.list->to_str();
+          if (tmp == "[  ]") {
+            return "eListEmpty";
+          } else {
+            return std::move(tmp);
+          }
+        }
         return value.list->to_str();
     }
     case TypeType::BOOLEAN:
