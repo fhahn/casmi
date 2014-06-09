@@ -1,4 +1,5 @@
 import sys
+import difflib
 import subprocess
 import os
 import re
@@ -63,11 +64,13 @@ def test_symbolic(filename):
     expected_path = filename.rsplit(".", 1)[0] + '.expected'
     if p1.returncode == 0:
         if os.path.exists(expected_path) and stdout.decode('utf8') != open(expected_path).read():
-            print("")
-            print("Expected:\n"+HR+"\n"+open(expected_path).read()+HR)
-            print("\nGot:\n"+HR+"\n"+stdout.decode('utf8')+HR)
+            expected_lines = open(expected_path).read().split("\n")
+            got_lines = stdout.decode('utf8').split('\n')
+            for l in difflib.unified_diff(expected_lines, got_lines):
+                sys.stdout.write(l)
+                sys.stdout.write('\n')
 
-            sys.stdout.write(' ... fail (output did not match expected)\n')
+            sys.stdout.write(' ... fail (output did not match expected)\n\n')
             return (False, 'output did not match expected')
         sys.stdout.write(' ... ok\n')
         return (True, '')
