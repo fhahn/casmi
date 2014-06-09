@@ -1,13 +1,9 @@
-// symbolic
-
-CASM controlledTest
-
 init main
 
 function (symbolic) a: -> Boolean
 function (symbolic) b: -> Int
 
-rule main = seqblock
+rule main = {|
   if a then {
     b := 0
   } else {
@@ -15,4 +11,4 @@ rule main = seqblock
   }
 
   program( self ) := undef
-endseqblock
+|}
