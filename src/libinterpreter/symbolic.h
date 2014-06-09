@@ -11,7 +11,6 @@
 
 namespace symbolic {
   uint32_t next_symbol_id();
-  uint32_t next_fof_id();
   void advance_timestamp();
   uint32_t get_timestamp();
 

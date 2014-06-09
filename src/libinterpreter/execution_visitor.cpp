@@ -5,6 +5,7 @@
 #include <utility>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <stdio.h>
 
 
 #include "macros.h"
@@ -737,30 +738,36 @@ void ExecutionWalker::run() {
     if (WEXITSTATUS(status) != 0) {
       throw RuntimeException("error in child process");
     }
+
+    FILE *out;
     if (visitor.context_.fileout) {
       const std::string& filename = visitor.driver_.get_filename().substr(
           0, visitor.driver_.get_filename().rfind("."));
 
-      std::ofstream out(filename+"_"+visitor.context_.path_name+".trace");
-      out << "forklog:" << visitor.context_.path_name << std::endl;
-      for (const std::string& s : visitor.context_.trace_creates) {
-        out << s;
-      }
-      symbolic::dump_final(visitor.context_.trace, visitor.context_.functions);
-      for (const std::string& s : visitor.context_.trace) {
-        out << s;
-      }
+      out = fopen((filename+"_"+visitor.context_.path_name+".trace").c_str(), "wt");
     } else {
-      std::cout << "forklog:" << visitor.context_.path_name << std::endl;
-      symbolic::dump_final(visitor.context_.trace, visitor.context_.functions);
-      for (const std::string& s : visitor.context_.trace_creates) {
-        std::cout << s;
-      }
-      for (const std::string& s : visitor.context_.trace) {
-        std::cout << s;
-      }
-      std::cout << std::endl;
+      out = stdout;
     }
+    fprintf(out, "forklog:%s\n", visitor.context_.path_name.c_str());
+    uint32_t fof_id = 0;
+    for (const std::string& s : visitor.context_.trace_creates) {
+      if (s.find("id%u") != std::string::npos) {
+        fprintf(out, s.c_str(), fof_id);
+        fof_id += 1;
+      } else {
+        fprintf(out, "%s", s.c_str());
+      }
+    }
+    symbolic::dump_final(visitor.context_.trace, visitor.context_.functions);
+    for (const std::string& s : visitor.context_.trace) {
+     if (s.find("id%u") != std::string::npos) {
+        fprintf(out, s.c_str(), fof_id);
+        fof_id += 1;
+      } else {
+        fprintf(out, "%s", s.c_str());
+      }
+    }
+    fprintf(out, "\n");
   } else {
     std::cout << (symbolic::get_timestamp()-2);
     if ((symbolic::get_timestamp()-2) > 1) {

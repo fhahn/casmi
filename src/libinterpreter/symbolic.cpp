@@ -12,13 +12,6 @@ namespace symbolic {
     return last_symbol_id;
   }
 
-  static uint32_t last_fof_id = -1;
-
-  uint32_t next_fof_id() {
-    last_fof_id += 1;
-    return last_fof_id;
-  }
-
   static uint32_t current_time = 2;
   void advance_timestamp() {
     current_time += 1;
@@ -72,9 +65,9 @@ namespace symbolic {
       ss << "tff(symbolNext, type, sym" << v.value.ival<< ": $int)."
          << std::endl;
     }
-    ss << "fof(id"<<next_fof_id() << ",hypothesis,"
+    ss << "fof(id%u,hypothesis,"
        << location_to_string(func, args, sym_args, v, 1)
-       << ").%CREATE: " << func->name;
+       << ").%%CREATE: " << func->name;
 
     if (func->arguments_.size() == 0) {
        ss << arguments_to_string(func, args, sym_args, true);
@@ -88,9 +81,9 @@ namespace symbolic {
   void dump_symbolic(std::vector<std::string>& trace, const Function *func,
       const uint64_t args[], uint16_t sym_args, const Value& v) {
      std::stringstream ss;
-    ss << "fof(id" << next_fof_id() << ",hypothesis,"
+    ss << "fof(id%u,hypothesis,"
        << location_to_string(func, args, sym_args, v, get_timestamp())
-       << ").\%SYMBOLIC: " << func->name;
+       << ").%%SYMBOLIC: " << func->name;
 
     if (func->arguments_.size() == 0) {
        ss << arguments_to_string(func, args, sym_args, true);
@@ -104,9 +97,9 @@ namespace symbolic {
   void dump_update(std::vector<std::string>& trace, const Function *func,
       const uint64_t args[], uint16_t sym_args, const Value& v) {
     std::stringstream ss;
-    ss << "fof(id" << next_fof_id() << ",hypothesis,"
+    ss << "fof(id%u,hypothesis,"
        << location_to_string(func, args, sym_args, v, get_timestamp())
-       << ").%UPDATE: " << func->name;
+       << ").%%UPDATE: " << func->name;
 
     if (func->arguments_.size() == 0) {
        ss << arguments_to_string(func, args, sym_args, true);
