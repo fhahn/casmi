@@ -111,7 +111,7 @@
 
 %type <AstNode*> INIT_SYNTAX BODY_ELEMENT SPECIFICATION RULE_SYNTAX STATEMENT IMPOSSIBLE_SYNTAX
 %type <UnaryNode*> PARBLOCK_SYNTAX KW_PARBLOCK_SYNTAX SEQBLOCK_SYNTAX
-%type <UnaryNode*> ASSERT_SYNTAX KW_SEQBLOCK_SYNTAX ITERATE_SYNTAX
+%type <UnaryNode*> ASSERT_SYNTAX ASSURE_SYNTAX KW_SEQBLOCK_SYNTAX ITERATE_SYNTAX
 %type <AstListNode*> BODY_ELEMENTS STATEMENTS
 %type <AtomNode*> NUMBER VALUE NUMBER_RANGE
 %type <std::pair<ExpressionBase*, ExpressionBase*>> INITIALIZER
@@ -516,7 +516,7 @@ DUMPSPEC: "(" IDENTIFIER_LIST ")" ARROW IDENTIFIER { $$ = std::pair<std::string,
         ;
 
 STATEMENT: ASSERT_SYNTAX { $$ = $1; }
-         | ASSURE_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
+         | ASSURE_SYNTAX { $$ = $1; }
          | DIEDIE_SYNTAX { $$ = $1; }
          | IMPOSSIBLE_SYNTAX { $$ = $1; }
          | DEBUGINFO_SYNTAX { $$ = $1; }
@@ -542,7 +542,7 @@ STATEMENT: ASSERT_SYNTAX { $$ = $1; }
 
 ASSERT_SYNTAX: ASSERT EXPRESSION { $$ = new UnaryNode(@$, NodeType::ASSERT, $2); }
              ;
-ASSURE_SYNTAX: ASSURE EXPRESSION
+ASSURE_SYNTAX: ASSURE EXPRESSION { $$ = new UnaryNode(@$, NodeType::ASSURE, $2); }
              ;
 
 DIEDIE_SYNTAX: DIEDIE EXPRESSION { $$ = new DiedieNode(@$, $2); }

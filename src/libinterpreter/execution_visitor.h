@@ -29,6 +29,7 @@ class ExecutionVisitor : public BaseVisitor<Value> {
     ExecutionVisitor(ExecutionContext& context, Driver& driver);
 
     void visit_assert(UnaryNode* assert, Value& val);
+    void visit_assure(UnaryNode* assure, Value& val);
     void visit_update(UpdateNode *update, Value& expr_v);
     void visit_update_dumps(UpdateNode *update, Value& expr_v);
     void visit_call_pre(CallNode *call);

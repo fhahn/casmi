@@ -49,6 +49,14 @@ void ExecutionVisitor::visit_assert(UnaryNode* assert, Value& val) {
   }
 }
 
+void ExecutionVisitor::visit_assure(UnaryNode* assure, Value& val) {
+  if (context_.symbolic && val.is_symbolic() && val.value.sym->condition) {
+    context_.path_conditions.push_back(val.value.sym->condition);
+  } else {
+    visit_assert(assure, val);
+  }
+}
+
 casm_update *ExecutionVisitor::add_update(const Value& val, size_t sym_id, const std::vector<Value> &arguments) {
   casm_update* up = (casm_update*) pp_mem_alloc(&(context_.pp_stack), sizeof(casm_update));
 

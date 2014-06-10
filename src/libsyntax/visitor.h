@@ -99,6 +99,12 @@ template<class T, class V> class AstWalker {
           visitor.visit_assert(assert, v);
           break;
         }
+        case NodeType::ASSURE: {
+          UnaryNode *assure = reinterpret_cast<UnaryNode*>(stmt);
+          V v = walk_expression_base(reinterpret_cast<ExpressionBase*>(assure->child_));
+          visitor.visit_assure(assure, v);
+          break;
+        }
         case NodeType::SKIP: break; // skip does nothing
         case NodeType::IFTHENELSE: {
           walk_ifthenelse(reinterpret_cast<IfThenElseNode*>(stmt));
@@ -384,7 +390,8 @@ template<class T> class BaseVisitor {
     void visit_statements(AstListNode*) {}
     void visit_statement(AstNode*) {}
     void visit_ifthenelse(IfThenElseNode*, T) {}
-    T visit_assert(UnaryNode*, T) { return T(); }
+    void visit_assert(UnaryNode*, T) {}
+    void visit_assure(UnaryNode*, T) {}
     void visit_seqblock(UnaryNode*) {}
     void visit_parblock(UnaryNode*) {}
     T visit_update(UpdateNode*, T, T) { return T(); }

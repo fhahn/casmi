@@ -1,11 +1,12 @@
-// error interpreter @10
 CASM c
 
 init initR
 
 function f : -> Int
 
-rule initR = {
+rule initR = {|
     assure 2 >= 1
+    f := -1
     assure f < 0
-}
+    program(self) := undef
+|}

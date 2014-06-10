@@ -1,0 +1,8 @@
+CASM c
+
+init initR
+
+rule initR = {|
+    assure 2 <= 1
+    //~^ Assertion failed
+|}

@@ -1,0 +1,7 @@
+forklog:
+tff(symbolNext, type, sym2: $int).
+fof(id0,hypothesis,stf(1,sym2)).%CREATE: f
+% assure.casm:12 PC-LOOKUP ($greater(sym2, -1)) = 1
+fof(id1,hypothesis,stf(2,10)).%UPDATE: f
+fof(final0,hypothesis,stf(0,10)).%FINAL: f
+
