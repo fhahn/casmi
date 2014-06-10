@@ -33,7 +33,9 @@ namespace builtins {
     struct Int {
       uint64_t value;
       uint8_t defined;
+      bool sym;
     };
+
     const Value dispatch(BuiltinAtom::Id builtin_id, 
                          const std::vector<Value>& arguments);
 

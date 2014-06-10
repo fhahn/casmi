@@ -372,6 +372,26 @@ namespace shared {
   #define DEFINE_CASM_SHARED(NAME, VALUE, ARGS...) void NAME(VALUE, ##ARGS)
   #include "libcasmrt/pp_casm_shared.h"
 
+
+  namespace symbolic {
+    // create symbolic variants of shareds
+    namespace BV {
+      // mock BV namespace as expected by the pp_casm_shared builtins
+      struct helper_t {
+        bool next() { return true; }
+      };
+      static helper_t symbolic_nopointer;
+      helper_t *symbolic_ = &symbolic_nopointer;
+    }
+
+    #undef CASM_CALL_SHARED
+    #undef DEFINE_CASM_SHARED
+    #define SYMBOLIC
+    #define CASM_CALL_SHARED(NAME, VALUE, ARGS...)  symbolic_##NAME(VALUE, ##ARGS)
+    #define DEFINE_CASM_SHARED(NAME, VALUE, ARGS...) void symbolic_##NAME(VALUE, ##ARGS)
+    #include "libcasmrt/pp_casm_shared.h"
+  }
+
   REENABLE_VARIADIC_WARNINGS
 
   const Value dispatch(BuiltinAtom::Id builtin_id, 
