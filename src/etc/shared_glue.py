@@ -49,10 +49,15 @@ def create_dispatch_define(builtins):
         lines = []
         lines.append("case BuiltinAtom::Id::{}:".format(b[0].upper()))
         for arg in b[2:]:
-            lines.append("  arg{0:} = {{ (uint64_t) arguments[{0:}].value.ival, 1 }};".format(str(arg_ind)))
+            lines.append("  arg{0:} = {{ (uint64_t) arguments[{0:}].value.ival, (uint8_t)!arguments[{0:}].is_symbolic() }};".format(str(arg_ind)))
             arg_ind += 1
 
-        lines.append("  {}(&ret, ".format(b[0])+", ".join(["&arg"+str(i) for i in range(0, arg_ind)])+");")
+        lines.append("  if (ctxt.symbolic) {")
+        lines.append("    {}(&ret, ".format("symbolic::symbolic_"+b[0])+", ".join(["&arg"+str(i) for i in range(0, arg_ind)])+");")
+        lines.append("    sym_name = \"{}\";".format(b[0].replace("BV", "")))
+        lines.append("  } else {")
+        lines.append("    {}(&ret, ".format(b[0])+", ".join(["&arg"+str(i) for i in range(0, arg_ind)])+");")
+        lines.append("  }")
         lines.append("  break;")
   
         case_template ="".join(len(lines)*["    {:<60}\\\n"])

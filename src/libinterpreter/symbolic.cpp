@@ -288,4 +288,23 @@ namespace symbolic {
     }
     return sym_id;
   }
+
+  void dump_builtin(std::vector<std::string>& trace, const char *name,
+      const std::vector<Value>& args, const Value& ret) {
+    std::stringstream ss;
+
+    for (const auto& a : args) {
+      dump_type(ss, a);
+    }
+    dump_type(ss, ret);
+
+    ss << "fof(id%u,hypothesis,f" << name << "(";
+
+    for (const auto& a : args) {
+      ss << a.to_str() << ", ";
+    }
+    ss << ret.to_str() << "))." << std::endl;
+    trace.push_back(ss.str());
+  }
+
 }

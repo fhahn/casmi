@@ -1,0 +1,34 @@
+forklog:
+tff(symbolNext, type, sym2: $int).
+fof(id0,hypothesis,sta(1,sym2)).%CREATE: a
+tff(symbolNext, type, sym4: $int).
+fof(id1,hypothesis,stc(1,sym4)).%CREATE: c
+tff(symbolNext, type, sym5: $int).
+fof(id2,hypothesis,std(1,sym5)).%CREATE: d
+tff(symbolNext, type, sym3: $int).
+fof(id3,hypothesis,fequal(0, sym2, 2, sym3)).
+tff(symbolNext, type, sym6: $int).
+fof(id4,hypothesis,fadd_result(20, sym4, sym5, sym6)).
+tff(symbolNext, type, sym7: $int).
+fof(id5,hypothesis,fadd_overflow(20, sym4, sym5, sym7)).
+tff(symbolNext, type, sym8: $int).
+fof(id6,hypothesis,fadd_overflowsign(20, sym4, sym5, sym8)).
+tff(symbolNext, type, sym9: $int).
+fof(id7,hypothesis,fadd_result(20, sym4, sym5, sym9)).
+tff(symbolNext, type, sym10: $int).
+fof(id8,hypothesis,fadd_overflow(20, sym4, sym5, sym10)).
+tff(symbolNext, type, sym11: $int).
+fof(id9,hypothesis,fsb(0, 15, sym4, 38, sym11)).
+tff(symbolNext, type, sym12: $int).
+fof(id10,hypothesis,fsb(16, 31, 0, sym2, sym12)).
+tff(symbolNext, type, sym13: $int).
+fof(id11,hypothesis,fex(0, 15, sym2, sym13)).
+tff(symbolNext, type, sym14: $int).
+fof(id12,hypothesis,fex(16, 31, sym2, sym14)).
+fof(id13,hypothesis,sta(2,sym2)).%SYMBOLIC: a
+fof(id14,hypothesis,stc(2,sym4)).%SYMBOLIC: c
+fof(id15,hypothesis,std(2,sym5)).%SYMBOLIC: d
+fof(final0,hypothesis,sta(0,sym2)).%FINAL: a
+fof(final1,hypothesis,stc(0,sym4)).%FINAL: c
+fof(final2,hypothesis,std(0,sym5)).%FINAL: d
+

@@ -1,0 +1,13 @@
+// symbolic
+CASM test
+
+init main
+
+function (symbolic) a: -> Int // symbol
+function (symbolic) b: -> Int // symbol
+
+rule main = {|
+  a := BVadd_result( 20, b, b )
+
+  program( self ) := undef
+|}

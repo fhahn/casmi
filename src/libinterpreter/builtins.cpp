@@ -52,7 +52,7 @@ const Value builtins::dispatch(BuiltinAtom::Id atom_id,  ExecutionContext& ctxt,
     case BuiltinAtom::Id::SYMBOLIC:
       return std::move(symbolic(arguments[0]));
 
-    default: return std::move(shared::dispatch(atom_id, arguments));
+    default: return std::move(shared::dispatch(atom_id, arguments, ctxt));
   }
 }
 
@@ -395,7 +395,8 @@ namespace shared {
   REENABLE_VARIADIC_WARNINGS
 
   const Value dispatch(BuiltinAtom::Id builtin_id, 
-                       const std::vector<Value>& arguments) {
+                       const std::vector<Value>& arguments, ExecutionContext& ctxt) {
+    const char *sym_name;
     Int ret;
     Int arg0;
     Int arg1;
@@ -409,6 +410,10 @@ namespace shared {
 
     if (ret.defined == TRUE) {
       return std::move(Value((INT_T)ret.value));
+    } else if (ctxt.symbolic && ret.sym) {
+      Value v(new symbol_t(::symbolic::next_symbol_id()));
+      ::symbolic::dump_builtin(ctxt.trace, sym_name, arguments, v);
+      return std::move(v);
     } else {
       return std::move(Value());
     }

@@ -5,6 +5,7 @@
 
 #include "libinterpreter/execution_context.h"
 #include "libinterpreter/value.h"
+#include "libinterpreter/symbolic.h"
 
 namespace builtins {
   const Value dispatch(BuiltinAtom::Id atom_id, ExecutionContext& ctxt,
@@ -37,7 +38,7 @@ namespace builtins {
     };
 
     const Value dispatch(BuiltinAtom::Id builtin_id, 
-                         const std::vector<Value>& arguments);
+                         const std::vector<Value>& arguments, ExecutionContext& ctxt);
 
   }
 };
