@@ -4,54 +4,55 @@
 
 #include "libinterpreter/operators.h"
 #include "libinterpreter/execution_context.h"
+#include "libinterpreter/symbolic.h"
 
-#define CREATE_NUMERICAL_OPERATION(op, lhs, rhs)  {                   \
+#define HANDLE_SYMBOLIC_OR_UNDEF(lhs, rhs)                                   \
   if (lhs.is_undef() || rhs.is_undef()) {                                    \
     return Value();                                                          \
+  } else if (lhs.is_symbolic() || rhs.is_symbolic()) {                       \
+    /* TODO cleanup symbols */                                               \
+    return Value(new symbol_t(symbolic::next_symbol_id()));                  \
   }                                                                          \
-                                                                             \
-  switch (lhs.type) {                                             \
-    case TypeType::INT:                                           \
-      return std::move(Value(lhs.value.ival op rhs.value.ival));   \
-    case TypeType::FLOAT:                                           \
-      return std::move(Value(lhs.value.fval op rhs.value.fval));   \
-    case TypeType::RATIONAL:                                           \
-      return std::move(Value(&(*lhs.value.rat op *rhs.value.rat)));   \
-    default: assert(0);                                           \
-  }                                                               \
+
+#define CREATE_NUMERICAL_OPERATION(op, lhs, rhs)  {                          \
+  HANDLE_SYMBOLIC_OR_UNDEF(lhs, rhs)                                         \
+  switch (lhs.type) {                                                        \
+    case TypeType::INT:                                                      \
+      return std::move(Value(lhs.value.ival op rhs.value.ival));             \
+    case TypeType::FLOAT:                                                    \
+      return std::move(Value(lhs.value.fval op rhs.value.fval));             \
+    case TypeType::RATIONAL:                                                 \
+      return std::move(Value(&(*lhs.value.rat op *rhs.value.rat)));          \
+    default: assert(0);                                                      \
+  }                                                                          \
 }
 
-#define CREATE_NUMERICAL_CMP_OPERATION(op, lhs, rhs)  {                   \
-  if (lhs.is_undef() || rhs.is_undef()) {                                    \
-    return Value();                                                          \
-  }                                                                          \
+#define CREATE_NUMERICAL_CMP_OPERATION(op, lhs, rhs)  {                      \
+  HANDLE_SYMBOLIC_OR_UNDEF(lhs, rhs)                                         \
                                                                              \
-  switch (lhs.type) {                                             \
-    case TypeType::INT:                                           \
-      return std::move(Value(lhs.value.ival op rhs.value.ival));   \
-    case TypeType::FLOAT:                                           \
-      return std::move(Value(lhs.value.fval op rhs.value.fval));   \
-    default: assert(0);                                           \
-  }                                                               \
+  switch (lhs.type) {                                                        \
+    case TypeType::INT:                                                      \
+      return std::move(Value(lhs.value.ival op rhs.value.ival));             \
+    case TypeType::FLOAT:                                                    \
+      return std::move(Value(lhs.value.fval op rhs.value.fval));             \
+    default: assert(0);                                                      \
+  }                                                                          \
 }
 
 #define CHECK_SYMBOLIC_CMP_OPERATION(op, lhs, rhs) {                         \
  if (lhs.is_symbolic() && !rhs.is_undef()) {                                 \
-    return Value(new symbolic_condition(new Value(lhs),                      \
-                                        new Value(rhs),                      \
-                                        op));                                \
-  }                                                                          \
+    return Value(new symbol_t(symbolic::next_symbol_id(),                    \
+                              new symbolic_condition(new Value(lhs),         \
+                                                     new Value(rhs),         \
+                                                      op)));                 \
+ }                                                                           \
  if (rhs.is_symbolic() && !lhs.is_undef()) {                                 \
-    return Value(new symbolic_condition(new Value(lhs),                      \
-                                        new Value(rhs),                      \
-                                        op));                                \
+    return Value(new symbol_t(symbolic::next_symbol_id(),                    \
+                              new symbolic_condition(new Value(lhs),         \
+                                                     new Value(rhs),         \
+                                                      op)));                 \
   }                                                                          \
 }
-
-
-#define CREATE_LOGICAL_OPERATION(op, lhs, rhs)  {                   \
- \
-} 
 
 const Value operators::dispatch(ExpressionOperation op, const Value& lhs, const Value& rhs) {
   switch (op) {
@@ -102,18 +103,34 @@ const Value operators::dispatch(ExpressionOperation op, const Value& lhs, const 
       return std::move(operators::not_(lhs));
 
     case ExpressionOperation::LESSER:
+      if (lhs.is_symbolic() && rhs.is_symbolic() && lhs == rhs) {
+        return Value(false);
+      }
+
       CHECK_SYMBOLIC_CMP_OPERATION(op, lhs, rhs);
       return std::move(operators::lesser(lhs, rhs));
 
     case ExpressionOperation::GREATER:
+      if (lhs.is_symbolic() && rhs.is_symbolic() && lhs == rhs) {
+        return Value(false);
+      }
+
       CHECK_SYMBOLIC_CMP_OPERATION(op, lhs, rhs);
       return std::move(operators::greater(lhs, rhs));
 
     case ExpressionOperation::LESSEREQ:
+      if (lhs.is_symbolic() && rhs.is_symbolic() && lhs == rhs) {
+        return Value(true);
+      }
+
       CHECK_SYMBOLIC_CMP_OPERATION(op, lhs, rhs);
       return std::move(operators::lessereq(lhs, rhs));
 
     case ExpressionOperation::GREATEREQ:
+      if (lhs.is_symbolic() && rhs.is_symbolic() && lhs == rhs) {
+        return Value(true);
+      }
+
       CHECK_SYMBOLIC_CMP_OPERATION(op, lhs, rhs);
       return std::move(operators::greatereq(lhs, rhs));
 
@@ -139,9 +156,7 @@ const Value operators::div(const Value& lhs, const Value& rhs) {
 }
 
 const Value operators::mod(const Value& lhs, const Value& rhs) {
-  if (lhs.is_undef() || rhs.is_undef()) {                                    \
-    return Value();                                                          \
-  }                 
+  HANDLE_SYMBOLIC_OR_UNDEF(lhs, rhs)
   if (lhs.type == TypeType::INT) {
     return std::move(Value(lhs.value.ival % rhs.value.ival));
   }
@@ -149,9 +164,8 @@ const Value operators::mod(const Value& lhs, const Value& rhs) {
 }
 
 const Value operators::rat_div(const Value& lhs, const Value& rhs) {
-  if (lhs.is_undef() || rhs.is_undef()) {
-    return Value();
-  }
+  HANDLE_SYMBOLIC_OR_UNDEF(lhs, rhs)
+
   switch (lhs.type) {
     case TypeType::INT: {
       rational_t *result = (rational_t*) pp_mem_alloc(

@@ -1,0 +1,11 @@
+forklog:
+tff(symbolNext, type, sym2: $int).
+fof(id0,hypothesis,stb(1,sym2)).%CREATE: b
+tff(symbolNext, type, sym4: $int).
+fof(id1,hypothesis,sta(1,sym4)).%CREATE: a
+tff(symbolNext, type, sym3: $int).
+fof(id2,hypothesis,sta(2,sym3)).%UPDATE: a
+fof(id3,hypothesis,stb(2,sym2)).%SYMBOLIC: b
+fof(final0,hypothesis,sta(0,sym3)).%FINAL: a
+fof(final1,hypothesis,stb(0,sym2)).%FINAL: b
+

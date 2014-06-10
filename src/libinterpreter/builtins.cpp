@@ -342,7 +342,7 @@ const Value builtins::asrational(const Value& arg) {
 }
 
 const Value builtins::symbolic(const Value& arg) {
-  if (arg.type == TypeType::SYMBOL) {
+  if (arg.is_symbolic()) {
     return std::move(Value(true));
   } else {
     return std::move(Value(false));
