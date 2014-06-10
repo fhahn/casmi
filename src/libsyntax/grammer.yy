@@ -109,7 +109,7 @@
 %token FLOATCONST INTCONST RATIONALCONST STRCONST
 %token <std::string> IDENTIFIER "identifier"
 
-%type <AstNode*> INIT_SYNTAX BODY_ELEMENT SPECIFICATION RULE_SYNTAX STATEMENT
+%type <AstNode*> INIT_SYNTAX BODY_ELEMENT SPECIFICATION RULE_SYNTAX STATEMENT IMPOSSIBLE_SYNTAX
 %type <UnaryNode*> PARBLOCK_SYNTAX KW_PARBLOCK_SYNTAX SEQBLOCK_SYNTAX
 %type <UnaryNode*> ASSERT_SYNTAX KW_SEQBLOCK_SYNTAX ITERATE_SYNTAX
 %type <AstListNode*> BODY_ELEMENTS STATEMENTS
@@ -518,7 +518,7 @@ DUMPSPEC: "(" IDENTIFIER_LIST ")" ARROW IDENTIFIER { $$ = std::pair<std::string,
 STATEMENT: ASSERT_SYNTAX { $$ = $1; }
          | ASSURE_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
          | DIEDIE_SYNTAX { $$ = $1; }
-         | IMPOSSIBLE_SYNTAX { $$ = new AstNode(NodeType::STATEMENT); }
+         | IMPOSSIBLE_SYNTAX { $$ = $1; }
          | DEBUGINFO_SYNTAX { $$ = $1; }
          | PRINT_SYNTAX { $$ = $1; }
          | UPDATE_SYNTAX { $$ = $1; }
@@ -556,7 +556,7 @@ DIEDIE_SYNTAX: DIEDIE EXPRESSION { $$ = new DiedieNode(@$, $2); }
   in concrete mode:
     * an error like diedie
 */
-IMPOSSIBLE_SYNTAX: IMPOSSIBLE 
+IMPOSSIBLE_SYNTAX: IMPOSSIBLE { $$ = new AstNode(@$, NodeType::IMPOSSIBLE); }
          ;
 
 DEBUGINFO_SYNTAX: DEBUGINFO IDENTIFIER DEBUG_ATOM_LIST { $$ = new PrintNode(@$, $2, $3); }

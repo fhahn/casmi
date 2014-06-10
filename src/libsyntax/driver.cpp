@@ -6,7 +6,9 @@
 
 #define BOLD_BLACK  "\x1b[1m"
 #define BOLD_RED    "\x1b[1;31m"
+#define BOLD_GREEN  "\x1b[1;32m"
 #define RED         "\x1b[31m"
+#define GREEN       "\x1b[32m"
 #define RESET       "\x1b[0m"
 
 extern int yylex_destroy(void);
@@ -105,6 +107,26 @@ void Driver::error (const yy::location& l, const std::string& m) {
     }
   }
 }
+
+void Driver::info(const yy::location& l, const std::string& m) {
+  std::cerr << BOLD_BLACK << filename_ << ":" << l << ": " <<
+     BOLD_GREEN << "info: " << RESET << BOLD_BLACK << m << RESET << std::endl;
+
+  if (l.begin.line == l.end.line && l.begin.line <= lines_.size()) {
+    const std::string& error_line = lines_[l.begin.line-1];
+    std::cerr << filename_ <<":" << l.begin.line <<" " << error_line;
+
+    size_t length_to_error = filename_.size()+1+std::to_string(l.begin.line).size()+l.begin.column;
+    std::cerr << std::string(length_to_error, ' ');
+    std::cerr << GREEN << std::string(l.end.column-l.begin.column, '^') << RESET;
+    std::cerr << std::endl;
+  } else {
+    for (size_t i=l.begin.line-1; (i < l.end.line && i < lines_.size()); i++) {
+      std::cerr << filename_ <<":" << i <<" " << lines_[i];
+    }
+  }
+}
+
 
 bool Driver::ok() const {
   return !error_;

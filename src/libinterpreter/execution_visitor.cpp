@@ -206,6 +206,16 @@ void ExecutionVisitor::visit_diedie(DiedieNode *node, const Value& msg) {
     throw RuntimeException("diedie");
 }
 
+void ExecutionVisitor::visit_impossible(AstNode *node) {
+  if (context_.symbolic) {
+    driver_.info(node->location, "`impossible` executed, aborting trace");
+    throw ImpossibleException();
+  } else {
+    driver_.error(node->location, "`impossible` executed");
+    throw RuntimeException("impossible");
+  }
+}
+
 void ExecutionVisitor::visit_let(LetNode*, Value& v) {
   rule_bindings.back()->push_back(v);
 }

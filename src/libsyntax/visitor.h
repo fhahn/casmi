@@ -148,6 +148,10 @@ template<class T, class V> class AstWalker {
             }
           }
           break;
+        case NodeType::IMPOSSIBLE:
+            visitor.visit_impossible(stmt);
+          break;
+
         default:
             throw RuntimeException(
               std::string("Invalid node type: ")+
@@ -270,7 +274,6 @@ template<class T, class V> class AstWalker {
     }
 
     V walk_expression_base(ExpressionBase *expr, bool symbolic=false) {
-                                    DEBUG("WALKI "<<symbolic);
       if (expr->node_type_ == NodeType::EXPRESSION) {
         Expression *e = reinterpret_cast<Expression*>(expr);
         V v1 = walk_expression_base(e->left_, symbolic);
@@ -392,6 +395,7 @@ template<class T> class BaseVisitor {
     void visit_call_post(CallNode*) {}
     T visit_print(PrintNode*, std::vector<T>&) { return T(); }
     void visit_diedie(DiedieNode*, const T&) {}
+    void visit_impossible(AstNode*) {}
 
     void visit_let(LetNode*, T) {}
     void visit_let_post(LetNode*) {}

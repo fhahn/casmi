@@ -42,7 +42,8 @@ class Driver {
     AstNode *parse(const std::string& f);
 
     // Error handling.
-    void error (const yy::location& l, const std::string& m);
+    void error(const yy::location& l, const std::string& m);
+    void info(const yy::location& l, const std::string& m);
     bool ok() const;
 
     // Rule handling

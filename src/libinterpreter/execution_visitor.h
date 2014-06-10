@@ -37,6 +37,7 @@ class ExecutionVisitor : public BaseVisitor<Value> {
     void visit_call_post(CallNode *call);
     void visit_print(PrintNode *node, const std::vector<Value> &arguments);
     void visit_diedie(DiedieNode *node, const Value& msg);
+    void visit_impossible(AstNode *node);
 
     void visit_let(LetNode *node, Value& v);
     void visit_let_post(LetNode *node);

@@ -57,6 +57,7 @@ enum NodeType {
   FORALL,
   ITERATE,
   DIEDIE,
+  IMPOSSIBLE,
 };
 
 const std::string& type_to_str(NodeType t);

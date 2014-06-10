@@ -182,6 +182,8 @@ int main (int argc, char *argv[]) {
         } catch (const RuntimeException& ex) {
           std::cerr << "Abort after runtime exception: "<< ex.what() << std::endl;;
           res = EXIT_FAILURE;
+        } catch (const ImpossibleException& ex) {
+          res = EXIT_SUCCESS;
         } catch (char * e) {
           std::cerr << "Abort after catching a string: "<< e << std::endl;
           res = EXIT_FAILURE;

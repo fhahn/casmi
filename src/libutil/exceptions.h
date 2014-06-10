@@ -13,4 +13,9 @@ class RuntimeException : public std::exception {
     virtual const char* what() const throw();
 
 };
+
+class ImpossibleException : public std::exception {
+    virtual const char* what() const throw();
+};
+
 #endif //CASMI_EXCEPTIONS_H
