@@ -22,6 +22,7 @@ class BottomList;
 class List;
 
 struct symbolic_condition;
+struct symbol_t;
 struct rational_t;
 
 
@@ -37,7 +38,7 @@ class Value {
       List *list;
       const enum_value_t *enum_val;
       const rational_t *rat;
-      symbolic_condition *cond;
+      symbol_t *sym;
     } value;
 
     Value();
@@ -49,11 +50,10 @@ class Value {
     Value(const Type& t, List *list);
     Value(const enum_value_t *enum_val);
     Value(const rational_t *val);
-    Value(symbolic_condition *val);
+    Value(symbol_t *sym);
     Value(const Value& other);
     Value(Value&& other) noexcept;
     Value(TypeType type, casm_update* update);
-    Value(TypeType t, uint32_t symbol);
 
     Value& operator=(const Value& other);
     bool operator==(const Value &other) const;
@@ -65,6 +65,15 @@ class Value {
     bool is_symbolic() const;
 
     const std::string to_str(bool symbolic=false) const;
+};
+
+struct symbol_t {
+  const uint32_t id;
+  symbolic_condition *condition;
+  bool type_dumped;
+
+  symbol_t(uint32_t id);
+  symbol_t(uint32_t id, symbolic_condition *cond);
 };
 
 struct symbolic_condition {

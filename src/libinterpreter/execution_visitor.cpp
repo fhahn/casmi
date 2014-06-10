@@ -356,7 +356,10 @@ Value ExecutionVisitor::visit_list_atom(ListAtom *atom, std::vector<Value> &vals
   if (symbolic) {
     uint32_t sym_id = symbolic::dump_listconst(context_.trace_creates, list);
     if (sym_id > 0) {
-      return Value(TypeType::SYMBOL, sym_id);
+      // TODO cleanup symbols
+      symbol_t *sym = new symbol_t(sym_id);
+      sym->type_dumped = true;
+      return Value(sym);
     }
   }
   return Value(atom->type_, list);
@@ -397,8 +400,8 @@ void AstWalker<ExecutionVisitor, Value>::walk_ifthenelse(IfThenElseNode* node) {
 
   if (cond.is_symbolic()) {
     symbolic_condition *sym_cond;
-    if (cond.type == TypeType::SYMBOL_COND) {
-      sym_cond = cond.value.cond;
+    if (cond.value.sym->condition) {
+      sym_cond = cond.value.sym->condition;
     } else {
       sym_cond = new symbolic_condition(new Value(cond), new Value((INT_T)1), ExpressionOperation::EQ);
     }
@@ -407,12 +410,12 @@ void AstWalker<ExecutionVisitor, Value>::walk_ifthenelse(IfThenElseNode* node) {
       case symbolic::check_status_t::NOT_FOUND: break;
       case symbolic::check_status_t::TRUE:
         symbolic::dump_pathcond_match(visitor.context_.trace, visitor.driver_.get_filename(),
-            node->condition_->location.begin.line, cond, true);
+            node->condition_->location.begin.line, sym_cond, true);
         walk_statement(node->then_);
         return;
       case symbolic::check_status_t::FALSE:;
         symbolic::dump_pathcond_match(visitor.context_.trace, visitor.driver_.get_filename(),
-            node->condition_->location.begin.line, cond, false);
+            node->condition_->location.begin.line, sym_cond, false);
 
         if (node->else_) {
           walk_statement(node->else_);
@@ -428,7 +431,7 @@ void AstWalker<ExecutionVisitor, Value>::walk_ifthenelse(IfThenElseNode* node) {
       case 0:
         visitor.context_.path_name += "I";
         symbolic::dump_if(visitor.context_.trace, visitor.driver_.get_filename(),
-            node->condition_->location.begin.line, Value(sym_cond));
+            node->condition_->location.begin.line, sym_cond);
         visitor.context_.path_conditions.push_back(sym_cond);
         walk_statement(node->then_);
         break;
@@ -444,7 +447,7 @@ void AstWalker<ExecutionVisitor, Value>::walk_ifthenelse(IfThenElseNode* node) {
           throw RuntimeException("error in child process");
         }
 
-        if (cond.type == TypeType::SYMBOL_COND) {
+        if (cond.value.sym->condition) {
           sym_cond->op = invert(sym_cond->op);
         } else {
           // needed to generate correct output for boolean functions as conditions
@@ -454,7 +457,7 @@ void AstWalker<ExecutionVisitor, Value>::walk_ifthenelse(IfThenElseNode* node) {
         }
         visitor.context_.path_name += "E";
         symbolic::dump_if(visitor.context_.trace, visitor.driver_.get_filename(),
-            node->condition_->location.begin.line, Value(sym_cond));
+            node->condition_->location.begin.line, sym_cond);
         visitor.context_.path_conditions.push_back(sym_cond);
         if (node->else_) {
           walk_statement(node->else_);
@@ -527,7 +530,7 @@ void AstWalker<ExecutionVisitor, Value>::walk_case(CaseNode *node) {
           case symbolic::check_status_t::NOT_FOUND: break;
           case symbolic::check_status_t::TRUE:
             symbolic::dump_pathcond_match(visitor.context_.trace, visitor.driver_.get_filename(),
-                pair.first->location.begin.line, cond, true);
+                pair.first->location.begin.line, sym_cond, true);
             walk_statement(pair.second);
             return;
           default: break;
@@ -544,7 +547,7 @@ void AstWalker<ExecutionVisitor, Value>::walk_case(CaseNode *node) {
             visitor.context_.path_name += std::to_string(i);
             visitor.context_.path_conditions.push_back(sym_cond);
             symbolic::dump_if(visitor.context_.trace, visitor.driver_.get_filename(),
-              pair.first->location.begin.line, Value(sym_cond));
+              pair.first->location.begin.line, sym_cond);
           } else {
             visitor.context_.path_name += "D";
           }

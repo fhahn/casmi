@@ -41,8 +41,8 @@ Value::Value(const rational_t *rat) : type(TypeType::RATIONAL) {
   value.rat = rat;
 }
 
-Value::Value(symbolic_condition *cond) : type(TypeType::SYMBOL_COND) {
-  value.cond = cond;
+Value::Value(symbol_t *sym) : type(TypeType::SYMBOL) {
+  value.sym = sym;
 }
 
 Value::Value(const Value& other) : type(other.type), value(other.value) {}
@@ -57,10 +57,9 @@ Value::Value(TypeType t, casm_update* u) {
 
   if (u->symbolic) {
     type = TypeType::SYMBOL;
-    value.ival= (uint64_t) u->value;
+    value.sym = reinterpret_cast<symbol_t*>(u->value);
     return;
   }
-
 
   switch (t) {
     case TypeType::UNDEF:
@@ -103,10 +102,6 @@ Value::Value(TypeType t, casm_update* u) {
 }
 
 
-Value::Value(TypeType t, uint32_t symbol) : type(t) {
-  value.ival = symbol;
-}
-
 Value& Value::operator=(const Value& other) {
   value = other.value;
   type = other.type;
@@ -120,14 +115,14 @@ bool Value::operator==(const Value &other) const {
 
   if (is_symbolic()) {
     if (other.is_symbolic()) {
-      return value.ival == other.value.ival;
+      return value.sym->id == other.value.sym->id;
     } else {
       return false;
     }
   }
   if (other.is_symbolic()) {
     if (is_symbolic()) {
-      return value.ival == other.value.ival;
+      return value.sym->id == other.value.sym->id;
     } else {
       return false;
     }
@@ -186,7 +181,7 @@ bool Value::is_undef() const {
 }
 
 bool Value::is_symbolic() const {
-  return type == TypeType::SYMBOL || type == TypeType::SYMBOL_COND;
+  return type == TypeType::SYMBOL;
 }
 
 const std::string Value::to_str(bool symbolic) const {
@@ -227,12 +222,17 @@ const std::string Value::to_str(bool symbolic) const {
         return "false";
       }
     case TypeType::SYMBOL:
-      return "sym"+std::to_string(value.ival);
-    case TypeType::SYMBOL_COND:
-      return value.cond->to_str();
+      return "sym"+std::to_string(value.sym->id);
     default: throw RuntimeException("Unsupported type in Value.to_str() ");
   }
 }
+
+
+symbol_t::symbol_t(uint32_t id) : symbol_t(id, nullptr)  {}
+
+symbol_t::symbol_t(uint32_t id, symbolic_condition *cond) : id(id),
+    condition(cond), type_dumped(false) {}
+
 
 symbolic_condition::symbolic_condition(Value *lhs, Value *rhs,
                                        ExpressionOperation op) : lhs(lhs), rhs(rhs), op(op) {}

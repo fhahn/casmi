@@ -24,10 +24,10 @@ namespace symbolic {
       const uint64_t args[], uint16_t sym_args, const Value& v);
 
   void dump_if(std::vector<std::string>& trace, const std::string &filename,
-      size_t lineno, const Value& sym);
+      size_t lineno, const symbolic_condition *cond);
 
   void dump_pathcond_match(std::vector<std::string>& trace, const std::string &filename,
-      size_t lineno, const Value& sym, bool status);
+      size_t lineno, const symbolic_condition *cond, bool status);
 
   void dump_final(std::vector<std::string>& trace,
       const std::vector<std::pair<const Function*, 

@@ -268,7 +268,6 @@ Value& ExecutionContext::get_function_value(Function *sym, uint64_t args[], uint
   // TODO move should be used here
   auto& function_map = functions[sym->id];
   try {
-      DEBUG("get "<<sym->id << " " << sym->name<<" size:"<<sym->arguments_.size() << " args "<<args[0] << " Fun size "<< function_map.second.size());
     Value &v = function_map.second.at(ArgumentsKey(&args[0], sym->arguments_.size(), false, sym_args));
     int64_t state = (updateset.pseudostate % 2 == 0) ? state = updateset.pseudostate-1:
                                                        state = updateset.pseudostate;
@@ -277,19 +276,17 @@ Value& ExecutionContext::get_function_value(Function *sym, uint64_t args[], uint
       casm_update *update = (casm_update*) pp_hashmap_get(updateset.set, key);
       if (update) {
         tmp = Value(sym->return_type_->t, update);
-        DEBUG("FOUND UPDATE for "<< sym->name<<" "<<tmp.to_str() << " type "<<sym->return_type_->to_str());
         return tmp;
       }
     }
-    DEBUG("FOUNDDDD");
     return v;
 
   } catch (const std::out_of_range &e) {
-    DEBUG("NOT FOUND");
     if (symbolic && sym->is_symbolic) {
+      // TODO cleanup symbol
       function_map.second.emplace(
           ArgumentsKey(&args[0], sym->arguments_.size(), true, sym_args),
-          Value(TypeType::SYMBOL, symbolic::next_symbol_id()));
+          Value(new symbol_t(symbolic::next_symbol_id())));
       Value& v = function_map.second[ArgumentsKey(&args[0], sym->arguments_.size(), false, sym_args)];
       symbolic::dump_create(trace_creates, sym, &args[0], sym_args, v);
       return v;

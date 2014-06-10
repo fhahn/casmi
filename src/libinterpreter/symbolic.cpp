@@ -58,13 +58,18 @@ namespace symbolic {
   }
 
 
+  static void dump_type(std::stringstream& ss, const Value& v) {
+    if (v.is_symbolic() && !v.value.sym->type_dumped) {
+      ss << "tff(symbolNext, type, " << v.to_str() << ": $int)."
+         << std::endl;
+      v.value.sym->type_dumped = true;
+    }
+  }
+
   void dump_create(std::vector<std::string>& trace, const Function *func,
       const uint64_t args[], uint16_t sym_args, const Value& v) {
     std::stringstream ss;
-    if (v.is_symbolic()) {
-      ss << "tff(symbolNext, type, sym" << v.value.ival<< ": $int)."
-         << std::endl;
-    }
+    dump_type(ss, v);
     ss << "fof(id%u,hypothesis,"
        << location_to_string(func, args, sym_args, v, 1)
        << ").%%CREATE: " << func->name;
@@ -97,6 +102,7 @@ namespace symbolic {
   void dump_update(std::vector<std::string>& trace, const Function *func,
       const uint64_t args[], uint16_t sym_args, const Value& v) {
     std::stringstream ss;
+    dump_type(ss, v);
     ss << "fof(id%u,hypothesis,"
        << location_to_string(func, args, sym_args, v, get_timestamp())
        << ").%%UPDATE: " << func->name;
@@ -111,19 +117,19 @@ namespace symbolic {
   }
 
   void dump_pathcond_match(std::vector<std::string>& trace, const std::string &filename,
-      size_t lineno, const Value& sym, bool status) {
+      size_t lineno, const symbolic_condition *cond, bool status) {
     std::stringstream ss;
     ss << "% " << filename << ":" << lineno << " PC-LOOKUP ("
-       << sym.to_str(true) << ") = " << status << std::endl;
+       << cond->to_str() << ") = " << status << std::endl;
     trace.push_back(ss.str());
  
   }
 
   void dump_if(std::vector<std::string>& trace, const std::string &filename,
-      size_t lineno, const Value &sym) {
+      size_t lineno, const symbolic_condition *cond) {
     std::stringstream ss;
     ss << "fof('id" << filename <<  ":" << lineno << "',hypothesis,"
-       << sym.to_str(true) << ")." << std::endl;
+       << cond->to_str() << ")." << std::endl;
     trace.push_back(ss.str());
   }
 
