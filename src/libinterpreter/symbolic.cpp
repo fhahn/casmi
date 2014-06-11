@@ -51,7 +51,13 @@ namespace symbolic {
   std::string location_to_string(const Function *func, const uint64_t args[],
                                  uint16_t sym_args, const Value& val, uint32_t time) {
     std::stringstream ss;
-    ss << "st" << func->name << "(" << time
+    if (func->is_static) {
+      ss << "cs";
+    } else {
+      ss << "st";
+    }
+
+    ss << func->name << "(" << time
        << arguments_to_string(func, args, sym_args) << val.to_str(true)
        << ")";
     return ss.str();

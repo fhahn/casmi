@@ -141,7 +141,7 @@ void ExecutionContext::apply_updates() {
     for (uint32_t i = 1; i < functions.size(); i++) {
       const auto& function_map = functions[i];
       const auto& updated_keys = updated_functions[i];
-      if (!function_map.first->is_symbolic) {
+      if (!function_map.first->is_symbolic || function_map.first->is_static) {
         continue;
       }
 

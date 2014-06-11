@@ -1,0 +1,14 @@
+// static, symbolic functions are ignored when generating SYMBOLIC output 
+// after each step
+
+function(symbolic) a : Int -> Int initially { 1 -> 1 , 0 -> 0 }
+function(static, symbolic) b : Int -> Int initially { 1 -> 1, 0 -> 0 }
+
+init main
+
+rule main = {
+    a(2) := 1
+    a(3) := a(4)
+    a(4) := b(1)
+    program(self) := undef
+}

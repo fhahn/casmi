@@ -1,5 +1,0 @@
-tff(symbolNext, type, sym2: $int).
-fof(id0,hypothesis,stfoo(1,sym2)).%CREATE: foo 
-fof('idutils/tests/symbolic/impossible.casm:10',hypothesis,sym2=1).
-fof(id1,hypothesis,stfoo(2,sym2)).%SYMBOLIC: foo 
-fof(final0,hypothesis,stfoo(0,sym2)).%FINAL: foo 

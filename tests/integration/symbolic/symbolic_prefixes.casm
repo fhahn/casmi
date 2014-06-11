@@ -3,10 +3,9 @@ function (symbolic) st : Int -> Int
 
 init initR
 
-rule initR = 
-{
-	let x = st(1) in skip
-	st(2) := BVadd_result(32, cs(1), cs(2))
+rule initR = {
+    let x = st(1) in skip
+    st(2) := BVadd_result(32, cs(1), cs(2))
 
-	program(self) := undef
+    program(self) := undef
 }
