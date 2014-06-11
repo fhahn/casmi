@@ -1,0 +1,17 @@
+CASM test
+
+function (symbolic) a: -> Int
+function (symbolic) b: -> Int
+function cnt: -> Int initially { 1 }
+
+init main
+
+rule main = {
+    if cnt = 10 then
+        program(self) := undef
+    else {
+        a := a + 1
+        b := a
+        cnt := cnt + 1
+    }
+}

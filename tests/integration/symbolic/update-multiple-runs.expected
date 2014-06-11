@@ -1,0 +1,37 @@
+forklog:
+tff(symbolNext, type, sym2: $int).
+fof(id0,hypothesis,sta(1,sym2)).%CREATE: a
+tff(symbolNext, type, sym4: $int).
+fof(id1,hypothesis,stb(1,sym4)).%CREATE: b
+tff(symbolNext, type, sym3: $int).
+fof(id2,hypothesis,sta(2,sym3)).%UPDATE: a
+fof(id3,hypothesis,stb(2,sym2)).%UPDATE: b
+tff(symbolNext, type, sym5: $int).
+fof(id4,hypothesis,sta(3,sym5)).%UPDATE: a
+fof(id5,hypothesis,stb(3,sym3)).%UPDATE: b
+tff(symbolNext, type, sym6: $int).
+fof(id6,hypothesis,sta(4,sym6)).%UPDATE: a
+fof(id7,hypothesis,stb(4,sym5)).%UPDATE: b
+tff(symbolNext, type, sym7: $int).
+fof(id8,hypothesis,sta(5,sym7)).%UPDATE: a
+fof(id9,hypothesis,stb(5,sym6)).%UPDATE: b
+tff(symbolNext, type, sym8: $int).
+fof(id10,hypothesis,sta(6,sym8)).%UPDATE: a
+fof(id11,hypothesis,stb(6,sym7)).%UPDATE: b
+tff(symbolNext, type, sym9: $int).
+fof(id12,hypothesis,sta(7,sym9)).%UPDATE: a
+fof(id13,hypothesis,stb(7,sym8)).%UPDATE: b
+tff(symbolNext, type, sym10: $int).
+fof(id14,hypothesis,sta(8,sym10)).%UPDATE: a
+fof(id15,hypothesis,stb(8,sym9)).%UPDATE: b
+tff(symbolNext, type, sym11: $int).
+fof(id16,hypothesis,sta(9,sym11)).%UPDATE: a
+fof(id17,hypothesis,stb(9,sym10)).%UPDATE: b
+tff(symbolNext, type, sym12: $int).
+fof(id18,hypothesis,sta(10,sym12)).%UPDATE: a
+fof(id19,hypothesis,stb(10,sym11)).%UPDATE: b
+fof(id20,hypothesis,sta(11,sym12)).%SYMBOLIC: a
+fof(id21,hypothesis,stb(11,sym11)).%SYMBOLIC: b
+fof(final0,hypothesis,sta(0,sym12)).%FINAL: a
+fof(final1,hypothesis,stb(0,sym11)).%FINAL: b
+
