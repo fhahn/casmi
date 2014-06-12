@@ -297,7 +297,8 @@ void ExecutionVisitor::visit_pop(PopNode *node, Value& val) {
           Value(TypeType::LIST, val.value.sym->list)).value.list;
     }
 
-    symbolic::dump_pop(context_.trace, val, to_res, from_res);
+    symbolic::dump_builtin(context_.trace, "pop", {val, to_res} , from_res);
+
     try {
       up = add_update(from_res, node->from->symbol->id, value_list);
       up->line = (uint64_t) &node->location;

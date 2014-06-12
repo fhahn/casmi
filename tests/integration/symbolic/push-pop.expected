@@ -10,9 +10,9 @@ fof(id3,hypothesis,fpush(sym2, 1, sym3)).
 tff(symbolNext, type, sym4: $int).
 fof(id4,hypothesis,fpush(sym3, 2, sym4)).
 tff(symbolNext, type, sym6: $int).
-fof(id5,hypothesis,fpop(sym4,2,sym6)).
+fof(id5,hypothesis,fpop(sym4, 2, sym6)).
 tff(symbolNext, type, sym8: $int).
-fof(id6,hypothesis,fpop(sym6,1,sym8)).
+fof(id6,hypothesis,fpop(sym6, 1, sym8)).
 fof(id7,hypothesis,sta(2,sym8)).%UPDATE: a
 fof(id8,hypothesis,stb(2,2)).%UPDATE: b
 fof(id9,hypothesis,stc(2,1)).%UPDATE: c

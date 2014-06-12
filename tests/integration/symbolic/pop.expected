@@ -5,7 +5,7 @@ tff(symbolNext, type, sym3: $int).
 fof(id1,hypothesis,fcons(sym2,2,sym3)).
 fof(id2,hypothesis,sta(1,sym3)).%CREATE: a
 tff(symbolNext, type, sym4: $int).
-fof(id3,hypothesis,fpop(sym3,1,sym4)).
+fof(id3,hypothesis,fpop(sym3, 1, sym4)).
 fof(id4,hypothesis,sta(2,sym4)).%UPDATE: a
 fof(final0,hypothesis,sta(0,sym4)).%FINAL: a
 
