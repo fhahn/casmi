@@ -3,8 +3,8 @@ tff(symbolNext, type, sym2: $int).
 fof(id0,hypothesis,sta(1,sym2)).%CREATE: a
 tff(symbolNext, type, sym3: $int).
 fof(id1,hypothesis,stb(1,sym3)).%CREATE: b
-fof(id2,hypothesis,stb(2,sym2)).%UPDATE: b
-fof(id3,hypothesis,sta(2,sym2)).%SYMBOLIC: a
+fof(id2,hypothesis,sta(2,sym2)).%SYMBOLIC: a
+fof(id3,hypothesis,stb(2,sym2)).%UPDATE: b
 fof(id4,hypothesis,sta(3,sym2)).%SYMBOLIC: a
 fof(id5,hypothesis,stb(3,sym2)).%SYMBOLIC: b
 fof(final0,hypothesis,sta(0,sym2)).%FINAL: a

@@ -9,8 +9,8 @@ tff(symbolNext, type, sym5: $int).
 fof(id4,hypothesis,stst(1,2,sym5)).%CREATE: st(2)
 tff(symbolNext, type, sym4: $int).
 fof(id5,hypothesis,fadd_result(32, 2, sym3, sym4)).
-fof(id6,hypothesis,stst(2,2,sym4)).%UPDATE: st(2)
-fof(id7,hypothesis,stst(2,1,sym2)).%SYMBOLIC: st(1)
+fof(id6,hypothesis,stst(2,1,sym2)).%SYMBOLIC: st(1)
+fof(id7,hypothesis,stst(2,2,sym4)).%UPDATE: st(2)
 fof(final0,hypothesis,cscs(0,2,sym3)).%FINAL: cs(2)
 fof(final1,hypothesis,cscs(0,3,4)).%FINAL: cs(3)
 fof(final2,hypothesis,cscs(0,1,2)).%FINAL: cs(1)

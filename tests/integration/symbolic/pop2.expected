@@ -1,0 +1,16 @@
+forklog:
+tff(symbolNext, type, sym2: $int).
+fof(id0,hypothesis,fcons(eEmptyList,1,sym2)).
+tff(symbolNext, type, sym3: $int).
+fof(id1,hypothesis,fcons(sym2,2,sym3)).
+tff(symbolNext, type, sym4: $int).
+fof(id2,hypothesis,fcons(sym3,3,sym4)).
+tff(symbolNext, type, sym5: $int).
+fof(id3,hypothesis,sta(1,sym5)).%CREATE: a
+tff(symbolNext, type, sym6: $int).
+fof(id4,hypothesis,fpop(sym4,1,sym6)).
+tff(symbolNext, type, sym7: $int).
+fof(id5,hypothesis,fpop(sym6,2,sym7)).
+fof(id6,hypothesis,sta(2,sym7)).%UPDATE: a
+fof(final0,hypothesis,sta(0,sym7)).%FINAL: a
+

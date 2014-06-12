@@ -71,6 +71,8 @@ struct symbol_t {
   const uint32_t id;
   symbolic_condition *condition;
   bool type_dumped;
+  bool update_dumped;
+  List *list; // used for symbolic lists
 
   symbol_t(uint32_t id);
   symbol_t(uint32_t id, symbolic_condition *cond);

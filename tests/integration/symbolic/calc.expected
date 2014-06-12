@@ -5,9 +5,9 @@ tff(symbolNext, type, sym5: $int).
 fof(id1,hypothesis,stb(1,sym5)).%CREATE: b
 tff(symbolNext, type, sym35: $int).
 fof(id2,hypothesis,stc(1,sym35)).%CREATE: c
-fof(id3,hypothesis,stc(2,undef)).%UPDATE: c
-fof(id4,hypothesis,sta(2,sym2)).%SYMBOLIC: a
-fof(id5,hypothesis,stb(2,sym5)).%SYMBOLIC: b
+fof(id3,hypothesis,sta(2,sym2)).%SYMBOLIC: a
+fof(id4,hypothesis,stb(2,sym5)).%SYMBOLIC: b
+fof(id5,hypothesis,stc(2,undef)).%UPDATE: c
 fof(final0,hypothesis,sta(0,sym2)).%FINAL: a
 fof(final1,hypothesis,stb(0,sym5)).%FINAL: b
 fof(final2,hypothesis,stc(0,undef)).%FINAL: c

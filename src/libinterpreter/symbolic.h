@@ -38,6 +38,9 @@ namespace symbolic {
   void dump_builtin(std::vector<std::string>& trace, const char *name,
       const std::vector<Value>& arguments, const Value& ret);
 
+  void dump_pop(std::vector<std::string>& trace, Value& from,
+      Value& to, Value& from_result);
+
   enum class check_status_t {
     NOT_FOUND,
     TRUE,

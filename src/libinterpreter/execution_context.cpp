@@ -104,14 +104,12 @@ void ExecutionContext::apply_updates() {
         Value v(function_map.first->return_type_->t, u);
         function_map.second[ArgumentsKey(u->args, u->num_args, true, u->sym_args)] = v;
       } else if (u->defined == 0) {
-        DEBUG("HALLO");
         // set list to undef
         if (!list.is_undef()) {
           list.value.list->decrease_usage();
           list.type = TypeType::UNDEF;
         }
       } else {
-        DEBUG("ballo");
         if (!list.is_undef() && !list.is_symbolic()) {
           list.value.list->decrease_usage();
         } else {
@@ -130,7 +128,8 @@ void ExecutionContext::apply_updates() {
     }
 
     if (symbolic) {
-      updated_functions[u->func].push_back(ArgumentsKey(u->args, u->num_args, true, u->sym_args));
+      updated_functions[u->func].push_back(
+            ArgumentsKey(u->args, u->num_args, true, u->sym_args));
     }
 
     i->used = 0;
@@ -139,7 +138,7 @@ void ExecutionContext::apply_updates() {
 
   if (symbolic) {
     for (uint32_t i = 1; i < functions.size(); i++) {
-      const auto& function_map = functions[i];
+      auto& function_map = functions[i];
       const auto& updated_keys = updated_functions[i];
       if (!function_map.first->is_symbolic || function_map.first->is_static) {
         continue;
@@ -159,7 +158,10 @@ void ExecutionContext::apply_updates() {
               pair.first.sym_args, pair.second);
         }
       }
-    
+      for (const auto& k : updated_keys) {
+        symbolic::dump_update(trace, function_map.first, k.p,
+         k.sym_args, function_map.second[k]);
+      }
     }
   }
   for (Value* v : to_fold) {

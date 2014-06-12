@@ -78,6 +78,7 @@ casm_update *ExecutionVisitor::add_update(const Value& val, size_t sym_id, const
   casm_update* v = (casm_update*)casm_updateset_add(&(context_.updateset),
                                                     (void*) &ref,
                                                     (void*) up);
+
   if (v != nullptr) {
     // Check if values match
     for (int i=0; i < up->num_args; i++) {
@@ -120,11 +121,7 @@ void ExecutionVisitor::visit_update(UpdateNode *update, Value& expr_v) {
     casm_update *up = add_update(expr_v, update->func->symbol->id, value_list);
     up->line = (uint64_t) &update->location;
     value_list.clear();
-    DEBUG("UPADTE "<<update->func->name<<" num args "<<up->num_args << " arg[0] "<<up->args[0]<< " val "<<expr_v.to_str());
 
-    if (context_.symbolic && update->func->symbol->is_symbolic) {
-      symbolic::dump_update(context_.trace, update->func->symbol, up->args, up->sym_args, expr_v);
-    }
   } catch (const RuntimeException& ex) {
     // TODO this is probably not the cleanest solutions
     driver_.error(update->location,
@@ -247,37 +244,81 @@ void ExecutionVisitor::visit_push(PushNode *node, const Value& expr, const Value
   }
 }
 
-void ExecutionVisitor::visit_pop(PopNode *node, const Value& val) {
-  Value to_res = builtins::peek(val);
+void ExecutionVisitor::visit_pop(PopNode *node, Value& val) {
+  if (val.is_symbolic()) {
 
-  if (node->to->symbol_type == FunctionAtom::SymbolType::FUNCTION) {
+    Value to_res = (val.value.sym->list) ? builtins::peek(Value(TypeType::LIST, val.value.sym->list)) :
+                                           Value(new symbol_t(symbolic::next_symbol_id()));
+
+    casm_update *up = nullptr;
+    if (node->to->symbol_type == FunctionAtom::SymbolType::FUNCTION) {
+      try {
+        up = add_update(to_res, node->to->symbol->id, value_list);
+        up->line = (uint64_t) &node->location;
+        value_list.clear();
+      } catch (const RuntimeException& ex) {
+        // TODO this is probably not the cleanest solutions
+        driver_.error(node->to->location,
+                      "update conflict in parallel block for function `"+node->to->name+"`");
+        throw ex;
+      }
+    } else {
+      rule_bindings.back()->push_back(to_res);
+    }
+
+
+    Value from_res(new symbol_t(symbolic::next_symbol_id()));
+
+    if (val.value.sym->list) {
+      from_res.value.sym->list = builtins::tail(context_, 
+          Value(TypeType::LIST, val.value.sym->list)).value.list;
+    }
+
+    symbolic::dump_pop(context_.trace, val, to_res, from_res);
     try {
-      casm_update *up = add_update(to_res, node->to->symbol->id, value_list);
+      up = add_update(from_res, node->from->symbol->id, value_list);
       up->line = (uint64_t) &node->location;
       value_list.clear();
     } catch (const RuntimeException& ex) {
       // TODO this is probably not the cleanest solutions
-      driver_.error(node->to->location,
-                    "update conflict in parallel block for function `"+node->to->name+"`");
+      driver_.error(node->location,
+                    "update conflict in parallel block for function `"+node->from->name+"`");
       throw ex;
     }
-  } else {
-    rule_bindings.back()->push_back(to_res);
-  } 
 
-  Value from_res = builtins::tail(context_, val);
-  try {
-    casm_update *up = add_update(from_res, node->from->symbol->id, value_list);
-    up->line = (uint64_t) &node->location;
-    value_list.clear();
-    DEBUG("POP");
-  } catch (const RuntimeException& ex) {
-    // TODO this is probably not the cleanest solutions
-    driver_.error(node->location,
-                  "update conflict in parallel block for function `"+node->from->name+"`");
-    throw ex;
+  } else {
+    Value to_res = builtins::peek(val);
+
+    if (node->to->symbol_type == FunctionAtom::SymbolType::FUNCTION) {
+      try {
+        casm_update *up = add_update(to_res, node->to->symbol->id, value_list);
+        up->line = (uint64_t) &node->location;
+        value_list.clear();
+      } catch (const RuntimeException& ex) {
+        // TODO this is probably not the cleanest solutions
+        driver_.error(node->to->location,
+                      "update conflict in parallel block for function `"+node->to->name+"`");
+        throw ex;
+      }
+    } else {
+      rule_bindings.back()->push_back(to_res);
+    } 
+
+    Value from_res = builtins::tail(context_, val);
+    try {
+      casm_update *up = add_update(from_res, node->from->symbol->id, value_list);
+      up->line = (uint64_t) &node->location;
+      value_list.clear();
+      DEBUG("POP");
+    } catch (const RuntimeException& ex) {
+      // TODO this is probably not the cleanest solutions
+      driver_.error(node->location,
+                    "update conflict in parallel block for function `"+node->from->name+"`");
+      throw ex;
+    }
+    DEBUG("POPed "<<to_res.to_str() << " from "<<val.to_str() << " -> "<<from_res.to_str());
+
   }
-  DEBUG("POPed "<<to_res.to_str() << " from "<<val.to_str() << " -> "<<from_res.to_str());
 }
 
 Value ExecutionVisitor::visit_expression(Expression *expr, Value &left_val, Value &right_val) {
@@ -360,14 +401,15 @@ Value ExecutionVisitor::visit_list_atom(ListAtom *atom, std::vector<Value> &vals
   std::reverse(list->values.begin(), list->values.end());
   //context_.temp_lists.push_back(list);
 
-  DEBUG("LIST ATOM "<<symbolic);
   if (symbolic) {
     uint32_t sym_id = symbolic::dump_listconst(context_.trace_creates, list);
     if (sym_id > 0) {
       // TODO cleanup symbols
       symbol_t *sym = new symbol_t(sym_id);
       sym->type_dumped = true;
-      return Value(sym);
+      sym->list = list;
+      Value v(sym);
+      return v;
     }
   }
   return Value(atom->type_, list);
@@ -781,11 +823,15 @@ bool ExecutionWalker::init_function(const std::string& name, std::set<std::strin
       DEBUG("BEGIN INSERT "<<name);
 
       if (visitor.context_.symbolic && func->is_symbolic) {
+        Value v = walk_expression_base(init.second, true);
+        DEBUG("aSDASD "<<v.is_symbolic());
         symbolic::dump_create(visitor.context_.trace_creates, func,
-            &args[0], 0, walk_expression_base(init.second));
+            &args[0], 0, v);
+        function_map.emplace(std::pair<ArgumentsKey, Value>(
+              std::move(ArgumentsKey(&args[0], num_args, true, 0)), v));
+      } else {
+        function_map.emplace(std::pair<ArgumentsKey, Value>(std::move(ArgumentsKey(&args[0], num_args, true, 0)), walk_expression_base(init.second)));
       }
-
-      function_map.emplace(std::pair<ArgumentsKey, Value>(std::move(ArgumentsKey(&args[0], num_args, true, 0)), walk_expression_base(init.second)));
       DEBUG("END INSERT "<<name);
       initializer_args.push_back(args);
     }

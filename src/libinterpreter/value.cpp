@@ -231,7 +231,7 @@ const std::string Value::to_str(bool symbolic) const {
 symbol_t::symbol_t(uint32_t id) : symbol_t(id, nullptr)  {}
 
 symbol_t::symbol_t(uint32_t id, symbolic_condition *cond) : id(id),
-    condition(cond), type_dumped(false) {}
+    condition(cond), type_dumped(false), update_dumped(false), list(nullptr) {}
 
 
 symbolic_condition::symbolic_condition(Value *lhs, Value *rhs,

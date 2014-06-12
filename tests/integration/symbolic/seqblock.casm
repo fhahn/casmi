@@ -1,0 +1,10 @@
+
+function (symbolic) b : ->Int
+
+init main
+
+rule main = {|
+    b := 66
+    b := 99
+    program(self) := undef
+|}

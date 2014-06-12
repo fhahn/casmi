@@ -313,4 +313,15 @@ namespace symbolic {
     trace.push_back(ss.str());
   }
 
+  void dump_pop(std::vector<std::string>& trace, Value& from,
+      Value& to, Value& from_result) {
+    std::stringstream ss;
+    dump_type(ss, from);
+    dump_type(ss, to);
+    dump_type(ss, from_result);
+    ss << "fof(id%u,hypothesis,fpop(" << from.to_str() << "," << to.to_str()
+       << "," << from_result.to_str() << "))." << std::endl;
+
+    trace.push_back(ss.str());
+  }
 }
