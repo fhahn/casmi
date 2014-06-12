@@ -230,23 +230,48 @@ void ExecutionVisitor::visit_let_post(LetNode*) {
 }
 
 void ExecutionVisitor::visit_push(PushNode *node, const Value& expr, const Value& atom) {
-  Value to_res = builtins::cons(context_, expr, atom);
+    DEBUG("SYMBOLIC PUSH");
+  if (atom.is_symbolic()) {
+    Value to_res(new symbol_t(symbolic::next_symbol_id()));
+    if (atom.value.sym->list) {
+      to_res.value.sym->list = builtins::cons(context_, expr,
+          Value(TypeType::LIST, atom.value.sym->list)).value.list;
+    } else {
+      to_res.value.sym->list = builtins::cons(context_, expr,
+          Value(TypeType::LIST, new BottomList())).value.list;
+    }
 
-  try {
-    casm_update *up = add_update(to_res, node->to->symbol->id, value_list);
-    up->line = (uint64_t) &node->location;
-    value_list.clear();
-  } catch (const RuntimeException& ex) {
-    // TODO this is probably not the cleanest solutions
-    driver_.error(node->to->location,
-                  "update conflict in parallel block for function `"+node->to->name+"`");
-    throw ex;
+    try {
+      casm_update *up = add_update(to_res, node->to->symbol->id, value_list);
+      up->line = (uint64_t) &node->location;
+      value_list.clear();
+    } catch (const RuntimeException& ex) {
+      // TODO this is probably not the cleanest solutions
+      driver_.error(node->to->location,
+                    "update conflict in parallel block for function `"+node->to->name+"`");
+      throw ex;
+    }
+
+    symbolic::dump_builtin(context_.trace, "push", {atom, expr} , to_res);
+  } else {
+    Value to_res = builtins::cons(context_, expr, atom);
+
+    try {
+      casm_update *up = add_update(to_res, node->to->symbol->id, value_list);
+      up->line = (uint64_t) &node->location;
+      value_list.clear();
+    } catch (const RuntimeException& ex) {
+      // TODO this is probably not the cleanest solutions
+      driver_.error(node->to->location,
+                    "update conflict in parallel block for function `"+node->to->name+"`");
+      throw ex;
+    }
   }
 }
 
 void ExecutionVisitor::visit_pop(PopNode *node, Value& val) {
+    DEBUG("SYMBOLIC POP");
   if (val.is_symbolic()) {
-
     Value to_res = (val.value.sym->list) ? builtins::peek(Value(TypeType::LIST, val.value.sym->list)) :
                                            Value(new symbol_t(symbolic::next_symbol_id()));
 
@@ -266,9 +291,7 @@ void ExecutionVisitor::visit_pop(PopNode *node, Value& val) {
       rule_bindings.back()->push_back(to_res);
     }
 
-
     Value from_res(new symbol_t(symbolic::next_symbol_id()));
-
     if (val.value.sym->list) {
       from_res.value.sym->list = builtins::tail(context_, 
           Value(TypeType::LIST, val.value.sym->list)).value.list;
@@ -401,7 +424,7 @@ Value ExecutionVisitor::visit_list_atom(ListAtom *atom, std::vector<Value> &vals
   std::reverse(list->values.begin(), list->values.end());
   //context_.temp_lists.push_back(list);
 
-  if (symbolic) {
+  if (context_.symbolic) {
     uint32_t sym_id = symbolic::dump_listconst(context_.trace_creates, list);
     if (sym_id > 0) {
       // TODO cleanup symbols
@@ -557,9 +580,19 @@ void AstWalker<ExecutionVisitor, Value>::walk_parblock(UnaryNode* parblock) {
 
 template <>
 void AstWalker<ExecutionVisitor, Value>::walk_pop(PopNode* node) {
-  // TODO this should use the same code as the global visitor
   Value from = walk_function_atom(node->from);
+  if (visitor.context_.symbolic &&
+      node->to->symbol_type == FunctionAtom::SymbolType::FUNCTION && node->to->symbol->is_symbolic) {
+    walk_function_atom(node->to);
+  }
   visitor.visit_pop(node, from);
+}
+
+template <>
+void AstWalker<ExecutionVisitor, Value>::walk_push(PushNode *node) {
+  Value expr = walk_expression_base(node->expr);
+  Value atom = walk_function_atom(node->to);
+  visitor.visit_push(node, expr, atom);
 }
 
 template <>

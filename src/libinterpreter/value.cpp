@@ -115,19 +115,27 @@ bool Value::operator==(const Value &other) const {
 
   if (is_symbolic()) {
     if (other.is_symbolic()) {
-      return value.sym->id == other.value.sym->id;
-    } else {
-      return false;
-    }
-  }
-  if (other.is_symbolic()) {
-    if (is_symbolic()) {
-      return value.sym->id == other.value.sym->id;
+      if (value.sym->list && other.value.sym->list) {
+        return *value.sym->list == *other.value.sym->list;
+      } else {
+        return value.sym->id == other.value.sym->id;
+      }
     } else {
       return false;
     }
   }
 
+  if (other.is_symbolic()) {
+    if (is_symbolic()) {
+      if (value.sym->list && other.value.sym->list) {
+        return *value.sym->list == *other.value.sym->list;
+      } else {
+        return value.sym->id == other.value.sym->id;
+      }
+    } else {
+      return false;
+    }
+  }
 
   switch (type) {
     case TypeType::INT: return value.ival == other.value.ival;

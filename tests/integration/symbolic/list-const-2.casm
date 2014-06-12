@@ -1,4 +1,4 @@
-function a: -> List(Int)
+function (symbolic) a: -> List(Int)
 
 init main
 

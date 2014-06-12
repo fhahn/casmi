@@ -73,6 +73,9 @@ struct symbol_t {
   bool type_dumped;
   bool update_dumped;
   List *list; // used for symbolic lists
+  // The distinction between concrete lists and symbolic lists can be fuzzy,
+  // because fcons formulas are generated for all list constants by the legacy
+  // interpreter
 
   symbol_t(uint32_t id);
   symbol_t(uint32_t id, symbolic_condition *cond);

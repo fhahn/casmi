@@ -1,7 +1,0 @@
-tff(symbolNext, type, sym2: $int).
-fof(id0,hypothesis,fa(0,sym2)).%CREATE: a
-fof(id1,hypothesis, fpush(sym2,1,sym3)).
-fof(id2,hypothesis,fa(1, sym3)).%UPDATE: a
-fof(id3,hypothesis,fprogram(0, 0,@undef)).%UPDATE: program 0
-fof(final0, hypothesis, fa(1,X) <=>fa(666,X)).
-fof(final1, hypothesis, fprogram(0,0,X) <=>fprogram(666,0,X)).

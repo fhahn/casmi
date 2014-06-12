@@ -1,0 +1,21 @@
+// symbolic
+
+CASM test
+
+function (symbolic) a: -> List(Int)
+function (symbolic) b: -> Int
+function (symbolic) c: -> Int
+
+rule main = {|
+
+  push 1 into a
+  push 2 into a
+
+  pop b from a
+  pop c from a
+
+  program( self ) := undef
+|}
+
+init main
+
