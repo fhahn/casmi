@@ -174,7 +174,6 @@ std::string Type::unify_links_to_str_left() const {
   std::string res = stream.str();
 
   if (unify_with_left) {
-    DEBUG("UNBIF LEFT "<<this << " "<<unify_with_left);
     res = unify_with_left->unify_links_to_str_left() + "<-" + res;
   }
   return res;
@@ -185,7 +184,6 @@ std::string Type::unify_links_to_str_right() const {
   std::string res = stream.str();
 
   if (unify_with_right) {
-    DEBUG("UNBIF RIGHT");
     res += "->" + unify_with_right->unify_links_to_str_right(); 
   }
   return res;
@@ -419,7 +417,6 @@ bool Type::unify_left(Type *other) {
   if (other == nullptr) {
     return true;
   }
-  DEBUG("LEFFT "<< other << " "<<to_str() << " "<<other->to_str());
 
   
   bool result = unify_nofollow(other);
@@ -431,7 +428,6 @@ bool Type::unify_left(Type *other) {
 }
 
 bool Type::unify_right(Type *other) {
-  DEBUG("RIGHT "<<other);
   if (other == nullptr) {
     return true;
   }
@@ -455,7 +451,6 @@ bool Type::is_unknown() const {
 }
 
 bool Type::unify(Type *other) {
-  DEBUG("START "<<to_str() << " "<<other->to_str());
   if (is_unknown() && other->is_unknown() ) {
     Type* left_link = this;
     while (left_link->unify_with_left != nullptr) {
@@ -491,16 +486,13 @@ bool Type::unify(Type *other) {
 
     left_link->unify_with_left = right_link;
     right_link->unify_with_right = left_link;
-    DEBUG("Link "<<this << " with " << other);
     return true;
   }
 
   if (unify_nofollow(other)) {
     bool result = true;
-    //DEBUG("UNIFY LEFT");
     result = result && unify_left(other->unify_with_left);
     result = result && unify_left(unify_with_left);
-    //DEBUG("UNIFY RIGHT");
     result = result && unify_right(other->unify_with_right);
     result = result && unify_right(unify_with_right);
     return result;
