@@ -49,7 +49,8 @@ def create_dispatch_define(builtins):
         lines = []
         lines.append("case BuiltinAtom::Id::{}:".format(b[0].upper()))
         for arg in b[2:]:
-            lines.append("  arg{0:} = {{ (uint64_t) arguments[{0:}].value.ival, (uint8_t)!arguments[{0:}].is_symbolic() }};".format(str(arg_ind)))
+            lines.append("  arg{0:} = {{ (uint64_t) arguments[{0:}].value.ival,".format(str(arg_ind))+
+                         " (uint8_t)!arguments[{0:}].is_symbolic(), 0 }};".format(str(arg_ind)))
             arg_ind += 1
 
         lines.append("  if (ctxt.symbolic) {")
