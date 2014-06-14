@@ -279,18 +279,18 @@ template<class T, class V> class AstWalker {
       visitor.visit_case(node, walk_expression_base(node->expr), case_labels);
     }
 
-    V walk_expression_base(ExpressionBase *expr, bool symbolic=false) {
+    V walk_expression_base(ExpressionBase *expr) {
       if (expr->node_type_ == NodeType::EXPRESSION) {
         Expression *e = reinterpret_cast<Expression*>(expr);
-        V v1 = walk_expression_base(e->left_, symbolic);
+        V v1 = walk_expression_base(e->left_);
         if (e->right_) {
-          V v2 = walk_expression_base(e->right_, symbolic);
+          V v2 = walk_expression_base(e->right_);
           return visitor.visit_expression(e, v1, v2);
         } else {
           return visitor.visit_expression_single(e, v1);
         }
       } else {
-        return walk_atom(reinterpret_cast<AtomNode*>(expr), symbolic);
+        return walk_atom(reinterpret_cast<AtomNode*>(expr));
       }
 
       throw RuntimeException("Invalid expression structure");
@@ -326,17 +326,17 @@ template<class T, class V> class AstWalker {
       }
     }
 
-    V walk_list_atom(ListAtom *atom, bool symbolic=false) {
+    V walk_list_atom(ListAtom *atom) {
       std::vector<V> expr_results;
       if (atom->expr_list) {
         for (ExpressionBase* e : *atom->expr_list) {
-          expr_results.push_back(walk_expression_base(e, symbolic));
+          expr_results.push_back(walk_expression_base(e));
         }
       }
-      return visitor.visit_list_atom(atom, expr_results, symbolic);
+      return visitor.visit_list_atom(atom, expr_results);
     }
 
-    V walk_atom(AtomNode *atom, bool symbolic=false) {
+    V walk_atom(AtomNode *atom) {
       switch(atom->node_type_) {
         case NodeType::INT_ATOM: {
           return visitor.visit_int_atom(reinterpret_cast<IntAtom*>(atom));
@@ -367,7 +367,7 @@ template<class T, class V> class AstWalker {
           return visitor.visit_string_atom(reinterpret_cast<StringAtom*>(atom));
         }
         case NodeType::LIST_ATOM: {
-          return walk_list_atom(reinterpret_cast<ListAtom*>(atom), symbolic);
+          return walk_list_atom(reinterpret_cast<ListAtom*>(atom));
         }
         case NodeType::NUMBER_RANGE_ATOM:
           return visitor.visit_number_range_atom(reinterpret_cast<NumberRangeAtom*>(atom));
@@ -429,7 +429,7 @@ template<class T> class BaseVisitor {
     T visit_rule_atom(RuleAtom*) { return T(); }
     T visit_boolean_atom(BooleanAtom*) { return T(); }
     T visit_string_atom(StringAtom*) { return T(); }
-    T visit_list_atom(ListAtom*, std::vector<T> &, bool) { return T(); }
+    T visit_list_atom(ListAtom*, std::vector<T> &) { return T(); }
     T visit_number_range_atom(NumberRangeAtom*) { return T(); }
 };
 

@@ -318,7 +318,7 @@ const rational_t& rational_t::operator/(const rational_t& other) const {
   return *result;
 }
 
-const rational_t& rational_t::operator%(const rational_t& other) const {
+const rational_t& rational_t::operator%(const rational_t&) const {
   // rational modulo is not supported by CASM
   return *this;
 }
@@ -641,9 +641,6 @@ bool BottomList::check_allocated_and_set_to_false() {
 SkipList::SkipList(size_t skip, BottomList *btm) : List(ListType::SKIP), skip(skip), bottom(btm) {}
 
 static std::hash<std::string> str_hasher;
-static std::hash<HeadList> head_list_hasher;
-static std::hash<BottomList> perm_list_hasher;
-
 
 size_t hash_uint64_value(const Type *type, uint64_t val) {
   switch (type->t) {

@@ -418,7 +418,7 @@ Value ExecutionVisitor::visit_derived_function_atom(FunctionAtom*, Value& expr) 
   return expr;
 }
 
-Value ExecutionVisitor::visit_list_atom(ListAtom *atom, std::vector<Value> &vals, bool symbolic) {
+Value ExecutionVisitor::visit_list_atom(ListAtom *atom, std::vector<Value> &vals) {
   BottomList *list = new BottomList(vals);
   // this could be faster if the list of expressions would be evaluated back to
   // front as well
@@ -769,10 +769,10 @@ void AstWalker<ExecutionVisitor, Value>::walk_update(UpdateNode *node) {
   // this is used to dump %CREATE in trace if necessary
   Value expr_t;
   if (visitor.context_.symbolic && node->func->symbol->is_symbolic) {
-    expr_t = walk_expression_base(node->expr_, true);
+    expr_t = walk_expression_base(node->expr_);
     walk_expression_base(node->func);
   } else {
-    expr_t = walk_expression_base(node->expr_, false);
+    expr_t = walk_expression_base(node->expr_);
   }
 
   visitor.value_list.clear();
@@ -854,11 +854,9 @@ bool ExecutionWalker::init_function(const std::string& name, std::set<std::strin
         visitor.driver_.error(loc, "function `"+func->name+"("+args_to_str(args, num_args)+")` already initialized");
         throw RuntimeException("function already initialized");
       }
-      DEBUG("BEGIN INSERT "<<name);
 
       if (visitor.context_.symbolic && func->is_symbolic) {
-        Value v = walk_expression_base(init.second, true);
-        DEBUG("aSDASD "<<v.is_symbolic());
+        Value v = walk_expression_base(init.second);
         symbolic::dump_create(visitor.context_.trace_creates, func,
             &args[0], 0, v);
         function_map.emplace(std::pair<ArgumentsKey, Value>(

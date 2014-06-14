@@ -277,7 +277,7 @@ void get_numerator_denominator(double x, int64_t *num, int64_t *denom) {
   // http://stackoverflow.com/a/96035/781502
   uint64_t m[2][2];
   double startx = x;
-  int64_t maxden = 10000000000;
+  uint64_t maxden = 10000000000;
   int64_t ai;
 
   /* initialize matrix */
@@ -366,8 +366,6 @@ namespace shared {
   #define SARG(VAR) #VAR              " {0x%lx,%u}"
   #define PARG(TYPE, VAR)             (uint64_t)VAR->value, VAR->defined
   #define CASM_RT(FORMAT, ARGS...)        /* printf-able */
-  #define CASM_INFO(FORMAT, ARGS...)      /* printf-able */
-
 
   // create concrete variants of the shareds
   #define CASM_CALL_SHARED(NAME, VALUE, ARGS...)  NAME(VALUE, ##ARGS)
