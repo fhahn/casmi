@@ -18,7 +18,7 @@ class CheckConditionTest: public ::testing::Test {
 };
 
 TEST_F(CheckConditionTest, check_eq_true) {
-  Value sym(TypeType::SYMBOL, 1);
+  Value sym(new symbol_t(1));
   Value a((INT_T)20);
   Value b((INT_T)20);
 
@@ -29,7 +29,7 @@ TEST_F(CheckConditionTest, check_eq_true) {
 }
 
 TEST_F(CheckConditionTest, check_eq_false) {
-  Value sym(TypeType::SYMBOL, 1);
+  Value sym(new symbol_t(1));
   Value a((INT_T)20);
   Value b((INT_T)10);
 
@@ -40,7 +40,7 @@ TEST_F(CheckConditionTest, check_eq_false) {
 }
 
 TEST_F(CheckConditionTest, check_eq_neq_false) {
-  Value sym(TypeType::SYMBOL, 1);
+  Value sym(new symbol_t(1));
   Value a((INT_T)20);
   Value b((INT_T)20);
 
@@ -51,7 +51,7 @@ TEST_F(CheckConditionTest, check_eq_neq_false) {
 }
 
 TEST_F(CheckConditionTest, check_neq_true) {
-  Value sym(TypeType::SYMBOL, 1);
+  Value sym(new symbol_t(1));
   Value a((INT_T)20);
   Value b((INT_T)20);
 
@@ -62,7 +62,7 @@ TEST_F(CheckConditionTest, check_neq_true) {
 }
 
 TEST_F(CheckConditionTest, check_neq_true_2) {
-  Value sym(TypeType::SYMBOL, 1);
+  Value sym(new symbol_t(1));
   Value a((INT_T)20);
   Value b((INT_T)30);
 
@@ -74,7 +74,7 @@ TEST_F(CheckConditionTest, check_neq_true_2) {
 }
 
 TEST_F(CheckConditionTest, check_neq_not_found_1) {
-  Value sym(TypeType::SYMBOL, 1);
+  Value sym(new symbol_t(1));
   Value a((INT_T)20);
   Value b((INT_T)30);
 
@@ -85,7 +85,7 @@ TEST_F(CheckConditionTest, check_neq_not_found_1) {
 }
 
 TEST_F(CheckConditionTest, check_neq_eq_true) {
-  Value sym(TypeType::SYMBOL, 1);
+  Value sym(new symbol_t(1));
   Value a((INT_T)20);
   Value b((INT_T)30);
 
@@ -96,7 +96,7 @@ TEST_F(CheckConditionTest, check_neq_eq_true) {
 }
 
 TEST_F(CheckConditionTest, check_neq_eq_false) {
-  Value sym(TypeType::SYMBOL, 1);
+  Value sym(new symbol_t(1));
   Value a((INT_T)20);
 
   symbolic_condition k1(&sym, &a, ExpressionOperation::EQ);
@@ -106,7 +106,7 @@ TEST_F(CheckConditionTest, check_neq_eq_false) {
 }
 
 TEST_F(CheckConditionTest, check_eq_lessereq_true) {
-  Value sym(TypeType::SYMBOL, 1);
+  Value sym(new symbol_t(1));
   Value a((INT_T)20);
   Value b((INT_T)30);
 
@@ -117,7 +117,7 @@ TEST_F(CheckConditionTest, check_eq_lessereq_true) {
 }
 
 TEST_F(CheckConditionTest, check_eq_lessereq_false) {
-  Value sym(TypeType::SYMBOL, 1);
+  Value sym(new symbol_t(1));
   Value a((INT_T)50);
   Value b((INT_T)30);
 
@@ -128,7 +128,7 @@ TEST_F(CheckConditionTest, check_eq_lessereq_false) {
 }
 
 TEST_F(CheckConditionTest, check_lessereq_lessereq_true) {
-  Value sym(TypeType::SYMBOL, 1);
+  Value sym(new symbol_t(1));
   Value a((INT_T)50);
   Value b((INT_T)40);
 
@@ -139,7 +139,7 @@ TEST_F(CheckConditionTest, check_lessereq_lessereq_true) {
 }
 
 TEST_F(CheckConditionTest, check_lessereq_lessereq_not_found) {
-  Value sym(TypeType::SYMBOL, 1);
+  Value sym(new symbol_t(1));
   Value a((INT_T)50);
   Value b((INT_T)70);
 
@@ -150,7 +150,7 @@ TEST_F(CheckConditionTest, check_lessereq_lessereq_not_found) {
 }
 
 TEST_F(CheckConditionTest, check_greater_lessereq_false) {
-  Value sym(TypeType::SYMBOL, 1);
+  Value sym(new symbol_t(1));
   Value a((INT_T)50);
   Value b((INT_T)40);
 
@@ -161,7 +161,7 @@ TEST_F(CheckConditionTest, check_greater_lessereq_false) {
 }
 
 TEST_F(CheckConditionTest, check_greater_lessereq_not_found) {
-  Value sym(TypeType::SYMBOL, 1);
+  Value sym(new symbol_t(1));
   Value a((INT_T)50);
   Value b((INT_T)60);
 
@@ -172,7 +172,7 @@ TEST_F(CheckConditionTest, check_greater_lessereq_not_found) {
 }
 
 TEST_F(CheckConditionTest, check_eq_greater_true) {
-  Value sym(TypeType::SYMBOL, 1);
+  Value sym(new symbol_t(1));
   Value a((INT_T)50);
   Value b((INT_T)30);
 
@@ -183,7 +183,7 @@ TEST_F(CheckConditionTest, check_eq_greater_true) {
 }
 
 TEST_F(CheckConditionTest, check_eq_greater_false) {
-  Value sym(TypeType::SYMBOL, 1);
+  Value sym(new symbol_t(1));
   Value a((INT_T)50);
   Value b((INT_T)60);
 
@@ -194,7 +194,7 @@ TEST_F(CheckConditionTest, check_eq_greater_false) {
 }
 
 TEST_F(CheckConditionTest, check_lessereq_greater_false) {
-  Value sym(TypeType::SYMBOL, 1);
+  Value sym(new symbol_t(1));
   Value a((INT_T)50);
   Value b((INT_T)60);
 
@@ -205,7 +205,7 @@ TEST_F(CheckConditionTest, check_lessereq_greater_false) {
 }
 
 TEST_F(CheckConditionTest, check_greater_greater_true) {
-  Value sym(TypeType::SYMBOL, 1);
+  Value sym(new symbol_t(1));
   Value a((INT_T)50);
   Value b((INT_T)60);
 
