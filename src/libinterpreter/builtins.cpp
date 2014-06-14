@@ -355,6 +355,8 @@ namespace shared {
   #include "shared_glue.h"
 
   IGNORE_VARIADIC_WARNINGS
+  #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+  #pragma GCC diagnostic ignored "-Wunused-parameter"
 
   // the CASM runtime heavily depens on macros, whatever you think of it ... 
   // here we need to provide all definitions ...
@@ -392,6 +394,8 @@ namespace shared {
     #include "libcasmrt/pp_casm_shared.h"
   }
 
+  #pragma GCC diagnostic warning "-Wmissing-field-initializers"
+  #pragma GCC diagnostic warning "-Wunused-parameter"
   REENABLE_VARIADIC_WARNINGS
 
   const Value dispatch(BuiltinAtom::Id builtin_id, 
