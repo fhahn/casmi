@@ -466,6 +466,18 @@ ExpressionOperation invert(ExpressionOperation op) {
 }
 
 template <>
+Value AstWalker<ExecutionVisitor, Value>::walk_list_atom(ListAtom *atom) {
+  std::vector<Value> expr_results;
+  if (atom->expr_list) {
+    for (auto iter=atom->expr_list->rbegin(); iter != atom->expr_list->rend(); iter++) {
+      expr_results.push_back(walk_expression_base(*iter));
+    }
+  }
+  return visitor.visit_list_atom(atom, expr_results);
+}
+
+
+template <>
 void AstWalker<ExecutionVisitor, Value>::walk_ifthenelse(IfThenElseNode* node) {
   const Value cond = walk_expression_base(node->condition_);
 

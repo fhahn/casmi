@@ -329,8 +329,8 @@ template<class T, class V> class AstWalker {
     V walk_list_atom(ListAtom *atom) {
       std::vector<V> expr_results;
       if (atom->expr_list) {
-        for (auto iter=atom->expr_list->rbegin(); iter != atom->expr_list->rend(); iter++) {
-          expr_results.push_back(walk_expression_base(*iter));
+        for (ExpressionBase* e : *atom->expr_list) {
+          expr_results.push_back(walk_expression_base(e));
         }
       }
       return visitor.visit_list_atom(atom, expr_results);
