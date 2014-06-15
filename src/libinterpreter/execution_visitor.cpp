@@ -24,7 +24,7 @@ DEFINE_CASM_UPDATESET_FORK_SEQ
 REENABLE_VARIADIC_WARNINGS
 
 
-uint16_t pack_values_in_array(const std::vector<Value> &value_list, uint64_t array[]) {
+uint16_t pack_values_in_array(std::vector<Value> &value_list, uint64_t array[]) {
   uint16_t sym_args = 0;
   for (size_t i=0; i < value_list.size(); i++) {
     array[i] = value_list[i].to_uint64_t();
@@ -41,7 +41,7 @@ ExecutionVisitor::ExecutionVisitor(ExecutionContext &ctxt, Driver& driver)
   rule_bindings.push_back(&main_bindings);
 }
 
-void ExecutionVisitor::visit_assert(UnaryNode* assert, Value& val) {
+void ExecutionVisitor::visit_assert(UnaryNode* assert, const Value& val) {
   if (val.value.bval != true) {
     driver_.error(assert->location,
                   "Assertion failed");
@@ -49,7 +49,7 @@ void ExecutionVisitor::visit_assert(UnaryNode* assert, Value& val) {
   }
 }
 
-void ExecutionVisitor::visit_assure(UnaryNode* assure, Value& val) {
+void ExecutionVisitor::visit_assure(UnaryNode* assure, const Value& val) {
   if (context_.symbolic && val.is_symbolic() && val.value.sym->condition) {
     context_.path_conditions.push_back(val.value.sym->condition);
   } else {
@@ -57,7 +57,8 @@ void ExecutionVisitor::visit_assure(UnaryNode* assure, Value& val) {
   }
 }
 
-casm_update *ExecutionVisitor::add_update(const Value& val, size_t sym_id, const std::vector<Value> &arguments) {
+casm_update *ExecutionVisitor::add_update(const Value& val, size_t sym_id,
+                                          std::vector<Value> &arguments) {
   casm_update* up = (casm_update*) pp_mem_alloc(&(context_.pp_stack), sizeof(casm_update));
 
   up->value = (void*) val.to_uint64_t();
@@ -74,7 +75,7 @@ casm_update *ExecutionVisitor::add_update(const Value& val, size_t sym_id, const
   if (function_map.second.count(ArgumentsKey(up->args, up->num_args, false, up->sym_args)) == 0) {
     function_map.second.emplace(ArgumentsKey(up->args, up->num_args, true, up->sym_args), Value());
   }
-  Value& ref = function_map.second[ArgumentsKey(up->args, up->num_args, false, up->sym_args)];
+  const Value& ref = function_map.second[ArgumentsKey(up->args, up->num_args, false, up->sym_args)];
   casm_update* v = (casm_update*)casm_updateset_add(&(context_.updateset),
                                                     (void*) &ref,
                                                     (void*) up);
@@ -91,7 +92,7 @@ casm_update *ExecutionVisitor::add_update(const Value& val, size_t sym_id, const
   return up;
 }
 
-void ExecutionVisitor::visit_update_dumps(UpdateNode *update, Value& expr_v) {
+void ExecutionVisitor::visit_update_dumps(UpdateNode *update, const Value& expr_v) {
   const std::string& filter = driver_.function_trace_map[update->func->symbol->id];
   if (context_.filter_enabled(filter)) {
     std::cout << filter << ": " << update->func->symbol->name ;
@@ -116,7 +117,7 @@ void ExecutionVisitor::visit_update_dumps(UpdateNode *update, Value& expr_v) {
   visit_update(update, expr_v);
 }
 
-void ExecutionVisitor::visit_update(UpdateNode *update, Value& expr_v) {
+void ExecutionVisitor::visit_update(UpdateNode *update, const Value& expr_v) {
   try {
     casm_update *up = add_update(expr_v, update->func->symbol->id, value_list);
     up->line = (uint64_t) &update->location;
@@ -132,7 +133,7 @@ void ExecutionVisitor::visit_update(UpdateNode *update, Value& expr_v) {
 
 void ExecutionVisitor::visit_call_pre(CallNode *call) { UNUSED(call); }
 
-void ExecutionVisitor::visit_call_pre(CallNode *call, Value& expr) {
+void ExecutionVisitor::visit_call_pre(CallNode *call, const Value& expr) {
   if (expr.type != TypeType::UNDEF) {
     call->rule = expr.value.rule;
   } else {
@@ -180,7 +181,7 @@ void ExecutionVisitor::visit_call_post(CallNode *call) {
   rule_bindings.pop_back();
 }
 
-void ExecutionVisitor::visit_print(PrintNode *node, const std::vector<Value> &arguments) {
+void ExecutionVisitor::visit_print(PrintNode *node, std::vector<Value> &arguments) {
   std::stringstream ss;
   if (node->filter.size() > 0 ) {
     if (context_.filter_enabled(node->filter)) {
@@ -221,7 +222,7 @@ void ExecutionVisitor::visit_impossible(AstNode *node) {
   }
 }
 
-void ExecutionVisitor::visit_let(LetNode*, Value& v) {
+void ExecutionVisitor::visit_let(LetNode*, const Value& v) {
   rule_bindings.back()->push_back(v);
 }
 
@@ -230,9 +231,8 @@ void ExecutionVisitor::visit_let_post(LetNode*) {
 }
 
 void ExecutionVisitor::visit_push(PushNode *node, const Value& expr, const Value& atom) {
-    DEBUG("SYMBOLIC PUSH");
   if (atom.is_symbolic()) {
-    Value to_res(new symbol_t(symbolic::next_symbol_id()));
+    const Value to_res(new symbol_t(symbolic::next_symbol_id()));
     if (atom.value.sym->list) {
       to_res.value.sym->list = builtins::cons(context_, expr,
           Value(TypeType::LIST, atom.value.sym->list)).value.list;
@@ -254,7 +254,7 @@ void ExecutionVisitor::visit_push(PushNode *node, const Value& expr, const Value
 
     symbolic::dump_builtin(context_.trace, "push", {atom, expr} , to_res);
   } else {
-    Value to_res = builtins::cons(context_, expr, atom);
+    const Value to_res = builtins::cons(context_, expr, atom);
 
     try {
       casm_update *up = add_update(to_res, node->to->symbol->id, value_list);
@@ -269,10 +269,9 @@ void ExecutionVisitor::visit_push(PushNode *node, const Value& expr, const Value
   }
 }
 
-void ExecutionVisitor::visit_pop(PopNode *node, Value& val) {
-    DEBUG("SYMBOLIC POP");
+void ExecutionVisitor::visit_pop(PopNode *node, const Value& val) {
   if (val.is_symbolic()) {
-    Value to_res = (val.value.sym->list) ? builtins::peek(Value(TypeType::LIST, val.value.sym->list)) :
+    const Value to_res = (val.value.sym->list) ? builtins::peek(Value(TypeType::LIST, val.value.sym->list)) :
                                            Value(new symbol_t(symbolic::next_symbol_id()));
 
     casm_update *up = nullptr;
@@ -291,7 +290,7 @@ void ExecutionVisitor::visit_pop(PopNode *node, Value& val) {
       rule_bindings.back()->push_back(to_res);
     }
 
-    Value from_res(new symbol_t(symbolic::next_symbol_id()));
+    const Value from_res(new symbol_t(symbolic::next_symbol_id()));
     if (val.value.sym->list) {
       from_res.value.sym->list = builtins::tail(context_, 
           Value(TypeType::LIST, val.value.sym->list)).value.list;
@@ -311,7 +310,7 @@ void ExecutionVisitor::visit_pop(PopNode *node, Value& val) {
     }
 
   } else {
-    Value to_res = builtins::peek(val);
+    const Value to_res = builtins::peek(val);
 
     if (node->to->symbol_type == FunctionAtom::SymbolType::FUNCTION) {
       try {
@@ -328,34 +327,34 @@ void ExecutionVisitor::visit_pop(PopNode *node, Value& val) {
       rule_bindings.back()->push_back(to_res);
     } 
 
-    Value from_res = builtins::tail(context_, val);
+    const Value from_res = builtins::tail(context_, val);
     try {
       casm_update *up = add_update(from_res, node->from->symbol->id, value_list);
       up->line = (uint64_t) &node->location;
       value_list.clear();
-      DEBUG("POP");
     } catch (const RuntimeException& ex) {
       // TODO this is probably not the cleanest solutions
       driver_.error(node->location,
                     "update conflict in parallel block for function `"+node->from->name+"`");
       throw ex;
     }
-    DEBUG("POPed "<<to_res.to_str() << " from "<<val.to_str() << " -> "<<from_res.to_str());
 
   }
 }
 
-Value ExecutionVisitor::visit_expression(Expression *expr, Value &left_val, Value &right_val) {
-  DEBUG("left "<<left_val.to_str()<<" right "<<right_val.to_str());
+const Value ExecutionVisitor::visit_expression(Expression *expr,
+                                               const Value &left_val,
+                                               const Value &right_val) {
   return operators::dispatch(expr->op, left_val, right_val);
 }
 
-Value ExecutionVisitor::visit_expression_single(Expression *expr, Value &val) {
+Value ExecutionVisitor::visit_expression_single(Expression *expr, const Value &val) {
   UNUSED(expr);
   return operators::dispatch(expr->op, val, val);
 }
 
-Value ExecutionVisitor::visit_function_atom(FunctionAtom *atom, std::vector<Value> &expr_results) {
+const Value ExecutionVisitor::visit_function_atom(FunctionAtom *atom,
+                                                  std::vector<Value> &expr_results) {
   auto current_rule_bindings = rule_bindings.back();
   switch (atom->symbol_type) {
     case FunctionAtom::SymbolType::PARAMETER:
@@ -371,8 +370,7 @@ Value ExecutionVisitor::visit_function_atom(FunctionAtom *atom, std::vector<Valu
       args[0] = 0;
       uint16_t sym_args = pack_values_in_array(expr_results, args);
 
-      Value v = Value(context_.get_function_value(atom->symbol, args, sym_args));
-      DEBUG("visit_atom "<<atom->symbol->name<<" "<<v.to_str() <<" size "<<value_list.size());
+      const Value v = Value(context_.get_function_value(atom->symbol, args, sym_args));
 
       return v;
     }
@@ -383,13 +381,13 @@ Value ExecutionVisitor::visit_function_atom(FunctionAtom *atom, std::vector<Valu
       return v;
     }
     default: {
-      DEBUG("visiting invalid symbol type of atom "<<atom->name<<" "<<atom->offset);
       assert(0);
     }
   }
 }
 
-Value ExecutionVisitor::visit_builtin_atom(BuiltinAtom *atom, std::vector<Value> &expr_results) {
+const Value ExecutionVisitor::visit_builtin_atom(BuiltinAtom *atom,
+                                                 std::vector<Value> &expr_results) {
   // TODO Int2Enum is a special builtin, it needs the complete type information
   // for the enum, values only store TypeType and passing the type to all
   // builtins seems ugly.
@@ -409,20 +407,19 @@ Value ExecutionVisitor::visit_builtin_atom(BuiltinAtom *atom, std::vector<Value>
   return builtins::dispatch(atom->id, context_, expr_results);
 }
 
-void ExecutionVisitor::visit_derived_function_atom_pre(FunctionAtom*, std::vector<Value>& arguments) {
+void ExecutionVisitor::visit_derived_function_atom_pre(FunctionAtom*,
+                                                       std::vector<Value>& arguments) {
   rule_bindings.push_back(&arguments);
 }
 
-Value ExecutionVisitor::visit_derived_function_atom(FunctionAtom*, Value& expr) {
+const Value ExecutionVisitor::visit_derived_function_atom(FunctionAtom*, const Value& expr) {
   rule_bindings.pop_back();
   return expr;
 }
 
-Value ExecutionVisitor::visit_list_atom(ListAtom *atom, std::vector<Value> &vals) {
+const Value ExecutionVisitor::visit_list_atom(ListAtom *atom,
+                                              std::vector<Value> &vals) {
   BottomList *list = new BottomList(vals);
-  // this could be faster if the list of expressions would be evaluated back to
-  // front as well
-  std::reverse(list->values.begin(), list->values.end());
   //context_.temp_lists.push_back(list);
 
   if (context_.symbolic) {
@@ -432,7 +429,7 @@ Value ExecutionVisitor::visit_list_atom(ListAtom *atom, std::vector<Value> &vals
       symbol_t *sym = new symbol_t(sym_id);
       sym->type_dumped = true;
       sym->list = list;
-      Value v(sym);
+      const Value v(sym);
       return v;
     }
   }
@@ -452,7 +449,7 @@ std::string args_to_str(uint64_t args[], size_t size) {
   return res;
 }
 
-Value ExecutionVisitor::visit_number_range_atom(NumberRangeAtom *atom) {
+const Value ExecutionVisitor::visit_number_range_atom(NumberRangeAtom *atom) {
   return Value(atom->type_, atom->list);
 }
 
@@ -470,7 +467,7 @@ ExpressionOperation invert(ExpressionOperation op) {
 
 template <>
 void AstWalker<ExecutionVisitor, Value>::walk_ifthenelse(IfThenElseNode* node) {
-  Value cond = walk_expression_base(node->condition_);
+  const Value cond = walk_expression_base(node->condition_);
 
   if (cond.is_symbolic()) {
     symbolic_condition *sym_cond;
@@ -581,7 +578,7 @@ void AstWalker<ExecutionVisitor, Value>::walk_parblock(UnaryNode* parblock) {
 
 template <>
 void AstWalker<ExecutionVisitor, Value>::walk_pop(PopNode* node) {
-  Value from = walk_function_atom(node->from);
+  const Value from = walk_function_atom(node->from);
   if (visitor.context_.symbolic &&
       node->to->symbol_type == FunctionAtom::SymbolType::FUNCTION && node->to->symbol->is_symbolic) {
     walk_function_atom(node->to);
@@ -591,14 +588,14 @@ void AstWalker<ExecutionVisitor, Value>::walk_pop(PopNode* node) {
 
 template <>
 void AstWalker<ExecutionVisitor, Value>::walk_push(PushNode *node) {
-  Value expr = walk_expression_base(node->expr);
-  Value atom = walk_function_atom(node->to);
+  const Value expr = walk_expression_base(node->expr);
+  const Value atom = walk_function_atom(node->to);
   visitor.visit_push(node, expr, atom);
 }
 
 template <>
 void AstWalker<ExecutionVisitor, Value>::walk_case(CaseNode *node) {
-  Value cond = walk_expression_base(node->expr);
+  const Value cond = walk_expression_base(node->expr);
 
   if (cond.is_symbolic()) {
     for (uint32_t i=0; i < node->case_list.size(); i++) {
@@ -606,7 +603,7 @@ void AstWalker<ExecutionVisitor, Value>::walk_case(CaseNode *node) {
       // pair.first == nullptr for default:
       symbolic_condition *sym_cond;
       if (pair.first) {
-        Value c = walk_atom(pair.first);
+        const Value c = walk_atom(pair.first);
         sym_cond = new symbolic_condition(new Value(cond), new Value(c),
             ExpressionOperation::EQ);
 
@@ -674,7 +671,7 @@ void AstWalker<ExecutionVisitor, Value>::walk_case(CaseNode *node) {
 template <>
 void AstWalker<ExecutionVisitor, Value>::walk_forall(ForallNode *node) {
   bool forked = false;
-  Value in_list = walk_expression_base(node->in_expr);
+  const Value in_list = walk_expression_base(node->in_expr);
 
   if (visitor.context_.updateset.pseudostate % 2 == 1) {
     CASM_UPDATESET_FORK_PAR(&visitor.context_.updateset);
@@ -767,12 +764,9 @@ void AstWalker<ExecutionVisitor, Value>::walk_iterate(UnaryNode *node) {
 template <>
 void AstWalker<ExecutionVisitor, Value>::walk_update(UpdateNode *node) {
   // this is used to dump %CREATE in trace if necessary
-  Value expr_t;
+  const Value &expr_t = walk_expression_base(node->expr_);
   if (visitor.context_.symbolic && node->func->symbol->is_symbolic) {
-    expr_t = walk_expression_base(node->expr_);
     walk_expression_base(node->func);
-  } else {
-    expr_t = walk_expression_base(node->expr_);
   }
 
   visitor.value_list.clear();
@@ -787,8 +781,8 @@ void AstWalker<ExecutionVisitor, Value>::walk_update(UpdateNode *node) {
 
 template <>
 void AstWalker<ExecutionVisitor, Value>::walk_update_dumps(UpdateNode *node) {
-  Value expr_t = walk_expression_base(node->expr_);
-  
+  const Value expr_t = walk_expression_base(node->expr_);
+
   visitor.value_list.clear();
   if (node->func->arguments) {
     for (ExpressionBase* e : *node->func->arguments) {
@@ -834,7 +828,7 @@ bool ExecutionWalker::init_function(const std::string& name, std::set<std::strin
       uint64_t *args = new uint64_t[10];
       if (init.first != nullptr) {
         std::vector<Value> arguments;
-        Value argument_v = walk_expression_base(init.first);
+        const Value argument_v = walk_expression_base(init.first);
         if (func->arguments_.size() > 1) {
           List *list = argument_v.value.list;
           for (auto iter = list->begin(); iter != list->end(); iter++) {
@@ -856,7 +850,7 @@ bool ExecutionWalker::init_function(const std::string& name, std::set<std::strin
       }
 
       if (visitor.context_.symbolic && func->is_symbolic) {
-        Value v = walk_expression_base(init.second);
+        const Value v = walk_expression_base(init.second);
         symbolic::dump_create(visitor.context_.trace_creates, func,
             &args[0], 0, v);
         function_map.emplace(std::pair<ArgumentsKey, Value>(
@@ -864,7 +858,6 @@ bool ExecutionWalker::init_function(const std::string& name, std::set<std::strin
       } else {
         function_map.emplace(std::pair<ArgumentsKey, Value>(std::move(ArgumentsKey(&args[0], num_args, true, 0)), walk_expression_base(init.second)));
       }
-      DEBUG("END INSERT "<<name);
       initializer_args.push_back(args);
     }
   }
@@ -910,8 +903,7 @@ void ExecutionWalker::run() {
   Function *program_sym = visitor.context_.symbol_table.get_function("program");
   uint64_t args[10] = {0};
   while(true) {
-    Value& program_val = visitor.context_.get_function_value(program_sym, args, 0);
-    DEBUG(program_val.to_str());
+    const Value& program_val = visitor.context_.get_function_value(program_sym, args, 0);
     if (program_val.type == TypeType::UNDEF) {
       break;
     }

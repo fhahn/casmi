@@ -296,7 +296,7 @@ namespace symbolic {
   }
 
   void dump_builtin(std::vector<std::string>& trace, const char *name,
-      const std::vector<Value>& args, const Value& ret) {
+                    const std::vector<Value>& args, const Value& ret) {
     std::stringstream ss;
 
     for (const auto& a : args) {

@@ -38,7 +38,8 @@ namespace builtins {
     };
 
     const Value dispatch(BuiltinAtom::Id builtin_id, 
-                         const std::vector<Value>& arguments, ExecutionContext& ctxt);
+                         const std::vector<Value>& arguments,
+                         ExecutionContext& ctxt);
 
   }
 };
