@@ -67,6 +67,9 @@ class ExecutionVisitor : public BaseVisitor<const Value> {
     const Value visit_number_range_atom(NumberRangeAtom *atom);
 };
 
+template <>
+Value AstWalker<ExecutionVisitor, Value>::walk_list_atom(ListAtom *atom);
+
 // Specialize if-then-else for ExecutionVisitor
 template <>
 void AstWalker<ExecutionVisitor, Value>::walk_ifthenelse(IfThenElseNode* node);
@@ -78,6 +81,12 @@ template <>
 void AstWalker<ExecutionVisitor, Value>::walk_parblock(UnaryNode* parblock);
 
 template <>
+void AstWalker<ExecutionVisitor, Value>::walk_pop(PopNode* node);
+
+template <>
+void AstWalker<ExecutionVisitor, Value>::walk_push(PushNode* node);
+
+template <>
 void AstWalker<ExecutionVisitor, Value>::walk_case(CaseNode *node);
 
 template <>
@@ -85,6 +94,12 @@ void AstWalker<ExecutionVisitor, Value>::walk_forall(ForallNode *node);
 
 template <>
 void AstWalker<ExecutionVisitor, Value>::walk_iterate(UnaryNode *node);
+
+template <>
+void AstWalker<ExecutionVisitor, Value>::walk_update(UpdateNode *node);
+
+template <>
+void AstWalker<ExecutionVisitor, Value>::walk_update_dumps(UpdateNode *node);
 
 class ExecutionWalker : public AstWalker<ExecutionVisitor, Value> {
   private:

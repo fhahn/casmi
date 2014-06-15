@@ -74,4 +74,8 @@ class TypecheckVisitor : public BaseVisitor<Type*> {
 template <>
 void AstWalker<TypecheckVisitor, Type*>::walk_forall(ForallNode *node);
 
+template <>
+void AstWalker<TypecheckVisitor, Type*>::walk_call(CallNode *call);
+
+
 #endif //CASMI_LIBINTERPRETER_EXEC_VISITOR
