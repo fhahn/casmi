@@ -104,13 +104,13 @@ bool AstDumpVisitor::visit_update_dumps(UpdateNode *update, bool v1, bool v2) {
 bool AstDumpVisitor::visit_call_pre(CallNode *call) {
   dump_node(call, "Direct Call: "+call->rule_name);
   // TODO we need to populate the rule here!!!
-  assert(0);
+  FAILURE();
 }
 
 bool AstDumpVisitor::visit_call_pre(CallNode *call, bool) {
   dump_node(call, "Indirect Call");
   // TODO we need to populate the rule here!!!
-  assert(0);
+  FAILURE();
 }
 
 bool AstDumpVisitor::visit_call(CallNode *call, std::vector<bool>& argument_results) {

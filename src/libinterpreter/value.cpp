@@ -147,7 +147,7 @@ bool Value::operator==(const Value &other) const {
     case TypeType::TUPLE:
     case TypeType::TUPLE_OR_LIST:
     case TypeType::LIST: return *value.list == *other.value.list;
-    default: assert(0);
+    default: FAILURE();
   }
 }
 
@@ -260,7 +260,7 @@ std::string symbolic_condition::to_str() const {
     case ExpressionOperation::GREATEREQ:
       return "$greatereq("+lhs->to_str()+", "+rhs->to_str()+")";
     default:
-      assert(0);
+      FAILURE();
   }
 }
 
@@ -430,7 +430,7 @@ void List::const_iterator::next() {
     }
   } else if (tail) {
       do_init(tail->right);
-    //assert(0);
+    //FAILURE();
   }
 }
 
@@ -448,7 +448,7 @@ const Value& List::const_iterator::operator*() {
   } else if (tail) {
     return tail->current_tail;
   } else {
-    assert(0);
+    FAILURE();
   }
 }
 
@@ -600,7 +600,7 @@ BottomList* List::collect() {
       return copy;
     }
   } else {
-    assert(0);
+    FAILURE();
   }
 }
 
@@ -655,7 +655,7 @@ size_t hash_uint64_value(const Type *type, uint64_t val) {
       return (uint64_t) str_hasher(*reinterpret_cast<std::string*>(val));
     case TypeType::TUPLE: 
     case TypeType::TUPLE_OR_LIST: 
-      assert(0);
+      FAILURE();
     case TypeType::LIST: {
       size_t h = 0; 
       List *list = reinterpret_cast<List*>(val);
@@ -672,7 +672,7 @@ size_t hash_uint64_value(const Type *type, uint64_t val) {
     }
     case TypeType::SYMBOL:
       return val;
-    default: assert(0);
+    default: FAILURE();
   }
 }
 
@@ -697,7 +697,7 @@ bool eq_uint64_value(const Type *type, uint64_t lhs, uint64_t rhs) {
     case TypeType::RATIONAL:
       return *reinterpret_cast<rational_t*>(lhs) ==
              *reinterpret_cast<rational_t*>(rhs); 
-    default: assert(0);
+    default: FAILURE();
   }
 }
 

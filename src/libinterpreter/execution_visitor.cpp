@@ -381,7 +381,7 @@ const Value ExecutionVisitor::visit_function_atom(FunctionAtom *atom,
       return v;
     }
     default: {
-      assert(0);
+      FAILURE();
     }
   }
 }

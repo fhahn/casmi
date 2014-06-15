@@ -23,7 +23,7 @@
       return std::move(Value(lhs.value.fval op rhs.value.fval));             \
     case TypeType::RATIONAL:                                                 \
       return std::move(Value(&(*lhs.value.rat op *rhs.value.rat)));          \
-    default: assert(0);                                                      \
+    default: FAILURE();                                                      \
   }                                                                          \
 }
 
@@ -35,7 +35,7 @@
       return std::move(Value(lhs.value.ival op rhs.value.ival));             \
     case TypeType::FLOAT:                                                    \
       return std::move(Value(lhs.value.fval op rhs.value.fval));             \
-    default: assert(0);                                                      \
+    default: FAILURE();                                                      \
   }                                                                          \
 }
 
@@ -134,7 +134,7 @@ const Value operators::dispatch(ExpressionOperation op, const Value& lhs, const 
       CHECK_SYMBOLIC_CMP_OPERATION(op, lhs, rhs);
       return std::move(operators::greatereq(lhs, rhs));
 
-    default: assert(0);
+    default: FAILURE();
   }
 
 }
@@ -175,7 +175,7 @@ const Value operators::rat_div(const Value& lhs, const Value& rhs) {
       result->denominator = rhs.value.ival;
       return std::move(Value(result));
     }
-    default: assert(0);
+    default: FAILURE();
   }
 }
 

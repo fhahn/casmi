@@ -32,4 +32,12 @@
 
 #endif
 
+
+#define FAILURE() \
+  do {                                                                       \
+  std::cerr << __FILE__ << ":" << __LINE__                                   \
+            << ": this line shouldn't be reached!" << std::endl;             \
+  exit(4);                                                                   \
+  } while(0)                                                                 \
+
 #endif

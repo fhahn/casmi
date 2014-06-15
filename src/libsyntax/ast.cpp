@@ -550,7 +550,7 @@ bool PushNode::equals(AstNode *other) {
   if (!AstNode::equals(other)) {
     return false;
   }
-  assert(0);
+  FAILURE();
 }
 
 
@@ -568,7 +568,7 @@ bool PopNode::equals(AstNode *other) {
   if (!AstNode::equals(other)) {
     return false;
   }
-  assert(0);
+  FAILURE();
 }
 
 ForallNode::ForallNode(yy::location& loc, const std::string& ident,
@@ -591,7 +591,7 @@ bool CaseNode::equals(AstNode *other) {
   if (!AstNode::equals(other)) {
     return false;
   }
-  assert(0);
+  FAILURE();
 }
 
 UnaryNode::UnaryNode(yy::location& loc, NodeType node_type, AstNode *child) : AstNode(loc, node_type) {

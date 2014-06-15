@@ -64,7 +64,7 @@ const Value builtins::pow(const Value& base, const Value& power) {
 
     case TypeType::FLOAT:
       return std::move(Value((FLOAT_T)std::pow(base.value.fval, power.value.fval)));
-    default: assert(0);
+    default: FAILURE();
   }
 }
 
@@ -145,7 +145,7 @@ const Value builtins::app(ExecutionContext& ctxt, const Value& list, const Value
   } else if (current->list_type == List::ListType::BOTTOM) {
     reinterpret_cast<BottomList*>(current)->tail = tail;
   } else {
-    assert(0);
+    FAILURE();
   }
   return std::move(Value(list.type, list.value.list));
 }
@@ -251,7 +251,7 @@ const Value builtins::asint(const Value& arg) {
       return std::move(Value((INT_T)arg.value.fval));
     case TypeType::RATIONAL:
       return std::move(Value((INT_T)(arg.value.rat->numerator / arg.value.rat->denominator)));
-    default: assert(0);
+    default: FAILURE();
   }
 }
 
@@ -267,7 +267,7 @@ const Value builtins::asfloat(const Value& arg) {
       return std::move(Value(arg.value.fval));
     case TypeType::RATIONAL:
       return std::move(Value(((FLOAT_T)arg.value.rat->numerator) / arg.value.rat->denominator));
-    default: assert(0);
+    default: FAILURE();
   }
 }
 
@@ -337,7 +337,7 @@ const Value builtins::asrational(const Value& arg) {
       return std::move(Value(result));
     case TypeType::RATIONAL:
       return std::move(Value(arg.value.rat));
-    default: assert(0);
+    default: FAILURE();
   }
 }
 
@@ -407,7 +407,7 @@ namespace shared {
     Int arg4;
     switch (builtin_id) {
       SHARED_DISPATCH
-      default: assert(0);
+      default: FAILURE();
     }
 
     if (ret.defined == TRUE) {

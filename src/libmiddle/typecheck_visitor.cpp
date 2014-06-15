@@ -216,20 +216,18 @@ void TypecheckVisitor::visit_diedie(DiedieNode *node, Type* msg) {
   }
 }
 
-void TypecheckVisitor::visit_let(LetNode *node, Type* v) {
+void TypecheckVisitor::visit_let(LetNode *node, Type*) {
   if (node->type_ == TypeType::ENUM &&
       !driver_.function_table.get_enum(node->type_.enum_name)) {
     driver_.error(node->location,
                   "unknown type "+node->type_.enum_name+"");
   }
 
-  DEBUG("LET "<<node->identifier << "\tT1 "<<node->type_.to_str()<< " T2 "<<v->to_str() << " addr "<<&node->type_);
   if (!node->type_.unify(&node->expr->type_)) {
     driver_.error(node->location, "type of let conflicts with type of expression");
   }
 
 
-  DEBUG("LET UNIFIED "<<node->type_.to_str());
   DEBUG(node->type_.unify_links_to_str());
 
   auto current_rule_binding_types = rule_binding_types.back();
@@ -243,7 +241,6 @@ void TypecheckVisitor::visit_let(LetNode *node, Type* v) {
 }
 
 void TypecheckVisitor::visit_let_post(LetNode *node) {
-  DEBUG("type of let "<<&node->type_ << " "<<node->type_.to_str());
   if (!node->type_.is_complete()) {
     driver_.error(node->location, "type inference for `"+node->identifier+"` failed");
   }
@@ -409,7 +406,7 @@ Type* TypecheckVisitor::visit_expression(Expression *expr, Type*, Type*) {
       }
       expr->type_.unify(Type(TypeType::BOOLEAN));
       break;
-    default: assert(0);
+    default: FAILURE();
   }
 
   return &expr->type_;
@@ -425,7 +422,7 @@ Type* TypecheckVisitor::visit_expression_single(Expression *expr, Type*) {
       expr->type_.unify(Type(TypeType::BOOLEAN));
       return &expr->type_;
       break;
-    default: assert(0);
+    default: FAILURE();
   }
 
 }

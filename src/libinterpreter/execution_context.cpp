@@ -271,8 +271,8 @@ Value& ExecutionContext::get_function_value(Function *sym, uint64_t args[], uint
   auto& function_map = functions[sym->id];
   try {
     Value &v = function_map.second.at(ArgumentsKey(&args[0], sym->arguments_.size(), false, sym_args));
-    int64_t state = (updateset.pseudostate % 2 == 0) ? state = updateset.pseudostate-1:
-                                                       state = updateset.pseudostate;
+    int64_t state = (updateset.pseudostate % 2 == 0) ? updateset.pseudostate-1:
+                                                       updateset.pseudostate;
     for (; state > 0; state -= 2) {
       uint64_t key = (uint64_t) &v << 16 | state;
       casm_update *update = (casm_update*) pp_hashmap_get(updateset.set, key);

@@ -160,7 +160,7 @@ const std::string Type::to_str() const {
     }
     case TypeType::ENUM: return enum_name;
     case TypeType::INVALID: return "Invalid";
-    default: assert(0);
+    default: FAILURE();
   }
 }
 
