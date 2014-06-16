@@ -9,16 +9,16 @@
 
 Value::Value() : type(TypeType::UNDEF) {}
 
-Value::Value(INT_T ival) : type(TypeType::INT) {
-  value.ival = ival;
+Value::Value(INT_T integer) : type(TypeType::INT) {
+  value.integer = integer;
 }
 
-Value::Value(FLOAT_T fval) : type(TypeType::FLOAT) {
-  value.fval = fval;
+Value::Value(FLOAT_T float_) : type(TypeType::FLOAT) {
+  value.float_ = float_;
 }
 
-Value::Value(bool bval) : type(TypeType::BOOLEAN) {
-  value.bval = bval;
+Value::Value(bool boolean) : type(TypeType::BOOLEAN) {
+  value.boolean = boolean;
 }
 
 Value::Value(RuleNode *rule) : type(TypeType::RULEREF) {
@@ -71,11 +71,11 @@ Value::Value(TypeType t, casm_update* u) {
       break;
     case TypeType::INT:
       type = TypeType::INT;
-      value.ival = (int64_t)u->value;
+      value.integer = (int64_t)u->value;
       break;
     case TypeType::FLOAT:
       type = TypeType::FLOAT;
-      value.fval = (int64_t)u->value;
+      value.float_ = (int64_t)u->value;
       break;
     case TypeType::ENUM:
       type = TypeType::ENUM; 
@@ -95,7 +95,7 @@ Value::Value(TypeType t, casm_update* u) {
       break;
     case TypeType::BOOLEAN: 
       type = TypeType::BOOLEAN;
-      value.bval = (bool) u->value;
+      value.boolean = (bool) u->value;
       break;
     default: throw RuntimeException("Unsupported type in apply");
   }
@@ -138,9 +138,9 @@ bool Value::operator==(const Value &other) const {
   }
 
   switch (type) {
-    case TypeType::INT: return value.ival == other.value.ival;
-    case TypeType::FLOAT: return value.fval == other.value.fval;
-    case TypeType::BOOLEAN: return value.bval == other.value.bval;
+    case TypeType::INT: return value.integer == other.value.integer;
+    case TypeType::FLOAT: return value.float_ == other.value.float_;
+    case TypeType::BOOLEAN: return value.boolean == other.value.boolean;
     case TypeType::ENUM: return value.enum_val == other.value.enum_val;
     case TypeType::RATIONAL: return *value.rat == *other.value.rat;
     case TypeType::STRING: return *value.string == *other.value.string;
@@ -158,9 +158,9 @@ bool Value::operator!=(const Value &other) const {
 uint64_t Value::to_uint64_t() const {
   switch (type) {
     case TypeType::INT:
-      return value.ival;
+      return value.integer;
     case TypeType::FLOAT:
-      return value.fval;
+      return value.float_;
     case TypeType::SELF:
     case TypeType::UNDEF: // are UNDEF and SELF the same here?
       return 0;
@@ -177,9 +177,9 @@ uint64_t Value::to_uint64_t() const {
     case TypeType::LIST:
       return (uint64_t) value.list;
     case TypeType::BOOLEAN:
-      return (uint64_t) value.bval;
+      return (uint64_t) value.boolean;
     case TypeType::SYMBOL:
-      return (uint64_t) value.ival;
+      return (uint64_t) value.integer;
     default: throw RuntimeException("Unsupported type in Value.to_uint64_t");
   }
 }
@@ -195,9 +195,9 @@ bool Value::is_symbolic() const {
 const std::string Value::to_str(bool symbolic) const {
   switch (type) {
     case TypeType::INT:
-      return std::move(std::to_string(value.ival));
+      return std::move(std::to_string(value.integer));
     case TypeType::FLOAT:
-      return std::move(std::to_string(value.fval));
+      return std::move(std::to_string(value.float_));
     case TypeType::SELF:
       return std::move("self");
     case TypeType::UNDEF: // are UNDEF and SELF the same here?
@@ -224,7 +224,7 @@ const std::string Value::to_str(bool symbolic) const {
         return value.list->to_str();
     }
     case TypeType::BOOLEAN:
-      if (value.bval) {
+      if (value.boolean) {
         return "true";
       } else {
         return "false";
@@ -707,7 +707,7 @@ namespace std {
   size_t hash<Value>::operator()(const Value &key) const {
     switch (key.type) {
       case TypeType::INT:
-        return key.value.ival;
+        return key.value.integer;
       case TypeType::SELF:
       case TypeType::UNDEF: // are UNDEF and SELF the same here?
         return 0;

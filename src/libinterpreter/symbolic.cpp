@@ -194,19 +194,19 @@ namespace symbolic {
       case ExpressionOperation::LESSEREQ:
         if (known.op == ExpressionOperation::EQ) {
           Value res = operators::lessereq(*known.rhs, *check.rhs);
-          if (res.value.bval) {
+          if (res.value.boolean) {
             return check_status_t::TRUE;
           } else {
             return check_status_t::FALSE;
           }
         } else if (known.op == ExpressionOperation::LESSEREQ) {
           Value res = operators::lessereq(*check.rhs, *known.rhs);
-          if (res.value.bval) {
+          if (res.value.boolean) {
             return check_status_t::TRUE;
           }
         } else if (known.op == ExpressionOperation::GREATER) {
           Value res = operators::lessereq(*check.rhs, *known.rhs);
-          if (res.value.bval) {
+          if (res.value.boolean) {
             return check_status_t::FALSE;
           }
         }
@@ -214,19 +214,19 @@ namespace symbolic {
       case ExpressionOperation::GREATER:
         if (known.op == ExpressionOperation::EQ) {
           Value res = operators::greater(*known.rhs, *check.rhs);
-          if (res.value.bval) {
+          if (res.value.boolean) {
             return check_status_t::TRUE;
           } else {
             return check_status_t::FALSE;
           }
         } else if (known.op == ExpressionOperation::LESSEREQ) {
           Value res = operators::lessereq(*known.rhs, *check.rhs);
-          if (res.value.bval) {
+          if (res.value.boolean) {
             return check_status_t::FALSE;
           }
         } else if (known.op == ExpressionOperation::GREATER) {
           Value res = operators::greater(*check.rhs, *known.rhs);
-          if (res.value.bval) {
+          if (res.value.boolean) {
             return check_status_t::TRUE;
           }
         }

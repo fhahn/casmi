@@ -42,7 +42,7 @@ ExecutionVisitor::ExecutionVisitor(ExecutionContext &ctxt, Driver& driver)
 }
 
 void ExecutionVisitor::visit_assert(UnaryNode* assert, const Value& val) {
-  if (val.value.bval != true) {
+  if (val.value.boolean != true) {
     driver_.error(assert->location,
                   "Assertion failed");
     throw RuntimeException("Assertion failed");
@@ -397,7 +397,7 @@ const Value ExecutionVisitor::visit_builtin_atom(BuiltinAtom *atom,
     for (auto pair : enum_->mapping) {
       // TODO check why the enum mapping contains an extra entry with the name
       // of the enum
-      if (pair.first != enum_->name && pair.second->id == expr_results[0].value.ival) {
+      if (pair.first != enum_->name && pair.second->id == expr_results[0].value.integer) {
         return std::move(Value(pair.second));
       }
     }
@@ -551,7 +551,7 @@ void AstWalker<ExecutionVisitor, Value>::walk_ifthenelse(IfThenElseNode* node) {
     visitor.driver_.error(node->condition_->location,
         "condition must be true or false but was undef");
     throw RuntimeException("Condition is undef");
-  } else if (cond.value.bval) {
+  } else if (cond.value.boolean) {
     walk_statement(node->then_);
   } else if (node->else_) {
     walk_statement(node->else_);
@@ -702,7 +702,7 @@ void AstWalker<ExecutionVisitor, Value>::walk_forall(ForallNode *node) {
       break;
     }
     case TypeType::INT: {
-      INT_T end =  in_list.value.ival;
+      INT_T end =  in_list.value.integer;
 
       if (end > 0) {
         for (INT_T i = 0; i < end; i++) {

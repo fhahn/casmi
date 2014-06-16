@@ -30,9 +30,9 @@ class Value {
   public:
     TypeType type;
     union {
-      INT_T ival;
-      FLOAT_T fval;
-      bool bval;
+      INT_T integer;
+      FLOAT_T float_;
+      bool boolean;
       RuleNode *rule;
       std::string *string;
       List *list;
@@ -42,9 +42,9 @@ class Value {
     } value;
 
     Value();
-    Value(INT_T ival);
-    Value(FLOAT_T fval);
-    Value(bool bval);
+    Value(INT_T integer);
+    Value(FLOAT_T float_);
+    Value(bool boolean);
     Value(RuleNode *rule);
     Value(std::string *string);
     Value(const Type& t, List *list);

@@ -18,9 +18,9 @@
   HANDLE_SYMBOLIC_OR_UNDEF(lhs, rhs)                                         \
   switch (lhs.type) {                                                        \
     case TypeType::INT:                                                      \
-      return std::move(Value(lhs.value.ival op rhs.value.ival));             \
+      return std::move(Value(lhs.value.integer op rhs.value.integer));             \
     case TypeType::FLOAT:                                                    \
-      return std::move(Value(lhs.value.fval op rhs.value.fval));             \
+      return std::move(Value(lhs.value.float_ op rhs.value.float_));             \
     case TypeType::RATIONAL:                                                 \
       return std::move(Value(&(*lhs.value.rat op *rhs.value.rat)));          \
     default: FAILURE();                                                      \
@@ -32,9 +32,9 @@
                                                                              \
   switch (lhs.type) {                                                        \
     case TypeType::INT:                                                      \
-      return std::move(Value(lhs.value.ival op rhs.value.ival));             \
+      return std::move(Value(lhs.value.integer op rhs.value.integer));             \
     case TypeType::FLOAT:                                                    \
-      return std::move(Value(lhs.value.fval op rhs.value.fval));             \
+      return std::move(Value(lhs.value.float_ op rhs.value.float_));             \
     default: FAILURE();                                                      \
   }                                                                          \
 }
@@ -158,7 +158,7 @@ const Value operators::div(const Value& lhs, const Value& rhs) {
 const Value operators::mod(const Value& lhs, const Value& rhs) {
   HANDLE_SYMBOLIC_OR_UNDEF(lhs, rhs)
   if (lhs.type == TypeType::INT) {
-    return std::move(Value(lhs.value.ival % rhs.value.ival));
+    return std::move(Value(lhs.value.integer % rhs.value.integer));
   }
   return std::move(Value());
 }
@@ -171,8 +171,8 @@ const Value operators::rat_div(const Value& lhs, const Value& rhs) {
       rational_t *result = (rational_t*) pp_mem_alloc(
         &(ExecutionContext::value_stack), sizeof(rational_t)
       );
-      result->numerator = lhs.value.ival;
-      result->denominator = rhs.value.ival;
+      result->numerator = lhs.value.integer;
+      result->denominator = rhs.value.integer;
       return std::move(Value(result));
     }
     default: FAILURE();
@@ -187,28 +187,28 @@ const Value operators::and_(const Value& lhs, const Value& rhs) {
   if (lhs.is_undef() || rhs.is_undef()) {
     return Value();
   }
-  return std::move(Value(lhs.value.bval && rhs.value.bval));  
+  return std::move(Value(lhs.value.boolean && rhs.value.boolean));  
 }
 
 const Value operators::or_(const Value& lhs, const Value& rhs) {
   if (lhs.is_undef() || rhs.is_undef()) {
     return Value();
   }
-  return std::move(Value(lhs.value.bval || rhs.value.bval));  
+  return std::move(Value(lhs.value.boolean || rhs.value.boolean));  
 }
 
 const Value operators::xor_(const Value& lhs, const Value& rhs) {
   if (lhs.is_undef() || rhs.is_undef()) {
     return Value();
   }
-  return std::move(Value((bool)(lhs.value.bval ^ rhs.value.bval)));  
+  return std::move(Value((bool)(lhs.value.boolean ^ rhs.value.boolean)));  
 }
 
 const Value operators::not_(const Value& lhs) {
   if (lhs.is_undef()) {
     return Value();
   }
-  return std::move(Value(!lhs.value.bval));  
+  return std::move(Value(!lhs.value.boolean));  
 }
 
 const Value operators::neq(const Value& lhs, const Value& rhs) {

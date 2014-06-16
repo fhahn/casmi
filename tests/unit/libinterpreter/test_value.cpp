@@ -19,13 +19,13 @@ TEST_F(ListIteratorTest, test_iterator_bottom_list) {
   lst.values = { Value((INT_T)1), Value((INT_T)2), Value((INT_T)3) };
 
   auto iter = lst.begin();
-  EXPECT_EQ(3, (*iter).value.ival);
+  EXPECT_EQ(3, (*iter).value.integer);
 
   iter++;
-  EXPECT_EQ(2, (*iter).value.ival);
+  EXPECT_EQ(2, (*iter).value.integer);
 
   iter++;
-  EXPECT_EQ(1, (*iter).value.ival);
+  EXPECT_EQ(1, (*iter).value.integer);
 
   iter++;
   EXPECT_EQ(lst.end(), iter);
@@ -48,19 +48,19 @@ TEST_F(ListIteratorTest, test_iterator_head_and_tail_list) {
   HeadList head(&list, Value((INT_T)4));
 
   auto iter = head.begin();
-  EXPECT_EQ(4, (*iter).value.ival);
+  EXPECT_EQ(4, (*iter).value.integer);
 
   iter++;
-  EXPECT_EQ(3, (*iter).value.ival);
+  EXPECT_EQ(3, (*iter).value.integer);
 
   iter++;
-  EXPECT_EQ(2, (*iter).value.ival);
+  EXPECT_EQ(2, (*iter).value.integer);
 
   iter++;
-  EXPECT_EQ(1, (*iter).value.ival);
+  EXPECT_EQ(1, (*iter).value.integer);
 
   iter++;
-  EXPECT_EQ(5, (*iter).value.ival);
+  EXPECT_EQ(5, (*iter).value.integer);
 
   iter++;
   EXPECT_EQ(list.end(), iter);

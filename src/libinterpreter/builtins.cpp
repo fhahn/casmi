@@ -60,10 +60,10 @@ const Value builtins::dispatch(BuiltinAtom::Id atom_id,  ExecutionContext& ctxt,
 const Value builtins::pow(const Value& base, const Value& power) {
   switch (base.type) {
     case TypeType::INT:
-      return std::move(Value((INT_T)std::pow(base.value.ival, power.value.ival)));
+      return std::move(Value((INT_T)std::pow(base.value.integer, power.value.integer)));
 
     case TypeType::FLOAT:
-      return std::move(Value((FLOAT_T)std::pow(base.value.fval, power.value.fval)));
+      return std::move(Value((FLOAT_T)std::pow(base.value.float_, power.value.float_)));
     default: FAILURE();
   }
 }
@@ -75,10 +75,10 @@ const Value builtins::hex(const Value& arg) {
   }
 
   std::stringstream ss;
-  if (arg.value.ival < 0) {
-    ss << "-" << std::hex << (-1) * arg.value.ival;
+  if (arg.value.integer < 0) {
+    ss << "-" << std::hex << (-1) * arg.value.integer;
   } else {
-    ss << std::hex << arg.value.ival;
+    ss << std::hex << arg.value.integer;
   }
   return std::move(Value(new std::string(ss.str())));
 }
@@ -92,11 +92,11 @@ const Value builtins::nth(const Value& list_arg, const Value& index ) {
   List::const_iterator iter = list->begin();
   INT_T i = 1;
 
-  while (iter != list->end() && i < index.value.ival) {
+  while (iter != list->end() && i < index.value.integer) {
     i++;
     iter++;
   }
-  if (i == index.value.ival && iter != list->end()) {
+  if (i == index.value.integer && iter != list->end()) {
     return std::move(Value(*iter));
   } else {
     return std::move(Value());
@@ -220,7 +220,7 @@ const Value builtins::boolean2int(const Value& arg) {
     return std::move(arg);
   }
 
-  return std::move(Value((INT_T)arg.value.bval));
+  return std::move(Value((INT_T)arg.value.boolean));
 }
 
 const Value builtins::int2boolean(const Value& arg) {
@@ -228,7 +228,7 @@ const Value builtins::int2boolean(const Value& arg) {
     return std::move(arg);
   }
 
-  return std::move(Value((bool)arg.value.ival));
+  return std::move(Value((bool)arg.value.integer));
 }
 
 const Value builtins::enum2int(const Value& arg) {
@@ -246,9 +246,9 @@ const Value builtins::asint(const Value& arg) {
 
   switch (arg.type) {
     case TypeType::INT:
-      return std::move(Value(arg.value.ival));
+      return std::move(Value(arg.value.integer));
     case TypeType::FLOAT:
-      return std::move(Value((INT_T)arg.value.fval));
+      return std::move(Value((INT_T)arg.value.float_));
     case TypeType::RATIONAL:
       return std::move(Value((INT_T)(arg.value.rat->numerator / arg.value.rat->denominator)));
     default: FAILURE();
@@ -262,9 +262,9 @@ const Value builtins::asfloat(const Value& arg) {
 
   switch (arg.type) {
     case TypeType::INT:
-      return std::move(Value((FLOAT_T) arg.value.ival));
+      return std::move(Value((FLOAT_T) arg.value.integer));
     case TypeType::FLOAT:
-      return std::move(Value(arg.value.fval));
+      return std::move(Value(arg.value.float_));
     case TypeType::RATIONAL:
       return std::move(Value(((FLOAT_T)arg.value.rat->numerator) / arg.value.rat->denominator));
     default: FAILURE();
@@ -329,11 +329,11 @@ const Value builtins::asrational(const Value& arg) {
   );
   switch (arg.type) {
     case TypeType::INT:
-      result->numerator = arg.value.ival;
+      result->numerator = arg.value.integer;
       result->denominator = 1;
       return std::move(Value(result));
     case TypeType::FLOAT:
-      get_numerator_denominator(arg.value.fval, &result->numerator, &result->denominator);
+      get_numerator_denominator(arg.value.float_, &result->numerator, &result->denominator);
       return std::move(Value(result));
     case TypeType::RATIONAL:
       return std::move(Value(arg.value.rat));
