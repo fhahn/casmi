@@ -77,7 +77,7 @@ namespace symbolic {
     std::stringstream ss;
     dump_type(ss, v);
     ss << "fof(id%u,hypothesis,"
-       << location_to_string(func, args, sym_args, v, 1)
+       << location_to_string(func, args, sym_args, v, symbolic::get_timestamp()-1)
        << ").%%CREATE: " << func->name;
 
     if (func->arguments_.size() == 0) {
@@ -85,8 +85,27 @@ namespace symbolic {
     } else {
        ss << '(' << arguments_to_string(func, args, sym_args, true) << ')';
     }
+
     ss << std::endl;
     trace.push_back(ss.str());
+
+    if (symbolic::get_timestamp() > 2) {
+      for (uint32_t i=1; i < symbolic::get_timestamp()-1; i++) {
+        std::stringstream ss;
+        ss << "fof(id%u,hypothesis,"
+           << location_to_string(func, args, sym_args, v, i)
+           << ").%%CATCHUP: " << func->name;
+
+        if (func->arguments_.size() == 0) {
+           ss << arguments_to_string(func, args, sym_args, true);
+        } else {
+           ss << '(' << arguments_to_string(func, args, sym_args, true) << ')';
+        }
+
+        ss << std::endl;
+        trace.push_back(ss.str());
+      }
+    }
   }
 
   void dump_symbolic(std::vector<std::string>& trace, const Function *func,
