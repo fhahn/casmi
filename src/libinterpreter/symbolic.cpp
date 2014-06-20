@@ -49,7 +49,7 @@ namespace symbolic {
 
 
   std::string location_to_string(const Function *func, const uint64_t args[],
-                                 uint16_t sym_args, const Value& val, uint32_t time) {
+                                 uint16_t sym_args, const value_t& val, uint32_t time) {
     std::stringstream ss;
     if (func->is_static) {
       ss << "cs";
@@ -64,7 +64,7 @@ namespace symbolic {
   }
 
 
-  static void dump_type(std::stringstream& ss, const Value& v) {
+  static void dump_type(std::stringstream& ss, const value_t& v) {
     if (v.is_symbolic() && !v.value.sym->type_dumped) {
       ss << "tff(symbolNext, type, " << v.to_str() << ": $int)."
          << std::endl;
@@ -73,7 +73,7 @@ namespace symbolic {
   }
 
   void dump_create(std::vector<std::string>& trace, const Function *func,
-      const uint64_t args[], uint16_t sym_args, const Value& v) {
+      const uint64_t args[], uint16_t sym_args, const value_t& v) {
     std::stringstream ss;
     dump_type(ss, v);
     ss << "fof(id%u,hypothesis,"
@@ -109,7 +109,7 @@ namespace symbolic {
   }
 
   void dump_symbolic(std::vector<std::string>& trace, const Function *func,
-      const uint64_t args[], uint16_t sym_args, const Value& v) {
+      const uint64_t args[], uint16_t sym_args, const value_t& v) {
      std::stringstream ss;
     ss << "fof(id%u,hypothesis,"
        << location_to_string(func, args, sym_args, v, get_timestamp())
@@ -125,7 +125,7 @@ namespace symbolic {
   }
 
   void dump_update(std::vector<std::string>& trace, const Function *func,
-      const uint64_t args[], uint16_t sym_args, const Value& v) {
+      const uint64_t args[], uint16_t sym_args, const value_t& v) {
     std::stringstream ss;
     dump_type(ss, v);
     ss << "fof(id%u,hypothesis,"
@@ -159,7 +159,7 @@ namespace symbolic {
   }
 
   void dump_final(std::vector<std::string>& trace, const std::vector<std::pair<const Function*,
-      std::unordered_map<ArgumentsKey, Value> >>& functions) {
+      std::unordered_map<ArgumentsKey, value_t> >>& functions) {
     std::stringstream ss;
     uint32_t i = 0;
     for (auto& pair : functions) {
@@ -212,19 +212,19 @@ namespace symbolic {
         return check_status_t::NOT_FOUND;
       case ExpressionOperation::LESSEREQ:
         if (known.op == ExpressionOperation::EQ) {
-          Value res = operators::lessereq(*known.rhs, *check.rhs);
+          value_t res = operators::lessereq(*known.rhs, *check.rhs);
           if (res.value.boolean) {
             return check_status_t::TRUE;
           } else {
             return check_status_t::FALSE;
           }
         } else if (known.op == ExpressionOperation::LESSEREQ) {
-          Value res = operators::lessereq(*check.rhs, *known.rhs);
+          value_t res = operators::lessereq(*check.rhs, *known.rhs);
           if (res.value.boolean) {
             return check_status_t::TRUE;
           }
         } else if (known.op == ExpressionOperation::GREATER) {
-          Value res = operators::lessereq(*check.rhs, *known.rhs);
+          value_t res = operators::lessereq(*check.rhs, *known.rhs);
           if (res.value.boolean) {
             return check_status_t::FALSE;
           }
@@ -232,19 +232,19 @@ namespace symbolic {
         return check_status_t::NOT_FOUND;
       case ExpressionOperation::GREATER:
         if (known.op == ExpressionOperation::EQ) {
-          Value res = operators::greater(*known.rhs, *check.rhs);
+          value_t res = operators::greater(*known.rhs, *check.rhs);
           if (res.value.boolean) {
             return check_status_t::TRUE;
           } else {
             return check_status_t::FALSE;
           }
         } else if (known.op == ExpressionOperation::LESSEREQ) {
-          Value res = operators::lessereq(*known.rhs, *check.rhs);
+          value_t res = operators::lessereq(*known.rhs, *check.rhs);
           if (res.value.boolean) {
             return check_status_t::FALSE;
           }
         } else if (known.op == ExpressionOperation::GREATER) {
-          Value res = operators::greater(*check.rhs, *known.rhs);
+          value_t res = operators::greater(*check.rhs, *known.rhs);
           if (res.value.boolean) {
             return check_status_t::TRUE;
           }
@@ -315,7 +315,7 @@ namespace symbolic {
   }
 
   void dump_builtin(std::vector<std::string>& trace, const char *name,
-                    const std::vector<Value>& args, const Value& ret) {
+                    const std::vector<value_t>& args, const value_t& ret) {
     std::stringstream ss;
 
     for (const auto& a : args) {

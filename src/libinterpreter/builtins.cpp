@@ -4,8 +4,8 @@
 
 #include "libinterpreter/builtins.h"
 
-const Value builtins::dispatch(BuiltinAtom::Id atom_id,  ExecutionContext& ctxt,
-                               const std::vector<Value>& arguments) {
+const value_t builtins::dispatch(BuiltinAtom::Id atom_id,  ExecutionContext& ctxt,
+                               const std::vector<value_t>& arguments) {
   switch (atom_id) {
     case BuiltinAtom::Id::POW:
       return std::move(pow(arguments[0], arguments[1]));
@@ -57,21 +57,21 @@ const Value builtins::dispatch(BuiltinAtom::Id atom_id,  ExecutionContext& ctxt,
 }
 
 
-const Value builtins::pow(const Value& base, const Value& power) {
+const value_t builtins::pow(const value_t& base, const value_t& power) {
   switch (base.type) {
     case TypeType::INT:
-      return std::move(Value((INT_T)std::pow(base.value.integer, power.value.integer)));
+      return std::move(value_t((INT_T)std::pow(base.value.integer, power.value.integer)));
 
     case TypeType::FLOAT:
-      return std::move(Value((FLOAT_T)std::pow(base.value.float_, power.value.float_)));
+      return std::move(value_t((FLOAT_T)std::pow(base.value.float_, power.value.float_)));
     default: FAILURE();
   }
 }
 
-const Value builtins::hex(const Value& arg) {
+const value_t builtins::hex(const value_t& arg) {
   // TODO LEAK!
   if (arg.is_undef()) {
-    return std::move(Value(new std::string("undef")));
+    return std::move(value_t(new std::string("undef")));
   }
 
   std::stringstream ss;
@@ -80,12 +80,12 @@ const Value builtins::hex(const Value& arg) {
   } else {
     ss << std::hex << arg.value.integer;
   }
-  return std::move(Value(new std::string(ss.str())));
+  return std::move(value_t(new std::string(ss.str())));
 }
 
-const Value builtins::nth(const Value& list_arg, const Value& index ) {
+const value_t builtins::nth(const value_t& list_arg, const value_t& index ) {
   if (list_arg.is_undef() || index.is_undef()) {
-    return Value();
+    return value_t();
   }
 
   List *list = list_arg.value.list;
@@ -97,16 +97,16 @@ const Value builtins::nth(const Value& list_arg, const Value& index ) {
     iter++;
   }
   if (i == index.value.integer && iter != list->end()) {
-    return std::move(Value(*iter));
+    return std::move(value_t(*iter));
   } else {
-    return std::move(Value());
+    return std::move(value_t());
   }
 }
 
-const Value builtins::app(ExecutionContext& ctxt, const Value& list, const Value& val) {
+const value_t builtins::app(ExecutionContext& ctxt, const value_t& list, const value_t& val) {
   // TODO LEAK
   if (list.is_undef()) {
-    return std::move(Value());
+    return std::move(value_t());
   }
 
   List *current = list.value.list;
@@ -147,46 +147,46 @@ const Value builtins::app(ExecutionContext& ctxt, const Value& list, const Value
   } else {
     FAILURE();
   }
-  return std::move(Value(list.type, list.value.list));
+  return std::move(value_t(list.type, list.value.list));
 }
 
-const Value builtins::cons(ExecutionContext& ctxt, const Value& val, const Value& list) {
+const value_t builtins::cons(ExecutionContext& ctxt, const value_t& val, const value_t& list) {
   // TODO LEAK
   if (list.is_undef()) {
-    return std::move(Value());
+    return std::move(value_t());
   }
 
   HeadList *consed_list = new HeadList(list.value.list, val);
   ctxt.temp_lists.push_back(consed_list);
-  return Value(list.type, consed_list);
+  return value_t(list.type, consed_list);
 }
 
-const Value builtins::tail(ExecutionContext& ctxt, const Value& arg_list) {
+const value_t builtins::tail(ExecutionContext& ctxt, const value_t& arg_list) {
   if (arg_list.is_undef()) {
-    return std::move(Value());
+    return std::move(value_t());
   }
 
   List *list = arg_list.value.list;
 
   if (list->is_head()) {
-    return std::move(Value(arg_list.type, reinterpret_cast<HeadList*>(list)->right));
+    return std::move(value_t(arg_list.type, reinterpret_cast<HeadList*>(list)->right));
   } else if (list->is_bottom()) {
     BottomList *btm = reinterpret_cast<BottomList*>(list);
     SkipList *skip = new SkipList(1, btm);
     ctxt.temp_lists.push_back(skip);
-    return std::move(Value(arg_list.type, skip));
+    return std::move(value_t(arg_list.type, skip));
   } else {
     SkipList *old_skip = reinterpret_cast<SkipList*>(list);
     SkipList *skip = new SkipList(old_skip->skip+1, old_skip->bottom);
     ctxt.temp_lists.push_back(skip);
-    return std::move(Value(arg_list.type, skip));
+    return std::move(value_t(arg_list.type, skip));
   }
 }
 
-const Value builtins::len(const Value& list_arg) {
+const value_t builtins::len(const value_t& list_arg) {
   // TODO len is really slow right now, it itertes over complete list
   if (list_arg.is_undef()) {
-    return std::move(Value());
+    return std::move(value_t());
   }
 
   List *list = list_arg.value.list;
@@ -198,75 +198,75 @@ const Value builtins::len(const Value& list_arg) {
     count++;
     iter++;
   }
-  return std::move(Value((INT_T) count));
+  return std::move(value_t((INT_T) count));
 }
 
-const Value builtins::peek(const Value& arg_list) {
+const value_t builtins::peek(const value_t& arg_list) {
   if (arg_list.is_undef()) {
-    return std::move(Value());
+    return std::move(value_t());
   }
 
   List *list = arg_list.value.list;
 
   if (list->begin() != list->end()) {
-    return std::move(Value(*(list->begin())));
+    return std::move(value_t(*(list->begin())));
   } else {
-    return std::move(Value());
+    return std::move(value_t());
   }
 }
 
-const Value builtins::boolean2int(const Value& arg) {
+const value_t builtins::boolean2int(const value_t& arg) {
   if (arg.is_undef()) {
     return std::move(arg);
   }
 
-  return std::move(Value((INT_T)arg.value.boolean));
+  return std::move(value_t((INT_T)arg.value.boolean));
 }
 
-const Value builtins::int2boolean(const Value& arg) {
+const value_t builtins::int2boolean(const value_t& arg) {
   if (arg.is_undef()) {
     return std::move(arg);
   }
 
-  return std::move(Value((bool)arg.value.integer));
+  return std::move(value_t((bool)arg.value.integer));
 }
 
-const Value builtins::enum2int(const Value& arg) {
+const value_t builtins::enum2int(const value_t& arg) {
   if (arg.is_undef()) {
     return std::move(arg);
   }
 
-  return std::move(Value((INT_T)arg.value.enum_val->id));
+  return std::move(value_t((INT_T)arg.value.enum_val->id));
 }
 
-const Value builtins::asint(const Value& arg) {
+const value_t builtins::asint(const value_t& arg) {
   if (arg.is_undef()) {
     return std::move(arg);
   }
 
   switch (arg.type) {
     case TypeType::INT:
-      return std::move(Value(arg.value.integer));
+      return std::move(value_t(arg.value.integer));
     case TypeType::FLOAT:
-      return std::move(Value((INT_T)arg.value.float_));
+      return std::move(value_t((INT_T)arg.value.float_));
     case TypeType::RATIONAL:
-      return std::move(Value((INT_T)(arg.value.rat->numerator / arg.value.rat->denominator)));
+      return std::move(value_t((INT_T)(arg.value.rat->numerator / arg.value.rat->denominator)));
     default: FAILURE();
   }
 }
 
-const Value builtins::asfloat(const Value& arg) {
+const value_t builtins::asfloat(const value_t& arg) {
   if (arg.is_undef()) {
     return std::move(arg);
   }
 
   switch (arg.type) {
     case TypeType::INT:
-      return std::move(Value((FLOAT_T) arg.value.integer));
+      return std::move(value_t((FLOAT_T) arg.value.integer));
     case TypeType::FLOAT:
-      return std::move(Value(arg.value.float_));
+      return std::move(value_t(arg.value.float_));
     case TypeType::RATIONAL:
-      return std::move(Value(((FLOAT_T)arg.value.rat->numerator) / arg.value.rat->denominator));
+      return std::move(value_t(((FLOAT_T)arg.value.rat->numerator) / arg.value.rat->denominator));
     default: FAILURE();
   }
 }
@@ -319,7 +319,7 @@ void get_numerator_denominator(double x, int64_t *num, int64_t *denom) {
   }
 }
 
-const Value builtins::asrational(const Value& arg) {
+const value_t builtins::asrational(const value_t& arg) {
   if (arg.is_undef()) {
     return std::move(arg);
   }
@@ -331,21 +331,21 @@ const Value builtins::asrational(const Value& arg) {
     case TypeType::INT:
       result->numerator = arg.value.integer;
       result->denominator = 1;
-      return std::move(Value(result));
+      return std::move(value_t(result));
     case TypeType::FLOAT:
       get_numerator_denominator(arg.value.float_, &result->numerator, &result->denominator);
-      return std::move(Value(result));
+      return std::move(value_t(result));
     case TypeType::RATIONAL:
-      return std::move(Value(arg.value.rat));
+      return std::move(value_t(arg.value.rat));
     default: FAILURE();
   }
 }
 
-const Value builtins::symbolic(const Value& arg) {
+const value_t builtins::symbolic(const value_t& arg) {
   if (arg.is_symbolic() && !arg.value.sym->list) {
-    return std::move(Value(true));
+    return std::move(value_t(true));
   } else {
-    return std::move(Value(false));
+    return std::move(value_t(false));
   }
 }
 
@@ -396,8 +396,8 @@ namespace shared {
   #pragma GCC diagnostic warning "-Wunused-parameter"
   REENABLE_VARIADIC_WARNINGS
 
-  const Value dispatch(BuiltinAtom::Id builtin_id, 
-                       const std::vector<Value>& arguments, ExecutionContext& ctxt) {
+  const value_t dispatch(BuiltinAtom::Id builtin_id, 
+                       const std::vector<value_t>& arguments, ExecutionContext& ctxt) {
     const char *sym_name;
     Int ret;
     Int arg0;
@@ -411,13 +411,13 @@ namespace shared {
     }
 
     if (ret.defined == TRUE) {
-      return std::move(Value((INT_T)ret.value));
+      return std::move(value_t((INT_T)ret.value));
     } else if (ctxt.symbolic && ret.sym) {
-      Value v(new symbol_t(::symbolic::next_symbol_id()));
+      value_t v(new symbol_t(::symbolic::next_symbol_id()));
       ::symbolic::dump_builtin(ctxt.trace, sym_name, arguments, v);
       return std::move(v);
     } else {
-      return std::move(Value());
+      return std::move(value_t());
     }
   }
 }

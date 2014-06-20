@@ -57,7 +57,7 @@ ExecutionContext::ExecutionContext(const SymbolTable& st, RuleNode *init,
     updateset.pseudostate = 0;
   }
 
-  functions = std::vector<std::pair<const Function*, std::unordered_map<ArgumentsKey, Value>>>(symbol_table.size());
+  functions = std::vector<std::pair<const Function*, std::unordered_map<ArgumentsKey, value_t>>>(symbol_table.size());
   Function *program_sym = symbol_table.get_function("program");
   // TODO location is wrong here
   program_sym->intitializers_ = new std::vector<std::pair<ExpressionBase*, ExpressionBase*>>();
@@ -91,7 +91,7 @@ void ExecutionContext::apply_updates() {
     }
   }
 
-  std::vector<Value*> to_fold;
+  std::vector<value_t*> to_fold;
   while( i != updateset.set->head ) {
     u = (casm_update*)i->value;
 
@@ -99,9 +99,9 @@ void ExecutionContext::apply_updates() {
 
     // TODO handle tuples
     if (function_map.first->return_type_->t == TypeType::LIST) {
-      Value& list = function_map.second[ArgumentsKey(u->args, u->num_args, false, u->sym_args)];
+      value_t& list = function_map.second[ArgumentsKey(u->args, u->num_args, false, u->sym_args)];
       if (u->symbolic){
-        Value v(function_map.first->return_type_->t, u);
+        value_t v(function_map.first->return_type_->t, u);
         function_map.second[ArgumentsKey(u->args, u->num_args, true, u->sym_args)] = v;
       } else if (u->defined == 0) {
         // set list to undef
@@ -120,7 +120,7 @@ void ExecutionContext::apply_updates() {
         to_fold.push_back(&list);
       }
     } else {
-      Value v(function_map.first->return_type_->t, u);
+      value_t v(function_map.first->return_type_->t, u);
       // we could erase keys that store an undef value in concrete mode,
       // but we need to know if a key was set to undef explicitly in symbolic
       // mode
@@ -164,7 +164,7 @@ void ExecutionContext::apply_updates() {
       }
     }
   }
-  for (Value* v : to_fold) {
+  for (value_t* v : to_fold) {
     BottomList *new_l = v->value.list->collect();
     if (new_l->check_allocated_and_set_to_false()) {
       temp_lists.push_back(new_l);
@@ -252,9 +252,9 @@ void ExecutionContext::merge_seq(Driver& driver) {
   }
 }
 
-static Value undef = Value();
+static value_t undef = value_t();
 
-static Value tmp;
+static value_t tmp;
 
 bool args_eq(uint64_t args1[], uint64_t args2[], size_t len) {
 
@@ -266,18 +266,18 @@ bool args_eq(uint64_t args1[], uint64_t args2[], size_t len) {
   return true;
 }
 
-Value& ExecutionContext::get_function_value(Function *sym, uint64_t args[], uint16_t sym_args) {
+value_t& ExecutionContext::get_function_value(Function *sym, uint64_t args[], uint16_t sym_args) {
   // TODO move should be used here
   auto& function_map = functions[sym->id];
   try {
-    Value &v = function_map.second.at(ArgumentsKey(&args[0], sym->arguments_.size(), false, sym_args));
+    value_t &v = function_map.second.at(ArgumentsKey(&args[0], sym->arguments_.size(), false, sym_args));
     int64_t state = (updateset.pseudostate % 2 == 0) ? updateset.pseudostate-1:
                                                        updateset.pseudostate;
     for (; state > 0; state -= 2) {
       uint64_t key = (uint64_t) &v << 16 | state;
       casm_update *update = (casm_update*) pp_hashmap_get(updateset.set, key);
       if (update) {
-        tmp = Value(sym->return_type_->t, update);
+        tmp = value_t(sym->return_type_->t, update);
         return tmp;
       }
     }
@@ -288,8 +288,8 @@ Value& ExecutionContext::get_function_value(Function *sym, uint64_t args[], uint
       // TODO cleanup symbol
       function_map.second.emplace(
           ArgumentsKey(&args[0], sym->arguments_.size(), true, sym_args),
-          Value(new symbol_t(symbolic::next_symbol_id())));
-      Value& v = function_map.second[ArgumentsKey(&args[0], sym->arguments_.size(), false, sym_args)];
+          value_t(new symbol_t(symbolic::next_symbol_id())));
+      value_t& v = function_map.second[ArgumentsKey(&args[0], sym->arguments_.size(), false, sym_args)];
       symbolic::dump_create(trace_creates, sym, &args[0], sym_args, v);
       return v;
     }

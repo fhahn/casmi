@@ -7,49 +7,49 @@
 #include "libinterpreter/value.h"
 #include "libinterpreter/execution_context.h"
 
-Value::Value() : type(TypeType::UNDEF) {}
+value_t::value_t() : type(TypeType::UNDEF) {}
 
-Value::Value(INT_T integer) : type(TypeType::INT) {
+value_t::value_t(INT_T integer) : type(TypeType::INT) {
   value.integer = integer;
 }
 
-Value::Value(FLOAT_T float_) : type(TypeType::FLOAT) {
+value_t::value_t(FLOAT_T float_) : type(TypeType::FLOAT) {
   value.float_ = float_;
 }
 
-Value::Value(bool boolean) : type(TypeType::BOOLEAN) {
+value_t::value_t(bool boolean) : type(TypeType::BOOLEAN) {
   value.boolean = boolean;
 }
 
-Value::Value(RuleNode *rule) : type(TypeType::RULEREF) {
+value_t::value_t(RuleNode *rule) : type(TypeType::RULEREF) {
   value.rule = rule;
 }
 
-Value::Value(std::string *string) : type(TypeType::STRING) {
+value_t::value_t(std::string *string) : type(TypeType::STRING) {
   value.string = string;
 }
 
-Value::Value(const Type &t, List *list) : type(t.t) {
+value_t::value_t(const Type &t, List *list) : type(t.t) {
   value.list = list;
 }
 
-Value::Value(const enum_value_t *enum_val) : type(TypeType::ENUM) {
+value_t::value_t(const enum_value_t *enum_val) : type(TypeType::ENUM) {
   value.enum_val = enum_val;
 }
 
-Value::Value(const rational_t *rat) : type(TypeType::RATIONAL) {
+value_t::value_t(const rational_t *rat) : type(TypeType::RATIONAL) {
   value.rat = rat;
 }
 
-Value::Value(symbol_t *sym) : type(TypeType::SYMBOL) {
+value_t::value_t(symbol_t *sym) : type(TypeType::SYMBOL) {
   value.sym = sym;
 }
 
-Value::Value(const Value& other) : type(other.type), value(other.value) {}
+value_t::value_t(const value_t& other) : type(other.type), value(other.value) {}
 
-Value::Value(Value&& other) noexcept : type(other.type), value(other.value) {}
+value_t::value_t(value_t&& other) noexcept : type(other.type), value(other.value) {}
 
-Value::Value(TypeType t, casm_update* u) {
+value_t::value_t(TypeType t, casm_update* u) {
   if (u->defined == 0) {
     type = TypeType::UNDEF;
     return;
@@ -102,13 +102,13 @@ Value::Value(TypeType t, casm_update* u) {
 }
 
 
-Value& Value::operator=(const Value& other) {
+value_t& value_t::operator=(const value_t& other) {
   value = other.value;
   type = other.type;
   return *this;
 }
 
-bool Value::operator==(const Value &other) const {
+bool value_t::operator==(const value_t &other) const {
   if (is_undef() || other.is_undef()) {
     return is_undef() && other.is_undef();
   }
@@ -151,11 +151,11 @@ bool Value::operator==(const Value &other) const {
   }
 }
 
-bool Value::operator!=(const Value &other) const {
+bool value_t::operator!=(const value_t &other) const {
   return !operator==(other);
 }
 
-uint64_t Value::to_uint64_t() const {
+uint64_t value_t::to_uint64_t() const {
   switch (type) {
     case TypeType::INT:
       return value.integer;
@@ -180,19 +180,19 @@ uint64_t Value::to_uint64_t() const {
       return (uint64_t) value.boolean;
     case TypeType::SYMBOL:
       return (uint64_t) value.integer;
-    default: throw RuntimeException("Unsupported type in Value.to_uint64_t");
+    default: throw RuntimeException("Unsupported type in value_t.to_uint64_t");
   }
 }
 
-bool Value::is_undef() const {
+bool value_t::is_undef() const {
   return type == TypeType::UNDEF;
 }
 
-bool Value::is_symbolic() const {
+bool value_t::is_symbolic() const {
   return type == TypeType::SYMBOL;
 }
 
-const std::string Value::to_str(bool symbolic) const {
+const std::string value_t::to_str(bool symbolic) const {
   switch (type) {
     case TypeType::INT:
       return std::move(std::to_string(value.integer));
@@ -231,7 +231,7 @@ const std::string Value::to_str(bool symbolic) const {
       }
     case TypeType::SYMBOL:
       return "sym"+std::to_string(value.sym->id);
-    default: throw RuntimeException("Unsupported type in Value.to_str() ");
+    default: throw RuntimeException("Unsupported type in value_t.to_str() ");
   }
 }
 
@@ -242,7 +242,7 @@ symbol_t::symbol_t(uint32_t id, symbolic_condition *cond) : id(id),
     condition(cond), type_dumped(false), update_dumped(false), list(nullptr) {}
 
 
-symbolic_condition::symbolic_condition(Value *lhs, Value *rhs,
+symbolic_condition::symbolic_condition(value_t *lhs, value_t *rhs,
                                        ExpressionOperation op) : lhs(lhs), rhs(rhs), op(op) {}
 
 std::string symbolic_condition::to_str() const {
@@ -440,7 +440,7 @@ List::const_iterator::self_type List::const_iterator::operator++(int) {
   return copy;
 }
 
-const Value& List::const_iterator::operator*() {
+const value_t& List::const_iterator::operator*() {
   if (head) {
     return head->current_head;
   } else if (bottom) {
@@ -604,11 +604,11 @@ BottomList* List::collect() {
   }
 }
 
-HeadList::HeadList(List *l, const Value& val) : List(ListType::HEAD), right(l), current_head(val) {}
+HeadList::HeadList(List *l, const value_t& val) : List(ListType::HEAD), right(l), current_head(val) {}
 
-TailList::TailList(TailList *l, const Value& val) : List(ListType::TAIL), right(l), current_tail(val) {}
+TailList::TailList(TailList *l, const value_t& val) : List(ListType::TAIL), right(l), current_tail(val) {}
 
-void TailList::collect(std::vector<Value>& collect_to) {
+void TailList::collect(std::vector<value_t>& collect_to) {
   collect_to.insert(collect_to.begin(), current_tail);
   if (right) {
     right->collect(collect_to);
@@ -619,7 +619,7 @@ BottomList::BottomList()
   : List(ListType::BOTTOM), usage_count(0), values(), tail(nullptr) {}
 
 
-BottomList::BottomList(const std::vector<Value>& vals) 
+BottomList::BottomList(const std::vector<value_t>& vals) 
   : List(ListType::BOTTOM), usage_count(0), values(std::move(vals)), tail(nullptr) {}
 
 BottomList::~BottomList() {
@@ -704,7 +704,7 @@ bool eq_uint64_value(const Type *type, uint64_t lhs, uint64_t rhs) {
 
 namespace std {
 
-  size_t hash<Value>::operator()(const Value &key) const {
+  size_t hash<value_t>::operator()(const value_t &key) const {
     switch (key.type) {
       case TypeType::INT:
         return key.value.integer;
@@ -728,26 +728,26 @@ namespace std {
         return (size_t) key.value.enum_val->id;
       case TypeType::RATIONAL:
         return (size_t) key.value.rat->numerator + key.value.rat->denominator;
-      default: throw RuntimeException("Unsupported type in std::hash<Value>()");
+      default: throw RuntimeException("Unsupported type in std::hash<value_t>()");
     }
   }
 
 
-  std::hash<Value> hash<std::vector<Value>>::hasher;
-  size_t hash<std::vector<Value>>::operator()(const std::vector<Value> &key) const {
+  std::hash<value_t> hash<std::vector<value_t>>::hasher;
+  size_t hash<std::vector<value_t>>::operator()(const std::vector<value_t> &key) const {
     size_t h = 0;
-    for (const Value& v : key) {
+    for (const value_t& v : key) {
       h += hasher(v);
     }
     return h;
   }
 
-  std::hash<Value> hash<HeadList>::hasher;
+  std::hash<value_t> hash<HeadList>::hasher;
   size_t hash<HeadList>::operator()(const HeadList &key) const {
     return hasher(key.current_head);
   }
 
-  std::hash<std::vector<Value>> hash<BottomList>::list_hasher;
+  std::hash<std::vector<value_t>> hash<BottomList>::list_hasher;
   size_t hash<BottomList>::operator()(const BottomList &key) const {
     return list_hasher(key.values);
   }

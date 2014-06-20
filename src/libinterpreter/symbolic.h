@@ -15,13 +15,13 @@ namespace symbolic {
   uint32_t get_timestamp();
 
   void dump_create(std::vector<std::string>& trace, const Function *func,
-      const uint64_t args[], uint16_t sym_args, const Value& v);
+      const uint64_t args[], uint16_t sym_args, const value_t& v);
 
   void dump_symbolic(std::vector<std::string>& trace, const Function *func,
-      const uint64_t args[], uint16_t sym_args, const Value& v);
+      const uint64_t args[], uint16_t sym_args, const value_t& v);
 
   void dump_update(std::vector<std::string>& trace, const Function *func,
-      const uint64_t args[], uint16_t sym_args, const Value& v);
+      const uint64_t args[], uint16_t sym_args, const value_t& v);
 
   void dump_if(std::vector<std::string>& trace, const std::string &filename,
       size_t lineno, const symbolic_condition *cond);
@@ -31,12 +31,12 @@ namespace symbolic {
 
   void dump_final(std::vector<std::string>& trace,
       const std::vector<std::pair<const Function*, 
-      std::unordered_map<ArgumentsKey, Value> >>& functions);
+      std::unordered_map<ArgumentsKey, value_t> >>& functions);
 
   uint32_t dump_listconst(std::vector<std::string>& trace, List *l);
 
   void dump_builtin(std::vector<std::string>& trace, const char *name,
-      const std::vector<Value>& arguments, const Value& ret);
+      const std::vector<value_t>& arguments, const value_t& ret);
 
   enum class check_status_t {
     NOT_FOUND,

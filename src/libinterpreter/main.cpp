@@ -22,7 +22,7 @@
 // defined in src/libsyntax/driver.cpp
 extern Driver *global_driver;
 
-enum OptionValues {  
+enum Optionvalue_ts {  
   NO_OPTIONS = 0,
   HELP = 1,
   DUMP_AST = (1 << 1),
@@ -63,30 +63,30 @@ struct arguments parse_cmd_args(int argc, char *argv[]) {
     switch(opt) {
       case 0:
         switch (option_index) {
-          case 1: flags |= OptionValues::DUMP_AST; break;
-          case 2: flags |= OptionValues::PARSE_ONLY; break;
-          default: flags |= OptionValues::ERROR;
+          case 1: flags |= Optionvalue_ts::DUMP_AST; break;
+          case 2: flags |= Optionvalue_ts::PARSE_ONLY; break;
+          default: flags |= Optionvalue_ts::ERROR;
         }
         break;
       case 'h':
-        flags |= OptionValues::HELP;
+        flags |= Optionvalue_ts::HELP;
         break;
       case 'd':
-        flags |= OptionValues::DEBUGINFO_FILTER;
+        flags |= Optionvalue_ts::DEBUGINFO_FILTER;
         opts.debuginfo_filter = optarg;
         break;
       case 's':
-        flags |= OptionValues::SYMBOLIC;
+        flags |= Optionvalue_ts::SYMBOLIC;
         break;
       case 'x':
-        flags |= OptionValues::FILEOUT;
+        flags |= Optionvalue_ts::FILEOUT;
         break;
       case '?':
-        flags |= OptionValues::ERROR;
+        flags |= Optionvalue_ts::ERROR;
         /* getopt_long already printed an error message. */
         break;
       default:
-        flags |= OptionValues::ERROR;
+        flags |= Optionvalue_ts::ERROR;
         break;
     }
   }
@@ -113,12 +113,12 @@ int main (int argc, char *argv[]) {
   int res = 0;
   struct arguments opts = parse_cmd_args(argc, argv);
 
-  if ((opts.flags & OptionValues::ERROR) != 0) {
+  if ((opts.flags & Optionvalue_ts::ERROR) != 0) {
     std::cerr << "There has been an error" << std::endl;
     return EXIT_FAILURE;
   }
 
-  if (opts.flags == OptionValues::HELP) {
+  if (opts.flags == Optionvalue_ts::HELP) {
     print_help();
     return EXIT_SUCCESS;
   }
@@ -131,14 +131,14 @@ int main (int argc, char *argv[]) {
   Driver driver;
   global_driver = &driver;
 
-  if ((opts.flags & OptionValues::PARSE_ONLY) != 0) {
+  if ((opts.flags & Optionvalue_ts::PARSE_ONLY) != 0) {
       if (driver.parse(opts.filename) == nullptr) {
         std::cerr << "Error parsing file" << std::endl;
         res = EXIT_FAILURE;
       } else {
         res = EXIT_SUCCESS;
       }
-  } else if ((opts.flags & OptionValues::DUMP_AST) != 0) {
+  } else if ((opts.flags & Optionvalue_ts::DUMP_AST) != 0) {
       if (driver.parse(opts.filename) == nullptr) {
         std::cerr << "Error parsing file" << std::endl;
         return EXIT_FAILURE;
@@ -167,10 +167,10 @@ int main (int argc, char *argv[]) {
         res = EXIT_FAILURE;
       } else {
         ExecutionContext ctx(driver.function_table, driver.get_init_rule(),
-            (opts.flags & OptionValues::SYMBOLIC) != 0,
-             (opts.flags & OptionValues::FILEOUT) != 0);
+            (opts.flags & Optionvalue_ts::SYMBOLIC) != 0,
+             (opts.flags & Optionvalue_ts::FILEOUT) != 0);
 
-        if ((opts.flags & OptionValues::DEBUGINFO_FILTER) != 0) {
+        if ((opts.flags & Optionvalue_ts::DEBUGINFO_FILTER) != 0) {
           ctx.set_debuginfo_filter(opts.debuginfo_filter);
         }
 

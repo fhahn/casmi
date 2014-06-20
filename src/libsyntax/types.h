@@ -25,8 +25,8 @@ enum class TypeType {
   TUPLE_OR_LIST,
   ENUM,
   RATIONAL,
-  UNDEF,    // only possible during execution in Value.type
-  SYMBOL,   // only possible during execution in Value.type
+  UNDEF,    // only possible during execution in value_t.type
+  SYMBOL,   // only possible during execution in value_t.type
 };
 
 class Type;

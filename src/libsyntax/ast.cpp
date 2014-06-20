@@ -434,14 +434,14 @@ NumberRangeAtom::NumberRangeAtom(yy::location& loc, IntAtom *start, IntAtom *end
   INT_T i_start = start->val_;
   INT_T i_end = end->val_;
 
-  std::vector<Value> vals;
+  std::vector<value_t> vals;
   if (i_start <= i_end) {
     for (INT_T i=i_end; i >= i_start; i--) {
-      vals.push_back(Value(i));
+      vals.push_back(value_t(i));
     }
   } else {
     for (INT_T i=i_end; i <= i_start; i++) {
-      vals.push_back(Value(i));
+      vals.push_back(value_t(i));
     }
   }
   list = new BottomList(vals);

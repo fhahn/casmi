@@ -8,27 +8,27 @@
 #include "libinterpreter/symbolic.h"
 
 namespace builtins {
-  const Value dispatch(BuiltinAtom::Id atom_id, ExecutionContext& ctxt,
-                       const std::vector<Value>& arguments);
+  const value_t dispatch(BuiltinAtom::Id atom_id, ExecutionContext& ctxt,
+                       const std::vector<value_t>& arguments);
 
-  const Value pow(const Value& base, const Value& power);
-  const Value hex(const Value& arg);
-  const Value nth(const Value& list_arg, const Value& index );
-  const Value app(ExecutionContext& ctxt, const Value& list, const Value& val);
-  const Value cons(ExecutionContext& ctxt, const Value& val, const Value& list);
-  const Value tail(ExecutionContext& ctxt, const Value& arg_list);
-  const Value len(const Value& list_arg);
-  const Value peek(const Value& arg_list);
+  const value_t pow(const value_t& base, const value_t& power);
+  const value_t hex(const value_t& arg);
+  const value_t nth(const value_t& list_arg, const value_t& index );
+  const value_t app(ExecutionContext& ctxt, const value_t& list, const value_t& val);
+  const value_t cons(ExecutionContext& ctxt, const value_t& val, const value_t& list);
+  const value_t tail(ExecutionContext& ctxt, const value_t& arg_list);
+  const value_t len(const value_t& list_arg);
+  const value_t peek(const value_t& arg_list);
 
-  const Value boolean2int(const Value& arg);
-  const Value int2boolean(const Value& arg);
-  const Value enum2int(const Value& arg);
+  const value_t boolean2int(const value_t& arg);
+  const value_t int2boolean(const value_t& arg);
+  const value_t enum2int(const value_t& arg);
 
-  const Value asint(const Value& arg);
-  const Value asfloat(const Value& arg);
-  const Value asrational(const Value& arg);
+  const value_t asint(const value_t& arg);
+  const value_t asfloat(const value_t& arg);
+  const value_t asrational(const value_t& arg);
 
-  const Value symbolic(const Value& arg);
+  const value_t symbolic(const value_t& arg);
 
   namespace shared {
     struct Int {
@@ -37,8 +37,8 @@ namespace builtins {
       bool sym;
     };
 
-    const Value dispatch(BuiltinAtom::Id builtin_id, 
-                         const std::vector<Value>& arguments,
+    const value_t dispatch(BuiltinAtom::Id builtin_id, 
+                         const std::vector<value_t>& arguments,
                          ExecutionContext& ctxt);
 
   }

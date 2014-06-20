@@ -8,21 +8,21 @@
 
 #define HANDLE_SYMBOLIC_OR_UNDEF(lhs, rhs)                                   \
   if (lhs.is_undef() || rhs.is_undef()) {                                    \
-    return Value();                                                          \
+    return value_t();                                                          \
   } else if (lhs.is_symbolic() || rhs.is_symbolic()) {                       \
     /* TODO cleanup symbols */                                               \
-    return Value(new symbol_t(symbolic::next_symbol_id()));                  \
+    return value_t(new symbol_t(symbolic::next_symbol_id()));                  \
   }                                                                          \
 
 #define CREATE_NUMERICAL_OPERATION(op, lhs, rhs)  {                          \
   HANDLE_SYMBOLIC_OR_UNDEF(lhs, rhs)                                         \
   switch (lhs.type) {                                                        \
     case TypeType::INT:                                                      \
-      return std::move(Value(lhs.value.integer op rhs.value.integer));             \
+      return std::move(value_t(lhs.value.integer op rhs.value.integer));             \
     case TypeType::FLOAT:                                                    \
-      return std::move(Value(lhs.value.float_ op rhs.value.float_));             \
+      return std::move(value_t(lhs.value.float_ op rhs.value.float_));             \
     case TypeType::RATIONAL:                                                 \
-      return std::move(Value(&(*lhs.value.rat op *rhs.value.rat)));          \
+      return std::move(value_t(&(*lhs.value.rat op *rhs.value.rat)));          \
     default: FAILURE();                                                      \
   }                                                                          \
 }
@@ -32,29 +32,29 @@
                                                                              \
   switch (lhs.type) {                                                        \
     case TypeType::INT:                                                      \
-      return std::move(Value(lhs.value.integer op rhs.value.integer));             \
+      return std::move(value_t(lhs.value.integer op rhs.value.integer));             \
     case TypeType::FLOAT:                                                    \
-      return std::move(Value(lhs.value.float_ op rhs.value.float_));             \
+      return std::move(value_t(lhs.value.float_ op rhs.value.float_));             \
     default: FAILURE();                                                      \
   }                                                                          \
 }
 
 #define CHECK_SYMBOLIC_CMP_OPERATION(op, lhs, rhs) {                         \
  if (lhs.is_symbolic() && !rhs.is_undef()) {                                 \
-    return Value(new symbol_t(symbolic::next_symbol_id(),                    \
-                              new symbolic_condition(new Value(lhs),         \
-                                                     new Value(rhs),         \
+    return value_t(new symbol_t(symbolic::next_symbol_id(),                    \
+                              new symbolic_condition(new value_t(lhs),         \
+                                                     new value_t(rhs),         \
                                                       op)));                 \
  }                                                                           \
  if (rhs.is_symbolic() && !lhs.is_undef()) {                                 \
-    return Value(new symbol_t(symbolic::next_symbol_id(),                    \
-                              new symbolic_condition(new Value(lhs),         \
-                                                     new Value(rhs),         \
+    return value_t(new symbol_t(symbolic::next_symbol_id(),                    \
+                              new symbolic_condition(new value_t(lhs),         \
+                                                     new value_t(rhs),         \
                                                       op)));                 \
   }                                                                          \
 }
 
-const Value operators::dispatch(ExpressionOperation op, const Value& lhs, const Value& rhs) {
+const value_t operators::dispatch(ExpressionOperation op, const value_t& lhs, const value_t& rhs) {
   switch (op) {
     case ExpressionOperation::ADD:
       return std::move(operators::add(lhs, rhs));
@@ -104,7 +104,7 @@ const Value operators::dispatch(ExpressionOperation op, const Value& lhs, const 
 
     case ExpressionOperation::LESSER:
       if (lhs.is_symbolic() && rhs.is_symbolic() && lhs == rhs) {
-        return Value(false);
+        return value_t(false);
       }
 
       CHECK_SYMBOLIC_CMP_OPERATION(op, lhs, rhs);
@@ -112,7 +112,7 @@ const Value operators::dispatch(ExpressionOperation op, const Value& lhs, const 
 
     case ExpressionOperation::GREATER:
       if (lhs.is_symbolic() && rhs.is_symbolic() && lhs == rhs) {
-        return Value(false);
+        return value_t(false);
       }
 
       CHECK_SYMBOLIC_CMP_OPERATION(op, lhs, rhs);
@@ -120,7 +120,7 @@ const Value operators::dispatch(ExpressionOperation op, const Value& lhs, const 
 
     case ExpressionOperation::LESSEREQ:
       if (lhs.is_symbolic() && rhs.is_symbolic() && lhs == rhs) {
-        return Value(true);
+        return value_t(true);
       }
 
       CHECK_SYMBOLIC_CMP_OPERATION(op, lhs, rhs);
@@ -128,7 +128,7 @@ const Value operators::dispatch(ExpressionOperation op, const Value& lhs, const 
 
     case ExpressionOperation::GREATEREQ:
       if (lhs.is_symbolic() && rhs.is_symbolic() && lhs == rhs) {
-        return Value(true);
+        return value_t(true);
       }
 
       CHECK_SYMBOLIC_CMP_OPERATION(op, lhs, rhs);
@@ -139,31 +139,31 @@ const Value operators::dispatch(ExpressionOperation op, const Value& lhs, const 
 
 }
 
-const Value operators::add(const Value& lhs, const Value& rhs) {
+const value_t operators::add(const value_t& lhs, const value_t& rhs) {
   CREATE_NUMERICAL_OPERATION(+, lhs, rhs);
 }
 
-const Value operators::sub(const Value& lhs, const Value& rhs) {
+const value_t operators::sub(const value_t& lhs, const value_t& rhs) {
   CREATE_NUMERICAL_OPERATION(-, lhs, rhs);
 }
 
-const Value operators::mul(const Value& lhs, const Value& rhs) {
+const value_t operators::mul(const value_t& lhs, const value_t& rhs) {
   CREATE_NUMERICAL_OPERATION(*, lhs, rhs);
 }
 
-const Value operators::div(const Value& lhs, const Value& rhs) {
+const value_t operators::div(const value_t& lhs, const value_t& rhs) {
   CREATE_NUMERICAL_OPERATION(/, lhs, rhs);
 }
 
-const Value operators::mod(const Value& lhs, const Value& rhs) {
+const value_t operators::mod(const value_t& lhs, const value_t& rhs) {
   HANDLE_SYMBOLIC_OR_UNDEF(lhs, rhs)
   if (lhs.type == TypeType::INT) {
-    return std::move(Value(lhs.value.integer % rhs.value.integer));
+    return std::move(value_t(lhs.value.integer % rhs.value.integer));
   }
-  return std::move(Value());
+  return std::move(value_t());
 }
 
-const Value operators::rat_div(const Value& lhs, const Value& rhs) {
+const value_t operators::rat_div(const value_t& lhs, const value_t& rhs) {
   HANDLE_SYMBOLIC_OR_UNDEF(lhs, rhs)
 
   switch (lhs.type) {
@@ -173,60 +173,60 @@ const Value operators::rat_div(const Value& lhs, const Value& rhs) {
       );
       result->numerator = lhs.value.integer;
       result->denominator = rhs.value.integer;
-      return std::move(Value(result));
+      return std::move(value_t(result));
     }
     default: FAILURE();
   }
 }
 
-const Value operators::eq(const Value& lhs, const Value& rhs) {
-  return std::move(Value(lhs == rhs));
+const value_t operators::eq(const value_t& lhs, const value_t& rhs) {
+  return std::move(value_t(lhs == rhs));
 }
 
-const Value operators::and_(const Value& lhs, const Value& rhs) {
+const value_t operators::and_(const value_t& lhs, const value_t& rhs) {
   if (lhs.is_undef() || rhs.is_undef()) {
-    return Value();
+    return value_t();
   }
-  return std::move(Value(lhs.value.boolean && rhs.value.boolean));  
+  return std::move(value_t(lhs.value.boolean && rhs.value.boolean));  
 }
 
-const Value operators::or_(const Value& lhs, const Value& rhs) {
+const value_t operators::or_(const value_t& lhs, const value_t& rhs) {
   if (lhs.is_undef() || rhs.is_undef()) {
-    return Value();
+    return value_t();
   }
-  return std::move(Value(lhs.value.boolean || rhs.value.boolean));  
+  return std::move(value_t(lhs.value.boolean || rhs.value.boolean));  
 }
 
-const Value operators::xor_(const Value& lhs, const Value& rhs) {
+const value_t operators::xor_(const value_t& lhs, const value_t& rhs) {
   if (lhs.is_undef() || rhs.is_undef()) {
-    return Value();
+    return value_t();
   }
-  return std::move(Value((bool)(lhs.value.boolean ^ rhs.value.boolean)));  
+  return std::move(value_t((bool)(lhs.value.boolean ^ rhs.value.boolean)));  
 }
 
-const Value operators::not_(const Value& lhs) {
+const value_t operators::not_(const value_t& lhs) {
   if (lhs.is_undef()) {
-    return Value();
+    return value_t();
   }
-  return std::move(Value(!lhs.value.boolean));  
+  return std::move(value_t(!lhs.value.boolean));  
 }
 
-const Value operators::neq(const Value& lhs, const Value& rhs) {
-  return std::move(Value(lhs != rhs));
+const value_t operators::neq(const value_t& lhs, const value_t& rhs) {
+  return std::move(value_t(lhs != rhs));
 }
 
-const Value operators::lesser(const Value& lhs, const Value& rhs) {
+const value_t operators::lesser(const value_t& lhs, const value_t& rhs) {
   CREATE_NUMERICAL_CMP_OPERATION(<, lhs, rhs);
 }
 
-const Value operators::greater(const Value& lhs, const Value& rhs) {
+const value_t operators::greater(const value_t& lhs, const value_t& rhs) {
   CREATE_NUMERICAL_CMP_OPERATION(>, lhs, rhs);
 }
 
-const Value operators::lessereq(const Value& lhs, const Value& rhs) {
+const value_t operators::lessereq(const value_t& lhs, const value_t& rhs) {
   CREATE_NUMERICAL_CMP_OPERATION(<=, lhs, rhs);
 }
 
-const Value operators::greatereq(const Value& lhs, const Value& rhs) {
+const value_t operators::greatereq(const value_t& lhs, const value_t& rhs) {
   CREATE_NUMERICAL_CMP_OPERATION(>=, lhs, rhs);
 }

@@ -26,7 +26,7 @@ struct symbol_t;
 struct rational_t;
 
 
-class Value {
+class value_t {
   public:
     TypeType type;
     union {
@@ -41,23 +41,23 @@ class Value {
       symbol_t *sym;
     } value;
 
-    Value();
-    Value(INT_T integer);
-    Value(FLOAT_T float_);
-    Value(bool boolean);
-    Value(RuleNode *rule);
-    Value(std::string *string);
-    Value(const Type& t, List *list);
-    Value(const enum_value_t *enum_val);
-    Value(const rational_t *val);
-    Value(symbol_t *sym);
-    Value(const Value& other);
-    Value(Value&& other) noexcept;
-    Value(TypeType type, casm_update* update);
+    value_t();
+    value_t(INT_T integer);
+    value_t(FLOAT_T float_);
+    value_t(bool boolean);
+    value_t(RuleNode *rule);
+    value_t(std::string *string);
+    value_t(const Type& t, List *list);
+    value_t(const enum_value_t *enum_val);
+    value_t(const rational_t *val);
+    value_t(symbol_t *sym);
+    value_t(const value_t& other);
+    value_t(value_t&& other) noexcept;
+    value_t(TypeType type, casm_update* update);
 
-    Value& operator=(const Value& other);
-    bool operator==(const Value &other) const;
-    bool operator!=(const Value &other) const;
+    value_t& operator=(const value_t& other);
+    bool operator==(const value_t &other) const;
+    bool operator!=(const value_t &other) const;
 
     uint64_t to_uint64_t() const;
 
@@ -82,11 +82,11 @@ struct symbol_t {
 };
 
 struct symbolic_condition {
-  Value *lhs;
-  Value *rhs;
+  value_t *lhs;
+  value_t *rhs;
   ExpressionOperation op;
 
-  symbolic_condition(Value *lhs, Value *rhs, ExpressionOperation op);
+  symbolic_condition(value_t *lhs, value_t *rhs, ExpressionOperation op);
   std::string to_str() const;
 };
 
@@ -120,8 +120,8 @@ class List {
     class const_iterator {
       public:
         typedef const_iterator self_type;
-        typedef Value value_type;
-        typedef Value& reference;
+        typedef value_t value_type;
+        typedef value_t& reference;
         typedef int difference_type;
         typedef std::forward_iterator_tag iterator_category;
 
@@ -130,7 +130,7 @@ class List {
         self_type operator++();
         self_type operator++(int);
         void next();
-        const Value& operator*();
+        const value_t& operator*();
         //const pointer operator->() { return ptr_; }
         bool operator==(const self_type& rhs) const;
         bool operator!=(const self_type& rhs) const;
@@ -173,19 +173,19 @@ class List {
 class HeadList : public List {
   public:
     List* right;
-    const Value current_head;
+    const value_t current_head;
 
-    HeadList(List* right, const Value& val);
+    HeadList(List* right, const value_t& val);
 };
 
 class TailList : public List {
   public:
     TailList* right;
-    const Value current_tail;
+    const value_t current_tail;
 
-    TailList(TailList* right, const Value& val);
+    TailList(TailList* right, const value_t& val);
 
-    void collect(std::vector<Value>& collect_to);
+    void collect(std::vector<value_t>& collect_to);
 };
 
 
@@ -197,12 +197,12 @@ class BottomList : public List {
     bool allocated_in_collect; 
 
   public:
-    std::vector<Value> values;
+    std::vector<value_t> values;
 
     TailList *tail;
 
     BottomList();
-    BottomList(const std::vector<Value>& vals);
+    BottomList(const std::vector<value_t>& vals);
 
     virtual ~BottomList();
 
@@ -225,24 +225,24 @@ namespace std {
 
   template <> struct hash<HeadList>;
 
-  template <> struct hash<Value> {
-    size_t operator()(const Value &key) const;
+  template <> struct hash<value_t> {
+    size_t operator()(const value_t &key) const;
   };
 
-  template <> struct hash<std::vector<Value>> {
-    static std::hash<Value> hasher;
+  template <> struct hash<std::vector<value_t>> {
+    static std::hash<value_t> hasher;
 
-    size_t operator()(const std::vector<Value> &key) const;
+    size_t operator()(const std::vector<value_t> &key) const;
   };
 
   template <> struct hash<HeadList> {
-    static std::hash<Value> hasher;
+    static std::hash<value_t> hasher;
 
     size_t operator()(const HeadList &key) const;
   };
 
   template <> struct hash<BottomList> {
-    static std::hash<std::vector<Value>> list_hasher;
+    static std::hash<std::vector<value_t>> list_hasher;
 
     size_t operator()(const BottomList &key) const;
   };

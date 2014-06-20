@@ -6,27 +6,27 @@
 #include "libinterpreter/value.h"
 
 namespace operators {
-  const Value dispatch(ExpressionOperation op, const Value& lhs, const Value& rhs);
+  const value_t dispatch(ExpressionOperation op, const value_t& lhs, const value_t& rhs);
 
-  const Value add(const Value& lhs, const Value& rhs);
-  const Value sub(const Value& lhs, const Value& rhs);
-  const Value mul(const Value& lhs, const Value& rhs);
-  const Value div(const Value& lhs, const Value& rhs);
-  const Value mod(const Value& lhs, const Value& rhs);
-  const Value rat_div(const Value& lhs, const Value& rhs);
+  const value_t add(const value_t& lhs, const value_t& rhs);
+  const value_t sub(const value_t& lhs, const value_t& rhs);
+  const value_t mul(const value_t& lhs, const value_t& rhs);
+  const value_t div(const value_t& lhs, const value_t& rhs);
+  const value_t mod(const value_t& lhs, const value_t& rhs);
+  const value_t rat_div(const value_t& lhs, const value_t& rhs);
 
-  const Value eq(const Value& lhs, const Value& rhs);
-  const Value neq(const Value& lhs, const Value& rhs);
+  const value_t eq(const value_t& lhs, const value_t& rhs);
+  const value_t neq(const value_t& lhs, const value_t& rhs);
 
-  const Value and_(const Value& lhs, const Value& rhs);
-  const Value or_(const Value& lhs, const Value& rhs);
-  const Value xor_(const Value& lhs, const Value& rhs);
-  const Value not_(const Value& lhs);
+  const value_t and_(const value_t& lhs, const value_t& rhs);
+  const value_t or_(const value_t& lhs, const value_t& rhs);
+  const value_t xor_(const value_t& lhs, const value_t& rhs);
+  const value_t not_(const value_t& lhs);
 
-  const Value lesser(const Value& lhs, const Value& rhs);
-  const Value greater(const Value& lhs, const Value& rhs);
-  const Value lessereq(const Value& lhs, const Value& rhs);
-  const Value greatereq(const Value& lhs, const Value& rhs);
+  const value_t lesser(const value_t& lhs, const value_t& rhs);
+  const value_t greater(const value_t& lhs, const value_t& rhs);
+  const value_t lessereq(const value_t& lhs, const value_t& rhs);
+  const value_t greatereq(const value_t& lhs, const value_t& rhs);
 };
 
 #endif

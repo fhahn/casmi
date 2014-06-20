@@ -66,7 +66,7 @@ class ExecutionContext {
     std::map<const std::string, bool> debuginfo_filters;
 
   public:
-    std::vector<std::pair<const Function*, std::unordered_map<ArgumentsKey, Value> >> functions;
+    std::vector<std::pair<const Function*, std::unordered_map<ArgumentsKey, value_t> >> functions;
     const SymbolTable symbol_table;
     casm_updateset updateset;
     pp_mem pp_stack;
@@ -88,7 +88,7 @@ class ExecutionContext {
     void merge_par();
     void merge_seq(Driver& driver);
 
-    Value& get_function_value(Function *sym, uint64_t args[], uint16_t sym_args);
+    value_t& get_function_value(Function *sym, uint64_t args[], uint16_t sym_args);
 
     bool set_debuginfo_filter(const std::string& filters);
     bool filter_enabled(const std::string& filter);

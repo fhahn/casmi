@@ -408,7 +408,7 @@ class CaseNode: public AstNode {
     ExpressionBase *expr;
 
     std::vector<std::pair<AtomNode*, AstNode*>> case_list;
-    std::unordered_map<Value, AstNode*> label_map;
+    std::unordered_map<value_t, AstNode*> label_map;
 
     bool map_fixed;
 
