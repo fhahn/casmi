@@ -1,0 +1,4 @@
+init main
+
+rule main = let x = [2] in push 1 into x
+//~^ can only push into functions

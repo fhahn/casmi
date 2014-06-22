@@ -31,8 +31,8 @@ void TypecheckVisitor::visit_function_def(FunctionDefNode *def,
     if (!p.second->unify(def->sym->return_type_)) {
       driver_.error(def->sym->intitializers_->at(i).second->location,
                     "type of initializer of function `" +def->sym->name+
-                    "` is `"+p.second->to_str()+"` but should be `"+
-                    def->sym->return_type_->to_str()+"´");
+                    "` is "+p.second->to_str()+" but should be "+
+                    def->sym->return_type_->to_str()+"");
     }
 
     // check arument types
@@ -65,7 +65,7 @@ void TypecheckVisitor::visit_function_def(FunctionDefNode *def,
       } else if (!def->sym->intitializers_->at(i).first) {
         driver_.error(def->sym->intitializers_->at(i).second->location,
                       "function `" +def->sym->name+
-                       "` needs multiple arguments but initializer does not provide one");
+                       "` needs multiple arguments but initializer does not provide any");
       }
    
     }
@@ -259,18 +259,18 @@ void TypecheckVisitor::visit_push(PushNode *node, Type *expr, Type *atom) {
         driver_.error(node->to->location, "cannot push into static function `"+
                                             node->to->symbol->name+"`");
     }
-  }
-
-  if (!expr->unify(atom->subtypes[0])) {
-    driver_.error(node->expr->location, 
-                  "cannot push "+expr->get_most_general_type()->to_str()+" into "+atom->to_str());
+    if (!expr->unify(atom->subtypes[0])) {
+      driver_.error(node->expr->location, 
+                    "cannot push "+expr->get_most_general_type()->to_str()
+                    +" into "+atom->to_str());
+    }
   }
 }
 
 void TypecheckVisitor::visit_pop(PopNode *node) {
   if (!node->from_type.unify(&node->from->type_)) {
     driver_.error(node->from->location,
-                  "from argument must be List(Unknown) but was "+node->from->type_.to_str());
+                  "`pop from` argument must be List(A) but was "+node->from->type_.to_str());
   }
 
   if (node->from->symbol_type != FunctionAtom::SymbolType::FUNCTION) {

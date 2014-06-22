@@ -1,0 +1,6 @@
+function f : -> Int initially { 2.0 }
+//~^ type of initializer of function `f` is Float but should be Int
+
+init main
+
+rule main = skip

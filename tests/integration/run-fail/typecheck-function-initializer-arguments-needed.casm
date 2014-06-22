@@ -1,0 +1,7 @@
+function f : Int * Int -> Int initially { 2 }
+//~^ function `f` needs multiple arguments but initializer does not provide any
+
+
+init main
+
+rule main = skip

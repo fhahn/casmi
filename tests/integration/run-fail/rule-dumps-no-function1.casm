@@ -1,0 +1,9 @@
+CASM dumps_
+
+init initR
+
+function f : -> Int
+
+rule initR dumps (x)-> trace = let x = 1 in skip
+//~^ names in dumplist must be function identifiers but `x` is not a function
+

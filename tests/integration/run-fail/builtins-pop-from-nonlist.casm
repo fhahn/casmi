@@ -1,0 +1,6 @@
+function f: -> Int
+
+init main
+
+rule main = pop x from f
+//~ `pop from` argument must be List(A) but was Int
