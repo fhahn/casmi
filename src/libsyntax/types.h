@@ -50,6 +50,9 @@ class Type {
 
     std::string enum_name;
 
+    INT_T subrange_start = 0;
+    INT_T subrange_end = -1;
+
     Type();
     Type(TypeType t);
     Type(const Type& other);

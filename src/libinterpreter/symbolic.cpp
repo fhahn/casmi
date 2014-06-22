@@ -182,7 +182,8 @@ namespace symbolic {
     trace.push_back(ss.str());
   }
 
-  check_status_t check_inclusion(const symbolic_condition& known, const symbolic_condition& check) {
+  check_status_t check_inclusion(const symbolic_condition& known,
+                                 const symbolic_condition& check) {
     switch (check.op) {
       case ExpressionOperation::EQ:
         if (known.op == ExpressionOperation::EQ) {
@@ -194,7 +195,7 @@ namespace symbolic {
         } else if (known.op == ExpressionOperation::NEQ) {
           if(*known.rhs == *check.rhs) {
             return check_status_t::FALSE;
-          } 
+          }
         }
         return check_status_t::NOT_FOUND;
       case ExpressionOperation::NEQ:

@@ -114,6 +114,7 @@
 %type <UnaryNode*> ASSERT_SYNTAX ASSURE_SYNTAX KW_SEQBLOCK_SYNTAX ITERATE_SYNTAX
 %type <AstListNode*> BODY_ELEMENTS STATEMENTS
 %type <AtomNode*> NUMBER VALUE NUMBER_RANGE
+%type <IntAtom*> INT_NUMBER 
 %type <std::pair<ExpressionBase*, ExpressionBase*>> INITIALIZER
 %type <std::vector<std::pair<ExpressionBase*, ExpressionBase*>>*> INITIALIZER_LIST INITIALIZERS
 %type <ExpressionBase*> EXPRESSION BRACKET_EXPRESSION ATOM
@@ -349,11 +350,18 @@ TYPE_IDENTIFIER_STARLIST: TYPE_SYNTAX "*" TYPE_IDENTIFIER_STARLIST {
                         ;
 
 TYPE_SYNTAX: IDENTIFIER { $$ = new Type($1); /* TODO check invalid types */}
-               | IDENTIFIER "(" TYPE_SYNTAX_LIST ")" {
-                $$ = new Type($1, $3);
+           | IDENTIFIER "(" TYPE_SYNTAX_LIST ")" {
+               $$ = new Type($1, $3);
+           }
+           | IDENTIFIER "(" INT_NUMBER DOTDOT INT_NUMBER ")" {
+               $$ = new Type($1);
+               $$->subrange_start = $3->val_;
+               $$->subrange_end = $5->val_;
+               if ($$->subrange_start >= $$->subrange_end) {
+                   driver.error(@$, "start of subrange must be smaller than the end");
                }
-               | IDENTIFIER "(" NUMBER DOTDOT NUMBER ")"
-               ;
+           }
+           ;
 
 TYPE_SYNTAX_LIST: TYPE_SYNTAX "," TYPE_SYNTAX_LIST {
                       $3.push_back($1);
@@ -397,9 +405,10 @@ VALUE: RULEREF { $$ = new RuleAtom(@$, std::move($1)); }
      | FALSE { $$ = new BooleanAtom(@$, false); }
      ;
 
-NUMBER: "+" INTCONST %prec UPLUS { $$ = new IntAtom(@$, $2); }
-      | "-" INTCONST %prec UMINUS { $$ = new IntAtom(@$, (-1) * $2); }
-      | INTCONST { $$ = new IntAtom(@$, $1); }
+INT_NUMBER: "+" INTCONST %prec UPLUS { $$ = new IntAtom(@$, $2); }
+          | "-" INTCONST %prec UMINUS { $$ = new IntAtom(@$, (-1) * $2); }
+          | INTCONST { $$ = new IntAtom(@$, $1); }
+NUMBER: INT_NUMBER { $$ = $1; }
       | "+" FLOATCONST %prec UPLUS { $$ = new FloatAtom(@$, $2); }
       | "-" FLOATCONST %prec UMINUS { $$ = new FloatAtom(@$, (-1) * $2); }
       | FLOATCONST { $$ = new FloatAtom(@$, $1); }

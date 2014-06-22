@@ -41,20 +41,27 @@ Symbol::Symbol(const std::string& name, SymbolType type) : name(std::move(name))
 uint64_t Function::counter = 0;
 
 Function::Function(const std::string name, std::vector<Type*>& args,
-              Type* return_type, std::vector<std::pair<ExpressionBase*, ExpressionBase*>> *init) :
-                Symbol(name, SymbolType::FUNCTION), arguments_(std::move(args)), intitializers_(init),
-                return_type_(return_type), id(counter), is_static(false), is_symbolic(false) {
-  counter += 1;
-}
+                  Type* return_type,
+                  std::vector<std::pair<ExpressionBase*, ExpressionBase*>> *init) :
+    Function(false, false, name, args, return_type, init) {}
 
 Function::Function(bool is_static, bool is_symbolic, const std::string name,
              std::vector<Type*>& args, Type* return_type,
              std::vector<std::pair<ExpressionBase*, ExpressionBase*>> *init) :
                 Symbol(name, SymbolType::FUNCTION), arguments_(std::move(args)), intitializers_(init),
                 return_type_(return_type), id(counter),
-                is_static(is_static), is_symbolic(is_symbolic) {
+                is_static(is_static), is_symbolic(is_symbolic),
+                subrange_arguments(), subrange_return(false) {
 
   counter += 1;
+  if (return_type->subrange_start < return_type->subrange_end) {
+    subrange_return = true;
+  }
+  for (Type* t : args) {
+    if (t->subrange_start < t->subrange_end) {
+      subrange_arguments.push_back(t);
+    }
+  }
 }
 
 Function::Function(const std::string name, std::vector<Type*>& args,

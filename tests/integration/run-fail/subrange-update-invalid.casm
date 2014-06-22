@@ -7,8 +7,8 @@ init initR
 
 rule initR = 
 seqblock
-	x := 5
-	x := 7
-	
-	program(self) := undef
+    x := 5
+    x := 7 //~ 7 does violate the subrange 0..5 of `x`
+
+    program(self) := undef
 endseqblock

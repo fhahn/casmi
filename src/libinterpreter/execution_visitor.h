@@ -13,7 +13,7 @@
 #include "libinterpreter/execution_context.h"
 #include "libinterpreter/value.h"
 
-class ExecutionVisitor : public BaseVisitor<const value_t> {
+class ExecutionVisitor : public BaseVisitor<value_t> {
   private:
     std::vector<value_t> main_bindings;
     casm_update *add_update(const value_t& val, size_t sym_id,
@@ -31,6 +31,8 @@ class ExecutionVisitor : public BaseVisitor<const value_t> {
     void visit_assert(UnaryNode* assert, const value_t& val);
     void visit_assure(UnaryNode* assure, const value_t& val);
     void visit_update(UpdateNode *update, const value_t& expr_v);
+    void visit_update_subrange(UpdateNode *update, const value_t& expr_v);
+
     void visit_update_dumps(UpdateNode *update, const value_t& expr_v);
     void visit_call_pre(CallNode *call);
     void visit_call_pre(CallNode *call, const value_t& expr);
@@ -97,6 +99,9 @@ void AstWalker<ExecutionVisitor, value_t>::walk_iterate(UnaryNode *node);
 
 template <>
 void AstWalker<ExecutionVisitor, value_t>::walk_update(UpdateNode *node);
+
+template <>
+void AstWalker<ExecutionVisitor, value_t>::walk_update_subrange(UpdateNode *node);
 
 template <>
 void AstWalker<ExecutionVisitor, value_t>::walk_update_dumps(UpdateNode *node);

@@ -131,6 +131,23 @@ void ExecutionVisitor::visit_update(UpdateNode *update, const value_t& expr_v) {
   }
 }
 
+void ExecutionVisitor::visit_update_subrange(UpdateNode *update, const value_t& expr_v) {
+  INT_T v = expr_v.value.integer;
+  if (v < update->func->symbol->return_type_->subrange_start
+      || v > update->func->symbol->return_type_->subrange_end) {
+    driver_.error(update->location,
+                  std::to_string(v)+" does violate the subrange "
+                  +std::to_string(update->func->symbol->return_type_->subrange_start)
+                  +".." +std::to_string(update->func->symbol->return_type_->subrange_end)
+                  +" of `"+update->func->name+"`");
+    throw RuntimeException("Subrange violated");
+   
+  }
+  visit_update(update, expr_v);
+}
+
+
+
 void ExecutionVisitor::visit_call_pre(CallNode *call) { UNUSED(call); }
 
 void ExecutionVisitor::visit_call_pre(CallNode *call, const value_t& expr) {
@@ -789,6 +806,24 @@ void AstWalker<ExecutionVisitor, value_t>::walk_update(UpdateNode *node) {
   }
 
   visitor.visit_update(node, expr_t);
+}
+
+template <>
+void AstWalker<ExecutionVisitor, value_t>::walk_update_subrange(UpdateNode *node) {
+  // this is used to dump %CREATE in trace if necessary
+  const value_t &expr_t = walk_expression_base(node->expr_);
+  if (visitor.context_.symbolic && node->func->symbol->is_symbolic) {
+    walk_expression_base(node->func);
+  }
+
+  visitor.value_list.clear();
+  if (node->func->arguments) {
+    for (ExpressionBase* e : *node->func->arguments) {
+      visitor.value_list.push_back(walk_expression_base(e));
+    }
+  }
+
+  visitor.visit_update_subrange(node, expr_t);
 }
 
 template <>

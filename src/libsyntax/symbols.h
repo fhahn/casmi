@@ -52,6 +52,9 @@ class Function : public Symbol {
     const bool is_static;
     const bool is_symbolic;
 
+    std::vector<Type*> subrange_arguments;
+    bool subrange_return;
+
     Function(const std::string name, std::vector<Type*>& args, Type* return_type,
            std::vector<std::pair<ExpressionBase*, ExpressionBase*>> *init);
     Function(bool is_static, bool is_symbolic, const std::string name,

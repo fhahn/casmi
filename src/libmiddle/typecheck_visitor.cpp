@@ -162,7 +162,9 @@ void TypecheckVisitor::visit_update(UpdateNode *update, Type*, Type*) {
   if (update->func->symbol && driver_.function_trace_map.count(update->func->symbol->id) > 0) {
     update->node_type_ = NodeType::UPDATE_DUMPS;
   }
-
+  if (update->func->symbol && update->func->symbol->subrange_return) {
+    update->node_type_ = NodeType::UPDATE_SUBRANGE;
+  }
 }
 
 void TypecheckVisitor::visit_call_pre(CallNode *call) {
@@ -455,8 +457,6 @@ Type* TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
         atom->offset = current_rule_binding_offsets->at(atom->name);
         // TODO check unifying
         Type* binding_type = current_rule_binding_types->at(atom->offset);
-        DEBUG("ATOM OFFSET  "<<current_rule_binding_types << " "<<atom->offset << " "<<binding_type);
-        DEBUG("BINDING "<<atom->name<<"\t atom_t "<<atom->type_.to_str() << " binding_t "<<binding_type->to_str()) ;
         atom->type_.unify(binding_type);
         return &atom->type_;
       }
@@ -471,6 +471,9 @@ Type* TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
   atom->symbol = func;
   if (atom->symbol->type == Symbol::SymbolType::FUNCTION) {
     atom->symbol_type = FunctionAtom::SymbolType::FUNCTION;
+    if (func->subrange_arguments.size() > 0) {
+      atom->node_type_ = NodeType::FUNCTION_ATOM_SUBRANGE;
+    }
   } else{
     atom->symbol_type = FunctionAtom::SymbolType::DERIVED;
   }
@@ -484,7 +487,6 @@ Type* TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
     for (size_t i=0; i < atom->symbol->arguments_.size(); i++) {
 
      Type *argument_t = atom->symbol->arguments_[i];
-      DEBUG("UNIFY ARG11 "<< atom->symbol->name << " "<<expr_results[i]->to_str() << " "<<argument_t);
       DEBUG(argument_t->unify_links_to_str());
  
       if (!expr_results[i]->unify(argument_t)) {
@@ -493,7 +495,6 @@ Type* TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
                       "` is "+expr_results[i]->to_str()+" but should be "+
                       argument_t->to_str());
       }
-      DEBUG("UNIFY ARG done "<< atom->symbol->name << " "<<expr_results[i]->to_str() <<"\n");
       expr_results[i]->unify_links_to_str();
     }
   }
