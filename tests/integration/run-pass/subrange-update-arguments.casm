@@ -1,0 +1,9 @@
+function f: Int * Int(1..5) * Int -> Int
+
+init main
+
+rule main = {|
+    f(-100, 2, 100) := 2
+    assert f(-100, 2, 100) = 2
+    program(self) := undef
+|}

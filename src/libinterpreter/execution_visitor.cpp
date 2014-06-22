@@ -133,15 +133,15 @@ void ExecutionVisitor::visit_update(UpdateNode *update, const value_t& expr_v) {
 
 void ExecutionVisitor::visit_update_subrange(UpdateNode *update, const value_t& expr_v) {
   INT_T v = expr_v.value.integer;
-  if (v < update->func->symbol->return_type_->subrange_start
-      || v > update->func->symbol->return_type_->subrange_end) {
+  Type *t = update->func->symbol->return_type_;
+  if ((t->subrange_start < t->subrange_end) &&
+      (v < t->subrange_start || v > t->subrange_end)) {
     driver_.error(update->location,
                   std::to_string(v)+" does violate the subrange "
-                  +std::to_string(update->func->symbol->return_type_->subrange_start)
-                  +".." +std::to_string(update->func->symbol->return_type_->subrange_end)
+                  +std::to_string(t->subrange_start)
+                  +".." +std::to_string(t->subrange_end)
                   +" of `"+update->func->name+"`");
     throw RuntimeException("Subrange violated");
-   
   }
   visit_update(update, expr_v);
 }
@@ -372,6 +372,7 @@ value_t ExecutionVisitor::visit_expression_single(Expression *expr, const value_
 
 const value_t ExecutionVisitor::visit_function_atom(FunctionAtom *atom,
                                                   std::vector<value_t> &expr_results) {
+
   auto current_rule_bindings = rule_bindings.back();
   switch (atom->symbol_type) {
     case FunctionAtom::SymbolType::PARAMETER:
@@ -402,6 +403,26 @@ const value_t ExecutionVisitor::visit_function_atom(FunctionAtom *atom,
     }
   }
 }
+
+const value_t ExecutionVisitor::visit_function_atom_subrange(FunctionAtom *atom,
+                                                             std::vector<value_t> &expr_results) {
+  for (uint32_t i=0; i < atom->symbol->subrange_arguments.size(); i++) {
+    uint32_t j = atom->symbol->subrange_arguments[i];
+    value_t v = expr_results[j];
+    Type *t = atom->symbol->arguments_[j];
+    if (v.value.integer < t->subrange_start ||
+        v.value.integer > t->subrange_end) {
+      driver_.error(atom->location,
+                  std::to_string(v.value.integer)+" does violate the subrange "
+                  +std::to_string(t->subrange_start)
+                  +".." +std::to_string(t->subrange_end)
+                  +" of "+std::to_string(i+1)+". function argument");
+      throw RuntimeException("Subrange violated");
+    }
+  }
+  return visit_function_atom(atom, expr_results);
+}
+
 
 const value_t ExecutionVisitor::visit_builtin_atom(BuiltinAtom *atom,
                                                  std::vector<value_t> &expr_results) {
@@ -810,9 +831,12 @@ void AstWalker<ExecutionVisitor, value_t>::walk_update(UpdateNode *node) {
 
 template <>
 void AstWalker<ExecutionVisitor, value_t>::walk_update_subrange(UpdateNode *node) {
-  // this is used to dump %CREATE in trace if necessary
   const value_t &expr_t = walk_expression_base(node->expr_);
-  if (visitor.context_.symbolic && node->func->symbol->is_symbolic) {
+
+  // walk the function expression when argument list contains subrange types
+  // to check the subranges and when function is symbolic to dump creates
+  if (node->func->symbol->subrange_arguments.size() > 0 || (
+      visitor.context_.symbolic && node->func->symbol->is_symbolic)) {
     walk_expression_base(node->func);
   }
 
@@ -891,7 +915,8 @@ bool ExecutionWalker::init_function(const std::string& name, std::set<std::strin
       }
 
       if (function_map.count(ArgumentsKey(&args[0], num_args, false, 0)) != 0) {
-        yy::location loc = init.first ? init.first->location+init.second->location : init.second->location;
+        yy::location loc = init.first ? init.first->location+init.second->location
+                                      : init.second->location;
         visitor.driver_.error(loc, "function `"+func->name+"("+args_to_str(args, num_args)+")` already initialized");
         throw RuntimeException("function already initialized");
       }
@@ -903,7 +928,21 @@ bool ExecutionWalker::init_function(const std::string& name, std::set<std::strin
         function_map.emplace(std::pair<ArgumentsKey, value_t>(
               std::move(ArgumentsKey(&args[0], num_args, true, 0)), v));
       } else {
-        function_map.emplace(std::pair<ArgumentsKey, value_t>(std::move(ArgumentsKey(&args[0], num_args, true, 0)), walk_expression_base(init.second)));
+        value_t v = walk_expression_base(init.second);
+        if (func->subrange_return) {
+          if (v.value.integer < func->return_type_->subrange_start ||
+            v.value.integer > func->return_type_->subrange_end) {
+            yy::location loc = init.first ? init.first->location+init.second->location
+                                          : init.second->location;
+            visitor.driver_.error(loc,
+                  std::to_string(v.value.integer)+" does violate the subrange "
+                  +std::to_string(func->return_type_->subrange_start)
+                  +".." +std::to_string(func->return_type_->subrange_end)
+                  +" of `"+func->name+"`");
+            throw RuntimeException("Subrange violated");
+          }
+        }
+        function_map.emplace(std::pair<ArgumentsKey, value_t>(std::move(ArgumentsKey(&args[0], num_args, true, 0)), v));
       }
       initializer_args.push_back(args);
     }

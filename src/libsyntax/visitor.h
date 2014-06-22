@@ -369,6 +369,7 @@ template<class T, class V> class AstWalker {
           return visitor.visit_undef_atom(reinterpret_cast<UndefAtom*>(atom));
         case NodeType::BUILTIN_ATOM:
         case NodeType::FUNCTION_ATOM:
+        case NodeType::FUNCTION_ATOM_SUBRANGE:
           return walk_function_atom(reinterpret_cast<BaseFunctionAtom*>(atom));
         case NodeType::SELF_ATOM: {
           return visitor.visit_self_atom(reinterpret_cast<SelfAtom*>(atom));

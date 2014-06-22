@@ -2,9 +2,10 @@
 
 CASM subr
 
-function x : -> Int(0..1) initially { 2 }	// must fail HERE!
+function x : -> Int(0..1) initially { 2 }
+//~^ 2 does violate the subrange 0..1 of `x`
 
 init initR 
 
 rule initR =
-	diedie // should never be reached
+    diedie // should never be reached

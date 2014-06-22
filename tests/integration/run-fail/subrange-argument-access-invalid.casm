@@ -1,0 +1,10 @@
+CASM foo
+
+function x : Int * Int(1..5) * Int -> Int
+
+init initR
+
+rule initR = {
+    assert x(-100, 7, 100) = undef
+    //~^ 7 does violate the subrange 1..5 of 1. function argument
+}

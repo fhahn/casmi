@@ -55,7 +55,10 @@ class ExecutionVisitor : public BaseVisitor<value_t> {
     const value_t visit_rational_atom(RationalAtom *atom) { return std::move(value_t(&atom->val_)); }
     const value_t visit_undef_atom(UndefAtom *atom) { UNUSED(atom); return std::move(value_t()); }
     const value_t visit_function_atom(FunctionAtom *atom,
-                                    std::vector<value_t> &expr_results);
+                                      std::vector<value_t> &expr_results);
+    const value_t visit_function_atom_subrange(FunctionAtom *atom,
+                                               std::vector<value_t> &expr_results);
+
 
     const value_t visit_builtin_atom(BuiltinAtom *atom, std::vector<value_t> &expr_results);
     void visit_derived_function_atom_pre(FunctionAtom *atom,

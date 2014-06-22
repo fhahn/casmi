@@ -142,7 +142,6 @@ void TypecheckVisitor::visit_update(UpdateNode *update, Type*, Type*) {
   }
 
   // TODO unify func->type and expr->type
-  DEBUG("UNIFY update "<<update->func->type_.to_str() << " "<<update->expr_->type_.to_str());
   //DEBUG("link "<<update->func->type_.unify_links_to_str());
   //DEBUG("link "<<update->expr_->type_.unify_links_to_str());
   if (!update->func->type_.unify(&update->expr_->type_)) {
@@ -157,12 +156,12 @@ void TypecheckVisitor::visit_update(UpdateNode *update, Type*, Type*) {
   }
 
   update->type_ = update->func->type_;
-  DEBUG("Type of update "<<update->type_.to_str() << " func: "<<update->func->type_.to_str() << " expr: "<<update->expr_->type_.to_str());
 
   if (update->func->symbol && driver_.function_trace_map.count(update->func->symbol->id) > 0) {
     update->node_type_ = NodeType::UPDATE_DUMPS;
   }
-  if (update->func->symbol && update->func->symbol->subrange_return) {
+  if (update->func->symbol && (update->func->symbol->subrange_return 
+                               || update->func->symbol->subrange_arguments.size() > 0)) {
     update->node_type_ = NodeType::UPDATE_SUBRANGE;
   }
 }
@@ -577,11 +576,9 @@ Type* TypecheckVisitor::visit_builtin_atom(BuiltinAtom *atom,
                       type_to_str(ind_expr->node_type_)+"`");
       }
     } else {
-      DEBUG("NTH RETURN TYPE "<<atom->type_.to_str() << " " << atom->types[0]->to_str());
       atom->type_.unify(atom->types[0]->subtypes[0]);
       expr_results[0]->unify(&atom->type_);
       atom->type_.unify(atom->return_type);
-      DEBUG("JUHUHU");
     }
   } else {
     // TODO check unifying
@@ -607,8 +604,6 @@ void TypecheckVisitor::visit_derived_function_atom_pre(FunctionAtom *atom, std::
       }
     }
   }
-  DEBUG("CHECKO NED "<<argument_results.size() << " "<<&argument_results<<"   "<<argument_results.at(0));
-
   rule_binding_types.push_back(new std::vector<Type*>(atom->symbol->arguments_));
   rule_binding_offsets.push_back(&atom->symbol->binding_offsets);
 }

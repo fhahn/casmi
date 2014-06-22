@@ -43,7 +43,9 @@ uint64_t Function::counter = 0;
 Function::Function(const std::string name, std::vector<Type*>& args,
                   Type* return_type,
                   std::vector<std::pair<ExpressionBase*, ExpressionBase*>> *init) :
-    Function(false, false, name, args, return_type, init) {}
+    Function(false, false, name, args, return_type, init) {
+    
+}
 
 Function::Function(bool is_static, bool is_symbolic, const std::string name,
              std::vector<Type*>& args, Type* return_type,
@@ -57,9 +59,10 @@ Function::Function(bool is_static, bool is_symbolic, const std::string name,
   if (return_type->subrange_start < return_type->subrange_end) {
     subrange_return = true;
   }
-  for (Type* t : args) {
+  for (uint32_t i=0; i < arguments_.size(); i++) {
+    Type* t = arguments_[i];
     if (t->subrange_start < t->subrange_end) {
-      subrange_arguments.push_back(t);
+      subrange_arguments.push_back(i);
     }
   }
 }
