@@ -18,9 +18,9 @@ class CheckConditionTest: public ::testing::Test {
 };
 
 TEST_F(CheckConditionTest, check_eq_true) {
-  Value sym(new symbol_t(1));
-  Value a((INT_T)20);
-  Value b((INT_T)20);
+  value_t sym(new symbol_t(1));
+  value_t a((INT_T)20);
+  value_t b((INT_T)20);
 
   symbolic_condition p1(&sym, &a, ExpressionOperation::EQ);
   symbolic_condition p2(&sym, &b, ExpressionOperation::EQ);
@@ -29,9 +29,9 @@ TEST_F(CheckConditionTest, check_eq_true) {
 }
 
 TEST_F(CheckConditionTest, check_eq_false) {
-  Value sym(new symbol_t(1));
-  Value a((INT_T)20);
-  Value b((INT_T)10);
+  value_t sym(new symbol_t(1));
+  value_t a((INT_T)20);
+  value_t b((INT_T)10);
 
   symbolic_condition p1(&sym, &a, ExpressionOperation::EQ);
   symbolic_condition p2(&sym, &b, ExpressionOperation::EQ);
@@ -40,9 +40,9 @@ TEST_F(CheckConditionTest, check_eq_false) {
 }
 
 TEST_F(CheckConditionTest, check_eq_neq_false) {
-  Value sym(new symbol_t(1));
-  Value a((INT_T)20);
-  Value b((INT_T)20);
+  value_t sym(new symbol_t(1));
+  value_t a((INT_T)20);
+  value_t b((INT_T)20);
 
   symbolic_condition p1(&sym, &a, ExpressionOperation::NEQ);
   symbolic_condition p2(&sym, &b, ExpressionOperation::EQ);
@@ -51,9 +51,9 @@ TEST_F(CheckConditionTest, check_eq_neq_false) {
 }
 
 TEST_F(CheckConditionTest, check_neq_true) {
-  Value sym(new symbol_t(1));
-  Value a((INT_T)20);
-  Value b((INT_T)20);
+  value_t sym(new symbol_t(1));
+  value_t a((INT_T)20);
+  value_t b((INT_T)20);
 
   symbolic_condition p1(&sym, &a, ExpressionOperation::NEQ);
   symbolic_condition p2(&sym, &b, ExpressionOperation::NEQ);
@@ -62,9 +62,9 @@ TEST_F(CheckConditionTest, check_neq_true) {
 }
 
 TEST_F(CheckConditionTest, check_neq_true_2) {
-  Value sym(new symbol_t(1));
-  Value a((INT_T)20);
-  Value b((INT_T)30);
+  value_t sym(new symbol_t(1));
+  value_t a((INT_T)20);
+  value_t b((INT_T)30);
 
   symbolic_condition k1(&sym, &a, ExpressionOperation::NEQ);
   symbolic_condition k2(&sym, &b, ExpressionOperation::NEQ);
@@ -74,9 +74,9 @@ TEST_F(CheckConditionTest, check_neq_true_2) {
 }
 
 TEST_F(CheckConditionTest, check_neq_not_found_1) {
-  Value sym(new symbol_t(1));
-  Value a((INT_T)20);
-  Value b((INT_T)30);
+  value_t sym(new symbol_t(1));
+  value_t a((INT_T)20);
+  value_t b((INT_T)30);
 
   symbolic_condition k1(&sym, &a, ExpressionOperation::NEQ);
   symbolic_condition p(&sym, &b, ExpressionOperation::NEQ);
@@ -85,9 +85,9 @@ TEST_F(CheckConditionTest, check_neq_not_found_1) {
 }
 
 TEST_F(CheckConditionTest, check_neq_eq_true) {
-  Value sym(new symbol_t(1));
-  Value a((INT_T)20);
-  Value b((INT_T)30);
+  value_t sym(new symbol_t(1));
+  value_t a((INT_T)20);
+  value_t b((INT_T)30);
 
   symbolic_condition k1(&sym, &a, ExpressionOperation::EQ);
   symbolic_condition p(&sym, &b, ExpressionOperation::NEQ);
@@ -96,8 +96,8 @@ TEST_F(CheckConditionTest, check_neq_eq_true) {
 }
 
 TEST_F(CheckConditionTest, check_neq_eq_false) {
-  Value sym(new symbol_t(1));
-  Value a((INT_T)20);
+  value_t sym(new symbol_t(1));
+  value_t a((INT_T)20);
 
   symbolic_condition k1(&sym, &a, ExpressionOperation::EQ);
   symbolic_condition p(&sym, &a, ExpressionOperation::NEQ);
@@ -106,9 +106,9 @@ TEST_F(CheckConditionTest, check_neq_eq_false) {
 }
 
 TEST_F(CheckConditionTest, check_eq_lessereq_true) {
-  Value sym(new symbol_t(1));
-  Value a((INT_T)20);
-  Value b((INT_T)30);
+  value_t sym(new symbol_t(1));
+  value_t a((INT_T)20);
+  value_t b((INT_T)30);
 
   symbolic_condition k1(&sym, &a, ExpressionOperation::EQ);
   symbolic_condition p(&sym, &b, ExpressionOperation::LESSEREQ);
@@ -117,9 +117,9 @@ TEST_F(CheckConditionTest, check_eq_lessereq_true) {
 }
 
 TEST_F(CheckConditionTest, check_eq_lessereq_false) {
-  Value sym(new symbol_t(1));
-  Value a((INT_T)50);
-  Value b((INT_T)30);
+  value_t sym(new symbol_t(1));
+  value_t a((INT_T)50);
+  value_t b((INT_T)30);
 
   symbolic_condition k1(&sym, &a, ExpressionOperation::EQ);
   symbolic_condition p(&sym, &b, ExpressionOperation::LESSEREQ);
@@ -128,9 +128,9 @@ TEST_F(CheckConditionTest, check_eq_lessereq_false) {
 }
 
 TEST_F(CheckConditionTest, check_lessereq_lessereq_true) {
-  Value sym(new symbol_t(1));
-  Value a((INT_T)50);
-  Value b((INT_T)40);
+  value_t sym(new symbol_t(1));
+  value_t a((INT_T)50);
+  value_t b((INT_T)40);
 
   symbolic_condition k1(&sym, &a, ExpressionOperation::LESSEREQ);
   symbolic_condition p(&sym, &b, ExpressionOperation::LESSEREQ);
@@ -139,9 +139,9 @@ TEST_F(CheckConditionTest, check_lessereq_lessereq_true) {
 }
 
 TEST_F(CheckConditionTest, check_lessereq_lessereq_not_found) {
-  Value sym(new symbol_t(1));
-  Value a((INT_T)50);
-  Value b((INT_T)70);
+  value_t sym(new symbol_t(1));
+  value_t a((INT_T)50);
+  value_t b((INT_T)70);
 
   symbolic_condition k1(&sym, &a, ExpressionOperation::LESSEREQ);
   symbolic_condition p(&sym, &b, ExpressionOperation::LESSEREQ);
@@ -150,9 +150,9 @@ TEST_F(CheckConditionTest, check_lessereq_lessereq_not_found) {
 }
 
 TEST_F(CheckConditionTest, check_greater_lessereq_false) {
-  Value sym(new symbol_t(1));
-  Value a((INT_T)50);
-  Value b((INT_T)40);
+  value_t sym(new symbol_t(1));
+  value_t a((INT_T)50);
+  value_t b((INT_T)40);
 
   symbolic_condition k1(&sym, &a, ExpressionOperation::GREATER);
   symbolic_condition p(&sym, &b, ExpressionOperation::LESSEREQ);
@@ -161,9 +161,9 @@ TEST_F(CheckConditionTest, check_greater_lessereq_false) {
 }
 
 TEST_F(CheckConditionTest, check_greater_lessereq_not_found) {
-  Value sym(new symbol_t(1));
-  Value a((INT_T)50);
-  Value b((INT_T)60);
+  value_t sym(new symbol_t(1));
+  value_t a((INT_T)50);
+  value_t b((INT_T)60);
 
   symbolic_condition k1(&sym, &a, ExpressionOperation::GREATER);
   symbolic_condition p(&sym, &b, ExpressionOperation::LESSEREQ);
@@ -172,9 +172,9 @@ TEST_F(CheckConditionTest, check_greater_lessereq_not_found) {
 }
 
 TEST_F(CheckConditionTest, check_eq_greater_true) {
-  Value sym(new symbol_t(1));
-  Value a((INT_T)50);
-  Value b((INT_T)30);
+  value_t sym(new symbol_t(1));
+  value_t a((INT_T)50);
+  value_t b((INT_T)30);
 
   symbolic_condition k1(&sym, &a, ExpressionOperation::EQ);
   symbolic_condition p(&sym, &b, ExpressionOperation::GREATER);
@@ -183,9 +183,9 @@ TEST_F(CheckConditionTest, check_eq_greater_true) {
 }
 
 TEST_F(CheckConditionTest, check_eq_greater_false) {
-  Value sym(new symbol_t(1));
-  Value a((INT_T)50);
-  Value b((INT_T)60);
+  value_t sym(new symbol_t(1));
+  value_t a((INT_T)50);
+  value_t b((INT_T)60);
 
   symbolic_condition k1(&sym, &a, ExpressionOperation::EQ);
   symbolic_condition p(&sym, &b, ExpressionOperation::GREATER);
@@ -194,9 +194,9 @@ TEST_F(CheckConditionTest, check_eq_greater_false) {
 }
 
 TEST_F(CheckConditionTest, check_lessereq_greater_false) {
-  Value sym(new symbol_t(1));
-  Value a((INT_T)50);
-  Value b((INT_T)60);
+  value_t sym(new symbol_t(1));
+  value_t a((INT_T)50);
+  value_t b((INT_T)60);
 
   symbolic_condition k1(&sym, &a, ExpressionOperation::LESSEREQ);
   symbolic_condition p(&sym, &b, ExpressionOperation::GREATER);
@@ -205,9 +205,9 @@ TEST_F(CheckConditionTest, check_lessereq_greater_false) {
 }
 
 TEST_F(CheckConditionTest, check_greater_greater_true) {
-  Value sym(new symbol_t(1));
-  Value a((INT_T)50);
-  Value b((INT_T)60);
+  value_t sym(new symbol_t(1));
+  value_t a((INT_T)50);
+  value_t b((INT_T)60);
 
   symbolic_condition k1(&sym, &a, ExpressionOperation::GREATER);
   symbolic_condition p(&sym, &b, ExpressionOperation::GREATER);
