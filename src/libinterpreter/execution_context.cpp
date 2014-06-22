@@ -266,7 +266,7 @@ bool args_eq(uint64_t args1[], uint64_t args2[], size_t len) {
   return true;
 }
 
-value_t& ExecutionContext::get_function_value(Function *sym, uint64_t args[], uint16_t sym_args) {
+const value_t ExecutionContext::get_function_value(Function *sym, uint64_t args[], uint16_t sym_args) {
   // TODO move should be used here
   auto& function_map = functions[sym->id];
   try {
@@ -277,8 +277,7 @@ value_t& ExecutionContext::get_function_value(Function *sym, uint64_t args[], ui
       uint64_t key = (uint64_t) &v << 16 | state;
       casm_update *update = (casm_update*) pp_hashmap_get(updateset.set, key);
       if (update) {
-        tmp = value_t(sym->return_type_->t, update);
-        return tmp;
+        return value_t(sym->return_type_->t, update);
       }
     }
     return v;

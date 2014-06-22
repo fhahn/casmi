@@ -90,7 +90,7 @@ class ExecutionContext {
     void merge_par();
     void merge_seq(Driver& driver);
 
-    value_t& get_function_value(Function *sym, uint64_t args[], uint16_t sym_args);
+    const value_t get_function_value(Function *sym, uint64_t args[], uint16_t sym_args);
 
     bool set_debuginfo_filter(const std::string& filters);
     bool filter_enabled(const std::string& filter);

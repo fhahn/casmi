@@ -389,9 +389,7 @@ const value_t ExecutionVisitor::visit_function_atom(FunctionAtom *atom,
       args[0] = 0;
       uint16_t sym_args = pack_values_in_array(expr_results, args);
 
-      const value_t v = value_t(context_.get_function_value(atom->symbol, args, sym_args));
-
-      return v;
+      return context_.get_function_value(atom->symbol, args, sym_args);
     }
     case FunctionAtom::SymbolType::ENUM: {
       enum_value_t *val = atom->enum_->mapping[atom->name];
@@ -988,7 +986,7 @@ void ExecutionWalker::run() {
   Function *program_sym = visitor.context_.symbol_table.get_function("program");
   uint64_t args[10] = {0};
   while(true) {
-    const value_t& program_val = visitor.context_.get_function_value(program_sym, args, 0);
+    const value_t program_val = visitor.context_.get_function_value(program_sym, args, 0);
     if (program_val.type == TypeType::UNDEF) {
       break;
     }
