@@ -89,6 +89,7 @@ casm_update *ExecutionVisitor::add_update(const value_t& val, size_t sym_id,
     }
     throw RuntimeException("Conflict in updateset");
   }
+  context_.update_counter += 1;
   return up;
 }
 
@@ -784,8 +785,6 @@ void AstWalker<ExecutionVisitor, value_t>::walk_forall(ForallNode *node) {
   }
 }
 
-DEFINE_CASM_UPDATESET_EMPTY
-
 template <>
 void AstWalker<ExecutionVisitor, value_t>::walk_iterate(UnaryNode *node) {
   bool forked = false;
@@ -796,14 +795,14 @@ void AstWalker<ExecutionVisitor, value_t>::walk_iterate(UnaryNode *node) {
     forked = true;
   }
 
+  uint64_t last_cnt = visitor.context_.update_counter;
   while (running) {
-    CASM_UPDATESET_FORK_PAR(&visitor.context_.updateset);
-
     walk_statement(node->child_);
-    if (CASM_UPDATESET_EMPTY(&visitor.context_.updateset)) {
+    if (last_cnt == visitor.context_.update_counter) {
       running = false;
+    } else {
+      last_cnt = visitor.context_.update_counter;
     }
-    visitor.context_.merge_par();
   }
 
   if (forked) {
