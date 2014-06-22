@@ -269,8 +269,8 @@ bool args_eq(uint64_t args1[], uint64_t args2[], size_t len) {
 const value_t ExecutionContext::get_function_value(Function *sym, uint64_t args[], uint16_t sym_args) {
   // TODO move should be used here
   auto& function_map = functions[sym->id];
-  if (function_map.second.count(ArgumentsKey(&args[0], sym->arguments_.size(), false, sym_args)) > 0) {
-    value_t &v = function_map.second[ArgumentsKey(&args[0], sym->arguments_.size(), false, sym_args)];
+  try {
+    value_t &v = function_map.second.at(ArgumentsKey(&args[0], sym->arguments_.size(), false, sym_args));
     int64_t state = (updateset.pseudostate % 2 == 0) ? updateset.pseudostate-1:
                                                        updateset.pseudostate;
     for (; state > 0; state -= 2) {
@@ -282,7 +282,7 @@ const value_t ExecutionContext::get_function_value(Function *sym, uint64_t args[
     }
     return v;
 
-  } else {
+  } catch (const std::out_of_range &e) {
     if (symbolic && sym->is_symbolic) {
       // TODO cleanup symbol
       function_map.second.emplace(
@@ -292,7 +292,8 @@ const value_t ExecutionContext::get_function_value(Function *sym, uint64_t args[
       symbolic::dump_create(trace_creates, sym, &args[0], sym_args, v);
       return v;
     }
-    return value_t();
+    undef.type = TypeType::UNDEF;
+    return undef;
   }
 }
 
