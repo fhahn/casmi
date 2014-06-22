@@ -238,14 +238,14 @@ const std::string value_t::to_str(bool symbolic) const {
 
 symbol_t::symbol_t(uint32_t id) : symbol_t(id, nullptr)  {}
 
-symbol_t::symbol_t(uint32_t id, symbolic_condition *cond) : id(id),
+symbol_t::symbol_t(uint32_t id, symbolic_condition_t *cond) : id(id),
     condition(cond), type_dumped(false), update_dumped(false), list(nullptr) {}
 
 
-symbolic_condition::symbolic_condition(value_t *lhs, value_t *rhs,
+symbolic_condition_t::symbolic_condition_t(value_t *lhs, value_t *rhs,
                                        ExpressionOperation op) : lhs(lhs), rhs(rhs), op(op) {}
 
-std::string symbolic_condition::to_str() const {
+std::string symbolic_condition_t::to_str() const {
   switch (op) {
     case ExpressionOperation::EQ:
       return lhs->to_str()+"="+rhs->to_str();

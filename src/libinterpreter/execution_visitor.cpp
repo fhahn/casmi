@@ -519,11 +519,11 @@ void AstWalker<ExecutionVisitor, value_t>::walk_ifthenelse(IfThenElseNode* node)
   const value_t cond = walk_expression_base(node->condition_);
 
   if (cond.is_symbolic()) {
-    symbolic_condition *sym_cond;
+    symbolic_condition_t *sym_cond;
     if (cond.value.sym->condition) {
       sym_cond = cond.value.sym->condition;
     } else {
-      sym_cond = new symbolic_condition(new value_t(cond), new value_t((INT_T)1), ExpressionOperation::EQ);
+      sym_cond = new symbolic_condition_t(new value_t(cond), new value_t((INT_T)1), ExpressionOperation::EQ);
     }
 
     switch (symbolic::check_condition(visitor.context_.path_conditions, sym_cond)) {
@@ -572,7 +572,7 @@ void AstWalker<ExecutionVisitor, value_t>::walk_ifthenelse(IfThenElseNode* node)
         } else {
           // needed to generate correct output for boolean functions as conditions
           delete sym_cond;
-          sym_cond = new symbolic_condition(new value_t(cond),
+          sym_cond = new symbolic_condition_t(new value_t(cond),
               new value_t((INT_T)0), ExpressionOperation::EQ);
         }
         visitor.context_.path_name += "E";
@@ -650,10 +650,10 @@ void AstWalker<ExecutionVisitor, value_t>::walk_case(CaseNode *node) {
     for (uint32_t i=0; i < node->case_list.size(); i++) {
       auto pair = node->case_list[i];
       // pair.first == nullptr for default:
-      symbolic_condition *sym_cond;
+      symbolic_condition_t *sym_cond;
       if (pair.first) {
         const value_t c = walk_atom(pair.first);
-        sym_cond = new symbolic_condition(new value_t(cond), new value_t(c),
+        sym_cond = new symbolic_condition_t(new value_t(cond), new value_t(c),
             ExpressionOperation::EQ);
 
         switch (symbolic::check_condition(visitor.context_.path_conditions, sym_cond)) {

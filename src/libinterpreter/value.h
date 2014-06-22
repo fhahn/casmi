@@ -21,7 +21,7 @@ class TailList;
 class BottomList;
 class List;
 
-struct symbolic_condition;
+struct symbolic_condition_t;
 struct symbol_t;
 struct rational_t;
 
@@ -69,7 +69,7 @@ class value_t {
 
 struct symbol_t {
   const uint32_t id;
-  symbolic_condition *condition;
+  symbolic_condition_t *condition;
   bool type_dumped;
   bool update_dumped;
   List *list; // used for symbolic lists
@@ -78,15 +78,15 @@ struct symbol_t {
   // interpreter
 
   symbol_t(uint32_t id);
-  symbol_t(uint32_t id, symbolic_condition *cond);
+  symbol_t(uint32_t id, symbolic_condition_t *cond);
 };
 
-struct symbolic_condition {
+struct symbolic_condition_t {
   value_t *lhs;
   value_t *rhs;
   ExpressionOperation op;
 
-  symbolic_condition(value_t *lhs, value_t *rhs, ExpressionOperation op);
+  symbolic_condition_t(value_t *lhs, value_t *rhs, ExpressionOperation op);
   std::string to_str() const;
 };
 

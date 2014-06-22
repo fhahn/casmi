@@ -42,13 +42,13 @@
 #define CHECK_SYMBOLIC_CMP_OPERATION(op, lhs, rhs) {                         \
  if (lhs.is_symbolic() && !rhs.is_undef()) {                                 \
     return value_t(new symbol_t(symbolic::next_symbol_id(),                    \
-                              new symbolic_condition(new value_t(lhs),         \
+                              new symbolic_condition_t(new value_t(lhs),         \
                                                      new value_t(rhs),         \
                                                       op)));                 \
  }                                                                           \
  if (rhs.is_symbolic() && !lhs.is_undef()) {                                 \
     return value_t(new symbol_t(symbolic::next_symbol_id(),                    \
-                              new symbolic_condition(new value_t(lhs),         \
+                              new symbolic_condition_t(new value_t(lhs),         \
                                                      new value_t(rhs),         \
                                                       op)));                 \
   }                                                                          \

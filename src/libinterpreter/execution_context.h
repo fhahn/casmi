@@ -78,7 +78,7 @@ class ExecutionContext {
     std::vector<std::string> trace_creates;
     std::vector<std::string> trace;
     std::string path_name;
-    std::vector<symbolic_condition*> path_conditions;
+    std::vector<symbolic_condition_t*> path_conditions;
 
     uint64_t update_counter;
 

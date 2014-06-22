@@ -142,7 +142,7 @@ namespace symbolic {
   }
 
   void dump_pathcond_match(std::vector<std::string>& trace, const std::string &filename,
-      size_t lineno, const symbolic_condition *cond, bool status) {
+      size_t lineno, const symbolic_condition_t *cond, bool status) {
     std::stringstream ss;
     ss << "% " << filename << ":" << lineno << " PC-LOOKUP ("
        << cond->to_str() << ") = " << status << std::endl;
@@ -151,7 +151,7 @@ namespace symbolic {
   }
 
   void dump_if(std::vector<std::string>& trace, const std::string &filename,
-      size_t lineno, const symbolic_condition *cond) {
+      size_t lineno, const symbolic_condition_t *cond) {
     std::stringstream ss;
     ss << "fof('id" << filename <<  ":" << lineno << "',hypothesis,"
        << cond->to_str() << ")." << std::endl;
@@ -182,8 +182,8 @@ namespace symbolic {
     trace.push_back(ss.str());
   }
 
-  check_status_t check_inclusion(const symbolic_condition& known,
-                                 const symbolic_condition& check) {
+  check_status_t check_inclusion(const symbolic_condition_t& known,
+                                 const symbolic_condition_t& check) {
     switch (check.op) {
       case ExpressionOperation::EQ:
         if (known.op == ExpressionOperation::EQ) {
@@ -258,26 +258,26 @@ namespace symbolic {
     return check_status_t::NOT_FOUND;
   }
 
-  check_status_t check_condition(std::vector<symbolic_condition*> known_conditions,
-      const symbolic_condition *check) {
+  check_status_t check_condition(std::vector<symbolic_condition_t*> known_conditions,
+      const symbolic_condition_t *check) {
 
-    symbolic_condition cond(check->lhs, check->rhs, check->op);
+    symbolic_condition_t cond(check->lhs, check->rhs, check->op);
 
     if (check->lhs->type != TypeType::SYMBOL) {
       if (check->rhs->type == TypeType::SYMBOL) {
-        cond = symbolic_condition(check->rhs, check->lhs, check->op);
+        cond = symbolic_condition_t(check->rhs, check->lhs, check->op);
       } else {
         throw RuntimeException("Invalid condition passed");
       }
     }
 
-    for (symbolic_condition *known_cond : known_conditions) {
+    for (symbolic_condition_t *known_cond : known_conditions) {
      check_status_t s = check_status_t::NOT_FOUND;
       if (*(known_cond->lhs) == *(cond.lhs)) {
         s = check_inclusion(*known_cond, cond);
       } else if (*(known_cond->rhs) == *(cond.lhs)) {
         s = check_inclusion(
-            symbolic_condition(known_cond->rhs, known_cond->lhs, known_cond->op),
+            symbolic_condition_t(known_cond->rhs, known_cond->lhs, known_cond->op),
             cond);
       }
       if (s != check_status_t::NOT_FOUND) {
