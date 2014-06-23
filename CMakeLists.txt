@@ -8,17 +8,18 @@ set( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${casmi_BINARY_DIR}/lib )
 set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${casmi_BINARY_DIR}/lib )
 
 # when -pendantic is used, -Wvariadic-macros cannot be disabled in gcc
-set( CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wextra -Ofast" )
+set( CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wextra" )
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DCASMI_DEBUG")
+set(CMAKE_CXX_FLAGS_RELEASE "")
 set(CMAKE_CXX_FLAGS_PROFILE "${CMAKE_CXX_FLAGS_DEBUG} -pg")
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   # using Clang
-  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -flto")
+  #set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -flto")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   # using GCC
-  set(CMAKE_CXX_FLAGS_RELEASE "-flto -fuse-linker-plugin ${CMAKE_CXX_FLAGS_RELEASE}")
+  #set(CMAKE_CXX_FLAGS_RELEASE "-flto -fuse-linker-plugin ${CMAKE_CXX_FLAGS_RELEASE}")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
   # using Intel C++
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
