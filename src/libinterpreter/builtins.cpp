@@ -5,7 +5,7 @@
 #include "libinterpreter/builtins.h"
 
 const value_t builtins::dispatch(BuiltinAtom::Id atom_id,  ExecutionContext& ctxt,
-                               const std::vector<value_t>& arguments) {
+                               const value_t arguments[]) {
   switch (atom_id) {
     case BuiltinAtom::Id::POW:
       return std::move(pow(arguments[0], arguments[1]));
@@ -397,7 +397,7 @@ namespace shared {
   REENABLE_VARIADIC_WARNINGS
 
   const value_t dispatch(BuiltinAtom::Id builtin_id, 
-                       const std::vector<value_t>& arguments, ExecutionContext& ctxt) {
+                       const value_t arguments[], ExecutionContext& ctxt) {
     const char *sym_name;
     Int ret;
     Int arg0;
@@ -414,7 +414,8 @@ namespace shared {
       return std::move(value_t((INT_T)ret.value));
     } else if (ctxt.symbolic && ret.sym) {
       value_t v(new symbol_t(::symbolic::next_symbol_id()));
-      ::symbolic::dump_builtin(ctxt.trace, sym_name, arguments, v);
+      // TODO enable
+      //::symbolic::dump_builtin(ctxt.trace, sym_name, arguments, v);
       return std::move(v);
     } else {
       return std::move(value_t());

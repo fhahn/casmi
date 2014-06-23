@@ -24,9 +24,9 @@ DEFINE_CASM_UPDATESET_FORK_SEQ
 REENABLE_VARIADIC_WARNINGS
 
 
-uint16_t pack_values_in_array(const std::vector<value_t> &value_list, uint64_t array[]) {
+uint16_t pack_values_in_array(const value_t value_list[], uint64_t array[], uint32_t size) {
   uint16_t sym_args = 0;
-  for (size_t i=0; i < value_list.size(); i++) {
+  for (uint32_t i=0; i < size; i++) {
     const value_t& v = value_list[i];
     array[i] = v.to_uint64_t();
     if (v.is_symbolic()) {
@@ -59,7 +59,7 @@ void ExecutionVisitor::visit_assure(UnaryNode* assure, const value_t& val) {
 }
 
 casm_update *ExecutionVisitor::add_update(const value_t& val, size_t sym_id,
-                                          const std::vector<value_t> &arguments) {
+                                          const std::vector<value_t> &arguments_) {
   casm_update* up = (casm_update*) pp_mem_alloc(&(context_.pp_stack), sizeof(casm_update));
 
   up->value = (void*) val.to_uint64_t();
@@ -68,9 +68,10 @@ casm_update *ExecutionVisitor::add_update(const value_t& val, size_t sym_id,
   up->func = sym_id;
   // TODO: Do we need line here?
   //up->line = (uint64_t) loc.lines;
-  up->sym_args = pack_values_in_array(arguments, up->args);
+  // TODO use arg!
+  up->sym_args = pack_values_in_array(&arguments_[0], up->args, arguments_.size());
 
-  up->num_args = arguments.size();
+  up->num_args = arguments_.size();
 
   auto& function_map = context_.functions[sym_id];
   if (function_map.second.count(ArgumentsKey(up->args, up->num_args, false, up->sym_args)) == 0) {
@@ -371,8 +372,7 @@ value_t ExecutionVisitor::visit_expression_single(Expression *expr, const value_
   return operators::dispatch(expr->op, val, val);
 }
 
-const value_t ExecutionVisitor::visit_function_atom(FunctionAtom *atom,
-                                                    const std::vector<value_t> &expr_results) {
+const value_t ExecutionVisitor::visit_function_atom(FunctionAtom *atom) {
 
   auto current_rule_bindings = rule_bindings.back();
   switch (atom->symbol_type) {
@@ -380,14 +380,9 @@ const value_t ExecutionVisitor::visit_function_atom(FunctionAtom *atom,
       return value_t(current_rule_bindings->at(atom->offset));
 
     case FunctionAtom::SymbolType::FUNCTION: {
-      size_t num_args = 1;
-      if (expr_results.size() > 0) {
-        num_args = expr_results.size();
-      }
-
-      uint64_t args[num_args];
+      uint64_t args[num_arguments];
       args[0] = 0;
-      uint16_t sym_args = pack_values_in_array(expr_results, args);
+      uint16_t sym_args = pack_values_in_array(arguments, args, num_arguments);
 
       return context_.get_function_value(atom->symbol, args, sym_args);
     }
@@ -403,11 +398,10 @@ const value_t ExecutionVisitor::visit_function_atom(FunctionAtom *atom,
   }
 }
 
-const value_t ExecutionVisitor::visit_function_atom_subrange(FunctionAtom *atom,
-                                                             const std::vector<value_t> &expr_results) {
+const value_t ExecutionVisitor::visit_function_atom_subrange(FunctionAtom *atom) {
   for (uint32_t i=0; i < atom->symbol->subrange_arguments.size(); i++) {
     uint32_t j = atom->symbol->subrange_arguments[i];
-    value_t v = expr_results[j];
+    value_t v = arguments[j];
     Type *t = atom->symbol->arguments_[j];
     if (v.value.integer < t->subrange_start ||
         v.value.integer > t->subrange_end) {
@@ -419,12 +413,11 @@ const value_t ExecutionVisitor::visit_function_atom_subrange(FunctionAtom *atom,
       throw RuntimeException("Subrange violated");
     }
   }
-  return visit_function_atom(atom, expr_results);
+  return visit_function_atom(atom);
 }
 
 
-const value_t ExecutionVisitor::visit_builtin_atom(BuiltinAtom *atom,
-                                                   const std::vector<value_t> &expr_results) {
+const value_t ExecutionVisitor::visit_builtin_atom(BuiltinAtom *atom) {
   // TODO Int2Enum is a special builtin, it needs the complete type information
   // for the enum, values only store TypeType and passing the type to all
   // builtins seems ugly.
@@ -434,19 +427,24 @@ const value_t ExecutionVisitor::visit_builtin_atom(BuiltinAtom *atom,
     for (auto pair : enum_->mapping) {
       // TODO check why the enum mapping contains an extra entry with the name
       // of the enum
-      if (pair.first != enum_->name && pair.second->id == expr_results[0].value.integer) {
+      if (pair.first != enum_->name && pair.second->id == arguments[0].value.integer) {
         return std::move(value_t(pair.second));
       }
     }
     return std::move(value_t());
   }
 
-  return builtins::dispatch(atom->id, context_, expr_results);
+  return builtins::dispatch(atom->id, context_, arguments);
 }
 
-void ExecutionVisitor::visit_derived_function_atom_pre(FunctionAtom*,
-                                                       std::vector<value_t>& arguments) {
-  rule_bindings.push_back(&arguments);
+void ExecutionVisitor::visit_derived_function_atom_pre(FunctionAtom*) {
+  // TODO change, cleanup!
+  std::vector<value_t> *tmp = new std::vector<value_t>();
+  for (uint32_t i=0; i < num_arguments; i++) {
+    tmp->push_back(arguments[i]);
+  }
+
+  rule_bindings.push_back(tmp);
 }
 
 const value_t ExecutionVisitor::visit_derived_function_atom(FunctionAtom*, const value_t& expr) {
@@ -894,29 +892,30 @@ bool ExecutionWalker::init_function(const std::string& name, std::set<std::strin
 
   if (func->intitializers_ != nullptr) {
     for (std::pair<ExpressionBase*, ExpressionBase*> init : *func->intitializers_) {
-      size_t num_args = 0; 
+      uint32_t num_arguments = 0;
       uint64_t *args = new uint64_t[10];
       if (init.first != nullptr) {
-        std::vector<value_t> arguments;
+        value_t arguments[10];
         const value_t argument_v = walk_expression_base(init.first);
         if (func->arguments_.size() > 1) {
           List *list = argument_v.value.list;
           for (auto iter = list->begin(); iter != list->end(); iter++) {
-            arguments.push_back(*iter);
+            arguments[num_arguments] = *iter;
+            num_arguments += 1;
           }
         } else {
-          arguments.push_back(argument_v);
+            arguments[num_arguments] = argument_v;
+            num_arguments += 1;
         }
-        pack_values_in_array(arguments, &args[0]);
-        num_args = arguments.size();
+        pack_values_in_array(arguments, &args[0], num_arguments);
       } else {
         args[0] = 0;
       }
 
-      if (function_map.count(ArgumentsKey(&args[0], num_args, false, 0)) != 0) {
+      if (function_map.count(ArgumentsKey(&args[0], num_arguments, false, 0)) != 0) {
         yy::location loc = init.first ? init.first->location+init.second->location
                                       : init.second->location;
-        visitor.driver_.error(loc, "function `"+func->name+"("+args_to_str(args, num_args)+")` already initialized");
+        visitor.driver_.error(loc, "function `"+func->name+"("+args_to_str(args, num_arguments)+")` already initialized");
         throw RuntimeException("function already initialized");
       }
 
@@ -925,7 +924,7 @@ bool ExecutionWalker::init_function(const std::string& name, std::set<std::strin
         symbolic::dump_create(visitor.context_.trace_creates, func,
             &args[0], 0, v);
         function_map.emplace(std::pair<ArgumentsKey, value_t>(
-              std::move(ArgumentsKey(&args[0], num_args, true, 0)), v));
+              std::move(ArgumentsKey(&args[0], num_arguments, true, 0)), v));
       } else {
         value_t v = walk_expression_base(init.second);
         if (func->subrange_return) {
@@ -941,7 +940,7 @@ bool ExecutionWalker::init_function(const std::string& name, std::set<std::strin
             throw RuntimeException("Subrange violated");
           }
         }
-        function_map.emplace(std::pair<ArgumentsKey, value_t>(std::move(ArgumentsKey(&args[0], num_args, true, 0)), v));
+        function_map.emplace(std::pair<ArgumentsKey, value_t>(std::move(ArgumentsKey(&args[0], num_arguments, true, 0)), v));
       }
       initializer_args.push_back(args);
     }

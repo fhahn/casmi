@@ -25,6 +25,10 @@ class TypecheckVisitor : public BaseVisitor<Type*> {
     std::vector<std::map<std::string, size_t> *> rule_binding_offsets;
 
     bool forall_head;
+
+    Type *arguments[10];
+    uint32_t num_arguments;
+
     TypecheckVisitor(Driver& driver);
 
     void visit_init(AstNode *init) { UNUSED(init); }
@@ -56,12 +60,10 @@ class TypecheckVisitor : public BaseVisitor<Type*> {
     Type* visit_float_atom(FloatAtom *atom) {  return &atom->type_; }
     Type* visit_rational_atom(RationalAtom *atom) { return &atom->type_; }
     Type* visit_undef_atom(UndefAtom *atom) { return &atom->type_; }
-    Type* visit_function_atom(FunctionAtom *atom,
-                             const std::vector<Type*> &expr_results);
-   Type* visit_builtin_atom(BuiltinAtom *atom,
-                             const std::vector<Type*> &expr_results);
+    Type* visit_function_atom(FunctionAtom *atom);
+    Type* visit_builtin_atom(BuiltinAtom *atom);
 
-    void visit_derived_function_atom_pre(FunctionAtom *atom, std::vector<Type*> arguments);
+    void visit_derived_function_atom_pre(FunctionAtom *atom);
     Type* visit_derived_function_atom(FunctionAtom *atom, Type *expr);
     Type* visit_self_atom(SelfAtom *atom) { return &atom->type_;  }
     Type* visit_rule_atom(RuleAtom *atom);

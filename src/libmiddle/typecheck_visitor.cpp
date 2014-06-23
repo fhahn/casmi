@@ -288,12 +288,11 @@ void TypecheckVisitor::visit_pop(PopNode *node) {
       driver_.error(node->to->location, "cannot pop into static function `"+sym->name+"`");
     }
 
-    std::vector<Type*> func_arguments;
     if (node->to->arguments) {
       // TODO this should be doable!
       driver_.error(node->to->location, "cannot pop into function with arguments");
     }
-    visit_function_atom(node->to, func_arguments);
+    visit_function_atom(node->to);
     if (!node->type_.unify(&node->to->type_)) {
       driver_.error(node->from->location,
                     "cannot pop from "+node->from->type_.to_str()+" into "+node->to->type_.to_str());
@@ -428,8 +427,7 @@ Type* TypecheckVisitor::visit_expression_single(Expression *expr, Type*) {
 
 }
 
-Type* TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
-                                           const std::vector<Type*> &expr_results) {
+Type* TypecheckVisitor::visit_function_atom(FunctionAtom *atom) {
 
   Symbol *sym = driver_.function_table.get(atom->name);
   if (sym && sym->type == Symbol::SymbolType::ENUM) {
@@ -478,7 +476,7 @@ Type* TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
   }
 
   // check for function definitions with arguments
-  if(atom->symbol->arguments_.size() != expr_results.size()) {
+  if(atom->symbol->arguments_.size() != num_arguments) {
     driver_.error(atom->location,
                   "number of provided arguments does not match definition of `"+
                   atom->name+"`");
@@ -488,18 +486,18 @@ Type* TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
      Type *argument_t = atom->symbol->arguments_[i];
       DEBUG(argument_t->unify_links_to_str());
  
-      if (!expr_results[i]->unify(argument_t)) {
+      if (!arguments[i]->unify(argument_t)) {
         driver_.error(atom->arguments->at(i)->location,
                       "type of "+std::to_string(i+1)+" argument of `"+atom->name+
-                      "` is "+expr_results[i]->to_str()+" but should be "+
+                      "` is "+arguments[i]->to_str()+" but should be "+
                       argument_t->to_str());
       }
-      expr_results[i]->unify_links_to_str();
+      arguments[i]->unify_links_to_str();
     }
   }
 
   // check for function definitions without arguments
-  if (atom->symbol->arguments_.size() == 0 && expr_results.size() > 0 ) {
+  if (atom->symbol->arguments_.size() == 0 && num_arguments > 0 ) {
     driver_.error(atom->location, "number of provided arguments does not match definition of `"+atom->name+"`");
   }
 
@@ -508,9 +506,8 @@ Type* TypecheckVisitor::visit_function_atom(FunctionAtom *atom,
   return &atom->type_;
 }
 
-Type* TypecheckVisitor::visit_builtin_atom(BuiltinAtom *atom,
-                                           const std::vector<Type*> &expr_results) {
-  if(atom->types.size() != expr_results.size()) {
+Type* TypecheckVisitor::visit_builtin_atom(BuiltinAtom *atom) {
+  if(atom->types.size() != num_arguments) {
     driver_.error(atom->location,
                   "number of provided arguments does not match definition of `"+
                   atom->name+"`");
@@ -518,15 +515,13 @@ Type* TypecheckVisitor::visit_builtin_atom(BuiltinAtom *atom,
     for (size_t i=0; i < atom->types.size(); i++) {
 
      Type *argument_t = atom->types[i];
-      DEBUG("UNIFY ARGS "<< atom->name << " "<<expr_results[i]->to_str() << " "<<argument_t->to_str());
  
-      if (!expr_results[i]->unify(argument_t)) {
+      if (!arguments[i]->unify(argument_t)) {
         driver_.error(atom->arguments->at(i)->location,
                       "type of "+std::to_string(i+1)+" argument of `"+atom->name+
-                      "` is "+expr_results[i]->to_str()+" but should be "+
+                      "` is "+arguments[i]->to_str()+" but should be "+
                       argument_t->to_str());
       }
-      DEBUG("UNIFY ARG done "<< atom->name << " "<<argument_t->to_str() <<"\n");
     }
   }
 
@@ -577,7 +572,7 @@ Type* TypecheckVisitor::visit_builtin_atom(BuiltinAtom *atom,
       }
     } else {
       atom->type_.unify(atom->types[0]->subtypes[0]);
-      expr_results[0]->unify(&atom->type_);
+      arguments[0]->unify(&atom->type_);
       atom->type_.unify(atom->return_type);
     }
   } else {
@@ -588,19 +583,19 @@ Type* TypecheckVisitor::visit_builtin_atom(BuiltinAtom *atom,
   return &atom->type_;
 }
 
-void TypecheckVisitor::visit_derived_function_atom_pre(FunctionAtom *atom, std::vector<Type*> argument_results) {
+void TypecheckVisitor::visit_derived_function_atom_pre(FunctionAtom *atom) {
   size_t args_defined = atom->symbol->arguments_.size();
-  size_t args_provided = argument_results.size();
+  size_t args_provided = num_arguments;
   if (args_defined != args_provided) {
     driver_.error(atom->location, " expects "
                                   +std::to_string(args_defined)+" arguments but "+
                                   std::to_string(args_provided)+" where provided");
   } else {
     for (size_t i=0; i < args_defined; i++) {
-      if (!argument_results[i]->unify(atom->symbol->arguments_.at(i))) {
+      if (!arguments[i]->unify(atom->symbol->arguments_.at(i))) {
         driver_.error(atom->arguments->at(i)->location,
                       "argument "+std::to_string(i+1)+" of must be `"+atom->symbol->arguments_.at(i)->to_str()+"` but was `"+
-                      argument_results[i]->to_str()+"`");
+                      arguments[i]->to_str()+"`");
       }
     }
   }

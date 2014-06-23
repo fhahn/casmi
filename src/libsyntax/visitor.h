@@ -320,25 +320,28 @@ template<class T, class V> class AstWalker {
     }
 
     V walk_function_atom(BaseFunctionAtom *func) {
-      std::vector<V> expr_results;
       if (func->arguments) {
-        for (ExpressionBase* e : *func->arguments) {
-          expr_results.push_back(walk_expression_base(e));
+        uint16_t i;
+        for (i=0; i < func->arguments->size(); i++) {
+          visitor.arguments[i] = walk_expression_base(func->arguments->at(i));
         }
+        visitor.num_arguments = i;
+      } else {
+        visitor.num_arguments = 0;
       }
       if (func->node_type_ == NodeType::BUILTIN_ATOM) {
-         return visitor.visit_builtin_atom(reinterpret_cast<BuiltinAtom*>(func), expr_results);
+         return visitor.visit_builtin_atom(reinterpret_cast<BuiltinAtom*>(func));
       } else {
         FunctionAtom *func_a = reinterpret_cast<FunctionAtom*>(func);
         if (func_a->symbol_type == FunctionAtom::SymbolType::DERIVED) {
-          visitor.visit_derived_function_atom_pre(func_a, expr_results);
+          visitor.visit_derived_function_atom_pre(func_a);
           V expr = walk_expression_base(func_a->symbol->derived);
           return visitor.visit_derived_function_atom(func_a, expr);
         } else {
           if (func->node_type_ == NodeType::FUNCTION_ATOM) {
-            return visitor.visit_function_atom(func_a, expr_results);
+            return visitor.visit_function_atom(func_a);
           } else {
-            return visitor.visit_function_atom_subrange(func_a, expr_results);
+            return visitor.visit_function_atom_subrange(func_a);
           }
         }
       }
@@ -440,9 +443,9 @@ template<class T> class BaseVisitor {
     T visit_rational_atom(RationalAtom*) { return T(); }
     T visit_undef_atom(UndefAtom*) { return T(); }
     T visit_function_atom(FunctionAtom *, const std::vector<T> &) { return T(); }
-    T visit_function_atom_subrange(FunctionAtom *, const std::vector<T> &) { return T(); }
-    T visit_builtin_atom(BuiltinAtom *, const std::vector<T> &) { return T(); }
-    void visit_derived_function_atom_pre(FunctionAtom*, const std::vector<T> &) {}
+    T visit_function_atom_subrange(FunctionAtom*) { return T(); }
+    T visit_builtin_atom(BuiltinAtom*) { return T(); }
+    void visit_derived_function_atom_pre(FunctionAtom*) {}
     T visit_derived_function_atom(FunctionAtom*, T) { return T(); }
     T visit_self_atom(SelfAtom*) { return T(); }
     T visit_rule_atom(RuleAtom*) { return T(); }

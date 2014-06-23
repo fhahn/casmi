@@ -26,6 +26,9 @@ class ExecutionVisitor : public BaseVisitor<value_t> {
     ExecutionContext& context_;
     std::vector<std::vector<value_t> *> rule_bindings;
 
+    value_t arguments[10];
+    uint32_t num_arguments;
+
     ExecutionVisitor(ExecutionContext& context, Driver& driver);
 
     void visit_assert(UnaryNode* assert, const value_t& val);
@@ -54,15 +57,12 @@ class ExecutionVisitor : public BaseVisitor<value_t> {
     const value_t visit_float_atom(FloatAtom *atom) { return std::move(value_t(atom->val_)); }
     const value_t visit_rational_atom(RationalAtom *atom) { return std::move(value_t(&atom->val_)); }
     const value_t visit_undef_atom(UndefAtom *atom) { UNUSED(atom); return std::move(value_t()); }
-    const value_t visit_function_atom(FunctionAtom *atom,
-                                      const std::vector<value_t> &expr_results);
-    const value_t visit_function_atom_subrange(FunctionAtom *atom,
-                                               const std::vector<value_t> &expr_results);
+    const value_t visit_function_atom(FunctionAtom *atom);
+    const value_t visit_function_atom_subrange(FunctionAtom *atom);
 
 
-    const value_t visit_builtin_atom(BuiltinAtom *atom, const std::vector<value_t> &expr_results);
-    void visit_derived_function_atom_pre(FunctionAtom *atom,
-                                         std::vector<value_t>& arguments);
+    const value_t visit_builtin_atom(BuiltinAtom *atom);
+    void visit_derived_function_atom_pre(FunctionAtom *atom);
     const value_t visit_derived_function_atom(FunctionAtom *atom, const value_t& expr);
     const value_t visit_self_atom(SelfAtom *atom) { UNUSED(atom); return value_t(); }
     const value_t visit_rule_atom(RuleAtom *atom) { return value_t(atom->rule); }

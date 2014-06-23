@@ -9,9 +9,10 @@
 class InitCycleVisitor: public BaseVisitor<bool> {
   public:
     std::set<std::string> dependency_names;
+    bool arguments[10];
+    uint32_t num_arguments;
 
-    bool visit_function_atom(FunctionAtom *atom,
-                             const std::vector<bool> &expr_results);
+    bool visit_function_atom(FunctionAtom *atom);
 };
 
 #endif //CASMI_LIBINTERPRETER_EXEC_VISITOR

@@ -163,8 +163,7 @@ bool AstDumpVisitor::visit_float_atom(FloatAtom *atom) {
   return true;
 }
 
-bool AstDumpVisitor::visit_function_atom(FunctionAtom *atom,
-    const std::vector<bool>&) {
+bool AstDumpVisitor::visit_function_atom(FunctionAtom *atom) {
   dump_node(atom, std::string("FunctionAtom:"+atom->name));
   return true;
 }

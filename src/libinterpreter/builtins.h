@@ -9,7 +9,7 @@
 
 namespace builtins {
   const value_t dispatch(BuiltinAtom::Id atom_id, ExecutionContext& ctxt,
-                       const std::vector<value_t>& arguments);
+                       const value_t arguments[]);
 
   const value_t pow(const value_t& base, const value_t& power);
   const value_t hex(const value_t& arg);
@@ -38,7 +38,7 @@ namespace builtins {
     };
 
     const value_t dispatch(BuiltinAtom::Id builtin_id, 
-                         const std::vector<value_t>& arguments,
+                         const value_t arguments[],
                          ExecutionContext& ctxt);
 
   }

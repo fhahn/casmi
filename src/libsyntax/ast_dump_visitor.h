@@ -22,6 +22,9 @@ class AstDumpVisitor : public BaseVisitor<bool> {
 
 
   public:
+    bool arguments[10];
+    uint32_t num_arguments;
+
     AstDumpVisitor();
     std::string get_dump();
 
@@ -57,11 +60,9 @@ class AstDumpVisitor : public BaseVisitor<bool> {
     bool visit_int_atom(IntAtom *atom);
     bool visit_float_atom(FloatAtom *atom);
     bool visit_undef_atom(UndefAtom*) { throw "not impleemented"; }
-    bool visit_function_atom(FunctionAtom *atom,
-                             const std::vector<bool> &expr_results);
-    bool visit_builtin_atom(BuiltinAtom *, 
-                         const std::vector<bool>&) { throw "not implemented"; }
-    void visit_derived_function_atom_pre(FunctionAtom*, const std::vector<bool>&) { throw "not implemented"; }
+    bool visit_function_atom(FunctionAtom *atom);
+    bool visit_builtin_atom(BuiltinAtom *) { throw "not implemented"; }
+    void visit_derived_function_atom_pre(FunctionAtom*) { throw "not implemented"; }
     bool visit_derived_function_atom(FunctionAtom*, bool) { throw "not implemented"; }
     bool visit_self_atom(SelfAtom *atom);
     bool visit_rule_atom(RuleAtom *atom);
