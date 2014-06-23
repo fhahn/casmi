@@ -3,15 +3,19 @@ import re
 import os
 import subprocess
 import sys
+import timeit
 
 
 NUM_RUNS = 3
 
 bench_path = os.path.dirname(os.path.abspath(__file__))
 
+sys.path.append(os.path.join(bench_path, "../../deps/click"))
+
+import click
+
 
 def dump_run(bench_name, vm, time):
-
     p = subprocess.Popen(["git", "log", "-n", "1"], stdout=subprocess.PIPE)
     (out, _) = p.communicate()
     commit_id = out.splitlines()[0].decode("utf-8").replace("commit ", "")
@@ -48,26 +52,47 @@ def iteritems(d):
     except AttributeError:
         return d.items()
 
-def run_script(vm_info, script_path):
-    p = subprocess.Popen([vm_info[1], script_path], stdout=subprocess.PIPE)
+def run_script(vm_path, script_path):
+    p = subprocess.Popen([vm_path, script_path], stdout=subprocess.PIPE)
     (outstr, errstr) = p.communicate()
     if p.returncode != 0:
         print("\nBenchmark not executed correctly, error was:\n {}".format(errstr))
 
-def run(): pass
 
-if __name__ == '__main__':
-    import timeit
+def error_abort(msg):
+    click.echo(click.style('error: ', fg='red', bold=True), nl=False)
+    click.echo(msg)
+    sys.exit(1)
 
-    vms = [
-        ("new casmi", sys.argv[1]),
-        ("old casmi", os.path.expanduser('~/Desktop/casm')),
-    ]
+@click.command()
+@click.option('--new-casmi', help='Path to the new (base) interpreter.', required=True)
+@click.option('--legacy-casmi', help='Path to the legacy interpreter.',
+              required=False, envvar='LEGACY_CASMI')
+@click.option('--casm-compiler', help='Path to the CASM compiler.',
+              required=False, envvar='CASM_COMPILER')
+def main(new_casmi, legacy_casmi, casm_compiler):
+    vms = []
+
+    if not os.path.exists(new_casmi):
+        error_abort('File `%s` for new-casmi does not exist' % click.format_filename(new_casmi))
+    else:
+        vms.append(("new casmi", os.path.abspath(os.path.expanduser(new_casmi))))
+
+    if legacy_casmi is not None:
+        if not os.path.exists(legacy_casmi):
+            error_abort('File `%s` for legacy-casmi does not exist' % click.format_filename(legacy_casmi))
+        else:
+            vms.append(("old casmi", os.path.abspath(os.path.expanduser(legacy_casmi))))
+
+    if casm_compiler is not None:
+        if not os.path.exists(legacy_casmi):
+            error_abort('File `%s` for casm-compiler does not exist' % click.format_filename(casm_compiler))
+        vms.append(('compiler', os.path.abspath(os.path.expanduser(casm_compiler))))
 
     for root, dirs, files in os.walk(bench_path):
         for bench_file in files:
             if not bench_file.endswith(".casm"): continue
-            print("Running benchmark %s" % os.path.join(os.path.split(root)[1], bench_file))
+            click.echo("Running benchmark %s" % os.path.join(os.path.split(root)[1], bench_file))
 
             results = {}
             file_path = os.path.join(root, bench_file);
@@ -75,9 +100,7 @@ if __name__ == '__main__':
                 sys.stdout.write("\t {} ...".format(vm[0]))
                 sys.stdout.flush()
 
-                def run():
-                    run_script(vm, file_path)
-                time = timeit.timeit('run()'.format(vm, file_path), setup="from __main__ import run", number=NUM_RUNS)
+                time = timeit.timeit('run_script("{}", "{}")'.format(vm[1], file_path), setup="from __main__ import run_script", number=NUM_RUNS)
 
                 sys.stdout.write(" took %lf s\n" % (time))
                 results[vm] = time
@@ -89,3 +112,6 @@ if __name__ == '__main__':
                     # compare other casm solutions to new casmi
                     factor = v / results[vms[0]]
                     print("\t'%s' is %lf faster than '%s'" % (vms[0][0], factor, k[0]))
+
+if __name__ == '__main__':
+    main()
