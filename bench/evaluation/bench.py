@@ -4,6 +4,8 @@ import os
 import subprocess
 import sys
 import timeit
+import tempfile
+import shutil
 
 
 NUM_RUNS = 3
@@ -58,6 +60,13 @@ def run_script(vm_path, script_path):
     if p.returncode != 0:
         print("\nBenchmark not executed correctly, error was:\n {}".format(errstr))
 
+def run_compiler(file_path):
+    p = subprocess.Popen([file_path], stdout=subprocess.PIPE)
+    (outstr, errstr) = p.communicate()
+    if p.returncode != 0:
+        print("\nBenchmark not executed correctly, error was:\n {}".format(errstr))
+
+
 
 def error_abort(msg):
     click.echo(click.style('error: ', fg='red', bold=True), nl=False)
@@ -100,7 +109,14 @@ def main(new_casmi, legacy_casmi, casm_compiler):
                 sys.stdout.write("\t {} ...".format(vm[0]))
                 sys.stdout.flush()
 
-                time = timeit.timeit('run_script("{}", "{}")'.format(vm[1], file_path), setup="from __main__ import run_script", number=NUM_RUNS)
+                if vm[0] == 'compiler':
+                    tmp_dir = tempfile.mkdtemp()
+                    out_file = os.path.join(tmp_dir, 'out')
+                    subprocess.call([casm_compiler, file_path, '-o', out_file, '-c'])
+                    time = timeit.timeit('run_compiler("{}")'.format(out_file), setup="from __main__ import run_compiler", number=NUM_RUNS)
+                    shutil.rmtree(tmp_dir)
+                else:
+                    time = timeit.timeit('run_script("{}", "{}")'.format(vm[1], file_path), setup="from __main__ import run_script", number=NUM_RUNS)
 
                 sys.stdout.write(" took %lf s\n" % (time))
                 results[vm] = time
