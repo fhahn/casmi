@@ -24,11 +24,12 @@ DEFINE_CASM_UPDATESET_FORK_SEQ
 REENABLE_VARIADIC_WARNINGS
 
 
-uint16_t pack_values_in_array(std::vector<value_t> &value_list, uint64_t array[]) {
+uint16_t pack_values_in_array(const std::vector<value_t> &value_list, uint64_t array[]) {
   uint16_t sym_args = 0;
   for (size_t i=0; i < value_list.size(); i++) {
-    array[i] = value_list[i].to_uint64_t();
-    if (value_list[i].is_symbolic()) {
+    const value_t& v = value_list[i];
+    array[i] = v.to_uint64_t();
+    if (v.is_symbolic()) {
       sym_args = sym_args | (1 << i);
     }
   }
@@ -58,7 +59,7 @@ void ExecutionVisitor::visit_assure(UnaryNode* assure, const value_t& val) {
 }
 
 casm_update *ExecutionVisitor::add_update(const value_t& val, size_t sym_id,
-                                          std::vector<value_t> &arguments) {
+                                          const std::vector<value_t> &arguments) {
   casm_update* up = (casm_update*) pp_mem_alloc(&(context_.pp_stack), sizeof(casm_update));
 
   up->value = (void*) val.to_uint64_t();
@@ -198,7 +199,7 @@ void ExecutionVisitor::visit_call_post(CallNode *call) {
   rule_bindings.pop_back();
 }
 
-void ExecutionVisitor::visit_print(PrintNode *node, std::vector<value_t> &arguments) {
+void ExecutionVisitor::visit_print(PrintNode *node, const std::vector<value_t> &arguments) {
   std::stringstream ss;
   if (node->filter.size() > 0 ) {
     if (context_.filter_enabled(node->filter)) {
@@ -371,7 +372,7 @@ value_t ExecutionVisitor::visit_expression_single(Expression *expr, const value_
 }
 
 const value_t ExecutionVisitor::visit_function_atom(FunctionAtom *atom,
-                                                  std::vector<value_t> &expr_results) {
+                                                    const std::vector<value_t> &expr_results) {
 
   auto current_rule_bindings = rule_bindings.back();
   switch (atom->symbol_type) {
@@ -403,7 +404,7 @@ const value_t ExecutionVisitor::visit_function_atom(FunctionAtom *atom,
 }
 
 const value_t ExecutionVisitor::visit_function_atom_subrange(FunctionAtom *atom,
-                                                             std::vector<value_t> &expr_results) {
+                                                             const std::vector<value_t> &expr_results) {
   for (uint32_t i=0; i < atom->symbol->subrange_arguments.size(); i++) {
     uint32_t j = atom->symbol->subrange_arguments[i];
     value_t v = expr_results[j];
@@ -423,7 +424,7 @@ const value_t ExecutionVisitor::visit_function_atom_subrange(FunctionAtom *atom,
 
 
 const value_t ExecutionVisitor::visit_builtin_atom(BuiltinAtom *atom,
-                                                 std::vector<value_t> &expr_results) {
+                                                   const std::vector<value_t> &expr_results) {
   // TODO Int2Enum is a special builtin, it needs the complete type information
   // for the enum, values only store TypeType and passing the type to all
   // builtins seems ugly.
@@ -454,7 +455,7 @@ const value_t ExecutionVisitor::visit_derived_function_atom(FunctionAtom*, const
 }
 
 const value_t ExecutionVisitor::visit_list_atom(ListAtom *atom,
-                                              std::vector<value_t> &vals) {
+                                                const std::vector<value_t> &vals) {
   BottomList *list = new BottomList(vals);
   //context_.temp_lists.push_back(list);
 

@@ -17,7 +17,7 @@ class ExecutionVisitor : public BaseVisitor<value_t> {
   private:
     std::vector<value_t> main_bindings;
     casm_update *add_update(const value_t& val, size_t sym_id,
-                            std::vector<value_t> &arguments);
+                            const std::vector<value_t> &arguments);
 
 
   public:
@@ -38,7 +38,7 @@ class ExecutionVisitor : public BaseVisitor<value_t> {
     void visit_call_pre(CallNode *call, const value_t& expr);
     void visit_call(CallNode *call, std::vector<value_t> &arguments);
     void visit_call_post(CallNode *call);
-    void visit_print(PrintNode *node, std::vector<value_t> &arguments);
+    void visit_print(PrintNode *node, const std::vector<value_t> &arguments);
     void visit_diedie(DiedieNode *node, const value_t& msg);
     void visit_impossible(AstNode *node);
 
@@ -55,12 +55,12 @@ class ExecutionVisitor : public BaseVisitor<value_t> {
     const value_t visit_rational_atom(RationalAtom *atom) { return std::move(value_t(&atom->val_)); }
     const value_t visit_undef_atom(UndefAtom *atom) { UNUSED(atom); return std::move(value_t()); }
     const value_t visit_function_atom(FunctionAtom *atom,
-                                      std::vector<value_t> &expr_results);
+                                      const std::vector<value_t> &expr_results);
     const value_t visit_function_atom_subrange(FunctionAtom *atom,
-                                               std::vector<value_t> &expr_results);
+                                               const std::vector<value_t> &expr_results);
 
 
-    const value_t visit_builtin_atom(BuiltinAtom *atom, std::vector<value_t> &expr_results);
+    const value_t visit_builtin_atom(BuiltinAtom *atom, const std::vector<value_t> &expr_results);
     void visit_derived_function_atom_pre(FunctionAtom *atom,
                                          std::vector<value_t>& arguments);
     const value_t visit_derived_function_atom(FunctionAtom *atom, const value_t& expr);
@@ -68,7 +68,7 @@ class ExecutionVisitor : public BaseVisitor<value_t> {
     const value_t visit_rule_atom(RuleAtom *atom) { return value_t(atom->rule); }
     const value_t visit_boolean_atom(BooleanAtom *atom) { return value_t(atom->value); }
     const value_t visit_string_atom(StringAtom *atom) { return value_t(&atom->string); }
-    const value_t visit_list_atom(ListAtom *atom, std::vector<value_t> &vals);
+    const value_t visit_list_atom(ListAtom *atom, const std::vector<value_t> &vals);
     const value_t visit_number_range_atom(NumberRangeAtom *atom);
 };
 

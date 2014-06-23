@@ -267,7 +267,6 @@ bool args_eq(uint64_t args1[], uint64_t args2[], size_t len) {
 }
 
 const value_t ExecutionContext::get_function_value(Function *sym, uint64_t args[], uint16_t sym_args) {
-  // TODO move should be used here
   auto& function_map = functions[sym->id];
   try {
     value_t &v = function_map.second.at(ArgumentsKey(&args[0], sym->arguments_.size(), false, sym_args));
