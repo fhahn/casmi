@@ -80,8 +80,6 @@ class ExecutionContext {
     std::string path_name;
     std::vector<symbolic_condition_t*> path_conditions;
 
-    uint64_t update_counter;
-
     ExecutionContext(const SymbolTable& st, RuleNode *init, const bool symbolic,
         const bool fileout);
     ExecutionContext(const ExecutionContext& other);
