@@ -58,7 +58,8 @@ ExecutionContext::ExecutionContext(const SymbolTable& st, RuleNode *init,
     updateset.pseudostate = 0;
   }
 
-  functions = std::vector<std::pair<const Function*, std::unordered_map<ArgumentsKey, value_t>>>(symbol_table.size());
+  function_states = std::vector<std::unordered_map<ArgumentsKey, value_t>>(symbol_table.size());
+  function_symbols = std::vector<const Function*>(symbol_table.size());
   Function *program_sym = symbol_table.get_function("program");
   // TODO location is wrong here
   program_sym->intitializers_ = new std::vector<std::pair<ExpressionBase*, ExpressionBase*>>();
@@ -87,7 +88,7 @@ void ExecutionContext::apply_updates() {
 
   std::unordered_map<uint32_t, std::vector<ArgumentsKey>> updated_functions;
   if (symbolic) {
-    for (uint32_t i = 1; i < functions.size(); i++) {
+    for (uint32_t i = 1; i < function_states.size(); i++) {
       updated_functions[i] = std::vector<ArgumentsKey>();
     }
   }
@@ -96,14 +97,14 @@ void ExecutionContext::apply_updates() {
   while( i != updateset.set->head ) {
     u = (casm_update*)i->value;
 
-    auto& function_map = functions[u->func];
-
+    auto& function_map = function_states[u->func];
+    const Function* function_symbol = function_symbols[u->func];
     // TODO handle tuples
-    if (function_map.first->return_type_->t == TypeType::LIST) {
-      value_t& list = function_map.second[ArgumentsKey(u->args, u->num_args, false, u->sym_args)];
+    if (function_symbol->return_type_->t == TypeType::LIST) {
+      value_t& list = function_map[ArgumentsKey(u->args, u->num_args, false, u->sym_args)];
       if (u->symbolic){
-        value_t v(function_map.first->return_type_->t, u);
-        function_map.second[ArgumentsKey(u->args, u->num_args, true, u->sym_args)] = v;
+        value_t v(function_symbol->return_type_->t, u);
+        function_map[ArgumentsKey(u->args, u->num_args, true, u->sym_args)] = v;
       } else if (u->defined == 0) {
         // set list to undef
         if (!list.is_undef()) {
@@ -114,18 +115,18 @@ void ExecutionContext::apply_updates() {
         if (!list.is_undef() && !list.is_symbolic()) {
           list.value.list->decrease_usage();
         } else {
-          list.type = function_map.first->return_type_->t;
+          list.type = function_symbol->return_type_->t;
         }
         list.value.list = reinterpret_cast<List*>(u->value);
         list.value.list->bump_usage();
         to_fold.push_back(&list);
       }
     } else {
-      value_t v(function_map.first->return_type_->t, u);
+      value_t v(function_symbol->return_type_->t, u);
       // we could erase keys that store an undef value in concrete mode,
       // but we need to know if a key was set to undef explicitly in symbolic
       // mode
-      function_map.second[ArgumentsKey(u->args, u->num_args, true, u->sym_args)] = v;
+      function_map[ArgumentsKey(u->args, u->num_args, true, u->sym_args)] = v;
     }
 
     if (symbolic) {
@@ -138,15 +139,16 @@ void ExecutionContext::apply_updates() {
   }
 
   if (symbolic) {
-    for (uint32_t i = 1; i < functions.size(); i++) {
-      auto& function_map = functions[i];
+    for (uint32_t i = 1; i < function_states.size(); i++) {
+      auto& function_map = function_states[i];
+      const Function* function_symbol = function_symbols[i];
       const auto& updated_keys = updated_functions[i];
-      if (!function_map.first->is_symbolic || function_map.first->is_static) {
+      if (!function_symbol->is_symbolic || function_symbol->is_static) {
         continue;
       }
 
-      std::equal_to<ArgumentsKey> eq = {function_map.first->arguments_};
-      for (const auto& pair : function_map.second) {
+      std::equal_to<ArgumentsKey> eq = {function_symbol->arguments_};
+      for (const auto& pair : function_map) {
         bool found = false;
         for (const auto& k : updated_keys) {
           if (eq(k, pair.first)) {
@@ -155,13 +157,13 @@ void ExecutionContext::apply_updates() {
           }
         }
         if (!found) {
-          symbolic::dump_symbolic(trace, function_map.first, pair.first.p,
+          symbolic::dump_symbolic(trace, function_symbol, pair.first.p,
               pair.first.sym_args, pair.second);
         }
       }
       for (const auto& k : updated_keys) {
-        symbolic::dump_update(trace, function_map.first, k.p,
-         k.sym_args, function_map.second[k]);
+        symbolic::dump_update(trace, function_symbol, k.p,
+         k.sym_args, function_map[k]);
       }
     }
   }
@@ -241,7 +243,7 @@ void ExecutionContext::merge_seq(Driver& driver) {
       if( (v = (casm_update*) pp_hashmap_set(updateset.set, i->key-1, i->value)) != NULL ) {
           u = (casm_update*)i->value;
 
-          const Function *func = functions[u->func].first;
+          const Function *func = function_symbols[u->func];
           for (size_t i=0; i < func->arguments_.size(); i++) {
             if (!eq_uint64_value(func->arguments_[i], u->args[i], v->args[i])) {
               return;
@@ -268,9 +270,9 @@ bool args_eq(uint64_t args1[], uint64_t args2[], size_t len) {
 }
 
 const value_t ExecutionContext::get_function_value(Function *sym, uint64_t args[], uint16_t sym_args) {
-  auto& function_map = functions[sym->id];
+  auto& function_map = function_states[sym->id];
   try {
-    value_t &v = function_map.second.at(ArgumentsKey(&args[0], sym->arguments_.size(), false, sym_args));
+    const value_t &v = function_map.at(ArgumentsKey(&args[0], sym->arguments_.size(), false, sym_args));
     int64_t state = (updateset.pseudostate % 2 == 0) ? updateset.pseudostate-1:
                                                        updateset.pseudostate;
     for (; state > 0; state -= 2) {
@@ -285,10 +287,10 @@ const value_t ExecutionContext::get_function_value(Function *sym, uint64_t args[
   } catch (const std::out_of_range &e) {
     if (symbolic && sym->is_symbolic) {
       // TODO cleanup symbol
-      function_map.second.emplace(
+      function_map.emplace(
           ArgumentsKey(&args[0], sym->arguments_.size(), true, sym_args),
           value_t(new symbol_t(symbolic::next_symbol_id())));
-      value_t& v = function_map.second[ArgumentsKey(&args[0], sym->arguments_.size(), false, sym_args)];
+      value_t& v = function_map[ArgumentsKey(&args[0], sym->arguments_.size(), false, sym_args)];
       symbolic::dump_create(trace_creates, sym, &args[0], sym_args, v);
       return v;
     }

@@ -158,22 +158,22 @@ namespace symbolic {
     trace.push_back(ss.str());
   }
 
-  void dump_final(std::vector<std::string>& trace, const std::vector<std::pair<const Function*,
-      std::unordered_map<ArgumentsKey, value_t> >>& functions) {
+  void dump_final(std::vector<std::string>& trace, const std::vector<const Function*> symbols,
+                  const std::vector<std::unordered_map<ArgumentsKey, value_t>>& states) {
     std::stringstream ss;
     uint32_t i = 0;
-    for (auto& pair : functions) {
-      if (!pair.first->is_symbolic) {
+    for (uint32_t j=0; j < symbols.size(); j++) {
+      if (!symbols[j]->is_symbolic) {
         continue;
       }
-      for (auto& value_pair : pair.second) {
+      for (auto& value_pair : states[j]) {
         ss << "fof(final" << i << ",hypothesis,"
-           << location_to_string(pair.first, value_pair.first.p, value_pair.first.sym_args, value_pair.second, 0)
-           << ").%FINAL: " << pair.first->name;
-        if (pair.first->arguments_.size() == 0) {
-          ss << arguments_to_string(pair.first, value_pair.first.p, value_pair.first.sym_args, true);
+           << location_to_string(symbols[j], value_pair.first.p, value_pair.first.sym_args, value_pair.second, 0)
+           << ").%FINAL: " << symbols[j]->name;
+        if (symbols[j]->arguments_.size() == 0) {
+          ss << arguments_to_string(symbols[j], value_pair.first.p, value_pair.first.sym_args, true);
         } else {
-          ss << '(' << arguments_to_string(pair.first, value_pair.first.p, value_pair.first.sym_args, true) << ')' ;
+          ss << '(' << arguments_to_string(symbols[j], value_pair.first.p, value_pair.first.sym_args, true) << ')' ;
         }
         ss << std::endl;
         i += 1;

@@ -66,7 +66,8 @@ class ExecutionContext {
     std::map<const std::string, bool> debuginfo_filters;
 
   public:
-    std::vector<std::pair<const Function*, std::unordered_map<ArgumentsKey, value_t> >> functions;
+    std::vector<std::unordered_map<ArgumentsKey, value_t>> function_states;
+    std::vector<const Function*> function_symbols;
     const SymbolTable symbol_table;
     casm_updateset updateset;
     pp_mem pp_stack;

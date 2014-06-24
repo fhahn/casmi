@@ -29,9 +29,8 @@ namespace symbolic {
   void dump_pathcond_match(std::vector<std::string>& trace, const std::string &filename,
       size_t lineno, const symbolic_condition_t *cond, bool status);
 
-  void dump_final(std::vector<std::string>& trace,
-      const std::vector<std::pair<const Function*, 
-      std::unordered_map<ArgumentsKey, value_t> >>& functions);
+  void dump_final(std::vector<std::string>& trace, const std::vector<const Function*> symbols,
+                  const std::vector<std::unordered_map<ArgumentsKey, value_t>>& states);
 
   uint32_t dump_listconst(std::vector<std::string>& trace, List *l);
 

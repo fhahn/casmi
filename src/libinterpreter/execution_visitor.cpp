@@ -72,11 +72,12 @@ casm_update *ExecutionVisitor::add_update(const value_t& val, size_t sym_id) {
 
   up->num_args = num_arguments;
 
-  auto& function_map = context_.functions[sym_id];
-  if (function_map.second.count(ArgumentsKey(up->args, up->num_args, false, up->sym_args)) == 0) {
-    function_map.second.emplace(ArgumentsKey(up->args, up->num_args, true, up->sym_args), value_t());
+  auto& function_map = context_.function_states[sym_id];
+  const ArgumentsKey key(up->args, up->num_args, false, up->sym_args);
+  if (function_map.count(key) == 0) {
+    function_map.emplace(ArgumentsKey(up->args, up->num_args, true, up->sym_args), value_t());
   }
-  const value_t& ref = function_map.second[ArgumentsKey(up->args, up->num_args, false, up->sym_args)];
+  const value_t& ref = function_map[key];
 
   casm_update* v = (casm_update*)casm_updateset_add(&(context_.updateset),
                                                     (void*) &ref,
@@ -84,8 +85,9 @@ casm_update *ExecutionVisitor::add_update(const value_t& val, size_t sym_id) {
 
   if (v != nullptr) {
     // Check if values match
+    const Function* function_symbol = context_.function_symbols[sym_id];
     for (int i=0; i < up->num_args; i++) {
-      if (!eq_uint64_value(function_map.first->arguments_[i], up->args[i], v->args[i])) {
+      if (!eq_uint64_value(function_symbol->arguments_[i], up->args[i], v->args[i])) {
         return up;
       }
     }
@@ -370,14 +372,12 @@ value_t ExecutionVisitor::visit_expression_single(Expression *expr, const value_
 const value_t ExecutionVisitor::visit_function_atom(FunctionAtom *atom,
                                                     const value_t arguments[],
                                                     uint16_t num_arguments) {
-  auto current_rule_bindings = rule_bindings.back();
   switch (atom->symbol_type) {
     case FunctionAtom::SymbolType::PARAMETER:
-      return value_t(current_rule_bindings->at(atom->offset));
+      return value_t(rule_bindings.back()->at(atom->offset));
 
     case FunctionAtom::SymbolType::FUNCTION: {
-      uint64_t args[num_arguments];
-      args[0] = 0;
+      uint64_t args[5];
       uint16_t sym_args = pack_values_in_array(arguments, args, num_arguments);
 
       return context_.get_function_value(atom->symbol, args, sym_args);
@@ -899,8 +899,12 @@ bool ExecutionWalker::init_function(const std::string& name, std::set<std::strin
     return true;
   }
 
-  visitor.context_.functions[func->id] = std::move(std::pair<Function*, std::unordered_map<ArgumentsKey, value_t>>(func,std::unordered_map<ArgumentsKey, value_t>(0, {func->arguments_}, {func->arguments_})));
-  auto& function_map = visitor.context_.functions[func->id].second;
+  visitor.context_.function_states[func->id] = std::move(
+      std::unordered_map<ArgumentsKey, value_t>(0, {func->arguments_}, {func->arguments_}));
+
+  visitor.context_.function_symbols[func->id] = func;
+
+  auto& function_map = visitor.context_.function_states[func->id];
 
   if (func->intitializers_ != nullptr) {
     for (std::pair<ExpressionBase*, ExpressionBase*> init : *func->intitializers_) {
@@ -1030,7 +1034,7 @@ void ExecutionWalker::run() {
         fprintf(out, "%s", s.c_str());
       }
     }
-    symbolic::dump_final(visitor.context_.trace, visitor.context_.functions);
+    symbolic::dump_final(visitor.context_.trace, visitor.context_.function_symbols, visitor.context_.function_states);
     for (const std::string& s : visitor.context_.trace) {
      if (s.find("id%u") != std::string::npos) {
         fprintf(out, s.c_str(), fof_id);
