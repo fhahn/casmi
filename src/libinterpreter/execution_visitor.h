@@ -16,8 +16,7 @@
 class ExecutionVisitor : public BaseVisitor<value_t> {
   private:
     std::vector<value_t> main_bindings;
-    casm_update *add_update(const value_t& val, size_t sym_id,
-                            const std::vector<value_t> &arguments);
+    casm_update *add_update(const value_t& val, size_t sym_id);
 
 
   public:
@@ -57,11 +56,13 @@ class ExecutionVisitor : public BaseVisitor<value_t> {
     const value_t visit_float_atom(FloatAtom *atom) { return std::move(value_t(atom->val_)); }
     const value_t visit_rational_atom(RationalAtom *atom) { return std::move(value_t(&atom->val_)); }
     const value_t visit_undef_atom(UndefAtom *atom) { UNUSED(atom); return std::move(value_t()); }
-    const value_t visit_function_atom(FunctionAtom *atom);
+    const value_t visit_function_atom(FunctionAtom *atom,
+                                      const value_t arguments[], uint16_t num_arguments);
     const value_t visit_function_atom_subrange(FunctionAtom *atom);
 
 
-    const value_t visit_builtin_atom(BuiltinAtom *atom);
+    const value_t visit_builtin_atom(BuiltinAtom *atom, const value_t arguments[],
+                                     uint16_t num_arguments);
     void visit_derived_function_atom_pre(FunctionAtom *atom);
     const value_t visit_derived_function_atom(FunctionAtom *atom, const value_t& expr);
     const value_t visit_self_atom(SelfAtom *atom) { UNUSED(atom); return value_t(); }

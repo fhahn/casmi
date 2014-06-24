@@ -10,7 +10,6 @@ template<class T, class V> class AstWalker {
   public:
     T& visitor;
 
-
     AstWalker(T& v) : visitor(v) {}
 
     void walk_specification(AstNode *spec) {
@@ -320,17 +319,16 @@ template<class T, class V> class AstWalker {
     }
 
     V walk_function_atom(BaseFunctionAtom *func) {
+      V arguments[10];
+
+      uint16_t i = 0;
       if (func->arguments) {
-        uint16_t i;
-        for (i=0; i < func->arguments->size(); i++) {
-          visitor.arguments[i] = walk_expression_base(func->arguments->at(i));
+        for (; i < func->arguments->size(); i++) {
+          arguments[i] = walk_expression_base(func->arguments->at(i));
         }
-        visitor.num_arguments = i;
-      } else {
-        visitor.num_arguments = 0;
-      }
+      } 
       if (func->node_type_ == NodeType::BUILTIN_ATOM) {
-         return visitor.visit_builtin_atom(reinterpret_cast<BuiltinAtom*>(func));
+         return visitor.visit_builtin_atom(reinterpret_cast<BuiltinAtom*>(func), arguments, i);
       } else {
         FunctionAtom *func_a = reinterpret_cast<FunctionAtom*>(func);
         if (func_a->symbol_type == FunctionAtom::SymbolType::DERIVED) {
@@ -339,7 +337,7 @@ template<class T, class V> class AstWalker {
           return visitor.visit_derived_function_atom(func_a, expr);
         } else {
           if (func->node_type_ == NodeType::FUNCTION_ATOM) {
-            return visitor.visit_function_atom(func_a);
+            return visitor.visit_function_atom(func_a, arguments, i);
           } else {
             return visitor.visit_function_atom_subrange(func_a);
           }
@@ -444,7 +442,7 @@ template<class T> class BaseVisitor {
     T visit_undef_atom(UndefAtom*) { return T(); }
     T visit_function_atom(FunctionAtom *, const std::vector<T> &) { return T(); }
     T visit_function_atom_subrange(FunctionAtom*) { return T(); }
-    T visit_builtin_atom(BuiltinAtom*) { return T(); }
+    T visit_builtin_atom(BuiltinAtom*, T[], uint16_t) { return T(); }
     void visit_derived_function_atom_pre(FunctionAtom*) {}
     T visit_derived_function_atom(FunctionAtom*, T) { return T(); }
     T visit_self_atom(SelfAtom*) { return T(); }

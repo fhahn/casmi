@@ -60,8 +60,8 @@ class TypecheckVisitor : public BaseVisitor<Type*> {
     Type* visit_float_atom(FloatAtom *atom) {  return &atom->type_; }
     Type* visit_rational_atom(RationalAtom *atom) { return &atom->type_; }
     Type* visit_undef_atom(UndefAtom *atom) { return &atom->type_; }
-    Type* visit_function_atom(FunctionAtom *atom);
-    Type* visit_builtin_atom(BuiltinAtom *atom);
+    Type* visit_function_atom(FunctionAtom *atom, Type* arguments[], uint16_t num_arguments);
+    Type* visit_builtin_atom(BuiltinAtom *atom, Type *arguments[], uint16_t num_arguments);
 
     void visit_derived_function_atom_pre(FunctionAtom *atom);
     Type* visit_derived_function_atom(FunctionAtom *atom, Type *expr);

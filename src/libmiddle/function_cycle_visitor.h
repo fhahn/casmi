@@ -12,7 +12,7 @@ class InitCycleVisitor: public BaseVisitor<bool> {
     bool arguments[10];
     uint32_t num_arguments;
 
-    bool visit_function_atom(FunctionAtom *atom);
+    bool visit_function_atom(FunctionAtom *atom, bool[], uint16_t);
 };
 
 #endif //CASMI_LIBINTERPRETER_EXEC_VISITOR

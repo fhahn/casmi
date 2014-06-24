@@ -292,7 +292,7 @@ void TypecheckVisitor::visit_pop(PopNode *node) {
       // TODO this should be doable!
       driver_.error(node->to->location, "cannot pop into function with arguments");
     }
-    visit_function_atom(node->to);
+    visit_function_atom(node->to, arguments, 0);
     if (!node->type_.unify(&node->to->type_)) {
       driver_.error(node->from->location,
                     "cannot pop from "+node->from->type_.to_str()+" into "+node->to->type_.to_str());
@@ -427,8 +427,8 @@ Type* TypecheckVisitor::visit_expression_single(Expression *expr, Type*) {
 
 }
 
-Type* TypecheckVisitor::visit_function_atom(FunctionAtom *atom) {
-
+Type* TypecheckVisitor::visit_function_atom(FunctionAtom *atom, Type* arguments[],
+                                            uint16_t num_arguments) {
   Symbol *sym = driver_.function_table.get(atom->name);
   if (sym && sym->type == Symbol::SymbolType::ENUM) {
     atom->symbol_type = FunctionAtom::SymbolType::ENUM;
@@ -492,7 +492,6 @@ Type* TypecheckVisitor::visit_function_atom(FunctionAtom *atom) {
                       "` is "+arguments[i]->to_str()+" but should be "+
                       argument_t->to_str());
       }
-      arguments[i]->unify_links_to_str();
     }
   }
 
@@ -506,7 +505,9 @@ Type* TypecheckVisitor::visit_function_atom(FunctionAtom *atom) {
   return &atom->type_;
 }
 
-Type* TypecheckVisitor::visit_builtin_atom(BuiltinAtom *atom) {
+Type* TypecheckVisitor::visit_builtin_atom(BuiltinAtom *atom,
+                                           Type* arguments[],
+                                           uint16_t num_arguments) {
   if(atom->types.size() != num_arguments) {
     driver_.error(atom->location,
                   "number of provided arguments does not match definition of `"+
@@ -577,8 +578,9 @@ Type* TypecheckVisitor::visit_builtin_atom(BuiltinAtom *atom) {
     }
   } else {
     // TODO check unifying
-    // TODO use tpye_ as return_type_ for builtins
+    // TODO use type_ as return_type_ for builtins
     atom->type_.unify(atom->return_type);
+      DEBUG("HALLOOO");
   }
   return &atom->type_;
 }
