@@ -77,6 +77,7 @@ casm_update *ExecutionVisitor::add_update(const value_t& val, size_t sym_id) {
     function_map.second.emplace(ArgumentsKey(up->args, up->num_args, true, up->sym_args), value_t());
   }
   const value_t& ref = function_map.second[ArgumentsKey(up->args, up->num_args, false, up->sym_args)];
+
   casm_update* v = (casm_update*)casm_updateset_add(&(context_.updateset),
                                                     (void*) &ref,
                                                     (void*) up);
@@ -264,7 +265,8 @@ void ExecutionVisitor::visit_push(PushNode *node, const value_t& expr, const val
       throw ex;
     }
 
-    symbolic::dump_builtin(context_.trace, "push", {atom, expr} , to_res);
+    value_t args[] = {atom, expr};
+    symbolic::dump_builtin(context_.trace, "push", args, 2, to_res);
   } else {
     const value_t to_res = builtins::cons(context_, expr, atom);
 
@@ -308,7 +310,8 @@ void ExecutionVisitor::visit_pop(PopNode *node, const value_t& val) {
           value_t(TypeType::LIST, val.value.sym->list)).value.list;
     }
 
-    symbolic::dump_builtin(context_.trace, "pop", {val, to_res} , from_res);
+    value_t args[] = {val, to_res};
+    symbolic::dump_builtin(context_.trace, "pop", args, 2, from_res);
 
     try {
       up = add_update(from_res, node->from->symbol->id);
@@ -410,7 +413,7 @@ const value_t ExecutionVisitor::visit_function_atom_subrange(FunctionAtom *atom)
 
 const value_t ExecutionVisitor::visit_builtin_atom(BuiltinAtom *atom,
                                                    const value_t arguments[],
-                                                   uint16_t) {
+                                                   uint16_t num_arguments) {
   // TODO Int2Enum is a special builtin, it needs the complete type information
   // for the enum, values only store TypeType and passing the type to all
   // builtins seems ugly.
@@ -427,7 +430,7 @@ const value_t ExecutionVisitor::visit_builtin_atom(BuiltinAtom *atom,
     return std::move(value_t());
   }
 
-  return builtins::dispatch(atom->id, context_, arguments);
+  return builtins::dispatch(atom->id, context_, arguments, num_arguments);
 }
 
 void ExecutionVisitor::visit_derived_function_atom_pre(FunctionAtom*) {

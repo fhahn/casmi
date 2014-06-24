@@ -9,7 +9,7 @@
 
 namespace builtins {
   const value_t dispatch(BuiltinAtom::Id atom_id, ExecutionContext& ctxt,
-                       const value_t arguments[]);
+                         const value_t arguments[], uint16_t num_arguments);
 
   const value_t pow(const value_t& base, const value_t& power);
   const value_t hex(const value_t& arg);
@@ -37,9 +37,8 @@ namespace builtins {
       bool sym;
     };
 
-    const value_t dispatch(BuiltinAtom::Id builtin_id, 
-                         const value_t arguments[],
-                         ExecutionContext& ctxt);
+    const value_t dispatch(BuiltinAtom::Id builtin_id, ExecutionContext& ctxt,
+                         const value_t arguments[], uint16_t num_arguments);
 
   }
 };

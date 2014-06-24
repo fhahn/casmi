@@ -36,7 +36,7 @@ namespace symbolic {
   uint32_t dump_listconst(std::vector<std::string>& trace, List *l);
 
   void dump_builtin(std::vector<std::string>& trace, const char *name,
-      const std::vector<value_t>& arguments, const value_t& ret);
+      const value_t arguments[], uint16_t num_arguments, const value_t& ret);
 
   enum class check_status_t {
     NOT_FOUND,

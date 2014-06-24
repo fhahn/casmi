@@ -235,7 +235,6 @@ const std::string value_t::to_str(bool symbolic) const {
   }
 }
 
-
 symbol_t::symbol_t(uint32_t id) : symbol_t(id, nullptr)  {}
 
 symbol_t::symbol_t(uint32_t id, symbolic_condition_t *cond) : id(id),

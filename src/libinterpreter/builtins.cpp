@@ -5,7 +5,7 @@
 #include "libinterpreter/builtins.h"
 
 const value_t builtins::dispatch(BuiltinAtom::Id atom_id,  ExecutionContext& ctxt,
-                               const value_t arguments[]) {
+                               const value_t arguments[], uint16_t num_arguments) {
   switch (atom_id) {
     case BuiltinAtom::Id::POW:
       return std::move(pow(arguments[0], arguments[1]));
@@ -52,7 +52,7 @@ const value_t builtins::dispatch(BuiltinAtom::Id atom_id,  ExecutionContext& ctx
     case BuiltinAtom::Id::SYMBOLIC:
       return std::move(symbolic(arguments[0]));
 
-    default: return std::move(shared::dispatch(atom_id, arguments, ctxt));
+    default: return std::move(shared::dispatch(atom_id, ctxt, arguments, num_arguments));
   }
 }
 
@@ -396,8 +396,8 @@ namespace shared {
   #pragma GCC diagnostic warning "-Wunused-parameter"
   REENABLE_VARIADIC_WARNINGS
 
-  const value_t dispatch(BuiltinAtom::Id builtin_id, 
-                       const value_t arguments[], ExecutionContext& ctxt) {
+  const value_t dispatch(BuiltinAtom::Id builtin_id,  ExecutionContext& ctxt,
+                       const value_t arguments[], uint16_t num_arguments) {
     const char *sym_name;
     Int ret;
     Int arg0;
@@ -414,8 +414,7 @@ namespace shared {
       return std::move(value_t((INT_T)ret.value));
     } else if (ctxt.symbolic && ret.sym) {
       value_t v(new symbol_t(::symbolic::next_symbol_id()));
-      // TODO enable
-      //::symbolic::dump_builtin(ctxt.trace, sym_name, arguments, v);
+      ::symbolic::dump_builtin(ctxt.trace, sym_name, arguments, num_arguments, v);
       return std::move(v);
     } else {
       return std::move(value_t());

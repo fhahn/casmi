@@ -316,18 +316,19 @@ namespace symbolic {
   }
 
   void dump_builtin(std::vector<std::string>& trace, const char *name,
-                    const std::vector<value_t>& args, const value_t& ret) {
+                    const value_t arguments[], uint16_t num_arguments,
+                    const value_t& ret) {
     std::stringstream ss;
 
-    for (const auto& a : args) {
-      dump_type(ss, a);
+    for (uint16_t i=0; i < num_arguments; i++) {
+      dump_type(ss, arguments[i]);
     }
     dump_type(ss, ret);
 
     ss << "fof(id%u,hypothesis,f" << name << "(";
 
-    for (const auto& a : args) {
-      ss << a.to_str() << ", ";
+    for (uint16_t i=0; i < num_arguments; i++) {
+      ss << arguments[i].to_str() << ", ";
     }
     ss << ret.to_str() << "))." << std::endl;
     trace.push_back(ss.str());
