@@ -120,7 +120,7 @@ def main(new_casmi, legacy_casmi, casm_compiler):
 
                 sys.stdout.write(" took %lf s\n" % (time))
                 results[vm] = time
-                dump_run(bench_file, vm, time)
+                #dump_run(bench_file, vm, time)
 
 
             for k, v in iteritems(results):
