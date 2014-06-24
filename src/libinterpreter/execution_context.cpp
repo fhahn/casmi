@@ -4,10 +4,11 @@
 #include "libinterpreter/execution_context.h"
 #include "libinterpreter/symbolic.h"
 
-#define UPDATESET_DATA_SIZE 10 * 1024 * 1024
-#define UPDATESET_SIZE 10 * 1024
+//#define UPDATESET_DATA_SIZE 65535*64 * 50
+//#define UPDATESET_SIZE 65535*64
+#define UPDATESET_SIZE 1031 * 19
+#define UPDATESET_DATA_SIZE UPDATESET_SIZE * 50
 #define TEMP_STACK_SIZE 1024 * 1024
-
 
 ArgumentsKey::ArgumentsKey(uint64_t *args, uint16_t size, bool dyn,
     uint16_t syms) : dynamic(dyn), sym_args(syms) {
@@ -49,7 +50,7 @@ ExecutionContext::ExecutionContext(const SymbolTable& st, RuleNode *init,
   updateset.set =  pp_hashmap_new(&updateset_data_, UPDATESET_SIZE, "main updateset");
 
   pp_mem_new(&pp_stack, TEMP_STACK_SIZE, "mem for temporary updates");
-  pp_mem_new(&value_stack, 1024 * 1024 * 1024, "mem for value stuff");
+  pp_mem_new(&value_stack, 1024 * 1024, "mem for value stuff");
 
   if (init->child_ && init->child_->node_type_ == NodeType::PARBLOCK) {
     updateset.pseudostate = 1;
