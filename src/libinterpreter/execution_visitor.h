@@ -58,12 +58,16 @@ class ExecutionVisitor : public BaseVisitor<value_t> {
     const value_t visit_undef_atom(UndefAtom *atom) { UNUSED(atom); return std::move(value_t()); }
     const value_t visit_function_atom(FunctionAtom *atom,
                                       const value_t arguments[], uint16_t num_arguments);
-    const value_t visit_function_atom_subrange(FunctionAtom *atom);
+    const value_t visit_function_atom_subrange(FunctionAtom *atom,
+                                               const value_t arguments[],
+                                               uint16_t num_arguments);
 
 
     const value_t visit_builtin_atom(BuiltinAtom *atom, const value_t arguments[],
                                      uint16_t num_arguments);
-    void visit_derived_function_atom_pre(FunctionAtom *atom);
+    void visit_derived_function_atom_pre(FunctionAtom *atom,
+                                         const value_t arguments[],
+                                         uint16_t num_arguments);
     const value_t visit_derived_function_atom(FunctionAtom *atom, const value_t& expr);
     const value_t visit_self_atom(SelfAtom *atom) { UNUSED(atom); return value_t(); }
     const value_t visit_rule_atom(RuleAtom *atom) { return value_t(atom->rule); }

@@ -245,6 +245,8 @@ void ExecutionVisitor::visit_let_post(LetNode*) {
 }
 
 void ExecutionVisitor::visit_push(PushNode *node, const value_t& expr, const value_t& atom) {
+  // at the moment, functions with arguments are not supported
+  num_arguments = 0;
   if (atom.is_symbolic()) {
     const value_t to_res(new symbol_t(symbolic::next_symbol_id()));
     if (atom.value.sym->list) {
@@ -273,7 +275,6 @@ void ExecutionVisitor::visit_push(PushNode *node, const value_t& expr, const val
     try {
       casm_update *up = add_update(to_res, node->to->symbol->id);
       up->line = (uint64_t) &node->location;
-      num_arguments = 0;
     } catch (const RuntimeException& ex) {
       // TODO this is probably not the cleanest solutions
       driver_.error(node->to->location,
@@ -284,6 +285,7 @@ void ExecutionVisitor::visit_push(PushNode *node, const value_t& expr, const val
 }
 
 void ExecutionVisitor::visit_pop(PopNode *node, const value_t& val) {
+  // at the moment, functions with arguments are not supported
   num_arguments = 0;
   if (val.is_symbolic()) {
     const value_t to_res = (val.value.sym->list) ? builtins::peek(value_t(TypeType::LIST, val.value.sym->list)) :
@@ -392,7 +394,9 @@ const value_t ExecutionVisitor::visit_function_atom(FunctionAtom *atom,
   }
 }
 
-const value_t ExecutionVisitor::visit_function_atom_subrange(FunctionAtom *atom) {
+const value_t ExecutionVisitor::visit_function_atom_subrange(FunctionAtom *atom,
+                                                             const value_t arguments[],
+                                                             uint16_t num_arguments) {
   for (uint32_t i=0; i < atom->symbol->subrange_arguments.size(); i++) {
     uint32_t j = atom->symbol->subrange_arguments[i];
     value_t v = arguments[j];
@@ -433,7 +437,9 @@ const value_t ExecutionVisitor::visit_builtin_atom(BuiltinAtom *atom,
   return builtins::dispatch(atom->id, context_, arguments, num_arguments);
 }
 
-void ExecutionVisitor::visit_derived_function_atom_pre(FunctionAtom*) {
+void ExecutionVisitor::visit_derived_function_atom_pre(FunctionAtom*,
+                                                       const value_t arguments[],
+                                                       uint16_t num_arguments) {
   // TODO change, cleanup!
   std::vector<value_t> *tmp = new std::vector<value_t>();
   for (uint32_t i=0; i < num_arguments; i++) {

@@ -332,14 +332,14 @@ template<class T, class V> class AstWalker {
       } else {
         FunctionAtom *func_a = reinterpret_cast<FunctionAtom*>(func);
         if (func_a->symbol_type == FunctionAtom::SymbolType::DERIVED) {
-          visitor.visit_derived_function_atom_pre(func_a);
+          visitor.visit_derived_function_atom_pre(func_a, arguments, i);
           V expr = walk_expression_base(func_a->symbol->derived);
           return visitor.visit_derived_function_atom(func_a, expr);
         } else {
           if (func->node_type_ == NodeType::FUNCTION_ATOM) {
             return visitor.visit_function_atom(func_a, arguments, i);
           } else {
-            return visitor.visit_function_atom_subrange(func_a);
+            return visitor.visit_function_atom_subrange(func_a, arguments, i);
           }
         }
       }
@@ -441,9 +441,9 @@ template<class T> class BaseVisitor {
     T visit_rational_atom(RationalAtom*) { return T(); }
     T visit_undef_atom(UndefAtom*) { return T(); }
     T visit_function_atom(FunctionAtom *, const std::vector<T> &) { return T(); }
-    T visit_function_atom_subrange(FunctionAtom*) { return T(); }
+    T visit_function_atom_subrange(FunctionAtom*, T[], uint16_t) { return T(); }
     T visit_builtin_atom(BuiltinAtom*, T[], uint16_t) { return T(); }
-    void visit_derived_function_atom_pre(FunctionAtom*) {}
+    void visit_derived_function_atom_pre(FunctionAtom*, T[], uint16_t) {}
     T visit_derived_function_atom(FunctionAtom*, T) { return T(); }
     T visit_self_atom(SelfAtom*) { return T(); }
     T visit_rule_atom(RuleAtom*) { return T(); }

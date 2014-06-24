@@ -585,7 +585,9 @@ Type* TypecheckVisitor::visit_builtin_atom(BuiltinAtom *atom,
   return &atom->type_;
 }
 
-void TypecheckVisitor::visit_derived_function_atom_pre(FunctionAtom *atom) {
+void TypecheckVisitor::visit_derived_function_atom_pre(FunctionAtom *atom,
+                                                       Type* arguments[],
+                                                       uint16_t num_arguments) {
   size_t args_defined = atom->symbol->arguments_.size();
   size_t args_provided = num_arguments;
   if (args_defined != args_provided) {
