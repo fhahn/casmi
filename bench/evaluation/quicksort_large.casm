@@ -64,7 +64,7 @@ rule quicksort =
 				p := undef
 				need_pop := false
 			} else {
-				forall i in [0..999] do {
+				forall i in [0..2999] do {
 					assert array(i) <= array(i+1)
 					print array(i)
 				}
@@ -79,13 +79,13 @@ rule quicksort =
 init initR
 
 rule initR = {
-	forall i in [0..1000] do {
-		array(i) := 1000 - i
+	forall i in [0..3000] do {
+		array(i) := 3000 - i
 	}
 	p := undef
 	{|
 		stack := []
-		push [0,1000] into stack
+		push [0,3000] into stack
 	|}
 	need_pop := true
 	program(self) := @quicksort

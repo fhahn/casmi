@@ -13,10 +13,10 @@ case i of
 		changes := false
 		i := 0
 		}
-	90:
+	200:
 		{
 		if not changes then {
-			forall j in [0..90] do 
+			forall j in [0..200] do 
 				print j + "=" + array(j)
 			program(self) := undef
 		}
@@ -37,8 +37,8 @@ case i of
 endcase
 
 rule initR = {
-	forall j in [0..90] do {
-		array(j) := 90 - j
+	forall j in [0..200] do {
+		array(j) := 200 - j
 	}
 	program(self) := @bubblesort
 }

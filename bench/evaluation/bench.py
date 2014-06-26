@@ -8,7 +8,7 @@ import tempfile
 import shutil
 
 
-NUM_RUNS = 3
+NUM_RUNS = 10
 
 bench_path = os.path.dirname(os.path.abspath(__file__))
 
@@ -101,14 +101,15 @@ def main(new_casmi, legacy_casmi, casm_compiler):
     for root, dirs, files in os.walk(bench_path):
         for bench_file in files:
             if not bench_file.endswith(".casm"): continue
-            click.echo("Running benchmark %s" % os.path.join(os.path.split(root)[1], bench_file))
+            #click.echo("Running benchmark %s" % os.path.join(os.path.split(root)[1], bench_file))
 
             results = {}
             file_path = os.path.join(root, bench_file);
-            for vm in vms:
-                sys.stdout.write("\t {} ...".format(vm[0]))
-                sys.stdout.flush()
+            sys.stdout.write(bench_file)
+            sys.stdout.flush()
 
+            for vm in vms:
+ 
                 if vm[0] == 'compiler':
                     tmp_dir = tempfile.mkdtemp()
                     out_file = os.path.join(tmp_dir, 'out')
@@ -118,16 +119,27 @@ def main(new_casmi, legacy_casmi, casm_compiler):
                 else:
                     time = timeit.timeit('run_script("{}", "{}")'.format(vm[1], file_path), setup="from __main__ import run_script", number=NUM_RUNS)
 
-                sys.stdout.write(" took %lf s\n" % (time))
-                results[vm] = time
+                #sys.stdout.write(" took %lf s\n" % (time))
+                results[vm[0]] = time
                 #dump_run(bench_file, vm, time)
 
+            parts = [str(NUM_RUNS), str(results["new casmi"])]
 
+            if len(vms) == 2:
+                parts.append(str(results["old casmi"]))
+            elif len(vms) == 3:
+                parts.append(str(results["compiler"]))
+            else:
+                sys.exit(0)
+            print(" ; "+" ; ".join(parts))
+
+
+            """
             for k, v in iteritems(results):
                 if k != vms[0]:
                     # compare other casm solutions to new casmi
                     factor = v / results[vms[0]]
                     print("\t'%s' is %lf faster than '%s'" % (vms[0][0], factor, k[0]))
-
+            """
 if __name__ == '__main__':
     main()
