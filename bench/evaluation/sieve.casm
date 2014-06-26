@@ -10,7 +10,7 @@ function j : -> Int
 
 rule initR =
 {|
-	forall k in [0..1000] do
+	forall k in [0..10000] do
 		array(k) := k
 /*
 	program(self) := sieve
@@ -20,11 +20,11 @@ rule sieve =
 {|
 */	i := 2
 	iterate	
-		if i * i <= 1000 then
+		if i * i <= 10000 then
 		{|
 		j := i 
 		iterate
-			if i * j <= 1000 then
+			if i * j <= 10000 then
 			{
 				array(i*j) := undef
 				j := j + 1
@@ -32,7 +32,7 @@ rule sieve =
 			i := i + 1
 		|}
 
-	forall k in [0..1000] do
+	forall k in [0..10000] do
 		if array(k) != undef then
 			print array(k) + " " 
 

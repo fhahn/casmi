@@ -1,0 +1,6 @@
+CASM startup
+
+init main
+
+rule main = program(self) := undef
+

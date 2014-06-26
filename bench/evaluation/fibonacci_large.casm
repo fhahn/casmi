@@ -8,7 +8,7 @@ CASM Fibonacci
 init InitRule
 
 rule InitRule = 
-	let n = 1500 in 
+	let n = 3500 in 
 		seqblock
 		print "Fibonacci(" + n + ") using dynamic programming: " 
 		call fibo_d(n)

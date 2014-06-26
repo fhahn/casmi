@@ -4,8 +4,8 @@ function a: -> List(Int) initially { [] }
 rule main = {
     a := cons(i, a)
     i := i+1
-    if i = 10000 then {
-        assert a = [9999..0]
+    if i = 100000 then {
+        assert a = [99999..0]
         program(self) := undef
     }
 }
