@@ -125,12 +125,10 @@ def main(new_casmi, legacy_casmi, casm_compiler):
 
             parts = [str(NUM_RUNS), str(results["new casmi"])]
 
-            if len(vms) == 2:
+            if 'old casmi' in results:
                 parts.append(str(results["old casmi"]))
-            elif len(vms) == 3:
+            if 'compiler' in results:
                 parts.append(str(results["compiler"]))
-            else:
-                sys.exit(0)
             print(" ; "+" ; ".join(parts))
 
 
