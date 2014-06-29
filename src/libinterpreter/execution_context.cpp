@@ -6,9 +6,9 @@
 
 //#define UPDATESET_DATA_SIZE 65535*64 * 50
 //#define UPDATESET_SIZE 65535*64
-#define UPDATESET_SIZE 1031 * 19
+#define UPDATESET_SIZE 1561 * 19
 #define UPDATESET_DATA_SIZE UPDATESET_SIZE * 50
-#define TEMP_STACK_SIZE 1024 * 1024
+#define TEMP_STACK_SIZE 1024 * 1024 * 10
 
 ArgumentsKey::ArgumentsKey(uint64_t *args, uint16_t size, bool dyn,
     uint16_t syms) : dynamic(dyn), sym_args(syms) {
@@ -244,7 +244,9 @@ void ExecutionContext::merge_seq(Driver& driver) {
           u = (casm_update*)i->value;
 
           const Function *func = function_symbols[u->func];
+          DEBUG("FUNC "<<func->name);
           for (size_t i=0; i < func->arguments_.size(); i++) {
+            DEBUG("CHECK ARGS "<<u->args[i] << " "<<v->args[i]);
             if (!eq_uint64_value(func->arguments_[i], u->args[i], v->args[i])) {
               return;
             }
