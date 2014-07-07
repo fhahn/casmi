@@ -141,9 +141,6 @@ void TypecheckVisitor::visit_update(UpdateNode *update, Type*, Type*) {
     driver_.error(update->location, "cannot update static function `"+update->func->name+"`");
   }
 
-  // TODO unify func->type and expr->type
-  //DEBUG("link "<<update->func->type_.unify_links_to_str());
-  //DEBUG("link "<<update->expr_->type_.unify_links_to_str());
   if (!update->func->type_.unify(&update->expr_->type_)) {
     driver_.error(update->location, "type `"+update->func->type_.get_most_general_type()->to_str()+"` of `"+
                                     update->func->name+"` does not match type `"+
@@ -334,7 +331,6 @@ void TypecheckVisitor::check_numeric_operator(const yy::location& loc,
                                             Type* type,
                                             const ExpressionOperation op) {
   if (*type == TypeType::UNKNOWN) {
-    DEBUG("Add numeric constraints");
     type->constraints.push_back(new Type(TypeType::INT));
     if (op != ExpressionOperation::MOD || op == ExpressionOperation::RAT_DIV) {
       type->constraints.push_back(new Type(TypeType::RATIONAL));
@@ -359,14 +355,12 @@ void TypecheckVisitor::check_numeric_operator(const yy::location& loc,
 
 
 Type* TypecheckVisitor::visit_expression(Expression *expr, Type*, Type*) {
-  DEBUG("EXPR T1 "<<expr->left_->type_.to_str() << " T2: "<<expr->right_->type_.to_str());
   if (expr->left_ && expr->right_ && !expr->left_->type_.unify(&expr->right_->type_)) {
       driver_.error(expr->location, "type of expressions did not match: "+
                                      expr->left_->type_.get_most_general_type()->to_str()+" != "+
                                      expr->right_->type_.get_most_general_type()->to_str());
   }
 
-  DEBUG("EXPR DONE T1 "<<expr->left_->type_.to_str() << " T2: "<<expr->right_->type_.to_str());
   switch (expr->op) {
     case ExpressionOperation::ADD:
     case ExpressionOperation::SUB:
@@ -374,12 +368,10 @@ Type* TypecheckVisitor::visit_expression(Expression *expr, Type*, Type*) {
     case ExpressionOperation::DIV:
     case ExpressionOperation::MOD:
       check_numeric_operator(expr->location, &expr->left_->type_, expr->op);
-      // TODO Check unifying
       expr->type_.unify(&expr->left_->type_);
       break;
     case ExpressionOperation::RAT_DIV:
       check_numeric_operator(expr->location, &expr->left_->type_, expr->op);
-      // TODO Check unifying
       expr->type_.unify(Type(TypeType::RATIONAL));
       break;
 
@@ -436,8 +428,6 @@ Type* TypecheckVisitor::visit_function_atom(FunctionAtom *atom, Type* arguments[
     if (!forall_head && atom->enum_->name == atom->name) {
       driver_.error(atom->location, "`"+atom->name+"` is an enum, not a member of an enum");
     }
-    // TODO leak
-    // TODO check unify here?
     atom->type_.unify(new Type(TypeType::ENUM, sym->name));
     return &atom->type_;
   }
@@ -452,7 +442,6 @@ Type* TypecheckVisitor::visit_function_atom(FunctionAtom *atom, Type* arguments[
           !atom->arguments) {
         atom->symbol_type = FunctionAtom::SymbolType::PARAMETER;
         atom->offset = current_rule_binding_offsets->at(atom->name);
-        // TODO check unifying
         Type* binding_type = current_rule_binding_types->at(atom->offset);
         atom->type_.unify(binding_type);
         return &atom->type_;
@@ -483,8 +472,7 @@ Type* TypecheckVisitor::visit_function_atom(FunctionAtom *atom, Type* arguments[
   } else {
     for (size_t i=0; i < atom->symbol->arguments_.size(); i++) {
 
-     Type *argument_t = atom->symbol->arguments_[i];
-      DEBUG(argument_t->unify_links_to_str());
+      Type *argument_t = atom->symbol->arguments_[i];
  
       if (!arguments[i]->unify(argument_t)) {
         driver_.error(atom->arguments->at(i)->location,
@@ -500,7 +488,6 @@ Type* TypecheckVisitor::visit_function_atom(FunctionAtom *atom, Type* arguments[
     driver_.error(atom->location, "number of provided arguments does not match definition of `"+atom->name+"`");
   }
 
-  // TODO check unifying
   atom->type_.unify(func->return_type_);
   return &atom->type_;
 }
@@ -577,10 +564,8 @@ Type* TypecheckVisitor::visit_builtin_atom(BuiltinAtom *atom,
       atom->type_.unify(atom->return_type);
     }
   } else {
-    // TODO check unifying
     // TODO use type_ as return_type_ for builtins
     atom->type_.unify(atom->return_type);
-      DEBUG("HALLOOO");
   }
   return &atom->type_;
 }
@@ -657,9 +642,7 @@ void AstWalker<TypecheckVisitor, Type*>::walk_forall(ForallNode *node) {
   Type list_t = new Type(TypeType::LIST, new Type(TypeType::UNKNOWN));
 
   if (node->in_expr->type_ == TypeType::INT || node->in_expr->type_ == TypeType::ENUM) {
-    DEBUG("START UNIFY");
     node->type_.unify(&node->in_expr->type_);
-    DEBUG("DONE UNIFY\n Type:"<<node->type_.enum_name << "|"<<node->in_expr->type_.to_str());
   } else if (node->in_expr->type_.unify(&list_t)) {
     node->type_.unify(node->in_expr->type_.subtypes[0]);
   } else {
