@@ -61,46 +61,35 @@ value_t::value_t(TypeType t, casm_update* u) {
     return;
   }
 
+  type = t;
   switch (t) {
     case TypeType::UNDEF:
-      type = TypeType::UNDEF;
+    case TypeType::SELF: 
       break;
     case TypeType::RULEREF:
-      type = TypeType::RULEREF; 
       value.rule = reinterpret_cast<RuleNode*>(u->value);
       break;
     case TypeType::INT:
-      type = TypeType::INT;
       value.integer = (int64_t)u->value;
       break;
     case TypeType::FLOAT:
-      type = TypeType::FLOAT;
       value.float_ = (int64_t)u->value;
       break;
     case TypeType::ENUM:
-      type = TypeType::ENUM; 
       value.enum_val = reinterpret_cast<enum_value_t*>(u->value);
       break;
     case TypeType::RATIONAL:
-      type = TypeType::RATIONAL; 
       value.rat = reinterpret_cast<const rational_t*>(u->value);
       break;
     case TypeType::STRING:
-      type = TypeType::STRING;
       value.string = reinterpret_cast<std::string*>(u->value);
       break;
     case TypeType::LIST:
-      type = TypeType::LIST;
       value.list = reinterpret_cast<List*>(u->value);
       break;
     case TypeType::BOOLEAN: 
-      type = TypeType::BOOLEAN;
       value.boolean = (bool) u->value;
       break;
-    case TypeType::SELF: 
-      type = TypeType::SELF;
-      break;
-
     default: throw RuntimeException("Unsupported type in apply");
   }
 }
