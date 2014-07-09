@@ -30,6 +30,7 @@ enum Optionvalue_ts {
   DEBUGINFO_FILTER = (1 << 3),
   SYMBOLIC = (1 << 4),
   FILEOUT = (1 << 5),
+  DUMP_UPDATES = (1 << 6),
   ERROR = (1 << 9)
 };
 
@@ -49,6 +50,7 @@ struct arguments parse_cmd_args(int argc, char *argv[]) {
        {"debuginfo-filter", required_argument, 0, 'd'},
        {"symbolic", no_argument, 0, 's'},
        {"fileout", no_argument, 0, 'x'},
+       {"dump-updates", no_argument, 0, 'u'},
        {0, 0, 0, 0}
   };
 
@@ -58,7 +60,7 @@ struct arguments parse_cmd_args(int argc, char *argv[]) {
 
   struct arguments opts;
 
-  while ((opt = getopt_long(argc, argv, "hd:sx",
+  while ((opt = getopt_long(argc, argv, "hd:sxu",
                             long_options, &option_index)) != -1) {
     switch(opt) {
       case 0:
@@ -81,6 +83,9 @@ struct arguments parse_cmd_args(int argc, char *argv[]) {
       case 'x':
         flags |= Optionvalue_ts::FILEOUT;
         break;
+      case 'u':
+        flags |= Optionvalue_ts::DUMP_UPDATES;
+        break;
       case '?':
         flags |= Optionvalue_ts::ERROR;
         /* getopt_long already printed an error message. */
@@ -102,11 +107,12 @@ void print_help() {
   std::cout << "USAGE: casmi [OPTIONS] <filename>" << std::endl;
   std::cout << std::endl;
   std::cout << "OPTIONS:" << std::endl;
-  std::cout << "  -h, --help" << "\t\t" << "shows command line options" << std::endl;
-  std::cout << "  --dump-ast" << "\t\t" << "dumps the AST as dot graph" << std::endl;
-  std::cout << "  --parse-only" << "\t\t" << "only parse the input, does not run typechecking" << std::endl;
-  std::cout << "  --debuginfo-filter FILTERS" << "\t\t" << "comma separated list with filter names to enable"<< std::endl;
+  std::cout << "  -h, --help" << "\t\t\t" << "shows command line options" << std::endl;
+  std::cout << "  --dump-ast" << "\t\t\t" << "dumps the AST as dot graph" << std::endl;
+  std::cout << "  --parse-only" << "\t\t\t" << "only parse the input, does not run typechecking" << std::endl;
+  std::cout << "  --debuginfo-filter FILTERS" << "\t" << "comma separated list with filter names to enable"<< std::endl;
   std::cout << "  -s, --symbolic" << "\t\t" << "enable symbolic mode" << std::endl;
+  std::cout << "  -u, --dump-updates" << "\t\t" << "dump generated updates after each step" << std::endl;
 }
 
 int main (int argc, char *argv[]) {
