@@ -1,3 +1,5 @@
+#include <sstream>
+
 #include "macros.h"
 #include "libutil/exceptions.h"
 
@@ -39,12 +41,31 @@ ArgumentsKey::~ArgumentsKey() {
   }
 }
 
+std::string arguments_to_string(const Function *func, const uint64_t args[]) {
+  std::stringstream ss;
+  if (func->arguments_.size() == 0) {
+    return "";
+  }
+  for (uint32_t i = 0; i < func->arguments_.size(); i++) {
+    casm_update up;
+    up.defined = 1;
+    up.symbolic = 0;
+    up.num_args  = 0;
+    up.value = (void*) args[i];
+    ss << value_t(func->arguments_[i]->t, &up).to_str();
+    ss << ", ";
+  }
+  // Strip trailing comma
+  return "("+ss.str().substr(0, ss.str().size()-2)+")";
+}
+
 pp_mem ExecutionContext::value_stack;
 
 ExecutionContext::ExecutionContext(const SymbolTable& st, RuleNode *init,
-    const bool symbolic, const bool fileout): debuginfo_filters(),
+    const bool symbolic, const bool fileout, const bool dump_updates): debuginfo_filters(),
     symbol_table(std::move(st)), temp_lists(), symbolic(symbolic), fileout(fileout),
-    trace_creates(), trace(), path_name(""), path_conditions() {
+    dump_updates(dump_updates), trace_creates(), trace(), update_dump(),
+    path_name(""), path_conditions() {
 
   pp_mem_new(&updateset_data_, UPDATESET_DATA_SIZE, "mem for updateset hashmap");
   updateset.set =  pp_hashmap_new(&updateset_data_, UPDATESET_SIZE, "main updateset");
@@ -71,8 +92,8 @@ ExecutionContext::ExecutionContext(const SymbolTable& st, RuleNode *init,
 
 ExecutionContext::ExecutionContext(const ExecutionContext& other) : 
      debuginfo_filters(other.debuginfo_filters), symbol_table(other.symbol_table),
-     symbolic(other.symbolic), fileout(other.fileout), trace(other.trace),
-     path_name(other.path_name) {
+     symbolic(other.symbolic), fileout(other.fileout), dump_updates(other.dump_updates),
+     trace(other.trace), update_dump(other.update_dump), path_name(other.path_name) {
 
   // TODO copy updates!
   pp_mem_new(&updateset_data_, UPDATESET_DATA_SIZE, "mem for updateset hashmap");
@@ -87,8 +108,8 @@ void ExecutionContext::apply_updates() {
   casm_update* u;
 
   std::unordered_map<uint32_t, std::vector<ArgumentsKey>> updated_functions;
-  if (symbolic) {
-    for (uint32_t i = 1; i < function_states.size(); i++) {
+  if (symbolic || dump_updates) {
+    for (uint32_t i = 0; i < function_states.size(); i++) {
       updated_functions[i] = std::vector<ArgumentsKey>();
     }
   }
@@ -129,7 +150,7 @@ void ExecutionContext::apply_updates() {
       function_map[ArgumentsKey(u->args, u->num_args, true, u->sym_args)] = v;
     }
 
-    if (symbolic) {
+    if (symbolic || dump_updates) {
       updated_functions[u->func].push_back(
             ArgumentsKey(u->args, u->num_args, true, u->sym_args));
     }
@@ -167,6 +188,31 @@ void ExecutionContext::apply_updates() {
       }
     }
   }
+
+  if (dump_updates) {
+    for (uint32_t i = 0; i < function_states.size(); i++) {
+      auto& function_map = function_states[i];
+      const Function* function_symbol = function_symbols[i];
+      const auto& updated_keys = updated_functions[i];
+
+      for (const auto& k : updated_keys) {
+        update_dump.push_back(function_symbol->name+
+            arguments_to_string(function_symbol, k.p)+" = "+
+            function_map[k].to_str());
+      }
+    }
+
+    std::stringstream ss;
+    for (auto s : update_dump) {
+      ss << s << ", ";
+    }
+    std::cout << "{ " << ss.str().substr(0, ss.str().size()-2) << " }" << std::endl;
+    update_dump.clear();
+  }
+
+
+  // Handle lists
+  // 1. convert chained lists to BottomLists
   for (value_t* v : to_fold) {
     BottomList *new_l = v->value.list->collect();
     if (new_l->check_allocated_and_set_to_false()) {
@@ -177,18 +223,20 @@ void ExecutionContext::apply_updates() {
   to_fold.clear(); 
   std::vector<size_t> deleted;
 
+  // delete all list objects, except BottomLists that are currently used
   for (size_t i=0; i < temp_lists.size(); i++) {
-    // delete all list objects, except BottomLists that are currently used
     if (!(temp_lists[i]->is_bottom() && reinterpret_cast<BottomList*>(temp_lists[i])->is_used())) {
       delete temp_lists[i];
       deleted.push_back(i);
     }
   }
 
+  // remove deleted lists from temp_lists
   for (size_t del : deleted) {
     temp_lists[del] = std::move(temp_lists.back());
     temp_lists.pop_back();
   }
+  // list handling done
 
 
   // free allocated updateset data

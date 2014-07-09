@@ -174,7 +174,8 @@ int main (int argc, char *argv[]) {
       } else {
         ExecutionContext ctx(driver.function_table, driver.get_init_rule(),
             (opts.flags & Optionvalue_ts::SYMBOLIC) != 0,
-             (opts.flags & Optionvalue_ts::FILEOUT) != 0);
+            (opts.flags & Optionvalue_ts::FILEOUT) != 0,
+            (opts.flags & Optionvalue_ts::DUMP_UPDATES) != 0);
 
         if ((opts.flags & Optionvalue_ts::DEBUGINFO_FILTER) != 0) {
           ctx.set_debuginfo_filter(opts.debuginfo_filter);

@@ -75,14 +75,16 @@ class ExecutionContext {
     static pp_mem value_stack;
     const bool symbolic;
     const bool fileout;
+    const bool dump_updates;
 
     std::vector<std::string> trace_creates;
     std::vector<std::string> trace;
+    std::vector<std::string> update_dump;
     std::string path_name;
     std::vector<symbolic_condition_t*> path_conditions;
 
     ExecutionContext(const SymbolTable& st, RuleNode *init, const bool symbolic,
-        const bool fileout);
+        const bool fileout, const bool dump_updates);
     ExecutionContext(const ExecutionContext& other);
 
     void apply_updates();

@@ -97,6 +97,10 @@ value_t::value_t(TypeType t, casm_update* u) {
       type = TypeType::BOOLEAN;
       value.boolean = (bool) u->value;
       break;
+    case TypeType::SELF: 
+      type = TypeType::SELF;
+      break;
+
     default: throw RuntimeException("Unsupported type in apply");
   }
 }
