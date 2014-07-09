@@ -1,0 +1,10 @@
+// cmdline "-u"
+
+function a : -> Int initially { 1 }
+
+init main
+
+rule main = {
+    a := undef
+    program(self) := undef
+}

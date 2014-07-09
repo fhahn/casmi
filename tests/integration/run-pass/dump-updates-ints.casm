@@ -1,0 +1,15 @@
+// cmdline "--dump-updates"
+
+function a : -> Int initially { 1 }
+function b : -> Int initially { 99 }
+function c : Int * Int -> Int
+
+init main
+
+rule main = {
+    a := a + 1
+    b := b + 2
+    c(a,b) := a + b
+    if a = 5 then
+        program(self) := undef
+}

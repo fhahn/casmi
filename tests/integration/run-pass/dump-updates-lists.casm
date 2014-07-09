@@ -1,0 +1,15 @@
+// cmdline "-u"
+
+function a : -> Int initially { 1 }
+function b : -> List(Int) initially { [] }
+function c : Int * List(Int) -> List(Int)
+
+init main
+
+rule main = {
+    a := a + 1
+    b := cons(a, b)
+    c(a, b) := b
+    if a = 5 then
+        program(self) := undef
+}
