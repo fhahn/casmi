@@ -1,3 +1,7 @@
+
+**Notice: This project contains the code developed for my Bachelor's Thesis. This repository is not maintained any more. For ongoing work on an open source CASM interpreter, see https://github.com/fhahn/libcasm-frontend.**
+
+
 casmi
 =====
 
